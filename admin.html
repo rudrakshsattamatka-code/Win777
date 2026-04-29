@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>win777 Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        body {
+            background: #0a0c12;
+            color: #eef2ff;
+            overflow-x: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a1c2c, #0f1018);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #f5b042;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            padding: 15px 20px;
+            background: #0f1018;
+            overflow-x: auto;
+            border-bottom: 1px solid #2a2e42;
+        }
+        .tab-btn {
+            background: #1e2130;
+            border: none;
+            color: #b9c3e0;
+            padding: 10px 24px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 600;
+        }
+        .tab-btn.active {
+            background: #f5b042;
+            color: #0f0f1a;
+        }
+        .content-panel {
+            padding: 20px;
+            display: none;
+        }
+        .content-panel.active {
+            display: block;
+        }
+        .card {
+            background: #11131f;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #282e42;
+        }
+        input, select, textarea {
+            background: #1e2130;
+            border: 1px solid #3a4058;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 12px;
+            width: 100%;
+            margin-bottom: 12px;
+        }
+        button {
+            background: #f5b042;
+            border: none;
+            color: #0f0f1a;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button.danger {
+            background: #dc2626;
+            color: white;
+        }
+        button.secondary {
+            background: #2a2e42;
+            color: white;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #2a2e42;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        .status-open { background: #22c55e20; color: #22c55e; }
+        .status-closed { background: #ef444420; color: #ef4444; }
+        .status-running { background: #f59e0b20; color: #f59e0b; }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .live-badge {
+            background: #ef4444;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>🎰 win777 Admin Panel</h1>
+            <p style="font-size: 0.8rem;">Live Control | Real-time Updates</p>
+        </div>
+        <div id="adminInfo"></div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="markets">📊 Manage Markets</button>
+        <button class="tab-btn" data-tab="results">🎯 Declare Results</button>
+        <button class="tab-btn" data-tab="users">👥 Users Management</button>
+        <button class="tab-btn" data-tab="bids">🎲 All Bids</button>
+        <button class="tab-btn" data-tab="withdrawals">💰 Withdrawals</button>
+        <button class="tab-btn" data-tab="settings">⚙️ Game Settings</button>
+    </div>
+
+    <!-- MARKETS TAB -->
+    <div id="markets" class="content-panel active">
+        <div class="card">
+            <h2>➕ Add New Market</h2>
+            <div class="grid-2">
+                <input type="text" id="marketName" placeholder="Market Name (e.g., MAYA DAY)">
+                <input type="text" id="marketCode" placeholder="Code (e.g., 237-2*-***)">
+                <input type="time" id="openTime" value="09:40">
+                <input type="time" id="closeTime" value="16:10">
+                <select id="marketStatus">
+                    <option value="open">Open (Accepting Bids)</option>
+                    <option value="running">Running (Closing Soon)</option>
+                    <option value="closed">Closed</option>
+                </select>
+                <button onclick="addMarket()">Add Market</button>
+            </div>
+        </div>
+        <div class="card">
+            <h2>📋 Live Markets (Edit/Delete)</h2>
+            <div id="marketsList"></div>
+        </div>
+    </div>
+
+    <!-- RESULTS TAB -->
+    <div id="results" class="content-panel">
+        <div class="card">
+            <h2>🏆 Declare Winning Results</h2>
+            <select id="resultMarketSelect"></select>
+            <input type="text" id="resultNumber" placeholder="Winning Number (e.g., 178-61-290)">
+            <input type="text" id="resultPana" placeholder="Pana/Digit">
+            <button onclick="declareResult()">✅ Declare Result</button>
+        </div>
+        <div class="card">
+            <h2>📜 Recent Results</h2>
+            <div id="resultsList"></div>
+        </div>
+    </div>
+
+    <!-- USERS TAB -->
+    <div id="users" class="content-panel">
+        <div class="card">
+            <h2>👥 All Registered Users</h2>
+            <div id="usersList"></div>
+        </div>
+    </div>
+
+    <!-- BIDS TAB -->
+    <div id="bids" class="content-panel">
+        <div class="card">
+            <h2>🎲 All User Bids</h2>
+            <div id="bidsList"></div>
+        </div>
+    </div>
+
+    <!-- WITHDRAWALS TAB -->
+    <div id="withdrawals" class="content-panel">
+        <div class="card">
+            <h2>💰 Pending Withdrawals</h2>
+            <div id="withdrawalsList"></div>
+        </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="settings" class="content-panel">
+        <div class="grid-2">
+            <div class="card">
+                <h2>🎲 Game Rates</h2>
+                <input type="number" id="singleDigitRate" placeholder="Single Digit Rate">
+                <input type="number" id="singlePanaRate" placeholder="Single Pana Rate">
+                <input type="number" id="doublePanaRate" placeholder="Double Pana Rate">
+                <input type="number" id="triplePanaRate" placeholder="Triple Pana Rate">
+                <button onclick="updateGameRates()">Update Rates</button>
+            </div>
+            <div class="card">
+                <h2>🔧 System Settings</h2>
+                <label>Maintenance Mode</label>
+                <select id="maintenanceMode">
+                    <option value="false">Off</option>
+                    <option value="true">On</option>
+                </select>
+                <label>Min Withdrawal Amount (₹)</label>
+                <input type="number" id="minWithdrawal" value="500">
+                <button onclick="updateSystemSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
+            authDomain: "win777-be203.firebaseapp.com",
+            projectId: "win777-be203",
+            storageBucket: "win777-be203.firebasestorage.app",
+            messagingSenderId: "504655373119",
+            appId: "1:504655373119:web:4b964d6e6f0df20ebc698a",
+            measurementId: "G-XL2RBDZHE2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let currentUser = null;
+        let isAdmin = false;
+
+        // Login before admin access
+        async function adminLogin() {
+            const email = prompt("Admin Email:");
+            const password = prompt("Admin Password:");
+            try {
+                const userCred = await signInWithEmailAndPassword(auth, email, password);
+                const token = await userCred.user.getIdTokenResult();
+                if (token.claims.admin) {
+                    isAdmin = true;
+                    currentUser = userCred.user;
+                    document.getElementById('adminInfo').innerHTML = `<span>✅ Admin: ${email}</span>`;
+                    loadAllData();
+                    setupRealtimeListeners();
+                } else {
+                    alert("Not admin access!");
+                }
+            } catch (error) {
+                alert("Login failed: " + error.message);
+            }
+        }
+
+        // Load all collections
+        async function loadAllData() {
+            loadMarkets();
+            loadResults();
+            loadUsers();
+            loadAllBids();
+            loadWithdrawals();
+            loadGameRates();
+        }
+
+        // REAL-TIME LISTENERS
+        function setupRealtimeListeners() {
+            onSnapshot(collection(db, "markets"), () => loadMarkets());
+            onSnapshot(collection(db, "results"), () => loadResults());
+            onSnapshot(collection(db, "users"), () => loadUsers());
+            onSnapshot(collection(db, "bids"), () => loadAllBids());
+            onSnapshot(collection(db, "withdrawals"), () => loadWithdrawals());
+        }
+
+        // MARKETS CRUD
+        window.addMarket = async () => {
+            const marketData = {
+                name: document.getElementById('marketName').value,
+                code: document.getElementById('marketCode').value,
+                openBid: document.getElementById('openTime').value,
+                closeBid: document.getElementById('closeTime').value,
+                status: document.getElementById('marketStatus').value,
+                updatedAt: new Date()
+            };
+            await addDoc(collection(db, "markets"), marketData);
+            alert("Market added! Live update sent to users.");
+        };
+
+        window.updateMarketStatus = async (marketId, newStatus) => {
+            await updateDoc(doc(db, "markets", marketId), { status: newStatus, updatedAt: new Date() });
+        };
+
+        window.deleteMarket = async (marketId) => {
+            if(confirm("Delete this market?")) await deleteDoc(doc(db, "markets", marketId));
+        };
+
+        async function loadMarkets() {
+            const snapshot = await getDocs(collection(db, "markets"));
+            let html = '<table><tr><th>Name</th><th>Time</th><th>Status</th><th>Actions</th></tr>';
+            snapshot.forEach(doc => {
+                const m = doc.data();
+                html += `<tr>
+                    <td>${m.name}<br><small>${m.code}</small></td>
+                    <td>${m.openBid} - ${m.closeBid}</td>
+                    <td>
+                        <select onchange="updateMarketStatus('${doc.id}', this.value)">
+                            <option ${m.status === 'open' ? 'selected' : ''}>open</option>
+                            <option ${m.status === 'running' ? 'selected' : ''}>running</option>
+                            <option ${m.status === 'closed' ? 'selected' : ''}>closed</option>
+                        </select>
+                    </td>
+                    <td><button class="danger" onclick="deleteMarket('${doc.id}')">Delete</button></td>
+                </tr>`;
+            });
+            html += '</table>';
+            document.getElementById('marketsList').innerHTML = html;
+        }
+
+        // RESULTS
+        window.declareResult = async () => {
+            await addDoc(collection(db, "results"), {
+                market: document.getElementById('resultMarketSelect').value,
+                number: document.getElementById('resultNumber').value,
+                pana: document.getElementById('resultPana').value,
+                declaredAt: new Date()
+            });
+            alert("Result declared! Users will see instantly.");
+        };
+
+        async function loadResults() {
+            const snapshot = await getDocs(query(collection(db, "results"), orderBy("declaredAt", "desc")));
+            let html = '<table><tr><th>Market</th><th>Number</th><th>Time</th></tr>';
+            snapshot.forEach(doc => {
+                const r = doc.data();
+                html += `<tr><td>${r.market}</td><td><strong>${r.number}</strong></td><td>${r.declaredAt?.toDate?.() || 'Now'}</td></tr>`;
+            });
+            html += '</table>';
+            document.getElementById('resultsList').innerHTML = html;
+            
+            // Populate market dropdown
+            const marketsSnap = await getDocs(collection(db, "markets"));
+            let options = '';
+            marketsSnap.forEach(doc => options += `<option>${doc.data().name}</option>`);
+            document.getElementById('resultMarketSelect').innerHTML = options;
+        }
+
+        async function loadUsers() {
+            const snapshot = await getDocs(collection(db, "users"));
+            let html = '<table><tr><th>User ID</th><th>Balance</th><th>Joined</th></tr>';
+            snapshot.forEach(doc => {
+                const u = doc.data();
+                html += `<tr><td>${doc.id.substring(0,12)}...</td><td>₹${u.balance || 0}</td><td>${u.createdAt || 'N/A'}</td></tr>`;
+            });
+            html += '</table>';
+            document.getElementById('usersList').innerHTML = html;
+        }
+
+        async function loadAllBids() {
+            const snapshot = await getDocs(query(collection(db, "bids"), orderBy("timestamp", "desc")));
+            let html = '<table><tr><th>User</th><th>Market</th><th>Type</th><th>Amount</th><th>Status</th></tr>';
+            snapshot.forEach(doc => {
+                const b = doc.data();
+                html += `<tr><td>${b.userId?.substring(0,8)}</td><td>${b.market}</td><td>${b.betType}</td><td>₹${b.amount}</td><td>${b.status || 'Pending'}</td></tr>`;
+            });
+            html += '</table>';
+            document.getElementById('bidsList').innerHTML = html;
+        }
+
+        async function loadWithdrawals() {
+            const snapshot = await getDocs(query(collection(db, "withdrawals"), where("status", "==", "pending")));
+            let html = '<table><tr><th>User</th><th>Amount</th><th>Bank</th><th>Action</th></tr>';
+            snapshot.forEach(doc => {
+                const w = doc.data();
+                html += `<tr>
+                    <td>${w.userId}</td>
+                    <td>₹${w.amount}</td>
+                    <td>${w.bankAccount}</td>
+                    <td><button onclick="approveWithdrawal('${doc.id}')">✅ Approve</button></td>
+                </tr>`;
+            });
+            html += '</table>';
+            document.getElementById('withdrawalsList').innerHTML = html;
+        }
+
+        window.approveWithdrawal = async (id) => {
+            await updateDoc(doc(db, "withdrawals", id), { status: "approved", approvedAt: new Date() });
+        };
+
+        window.updateGameRates = async () => {
+            await updateDoc(doc(db, "adminSettings", "gameRates"), {
+                singleDigit: parseFloat(document.getElementById('singleDigitRate').value),
+                singlePana: parseFloat(document.getElementById('singlePanaRate').value),
+                doublePana: parseFloat(document.getElementById('doublePanaRate').value),
+                triplePana: parseFloat(document.getElementById('triplePanaRate').value),
+                updatedAt: new Date()
+            });
+            alert("Rates updated live!");
+        };
+
+        async function loadGameRates() {
+            const docRef = doc(db, "adminSettings", "gameRates");
+            const docSnap = await getDoc(docRef);
+            if(docSnap.exists()) {
+                const data = docSnap.data();
+                document.getElementById('singleDigitRate').value = data.singleDigit || 90;
+                document.getElementById('singlePanaRate').value = data.singlePana || 900;
+            }
+        }
+
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelectorAll('.content-panel').forEach(p => p.classList.remove('active'));
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Start
+        adminLogin();
+    </script>
+</body>
+</html>
