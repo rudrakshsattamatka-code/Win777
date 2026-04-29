@@ -22,6 +22,7 @@
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid #f5b042;
+            flex-wrap: wrap;
         }
         .tabs {
             display: flex;
@@ -91,11 +92,10 @@
             margin: 10px 0;
             border-radius: 10px;
         }
-        .status-pending { color: #f59e0b; }
-        .status-approved { color: #22c55e; }
         @media (max-width: 768px) {
             .tabs { flex-wrap: wrap; }
             table { font-size: 12px; }
+            th, td { padding: 8px; }
         }
     </style>
 </head>
@@ -120,7 +120,7 @@
     <div id="qr" class="content-panel active">
         <div class="card">
             <h2>Update QR Code</h2>
-            <p style="margin-bottom:15px">Upload your QR image to any hosting (Imgur, Telegram, etc.) and paste URL below</p>
+            <p style="margin-bottom:15px">Upload your QR image to any hosting and paste URL below</p>
             <input type="text" id="qrUrl" placeholder="https://your-image-url.jpg">
             <div id="qrPreview"></div>
             <button onclick="updateQR()">Update QR Code</button>
@@ -165,7 +165,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, getDocs, updateDoc, doc, addDoc, deleteDoc, onSnapshot, query, where, orderBy, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
@@ -194,7 +194,7 @@
                     loadAllData();
                     setupListeners();
                 } else {
-                    alert("Not admin! Need admin claim");
+                    alert("Not admin! Need admin claim. Set custom claim: {admin: true}");
                 }
             } catch(error) {
                 alert("Login failed: " + error.message);
@@ -219,7 +219,7 @@
             const qrDoc = await getDoc(doc(db, "qrSettings", "current"));
             if(qrDoc.exists()) {
                 document.getElementById('qrUrl').value = qrDoc.data().imageUrl;
-                document.getElementById('qrPreview').innerHTML = `<img src="${qrDoc.data().imageUrl}" class="qr-preview">`;
+                document.getElementById('qrPreview').innerHTML = `<img src="${qrDoc.data().imageUrl}" class="qr-preview" onerror="this.src='https://via.placeholder.com/200'">`;
             }
         };
 
@@ -238,7 +238,7 @@
             const q = query(collection(db, "deposits"), where("status", "==", "pending"), orderBy("createdAt", "desc"));
             const snapshot = await getDocs(q);
             if(snapshot.empty) { document.getElementById('depositsList').innerHTML = "<p>No pending deposits</p>"; return; }
-            let html = '<table><th>User</th><th>Amount</th><th>Transaction ID</th><th>Time</th><th>Action</th></tr>';
+            let html = '<td><th>User</th><th>Amount</th><th>Transaction ID</th><th>Time</th><th>Action</th></tr>';
             snapshot.forEach(doc => {
                 const d = doc.data();
                 html += `<tr>
@@ -246,7 +246,7 @@
                     <td><strong>₹${d.amount}</strong></td>
                     <td>${d.transactionId}</td>
                     <td>${d.createdAt?.toDate?.().toLocaleString() || 'Now'}</td>
-                    <td><button onclick="approveDeposit('${doc.id}', '${d.userId}', ${d.amount})">Approve</button></td>
+                    <td><button onclick="approveDeposit('${doc.id}', '${d.userId}', ${d.amount})">✅ Approve</button></td>
                 </tr>`;
             });
             html += '</table>';
@@ -275,7 +275,6 @@
                     <td><button class="danger" onclick="deleteMarket('${doc.id}')">Delete</button></td>
                 </tr>`;
             });
-            html += '</table>';
             document.getElementById('marketsList').innerHTML = `<table style="width:100%">${html}</table>`;
         }
 
@@ -292,28 +291,30 @@
             const q = query(collection(db, "withdrawals"), where("status", "==", "pending"));
             const snapshot = await getDocs(q);
             if(snapshot.empty) { document.getElementById('withdrawalsList').innerHTML = "<p>No pending withdrawals</p>"; return; }
-            let html = '<table><th>User</th><th>Amount</th><th>Bank/UPI</th><th>Action</th></tr>';
+            let html = '<tr><th>User</th><th>Amount</th><th>Bank/UPI</th><th>Action</th></tr>';
             snapshot.forEach(doc => {
                 const w = doc.data();
                 html += `<tr>
                     <td>${w.userId.substring(0,10)}</td>
                     <td><strong>₹${w.amount}</strong></td>
                     <td>${w.bankAccount}</td>
-                    <td><button onclick="approveWithdrawal('${doc.id}')">Approve</button></td>
+                    <td><button onclick="approveWithdrawal('${doc.id}')">✅ Approve</button></td>
                 </tr>`;
             });
-            html += '</table>';
             document.getElementById('withdrawalsList').innerHTML = `<table style="width:100%">${html}</table>`;
         }
 
         async function loadUsers() {
             const snapshot = await getDocs(collection(db, "users"));
-            let html = '</table><th>Mobile</th><th>Balance</th><th>Total Deposits</th></tr>';
+            let html = '<tr><th>Mobile</th><th>Balance</th><th>Total Deposits</th></tr>';
             snapshot.forEach(doc => {
                 const u = doc.data();
-                html += `<tr><td>${u.mobile || 'N/A'}</td><td>₹${u.balance || 0}</td><td>₹${u.totalDeposits || 0}</td></tr>`;
+                html += `<tr>
+                    <td>${u.mobile || 'N/A'}</td>
+                    <td>₹${u.balance || 0}</td>
+                    <td>₹${u.totalDeposits || 0}</td>
+                </tr>`;
             });
-            html += '</table>';
             document.getElementById('usersList').innerHTML = `<table style="width:100%">${html}</table>`;
         }
 
@@ -322,9 +323,14 @@
             let html = '<tr><th>User</th><th>Market</th><th>Type</th><th>Amount</th><th>Status</th></tr>';
             snapshot.forEach(doc => {
                 const b = doc.data();
-                html += `<tr><td>${b.userId.substring(0,8)}</td><td>${b.market}</td><td>${b.betType}</td><td>₹${b.amount}</td><td>${b.status}</td></tr>`;
+                html += `<tr>
+                    <td>${b.userId.substring(0,8)}</td>
+                    <td>${b.market}</td>
+                    <td>${b.betType}</td>
+                    <td>₹${b.amount}</td>
+                    <td>${b.status}</td>
+                </tr>`;
             });
-            html += '</table>';
             document.getElementById('bidsList').innerHTML = `<table style="width:100%">${html}</table>`;
         }
 
