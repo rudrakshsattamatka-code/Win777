@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>win777 · Play Big · Unlimited Fun</title>
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, onSnapshot, doc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
+            authDomain: "win777-be203.firebaseapp.com",
+            projectId: "win777-be203",
+            storageBucket: "win777-be203.firebasestorage.app",
+            messagingSenderId: "504655373119",
+            appId: "1:504655373119:web:4b964d6e6f0df20ebc698a",
+            measurementId: "G-XL2RBDZHE2"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        
+        window.db = db;
+        window.auth = auth;
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+        }
+        body {
+            background: #0a0c12;
+            color: #eef2ff;
+            padding-bottom: 80px;
+        }
+        .top-bar {
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1c2c 100%);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2a2e42;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo-area h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #f5c542, #ffb347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .user-badge {
+            background: #232638;
+            padding: 6px 14px;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .app-container {
+            display: flex;
+            flex-direction: row;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .sidebar {
+            width: 280px;
+            background: #0f1018;
+            border-right: 1px solid #252a3a;
+            min-height: calc(100vh - 70px);
+            padding: 20px 0 30px 0;
+            flex-shrink: 0;
+        }
+        .sidebar-item {
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #b9c3e0;
+            transition: 0.2s;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+        }
+        .sidebar-item:hover, .sidebar-item.active {
+            background: #1e2130;
+            color: #ffde9c;
+            border-left-color: #f5b042;
+        }
+        .main-content {
+            flex: 1;
+            padding: 20px 24px;
+            overflow-x: auto;
+        }
+        .markets-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .market-card {
+            background: #11131f;
+            border-radius: 24px;
+            padding: 12px 18px;
+            border: 1px solid #282e42;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .market-info h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        .status {
+            font-weight: bold;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 50px;
+        }
+        .status.closed { background: #2d1f2a; color: #f87171; }
+        .status.open { background: #1f3a2f; color: #4ade80; }
+        .status.running { background: #2a2a1e; color: #facc15; }
+        .game-dashboard {
+            background: #10121e;
+            border-radius: 28px;
+            padding: 18px 20px;
+            margin-bottom: 30px;
+        }
+        .dashboard-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-left: 5px solid #f5b042;
+            padding-left: 15px;
+            margin-bottom: 20px;
+        }
+        .bet-buttons-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .bet-chip {
+            background: #1b1e2e;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #cdd9ff;
+            cursor: pointer;
+            border: 1px solid #2f354c;
+        }
+        .bet-chip:hover {
+            background: #f5b04222;
+            border-color: #f5b042;
+        }
+        .fund-panel {
+            background: linear-gradient(145deg, #121624, #0b0d14);
+            border-radius: 28px;
+            padding: 20px;
+            margin-bottom: 28px;
+        }
+        .btn-primary {
+            background: #f5b042;
+            border: none;
+            color: #0f0f1a;
+            font-weight: bold;
+            padding: 10px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #f5b042;
+            color: #f5b042;
+            padding: 10px 24px;
+            border-radius: 40px;
+            cursor: pointer;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #11131f;
+            border-radius: 30px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        .qr-img {
+            width: 250px;
+            height: 250px;
+            object-fit: contain;
+            margin: 20px auto;
+            border-radius: 20px;
+            background: white;
+            padding: 10px;
+        }
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            right: 20px;
+            background: #23283e;
+            padding: 12px;
+            border-radius: 60px;
+            text-align: center;
+            z-index: 1100;
+        }
+        @media (max-width: 760px) {
+            .sidebar { display: none; }
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #0b0d15ec;
+            backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 20px;
+            border-top: 1px solid #2a2f46;
+        }
+        .nav-icon {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #9aa2c0;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="top-bar">
+    <div class="logo-area">
+        <h1>WIN777</h1>
+        <p>Play big · Unlimited fun</p>
+    </div>
+    <div class="user-badge" id="userDisplay">
+        <span id="userName">Login</span>
+        <button onclick="logout()" id="logoutBtn" style="display:none; background:none; color:#f5b042;">🚪</button>
+    </div>
+</div>
+<div class="app-container">
+    <div class="sidebar">
+        <div class="sidebar-item active" data-nav="dashboard">🏠 Dashboard</div>
+        <div class="sidebar-item" data-nav="deposit">💰 Deposit</div>
+        <div class="sidebar-item" data-nav="withdraw">💸 Withdraw</div>
+        <div class="sidebar-item" data-nav="bidhistory">📝 My Bids</div>
+        <div class="sidebar-item" data-nav="passbook">📒 Passbook</div>
+        <div class="sidebar-item" data-nav="support">💬 Support</div>
+        <div class="sidebar-footer" style="margin-top:40px; padding:20px;">
+            App Version: 2.7<br>
+            Jackpot: +447832616125
+        </div>
+    </div>
+    <div class="main-content" id="mainContent"></div>
+</div>
+<div class="bottom-nav">
+    <div class="nav-icon" data-nav="passbook">📘 Passbook</div>
+    <div class="nav-icon" data-nav="deposit">💰 Deposit</div>
+    <div class="nav-icon" data-nav="bidhistory">🎯 My Bids</div>
+    <div class="nav-icon" data-nav="support">💬 Support</div>
+</div>
+<div id="depositModal" class="modal">
+    <div class="modal-content">
+        <h2>💰 Deposit Money</h2>
+        <img id="qrImage" class="qr-img" alt="QR Code">
+        <p style="margin:10px 0">Scan QR & Pay Amount</p>
+        <input type="number" id="depositAmount" placeholder="Enter Amount (₹)" style="width:100%; padding:10px; margin:10px 0; border-radius:10px; border:none;">
+        <input type="text" id="transactionId" placeholder="Transaction ID / UTR" style="width:100%; padding:10px; margin:10px 0; border-radius:10px; border:none;">
+        <button class="btn-primary" onclick="submitDeposit()" style="width:100%">✅ I have paid</button>
+        <button class="btn-outline" onclick="closeModal()" style="margin-top:10px">Close</button>
+    </div>
+</div>
+<script type="module">
+    import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, onSnapshot, doc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    
+    const db = window.db;
+    const auth = window.auth;
+    let currentUser = null;
+    let currentBalance = 0;
+    
+    // Login/Signup
+    async function loginOrSignup() {
+        const email = prompt("Enter your email:");
+        const password = prompt("Enter password (min 6 chars):");
+        if(!email || !password) return;
+        try {
+            const userCred = await signInWithEmailAndPassword(auth, email, password);
+            currentUser = userCred.user;
+            await ensureUserDocument();
+            loadDashboard();
+            showToast("✅ Login successful!");
+        } catch(error) {
+            if(error.code === 'auth/user-not-found') {
+                const userCred = await createUserWithEmailAndPassword(auth, email, password);
+                currentUser = userCred.user;
+                await createNewUser();
+                loadDashboard();
+                showToast("✅ Account created!");
+            } else {
+                showToast("Error: " + error.message);
+            }
+        }
+    }
+    
+    async function ensureUserDocument() {
+        const userRef = doc(db, "users", currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        if(!userSnap.exists()) {
+            await setDoc(userRef, {
+                email: currentUser.email,
+                balance: 0,
+                createdAt: new Date(),
+                totalDeposits: 0,
+                totalWithdrawals: 0
+            });
+        } else {
+            currentBalance = userSnap.data().balance || 0;
+        }
+    }
+    
+    async function createNewUser() {
+        await setDoc(doc(db, "users", currentUser.uid), {
+            email: currentUser.email,
+            balance: 0,
+            createdAt: new Date(),
+            totalDeposits: 0,
+            totalWithdrawals: 0
+        });
+        currentBalance = 0;
+    }
+    
+    window.logout = async () => {
+        await signOut(auth);
+        currentUser = null;
+        document.getElementById('userName').innerHTML = 'Login';
+        document.getElementById('logoutBtn').style.display = 'none';
+        loadDashboard();
+    };
+    
+    // Load QR from admin settings
+    async function loadQR() {
+        const qrDoc = await getDoc(doc(db, "qrSettings", "current"));
+        if(qrDoc.exists()) {
+            document.getElementById('qrImage').src = qrDoc.data().imageUrl;
+        } else {
+            document.getElementById('qrImage').src = "https://via.placeholder.com/250?text=QR+Code";
+        }
+    }
+    
+    // Submit deposit request
+    window.submitDeposit = async () => {
+        if(!currentUser) { showToast("Please login first"); return; }
+        const amount = parseFloat(document.getElementById('depositAmount').value);
+        const transactionId = document.getElementById('transactionId').value;
+        if(!amount || amount < 100) { showToast("Minimum deposit ₹100"); return; }
+        if(!transactionId) { showToast("Enter Transaction ID"); return; }
+        
+        await addDoc(collection(db, "deposits"), {
+            userId: currentUser.uid,
+            amount: amount,
+            transactionId: transactionId,
+            status: "pending",
+            createdAt: new Date(),
+            userEmail: currentUser.email
+        });
+        showToast("✅ Deposit request sent! Admin will approve soon.");
+        closeModal();
+        document.getElementById('depositAmount').value = '';
+        document.getElementById('transactionId').value = '';
+    };
+    
+    // Load markets
+    async function loadMarkets() {
+        const marketsSnap = await getDocs(collection(db, "markets"));
+        let html = '';
+        marketsSnap.forEach(doc => {
+            const m = doc.data();
+            html += `<div class="market-card">
+                <div class="market-info">
+                    <h3>${m.name}</h3>
+                    <div class="code">${m.code || ''}</div>
+                    <div>🕒 ${m.openBid} - ${m.closeBid}</div>
+                </div>
+                <span class="status ${m.status}">${m.status === 'open' ? '✅ Open' : (m.status === 'running' ? '⏳ Running' : '🔒 Closed')}</span>
+            </div>`;
+        });
+        document.getElementById('marketsContainer').innerHTML = html;
+    }
+    
+    // Load user balance
+    async function loadBalance() {
+        if(!currentUser) return;
+        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+        if(userDoc.exists()) {
+            currentBalance = userDoc.data().balance || 0;
+            document.getElementById('walletBalance').innerHTML = `₹${currentBalance}`;
+        }
+    }
+    
+    // Place bid
+    window.placeBid = async (betType) => {
+        if(!currentUser) { showToast("Please login first"); loginOrSignup(); return; }
+        const amount = prompt(`Enter amount for ${betType}:`, "100");
+        if(!amount || amount < 10) return;
+        if(amount > currentBalance) { showToast("Insufficient balance!"); return; }
+        
+        const market = prompt("Enter market name:", "MAYA DAY");
+        if(!market) return;
+        
+        // Deduct balance
+        const newBalance = currentBalance - parseFloat(amount);
+        await updateDoc(doc(db, "users", currentUser.uid), { balance: newBalance });
+        
+        await addDoc(collection(db, "bids"), {
+            userId: currentUser.uid,
+            betType: betType,
+            amount: parseFloat(amount),
+            market: market,
+            status: "pending",
+            timestamp: new Date(),
+            userEmail: currentUser.email
+        });
+        
+        currentBalance = newBalance;
+        loadBalance();
+        showToast(`✅ Bid placed: ${betType} - ₹${amount}`);
+    };
+    
+    // Dashboard render
+    async function loadDashboard() {
+        const gameTypes = ["Single Digit", "Single Pana", "Double Pana", "Triple Pana", "SP Motor", "DP Motor", "Odd Even", "Two Digit Panel"];
+        const betChips = gameTypes.map(type => `<div class="bet-chip" onclick="placeBid('${type}')">${type}</div>`).join('');
+        
+        const html = `
+            <div class="fund-panel">
+                <div style="display: flex; justify-content: space-between;">
+                    <span><strong>💰 Wallet Balance</strong></span>
+                    <span style="color:#f5b042; font-size:1.5rem;" id="walletBalance">₹0</span>
+                </div>
+                <div class="flex-btns" style="display:flex; gap:10px; margin-top:15px;">
+                    <button class="btn-primary" onclick="openDepositModal()">➕ Add Fund</button>
+                    <button class="btn-outline" onclick="navigateTo('withdraw')">💸 Withdraw</button>
+                </div>
+            </div>
+            <div class="game-dashboard">
+                <div class="dashboard-title">🎲 Betting Options</div>
+                <div class="bet-buttons-grid">${betChips}</div>
+            </div>
+            <h3>📢 Today's Markets</h3>
+            <div class="markets-grid" id="marketsContainer"></div>
+        `;
+        document.getElementById('mainContent').innerHTML = html;
+        await loadMarkets();
+        await loadBalance();
+        
+        // Setup realtime balance listener
+        if(currentUser) {
+            onSnapshot(doc(db, "users", currentUser.uid), (doc) => {
+                if(doc.exists()) {
+                    currentBalance = doc.data().balance || 0;
+                    const balSpan = document.getElementById('walletBalance');
+                    if(balSpan) balSpan.innerHTML = `₹${currentBalance}`;
+                }
+            });
+        }
+    }
+    
+    // Deposit history / Passbook
+    async function loadPassbook() {
+        if(!currentUser) { loadDashboard(); return; }
+        const depositsSnap = await getDocs(query(collection(db, "deposits"), where("userId", "==", currentUser.uid), orderBy("createdAt", "desc")));
+        const bidsSnap = await getDocs(query(collection(db, "bids"), where("userId", "==", currentUser.uid), orderBy("timestamp", "desc")));
+        
+        let historyHtml = '<div class="game-dashboard"><div class="dashboard-title">📒 Passbook</div><table style="width:100%"><tr><th>Date</th><th>Description</th><th>Amount</th><th>Status</th></tr>';
+        depositsSnap.forEach(d => {
+            const data = d.data();
+            historyHtml += `<tr><td>${data.createdAt?.toDate?.().toLocaleDateString() || 'Today'}</td><td>Deposit</td><td>+₹${data.amount}</td><td>${data.status}</td></tr>`;
+        });
+        bidsSnap.forEach(b => {
+            const data = b.data();
+            historyHtml += `<tr><td>${data.timestamp?.toDate?.().toLocaleDateString() || 'Today'}</td><td>Bid: ${data.betType}</td><td>-₹${data.amount}</td><td>${data.status}</td></tr>`;
+        });
+        historyHtml += '</table></div>';
+        document.getElementById('mainContent').innerHTML = historyHtml;
+    }
+    
+    async function loadBidHistory() {
+        if(!currentUser) { loadDashboard(); return; }
+        const bidsSnap = await getDocs(query(collection(db, "bids"), where("userId", "==", currentUser.uid), orderBy("timestamp", "desc")));
+        let html = '<div class="game-dashboard"><div class="dashboard-title">📝 My Bid History</div><table style="width:100%"><tr><th>Market</th><th>Type</th><th>Amount</th><th>Status</th></tr>';
+        bidsSnap.forEach(b => {
+            const data = b.data();
+            html += `<tr><td>${data.market}</td><td>${data.betType}</td><td>₹${data.amount}</td><td>${data.status}</td></tr>`;
+        });
+        html += '</table></div>';
+        document.getElementById('mainContent').innerHTML = html;
+    }
+    
+    function loadWithdrawPage() {
+        document.getElementById('mainContent').innerHTML = `
+            <div class="fund-panel">
+                <h2>💸 Withdraw Funds</h2>
+                <input type="number" id="withdrawAmount" placeholder="Amount (Min ₹500)" style="width:100%; margin:10px 0;">
+                <input type="text" id="bankAccount" placeholder="Bank Account / UPI" style="width:100%; margin:10px 0;">
+                <button class="btn-primary" onclick="requestWithdraw()">Request Withdrawal</button>
+            </div>
+        `;
+    }
+    
+    window.requestWithdraw = async () => {
+        if(!currentUser) return;
+        const amount = parseFloat(document.getElementById('withdrawAmount').value);
+        const bankAccount = document.getElementById('bankAccount').value;
+        if(amount < 500) { showToast("Minimum withdrawal ₹500"); return; }
+        if(amount > currentBalance) { showToast("Insufficient balance"); return; }
+        
+        await addDoc(collection(db, "withdrawals"), {
+            userId: currentUser.uid,
+            amount: amount,
+            bankAccount: bankAccount,
+            status: "pending",
+            createdAt: new Date()
+        });
+        showToast("Withdrawal request sent for approval");
+    };
+    
+    function loadSupport() {
+        document.getElementById('mainContent').innerHTML = `
+            <div class="game-dashboard">
+                <div class="dashboard-title">💬 Support</div>
+                <p>📞 WhatsApp: +447832616125</p>
+                <p>📧 Email: support@win777.com</p>
+                <p>🕒 24/7 Customer Support</p>
+            </div>
+        `;
+    }
+    
+    window.openDepositModal = () => {
+        if(!currentUser) { loginOrSignup(); return; }
+        loadQR();
+        document.getElementById('depositModal').classList.add('active');
+    };
+    window.closeModal = () => document.getElementById('depositModal').classList.remove('active');
+    
+    function showToast(msg) {
+        let toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    
+    window.navigateTo = (page) => {
+        if(page === 'dashboard') loadDashboard();
+        else if(page === 'deposit') openDepositModal();
+        else if(page === 'withdraw') loadWithdrawPage();
+        else if(page === 'bidhistory') loadBidHistory();
+        else if(page === 'passbook') loadPassbook();
+        else if(page === 'support') loadSupport();
+    };
+    
+    // Auth listener
+    onAuthStateChanged(auth, (user) => {
+        currentUser = user;
+        if(user) {
+            document.getElementById('userName').innerHTML = user.email.split('@')[0];
+            document.getElementById('logoutBtn').style.display = 'inline-block';
+            ensureUserDocument().then(() => loadDashboard());
+        } else {
+            document.getElementById('userName').innerHTML = 'Login';
+            document.getElementById('logoutBtn').style.display = 'none';
+            loadDashboard();
+            setTimeout(() => { if(!currentUser) loginOrSignup(); }, 500);
+        }
+    });
+    
+    // Event listeners
+    document.querySelectorAll('.sidebar-item, .nav-icon').forEach(el => {
+        el.addEventListener('click', () => navigateTo(el.getAttribute('data-nav')));
+    });
+    
+    window.loadDashboard = loadDashboard;
+</script>
+</body>
+</html>
