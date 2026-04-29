@@ -9,14 +9,14 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Inter', sans-serif;
         }
         body {
-            background: #0a0c12;
-            color: #eef2ff;
+            background: #0f0c29;
+            color: white;
         }
         .header {
-            background: linear-gradient(135deg, #1a1c2c, #0f1018);
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             padding: 20px;
             display: flex;
             justify-content: space-between;
@@ -27,22 +27,21 @@
             display: flex;
             gap: 10px;
             padding: 15px 20px;
-            background: #0f1018;
+            background: #1a1a2e;
             overflow-x: auto;
-            border-bottom: 1px solid #2a2e42;
+            flex-wrap: wrap;
         }
         .tab-btn {
-            background: #1e2130;
+            background: #2a2a4a;
             border: none;
-            color: #b9c3e0;
             padding: 10px 24px;
             border-radius: 30px;
+            color: white;
             cursor: pointer;
-            font-weight: 600;
         }
         .tab-btn.active {
             background: #f5b042;
-            color: #0f0f1a;
+            color: #0f0c29;
         }
         .content-panel {
             padding: 20px;
@@ -52,29 +51,27 @@
             display: block;
         }
         .card {
-            background: #11131f;
+            background: rgba(26, 26, 46, 0.9);
             border-radius: 20px;
             padding: 20px;
             margin-bottom: 20px;
-            border: 1px solid #282e42;
         }
         input, select, textarea {
-            background: #1e2130;
-            border: 1px solid #3a4058;
-            color: white;
-            padding: 10px 15px;
+            background: #2a2a4a;
+            border: 1px solid #3a3a6a;
+            padding: 12px;
             border-radius: 12px;
             width: 100%;
             margin-bottom: 12px;
+            color: white;
         }
         button {
             background: #f5b042;
             border: none;
-            color: #0f0f1a;
-            font-weight: bold;
             padding: 10px 20px;
             border-radius: 30px;
             cursor: pointer;
+            font-weight: bold;
         }
         button.danger {
             background: #dc2626;
@@ -87,96 +84,80 @@
         th, td {
             padding: 12px;
             text-align: left;
-            border-bottom: 1px solid #2a2e42;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .status-pending { color: #f59e0b; }
-        .status-approved { color: #22c55e; }
         .qr-preview {
             max-width: 200px;
             margin: 10px 0;
             border-radius: 10px;
+        }
+        .status-pending { color: #f59e0b; }
+        .status-approved { color: #22c55e; }
+        @media (max-width: 768px) {
+            .tabs { flex-wrap: wrap; }
+            table { font-size: 12px; }
         }
     </style>
 </head>
 <body>
     <div class="header">
         <div>
-            <h1>🎰 win777 Admin Panel</h1>
-            <p>Live Control | QR Management | Approve Deposits</p>
+            <h1>🎰 WIN777 Admin Panel</h1>
+            <p>Manage QR, Approve Deposits, Control Markets</p>
         </div>
         <div id="adminInfo"></div>
     </div>
 
     <div class="tabs">
         <button class="tab-btn active" data-tab="qr">📱 QR Code</button>
-        <button class="tab-btn" data-tab="deposits">💰 Pending Deposits</button>
+        <button class="tab-btn" data-tab="deposits">💰 Deposits</button>
         <button class="tab-btn" data-tab="markets">📊 Markets</button>
         <button class="tab-btn" data-tab="withdrawals">💸 Withdrawals</button>
         <button class="tab-btn" data-tab="users">👥 Users</button>
-        <button class="tab-btn" data-tab="bids">🎲 All Bids</button>
+        <button class="tab-btn" data-tab="bids">🎲 Bids</button>
     </div>
 
-    <!-- QR CODE TAB -->
     <div id="qr" class="content-panel active">
         <div class="card">
-            <h2>📱 Update QR Code for Deposits</h2>
-            <p>Users will scan this QR code to make payments</p>
-            <input type="text" id="qrUrl" placeholder="Image URL (Upload to hosting first)">
+            <h2>Update QR Code</h2>
+            <p style="margin-bottom:15px">Upload your QR image to any hosting (Imgur, Telegram, etc.) and paste URL below</p>
+            <input type="text" id="qrUrl" placeholder="https://your-image-url.jpg">
             <div id="qrPreview"></div>
             <button onclick="updateQR()">Update QR Code</button>
-            <button class="btn-outline" onclick="fetchCurrentQR()">Load Current</button>
         </div>
     </div>
 
-    <!-- DEPOSITS TAB -->
     <div id="deposits" class="content-panel">
         <div class="card">
-            <h2>💰 Pending Deposit Requests</h2>
+            <h2>Pending Deposits</h2>
             <div id="depositsList"></div>
         </div>
     </div>
 
-    <!-- MARKETS TAB -->
     <div id="markets" class="content-panel">
         <div class="card">
-            <h2>➕ Add Market</h2>
-            <input type="text" id="marketName" placeholder="Market Name">
-            <input type="text" id="marketCode" placeholder="Code">
-            <input type="time" id="openTime">
-            <input type="time" id="closeTime">
-            <select id="marketStatus">
-                <option value="open">Open</option>
-                <option value="running">Running</option>
-                <option value="closed">Closed</option>
-            </select>
-            <button onclick="addMarket()">Add Market</button>
-        </div>
-        <div class="card">
-            <h2>📋 All Markets</h2>
+            <h2>Manage Markets</h2>
             <div id="marketsList"></div>
         </div>
     </div>
 
-    <!-- WITHDRAWALS TAB -->
     <div id="withdrawals" class="content-panel">
         <div class="card">
-            <h2>💸 Withdrawal Requests</h2>
+            <h2>Withdrawal Requests</h2>
             <div id="withdrawalsList"></div>
         </div>
     </div>
 
-    <!-- USERS TAB -->
     <div id="users" class="content-panel">
         <div class="card">
-            <h2>👥 All Users</h2>
+            <h2>All Users</h2>
             <div id="usersList"></div>
         </div>
     </div>
 
-    <!-- BIDS TAB -->
     <div id="bids" class="content-panel">
         <div class="card">
-            <h2>🎲 All User Bids</h2>
+            <h2>All Bids</h2>
             <div id="bidsList"></div>
         </div>
     </div>
@@ -211,123 +192,78 @@
                     isAdmin = true;
                     document.getElementById('adminInfo').innerHTML = `<span>✅ Admin: ${email}</span>`;
                     loadAllData();
-                    setupRealtimeListeners();
+                    setupListeners();
                 } else {
-                    alert("Not admin access! Set custom claim {admin: true}");
+                    alert("Not admin! Need admin claim");
                 }
-            } catch (error) {
+            } catch(error) {
                 alert("Login failed: " + error.message);
             }
         }
 
-        function setupRealtimeListeners() {
+        function setupListeners() {
             onSnapshot(collection(db, "deposits"), () => loadDeposits());
             onSnapshot(collection(db, "markets"), () => loadMarkets());
             onSnapshot(collection(db, "withdrawals"), () => loadWithdrawals());
-            onSnapshot(collection(db, "users"), () => loadUsers());
-            onSnapshot(collection(db, "bids"), () => loadAllBids());
         }
 
-        async function loadAllData() {
-            await loadDeposits();
-            await loadMarkets();
-            await loadWithdrawals();
-            await loadUsers();
-            await loadAllBids();
-            await fetchCurrentQR();
-        }
-
-        // QR CODE FUNCTIONS
         window.updateQR = async () => {
-            const qrUrl = document.getElementById('qrUrl').value;
-            if(!qrUrl) { alert("Enter image URL"); return; }
-            await setDoc(doc(db, "qrSettings", "current"), {
-                imageUrl: qrUrl,
-                updatedAt: new Date()
-            });
-            alert("✅ QR Code updated! Users will see new QR instantly");
+            const url = document.getElementById('qrUrl').value;
+            if(!url) { alert("Enter image URL"); return; }
+            await setDoc(doc(db, "qrSettings", "current"), { imageUrl: url, updatedAt: new Date() });
+            alert("QR Code updated! Users will see new QR instantly");
             fetchCurrentQR();
         };
 
         window.fetchCurrentQR = async () => {
             const qrDoc = await getDoc(doc(db, "qrSettings", "current"));
             if(qrDoc.exists()) {
-                const url = qrDoc.data().imageUrl;
-                document.getElementById('qrUrl').value = url;
-                document.getElementById('qrPreview').innerHTML = `<img src="${url}" class="qr-preview" onerror="this.src='https://via.placeholder.com/200'">`;
+                document.getElementById('qrUrl').value = qrDoc.data().imageUrl;
+                document.getElementById('qrPreview').innerHTML = `<img src="${qrDoc.data().imageUrl}" class="qr-preview">`;
             }
         };
 
-        // DEPOSITS - Approve
-        window.approveDeposit = async (depositId, userId, amount) => {
-            if(confirm(`Approve deposit of ₹${amount}?`)) {
-                await updateDoc(doc(db, "deposits", depositId), { 
-                    status: "approved", 
-                    approvedAt: new Date() 
-                });
-                // Add balance to user
+        window.approveDeposit = async (id, userId, amount) => {
+            if(confirm(`Approve ₹${amount} deposit?`)) {
+                await updateDoc(doc(db, "deposits", id), { status: "approved", approvedAt: new Date() });
                 const userRef = doc(db, "users", userId);
                 const userSnap = await getDoc(userRef);
-                const currentBalance = userSnap.data()?.balance || 0;
-                await updateDoc(userRef, { 
-                    balance: currentBalance + amount,
-                    totalDeposits: (userSnap.data()?.totalDeposits || 0) + amount
-                });
-                alert("✅ Deposit approved! Balance updated.");
+                const currBalance = userSnap.data()?.balance || 0;
+                await updateDoc(userRef, { balance: currBalance + amount });
+                alert("Deposit approved! Balance updated.");
             }
         };
 
         async function loadDeposits() {
             const q = query(collection(db, "deposits"), where("status", "==", "pending"), orderBy("createdAt", "desc"));
             const snapshot = await getDocs(q);
-            if(snapshot.empty) {
-                document.getElementById('depositsList').innerHTML = "<p>No pending deposits</p>";
-                return;
-            }
-            let html = '</table><th>User</th><th>Amount</th><th>Transaction ID</th><th>Time</th><th>Action</th></tr>';
+            if(snapshot.empty) { document.getElementById('depositsList').innerHTML = "<p>No pending deposits</p>"; return; }
+            let html = '<table><th>User</th><th>Amount</th><th>Transaction ID</th><th>Time</th><th>Action</th></tr>';
             snapshot.forEach(doc => {
                 const d = doc.data();
                 html += `<tr>
-                    <td>${d.userEmail || d.userId.substring(0,8)}</td>
+                    <td>${d.userMobile || d.userId.substring(0,8)}</td>
                     <td><strong>₹${d.amount}</strong></td>
                     <td>${d.transactionId}</td>
-                    <td>${d.createdAt?.toDate?.().toLocaleTimeString() || 'Now'}</td>
-                    <td><button onclick="approveDeposit('${doc.id}', '${d.userId}', ${d.amount})">✅ Approve</button></td>
+                    <td>${d.createdAt?.toDate?.().toLocaleString() || 'Now'}</td>
+                    <td><button onclick="approveDeposit('${doc.id}', '${d.userId}', ${d.amount})">Approve</button></td>
                 </tr>`;
             });
             html += '</table>';
             document.getElementById('depositsList').innerHTML = `<table style="width:100%">${html}</table>`;
         }
 
-        // MARKETS
-        window.addMarket = async () => {
-            await addDoc(collection(db, "markets"), {
-                name: document.getElementById('marketName').value,
-                code: document.getElementById('marketCode').value,
-                openBid: document.getElementById('openTime').value,
-                closeBid: document.getElementById('closeTime').value,
-                status: document.getElementById('marketStatus').value,
-                updatedAt: new Date()
-            });
-            alert("Market added!");
-        };
-
         window.updateMarketStatus = async (id, status) => {
-            await updateDoc(doc(db, "markets", id), { status, updatedAt: new Date() });
-        };
-
-        window.deleteMarket = async (id) => {
-            if(confirm("Delete market?")) await deleteDoc(doc(db, "markets", id));
+            await updateDoc(doc(db, "markets", id), { status: status, updatedAt: new Date() });
         };
 
         async function loadMarkets() {
             const snapshot = await getDocs(collection(db, "markets"));
-            if(snapshot.empty) { document.getElementById('marketsList').innerHTML = "<p>No markets</p>"; return; }
-            let html = '<table><th>Name</th><th>Time</th><th>Status</th><th>Action</th></tr>';
+            let html = '<tr><th>Market</th><th>Timing</th><th>Status</th><th>Action</th></tr>';
             snapshot.forEach(doc => {
                 const m = doc.data();
                 html += `<tr>
-                    <td>${m.name}<br><small>${m.code || ''}</small></td>
+                    <td><strong>${m.name}</strong><br><small>${m.code || ''}</small></td>
                     <td>${m.openBid} - ${m.closeBid}</td>
                     <td>
                         <select onchange="updateMarketStatus('${doc.id}', this.value)">
@@ -340,15 +276,16 @@
                 </tr>`;
             });
             html += '</table>';
-            document.getElementById('marketsList').innerHTML = `<table>${html}</table>`;
+            document.getElementById('marketsList').innerHTML = `<table style="width:100%">${html}</table>`;
         }
 
-        // WITHDRAWALS
-        window.approveWithdrawal = async (id, userId, amount) => {
-            if(confirm(`Approve withdrawal of ₹${amount}?`)) {
-                await updateDoc(doc(db, "withdrawals", id), { status: "approved", approvedAt: new Date() });
-                alert("Withdrawal approved");
-            }
+        window.deleteMarket = async (id) => {
+            if(confirm("Delete this market?")) await deleteDoc(doc(db, "markets", id));
+        };
+
+        window.approveWithdrawal = async (id) => {
+            await updateDoc(doc(db, "withdrawals", id), { status: "approved", approvedAt: new Date() });
+            alert("Withdrawal approved");
         };
 
         async function loadWithdrawals() {
@@ -362,22 +299,22 @@
                     <td>${w.userId.substring(0,10)}</td>
                     <td><strong>₹${w.amount}</strong></td>
                     <td>${w.bankAccount}</td>
-                    <td><button onclick="approveWithdrawal('${doc.id}', '${w.userId}', ${w.amount})">✅ Approve</button></td>
+                    <td><button onclick="approveWithdrawal('${doc.id}')">Approve</button></td>
                 </tr>`;
             });
             html += '</table>';
-            document.getElementById('withdrawalsList').innerHTML = `<table>${html}</table>`;
+            document.getElementById('withdrawalsList').innerHTML = `<table style="width:100%">${html}</table>`;
         }
 
         async function loadUsers() {
             const snapshot = await getDocs(collection(db, "users"));
-            let html = '<table><th>User ID</th><th>Balance</th><th>Total Deposits</th></tr>';
+            let html = '</table><th>Mobile</th><th>Balance</th><th>Total Deposits</th></tr>';
             snapshot.forEach(doc => {
                 const u = doc.data();
-                html += `<tr><td>${doc.id.substring(0,12)}...</td><td>₹${u.balance || 0}</td><td>₹${u.totalDeposits || 0}</td></tr>`;
+                html += `<tr><td>${u.mobile || 'N/A'}</td><td>₹${u.balance || 0}</td><td>₹${u.totalDeposits || 0}</td></tr>`;
             });
             html += '</table>';
-            document.getElementById('usersList').innerHTML = `<table>${html}</table>`;
+            document.getElementById('usersList').innerHTML = `<table style="width:100%">${html}</table>`;
         }
 
         async function loadAllBids() {
@@ -385,13 +322,21 @@
             let html = '<tr><th>User</th><th>Market</th><th>Type</th><th>Amount</th><th>Status</th></tr>';
             snapshot.forEach(doc => {
                 const b = doc.data();
-                html += `<tr><td>${b.userId?.substring(0,8)}</td><td>${b.market}</td><td>${b.betType}</td><td>₹${b.amount}</td><td>${b.status}</td></tr>`;
+                html += `<tr><td>${b.userId.substring(0,8)}</td><td>${b.market}</td><td>${b.betType}</td><td>₹${b.amount}</td><td>${b.status}</td></tr>`;
             });
             html += '</table>';
-            document.getElementById('bidsList').innerHTML = `<table>${html}</table>`;
+            document.getElementById('bidsList').innerHTML = `<table style="width:100%">${html}</table>`;
         }
 
-        // Tab switching
+        async function loadAllData() {
+            await loadDeposits();
+            await loadMarkets();
+            await loadWithdrawals();
+            await loadUsers();
+            await loadAllBids();
+            await fetchCurrentQR();
+        }
+
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
