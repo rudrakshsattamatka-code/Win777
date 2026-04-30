@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WIN777 - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: white;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #1a1a1a;
+            padding-bottom: 70px;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e0e0e0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: white;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ff0000;
+        }
+
+        /* 3-Line Menu Button */
+        .menu-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #333;
+            padding: 8px;
+        }
+
+        /* Side Menu */
+        .side-menu {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 280px;
+            height: 100%;
+            background: white;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            padding: 60px 20px 20px;
+        }
+
+        .side-menu.open {
+            right: 0;
+        }
+
+        .close-menu {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .menu-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .menu-item:hover {
+            color: #ff0000;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* User Profile Card */
+        .profile-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 60px;
+            height: 60px;
+            background: #ff0000;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .user-details h3 {
+            color: #ff0000;
+            margin-bottom: 5px;
+        }
+
+        .user-details p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Sliding Message */
+        .sliding-message {
+            background: #ff0000;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .sliding-text {
+            display: inline-block;
+            animation: slide 15s linear infinite;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        @keyframes slide {
+            0% {
+                transform: translateX(100%);
+            }
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .deposit-btn {
+            background: #ff0000;
+            color: white;
+        }
+
+        .withdraw-btn {
+            background: #0066ff;
+            color: white;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Markets Section */
+        .markets-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #ff0000;
+        }
+
+        .markets-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .market-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid #e0e0e0;
+        }
+
+        .market-card:hover {
+            border-color: #ff0000;
+            transform: translateY(-2px);
+        }
+
+        .market-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .market-result {
+            font-size: 12px;
+            color: #ff0000;
+            font-weight: 500;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 20px;
+            border-top: 1px solid #e0e0e0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .nav-item:active {
+            transform: scale(0.95);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .nav-item.active .nav-label {
+            color: #ff0000;
+            font-weight: 500;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            width: 350px;
+            max-width: 90%;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 20px;
+            color: #ff0000;
+        }
+
+        .modal-content input, .modal-content select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .modal-content button {
+            width: 100%;
+            padding: 12px;
+            background: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .close-modal {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        /* Game Rates Modal */
+        .rates-list {
+            margin-top: 15px;
+        }
+
+        .rate-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        /* Passbook Table */
+        .passbook-table {
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .passbook-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+
+        .credit {
+            color: #00cc00;
+        }
+
+        .debit {
+            color: #ff0000;
+        }
+
+        /* Bid History */
+        .bid-item {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="logo">WIN777</div>
+        <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    </div>
+
+    <!-- Side Menu -->
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+    <div class="side-menu" id="sideMenu">
+        <div class="close-menu" onclick="toggleMenu()">×</div>
+        <div class="menu-item" onclick="showGameRates()">🎮 Game Rates</div>
+        <div class="menu-item" onclick="showProfile()">👤 Profile</div>
+        <div class="menu-item" onclick="logout()">🚪 Logout</div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- User Profile -->
+        <div class="profile-card" id="profileCard">
+            <div class="avatar" id="avatar">U</div>
+            <div class="user-details" id="userDetails">
+                <h3>Loading...</h3>
+                <p>Loading...</p>
+            </div>
+        </div>
+
+        <!-- Sliding Message -->
+        <div class="sliding-message">
+            <div class="sliding-text">
+                🚀 NEW: Deposit and withdrawal are now faster than ever! Complete in just 5 to 10 minutes! 🚀
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <button class="action-btn deposit-btn" onclick="showDepositModal()">💰 Deposit</button>
+            <button class="action-btn withdraw-btn" onclick="showWithdrawModal()">💸 Withdrawal</button>
+        </div>
+
+        <!-- Markets Section -->
+        <div class="markets-section">
+            <div class="section-title">📊 Live Markets</div>
+            <div class="markets-grid" id="marketsGrid">
+                <!-- Markets will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item" onclick="showBidHistory()">
+            <div class="nav-icon">📋</div>
+            <div class="nav-label">Bid History</div>
+        </div>
+        <div class="nav-item active" onclick="showHome()">
+            <div class="nav-icon">🏠</div>
+            <div class="nav-label">Home</div>
+        </div>
+        <div class="nav-item" onclick="showPassbook()">
+            <div class="nav-icon">📒</div>
+            <div class="nav-label">Passbook</div>
+        </div>
+        <div class="nav-item" onclick="showSupport()">
+            <div class="nav-icon">💬</div>
+            <div class="nav-label">Support</div>
+        </div>
+    </div>
+    <!-- Deposit Modal -->
+    <div id="depositModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeDepositModal()">&times;</span>
+            <h3>Deposit Money</h3>
+            <input type="number" id="depositAmount" placeholder="Enter amount">
+            <input type="text" id="depositMethod" placeholder="UPI / Bank / Card">
+            <button onclick="processDeposit()">Submit Deposit Request</button>
+        </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="withdrawModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeWithdrawModal()">&times;</span>
+            <h3>Withdraw Money</h3>
+            <input type="number" id="withdrawAmount" placeholder="Enter amount">
+            <input type="text" id="withdrawAccount" placeholder="Bank / UPI details">
+            <button onclick="processWithdraw()">Submit Withdrawal Request</button>
+        </div>
+    </div>
+
+    <!-- Game Rates Modal -->
+    <div id="ratesModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeRatesModal()">&times;</span>
+            <h3>Game Rates</h3>
+            <div class="rates-list">
+                <div class="rate-item"><span>Single Digit</span><span>95x</span></div>
+                <div class="rate-item"><span>Double Digit</span><span>95x</span></div>
+                <div class="rate-item"><span>Triple Digit</span><span>950x</span></div>
+                <div class="rate-item"><span>Half Sangam</span><span>5000x</span></div>
+                <div class="rate-item"><span>Full Sangam</span><span>10000x</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeProfileModal()">&times;</span>
+            <h3>My Profile</h3>
+            <div id="profileInfo"></div>
+        </div>
+    </div>
+
+    <!-- Bid History Modal -->
+    <div id="bidHistoryModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeBidHistoryModal()">&times;</span>
+            <h3>Bid History</h3>
+            <div id="bidHistoryList"></div>
+        </div>
+    </div>
+
+    <!-- Passbook Modal -->
+    <div id="passbookModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closePassbookModal()">&times;</span>
+            <h3>Passbook</h3>
+            <div id="passbookList"></div>
+        </div>
+    </div>
+
+    <!-- Support Modal -->
+    <div id="supportModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeSupportModal()">&times;</span>
+            <h3>Support</h3>
+            <p>📞 Phone: +91 9113224019</p>
+            <p>💬 WhatsApp: <a href="https://wa.me/919113224019">Click to Chat</a></p>
+            <p>📧 Email: support@win777.com</p>
+            <p>⏰ 24/7 Customer Support</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
+            authDomain: "win777-be203.firebaseapp.com",
+            projectId: "win777-be203",
+            storageBucket: "win777-be203.firebasestorage.app",
+            messagingSenderId: "504655373119",
+            appId: "1:504655373119:web:4b964d6e6f0df20ebc698a",
+            measurementId: "G-XL2RBDZHE2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let userData = null;
+
+        // Market names (you can update these)
+        const markets = [
+            { name: "Mumbai", result: "Loading..." },
+            { name: "Delhi", result: "Loading..." },
+            { name: "Kolkata", result: "Loading..." },
+            { name: "Bangalore", result: "Loading..." },
+            { name: "Chennai", result: "Loading..." },
+            { name: "Hyderabad", result: "Loading..." },
+            { name: "Ahmedabad", result: "Loading..." },
+            { name: "Pune", result: "Loading..." },
+            { name: "Jaipur", result: "Loading..." }
+        ];
+
+        // Check auth state
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            currentUser = user;
+            await loadUserData();
+            loadMarkets();
+        });
+
+        async function loadUserData() {
+            const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+            if (userDoc.exists()) {
+                userData = userDoc.data();
+                document.getElementById('userDetails').innerHTML = `
+                    <h3>${userData.name}</h3>
+                    <p>📱 ${userData.mobile}</p>
+                `;
+                document.getElementById('avatar').textContent = userData.name.charAt(0).toUpperCase();
+            }
+        }
+
+        function loadMarkets() {
+            const grid = document.getElementById('marketsGrid');
+            grid.innerHTML = markets.map(market => `
+                <div class="market-card" onclick="showMarketResult('${market.name}')">
+                    <div class="market-name">${market.name}</div>
+                    <div class="market-result">${market.result}</div>
+                </div>
+            `).join('');
+        }
+
+        window.showMarketResult = function(marketName) {
+            alert(`Market: ${marketName}\nResult coming soon!`);
+        };
+
+        // Update market results (call this function with new results)
+        window.updateMarketResults = function(results) {
+            markets.forEach((market, index) => {
+                if (results[market.name]) {
+                    market.result = results[market.name];
+                }
+            });
+            loadMarkets();
+        };
+
+        // Menu functions
+        window.toggleMenu = function() {
+            const menu = document.getElementById('sideMenu');
+            const overlay = document.getElementById('overlay');
+            menu.classList.toggle('open');
+            overlay.classList.toggle('show');
+        };
+
+        window.showGameRates = function() {
+            toggleMenu();
+            document.getElementById('ratesModal').style.display = 'flex';
+        };
+
+        window.showProfile = function() {
+            toggleMenu();
+            const profileInfo = document.getElementById('profileInfo');
+            profileInfo.innerHTML = `
+                <p><strong>Name:</strong> ${userData?.name || 'N/A'}</p>
+                <p><strong>Mobile:</strong> ${userData?.mobile || 'N/A'}</p>
+                <p><strong>Email:</strong> ${currentUser?.email || 'N/A'}</p>
+                <p><strong>Member since:</strong> ${new Date(userData?.createdAt).toLocaleDateString() || 'N/A'}</p>
+            `;
+            document.getElementById('profileModal').style.display = 'flex';
+        };
+
+        window.logout = async function() {
+            await signOut(auth);
+            window.location.href = 'index.html';
+        };
+
+        // Deposit & Withdrawal
+        window.showDepositModal = function() {
+            document.getElementById('depositModal').style.display = 'flex';
+        };
+
+        window.closeDepositModal = function() {
+            document.getElementById('depositModal').style.display = 'none';
+            document.getElementById('depositAmount').value = '';
+            document.getElementById('depositMethod').value = '';
+        };
+
+        window.processDeposit = async function() {
+            const amount = document.getElementById('depositAmount').value;
+            const method = document.getElementById('depositMethod').value;
+            
+            if (!amount || !method) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            await addDoc(collection(db, 'transactions'), {
+                userId: currentUser.uid,
+                type: 'deposit',
+                amount: parseFloat(amount),
+                method: method,
+                status: 'pending',
+                date: new Date().toISOString()
+            });
+            
+            alert(`Deposit request of ₹${amount} submitted! Admin will verify.`);
+            closeDepositModal();
+        };
+
+        window.showWithdrawModal = function() {
+            document.getElementById('withdrawModal').style.display = 'flex';
+        };
+
+        window.closeWithdrawModal = function() {
+            document.getElementById('withdrawModal').style.display = 'none';
+            document.getElementById('withdrawAmount').value = '';
+            document.getElementById('withdrawAccount').value = '';
+        };
+
+        window.processWithdraw = async function() {
+            const amount = document.getElementById('withdrawAmount').value;
+            const account = document.getElementById('withdrawAccount').value;
+            
+            if (!amount || !account) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            await addDoc(collection(db, 'transactions'), {
+                userId: currentUser.uid,
+                type: 'withdrawal',
+                amount: parseFloat(amount),
+                accountDetails: account,
+                status: 'pending',
+                date: new Date().toISOString()
+            });
+            
+            alert(`Withdrawal request of ₹${amount} submitted! Will be processed within 24 hours.`);
+            closeWithdrawModal();
+        };
+
+        // Bottom Navigation
+        window.showHome = function() {
+            window.location.reload();
+        };
+
+        window.showBidHistory = async function() {
+            const bids = await getDocs(query(collection(db, 'bids'), where('userId', '==', currentUser.uid), orderBy('date', 'desc')));
+            const bidList = document.getElementById('bidHistoryList');
+            
+            if (bids.empty) {
+                bidList.innerHTML = '<p style="text-align:center; padding:20px;">No bids found</p>';
+            } else {
+                bidList.innerHTML = bids.docs.map(doc => `
+                    <div class="bid-item">
+                        <strong>Market:</strong> ${doc.data().market}<br>
+                        <strong>Bid Amount:</strong> ₹${doc.data().amount}<br>
+                        <strong>Number:</strong> ${doc.data().number}<br>
+                        <strong>Date:</strong> ${new Date(doc.data().date).toLocaleString()}
+                    </div>
+                `).join('');
+            }
+            document.getElementById('bidHistoryModal').style.display = 'flex';
+        };
+
+        window.showPassbook = async function() {
+            const transactions = await getDocs(query(collection(db, 'transactions'), where('userId', '==', currentUser.uid), orderBy('date', 'desc')));
+            const passbookList = document.getElementById('passbookList');
+            
+            if (transactions.empty) {
+                passbookList.innerHTML = '<p style="text-align:center; padding:20px;">No transactions found</p>';
+            } else {
+                passbookList.innerHTML = transactions.docs.map(doc => `
+                    <div class="passbook-entry">
+                        <span>${doc.data().type.toUpperCase()}</span>
+                        <span class="${doc.data().type === 'deposit' ? 'credit' : 'debit'}">₹${doc.data().amount}</span>
+                        <span>${doc.data().status}</span>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('passbookModal').style.display = 'flex';
+        };
+
+        window.showSupport = function() {
+            document.getElementById('supportModal').style.display = 'flex';
+        };
+
+        // Close modals
+        window.closeRatesModal = function() {
+            document.getElementById('ratesModal').style.display = 'none';
+        };
+
+        window.closeProfileModal = function() {
+            document.getElementById('profileModal').style.display = 'none';
+        };
+
+        window.closeBidHistoryModal = function() {
+            document.getElementById('bidHistoryModal').style.display = 'none';
+        };
+
+        window.closePassbookModal = function() {
+            document.getElementById('passbookModal').style.display = 'none';
+        };
+
+        window.closeSupportModal = function() {
+            document.getElementById('supportModal').style.display = 'none';
+        };
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = ['depositModal', 'withdrawModal', 'ratesModal', 'profileModal', 'bidHistoryModal', 'passbookModal', 'supportModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        };
+    </script>
+</body>
+</html>
