@@ -214,6 +214,80 @@
             margin-top: 20px;
         }
 
+        /* Forgot Password Link */
+        .forgot-password {
+            text-align: right;
+            margin-top: 10px;
+        }
+
+        .forgot-password a {
+            color: #ff0000;
+            text-decoration: none;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            width: 350px;
+            max-width: 90%;
+            position: relative;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 20px;
+            color: #ff0000;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .modal-content button {
+            width: 100%;
+            padding: 12px;
+            background: #ff0000;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+        }
+
         /* Message */
         .message {
             margin-top: 20px;
@@ -300,7 +374,6 @@
         <!-- Image Section -->
         <div class="image-section">
             <img src="your-image.jpg" alt="App Image" class="app-image" id="appImage">
-            <!-- Change "your-image.jpg" to your image filename -->
         </div>
         
         <!-- Two Buttons Side by Side -->
@@ -319,10 +392,13 @@
                 <label>Password</label>
                 <input type="password" id="loginPassword" placeholder="Enter password">
             </div>
+            <div class="forgot-password">
+                <a onclick="showForgotPassword()">Forgot Password?</a>
+            </div>
             <button class="submit-btn" onclick="login()">Login →</button>
         </div>
 
-        <!-- Signup Form (hidden by default) - No DOB, added Confirm Password -->
+        <!-- Signup Form (hidden by default) -->
         <div id="signupForm" class="hidden">
             <div class="form-group">
                 <label>Full Name</label>
@@ -352,6 +428,17 @@
         </div>
     </div>
 
+    <!-- Forgot Password Modal -->
+    <div id="forgotModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeForgotPassword()">&times;</span>
+            <h3>Reset Password</h3>
+            <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Enter your mobile number. We'll send a password reset link to your email.</p>
+            <input type="tel" id="resetMobile" placeholder="Enter mobile number">
+            <button onclick="resetPassword()">Send Reset Link</button>
+        </div>
+    </div>
+
     <!-- WhatsApp Help Button -->
     <div class="whatsapp-help">
         <a href="https://wa.me/919113224019" class="whatsapp-btn" target="_blank">
@@ -361,7 +448,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         // Your Firebase Config
@@ -393,12 +480,21 @@
             hideMessage();
         };
 
+        window.showForgotPassword = function() {
+            document.getElementById('forgotModal').style.display = 'flex';
+        };
+
+        window.closeForgotPassword = function() {
+            document.getElementById('forgotModal').style.display = 'none';
+            document.getElementById('resetMobile').value = '';
+        };
+
         function showMessage(text, type) {
             const msgDiv = document.getElementById('message');
             msgDiv.textContent = text;
             msgDiv.className = `message ${type}`;
             msgDiv.classList.remove('hidden');
-            setTimeout(() => msgDiv.classList.add('hidden'), 3000);
+            setTimeout(() => msgDiv.classList.add('hidden'), 5000);
         }
 
         function hideMessage() {
@@ -423,7 +519,36 @@
                     window.location.href = 'dashboard.html';
                 }, 1000);
             } catch (error) {
-                showMessage(error.message, 'error');
+                if (error.code === 'auth/user-not-found') {
+                    showMessage('No account found with this mobile number', 'error');
+                } else if (error.code === 'auth/wrong-password') {
+                    showMessage('Incorrect password', 'error');
+                } else {
+                    showMessage(error.message, 'error');
+                }
+            }
+        };
+
+        window.resetPassword = async function() {
+            const mobile = document.getElementById('resetMobile').value.trim();
+            
+            if (!mobile) {
+                showMessage('Please enter your mobile number', 'error');
+                return;
+            }
+            
+            const email = `${mobile}@win777.com`;
+            
+            try {
+                await sendPasswordResetEmail(auth, email);
+                showMessage('Password reset link sent to your registered email!', 'success');
+                closeForgotPassword();
+            } catch (error) {
+                if (error.code === 'auth/user-not-found') {
+                    showMessage('No account found with this mobile number', 'error');
+                } else {
+                    showMessage(error.message, 'error');
+                }
             }
         };
 
@@ -463,7 +588,19 @@
                     window.location.href = 'dashboard.html';
                 }, 1000);
             } catch (error) {
-                showMessage(error.message, 'error');
+                if (error.code === 'auth/email-already-in-use') {
+                    showMessage('Mobile number already registered', 'error');
+                } else {
+                    showMessage(error.message, 'error');
+                }
+            }
+        };
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('forgotModal');
+            if (event.target === modal) {
+                closeForgotPassword();
             }
         };
     </script>
