@@ -19,7 +19,7 @@
             overflow-x: hidden;
         }
 
-        /* New Animated Background */
+        /* Animated Background */
         .bg-animation {
             position: fixed;
             top: 0;
@@ -104,14 +104,14 @@
             }
         }
 
-        /* Main Container - Centered */
+        /* Main Container - Centered, no top space */
         .container {
             position: relative;
             z-index: 1;
             width: 450px;
             max-width: 90%;
             margin: 0 auto;
-            padding: 40px 0;
+            padding: 20px 0 40px 0;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -125,13 +125,14 @@
             text-align: center;
             color: #ff0000;
             letter-spacing: 3px;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            margin-top: 0;
         }
 
         /* Image Section */
         .image-section {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
         .app-image {
@@ -155,7 +156,6 @@
             cursor: pointer;
             border: none;
             border-radius: 4px;
-            transition: all 0.2s;
         }
 
         .login-btn {
@@ -237,6 +237,17 @@
             display: none;
         }
 
+        /* Disclaimer */
+        .disclaimer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+            line-height: 1.5;
+        }
+
         /* WhatsApp Help Button */
         .whatsapp-help {
             position: fixed;
@@ -267,7 +278,7 @@
 </head>
 <body>
 
-    <!-- New Animated Background -->
+    <!-- Animated Background -->
     <div class="bg-animation">
         <div class="particle" style="width: 100px; height: 100px; top: 10%; left: 5%; animation-duration: 12s;"></div>
         <div class="particle" style="width: 60px; height: 60px; top: 70%; left: 85%; animation-duration: 18s; animation-delay: -3s;"></div>
@@ -311,15 +322,11 @@
             <button class="submit-btn" onclick="login()">Login →</button>
         </div>
 
-        <!-- Signup Form (hidden by default) -->
+        <!-- Signup Form (hidden by default) - No DOB, added Confirm Password -->
         <div id="signupForm" class="hidden">
             <div class="form-group">
                 <label>Full Name</label>
                 <input type="text" id="signupName" placeholder="Enter full name">
-            </div>
-            <div class="form-group">
-                <label>Date of Birth</label>
-                <input type="date" id="signupDob">
             </div>
             <div class="form-group">
                 <label>Mobile Number</label>
@@ -329,10 +336,20 @@
                 <label>Password</label>
                 <input type="password" id="signupPassword" placeholder="Create password">
             </div>
+            <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" id="signupConfirmPassword" placeholder="Confirm your password">
+            </div>
             <button class="submit-btn" onclick="signup()">Create Account →</button>
         </div>
 
         <div id="message" class="message hidden"></div>
+
+        <!-- Disclaimer -->
+        <div class="disclaimer">
+            By using this app, you agree to our Terms & Conditions and Privacy Policy.<br>
+            This is a demo application for learning purposes. All rights reserved.
+        </div>
     </div>
 
     <!-- WhatsApp Help Button -->
@@ -412,11 +429,11 @@
 
         window.signup = async function() {
             const name = document.getElementById('signupName').value.trim();
-            const dob = document.getElementById('signupDob').value;
             const mobile = document.getElementById('signupMobile').value.trim();
             const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
             
-            if (!name || !dob || !mobile || !password) {
+            if (!name || !mobile || !password || !confirmPassword) {
                 showMessage('Please fill all fields', 'error');
                 return;
             }
@@ -426,13 +443,17 @@
                 return;
             }
             
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match', 'error');
+                return;
+            }
+            
             const email = `${mobile}@win777.com`;
             
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 await setDoc(doc(db, 'users', userCredential.user.uid), {
                     name: name,
-                    dob: dob,
                     mobile: mobile,
                     email: email,
                     createdAt: new Date().toISOString()
