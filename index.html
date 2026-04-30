@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WIN777 - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #000000 0%, #0a0a2a 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 1s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 450px;
+            box-shadow: 0 0 50px rgba(0, 102, 255, 0.3);
+            border: 1px solid #0066ff;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        h1 {
+            text-align: center;
+            color: #0066ff;
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 102, 255, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .toggle-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 12px;
+            background: #1a1a1a;
+            border: 1px solid #0066ff;
+            color: white;
+            cursor: pointer;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn.active {
+            background: #0066ff;
+            color: white;
+            box-shadow: 0 0 15px rgba(0, 102, 255, 0.5);
+        }
+
+        .toggle-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #0066ff;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #0066ff;
+            box-shadow: 0 0 10px rgba(0, 102, 255, 0.3);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #0066ff, #0044aa);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 102, 255, 0.4);
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+            color: #ff6666;
+        }
+
+        .success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+            color: #66ff66;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .extra-fields {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WIN777</h1>
+        <div class="subtitle">Your Winning Journey Starts Here</div>
+        
+        <div class="toggle-buttons">
+            <button class="toggle-btn active" onclick="switchForm('login')">Login</button>
+            <button class="toggle-btn" onclick="switchForm('signup')">Create Account</button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm">
+            <div class="form-group">
+                <label>📱 Mobile Number</label>
+                <input type="tel" id="loginMobile" placeholder="+1234567890">
+            </div>
+            <div class="form-group">
+                <label>🔒 Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter password">
+            </div>
+            <button class="btn-submit" onclick="login()">Login →</button>
+        </div>
+
+        <!-- Signup Form -->
+        <div id="signupForm" class="hidden">
+            <div class="form-group">
+                <label>👤 Full Name</label>
+                <input type="text" id="signupName" placeholder="Your full name">
+            </div>
+            <div class="form-group">
+                <label>📅 Date of Birth</label>
+                <input type="date" id="signupDob">
+            </div>
+            <div class="form-group">
+                <label>📱 Mobile Number</label>
+                <input type="tel" id="signupMobile" placeholder="+1234567890">
+            </div>
+            <div class="form-group">
+                <label>🔒 Password</label>
+                <input type="password" id="signupPassword" placeholder="Create password">
+            </div>
+            <button class="btn-submit" onclick="signup()">Create Account →</button>
+        </div>
+
+        <div id="message" class="message hidden"></div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Your Firebase config (REPLACE WITH YOUR CONFIG)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Make functions global
+        window.switchForm = function(type) {
+            const loginDiv = document.getElementById('loginForm');
+            const signupDiv = document.getElementById('signupForm');
+            const btns = document.querySelectorAll('.toggle-btn');
+            
+            if (type === 'login') {
+                loginDiv.classList.remove('hidden');
+                signupDiv.classList.add('hidden');
+                btns[0].classList.add('active');
+                btns[1].classList.remove('active');
+            } else {
+                loginDiv.classList.add('hidden');
+                signupDiv.classList.remove('hidden');
+                btns[0].classList.remove('active');
+                btns[1].classList.add('active');
+            }
+            hideMessage();
+        };
+
+        window.showMessage = function(text, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.textContent = text;
+            msgDiv.className = `message ${type}`;
+            msgDiv.classList.remove('hidden');
+            setTimeout(() => {
+                msgDiv.classList.add('hidden');
+            }, 3000);
+        };
+
+        function hideMessage() {
+            document.getElementById('message').classList.add('hidden');
+        }
+
+        window.login = async function() {
+            const mobile = document.getElementById('loginMobile').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!mobile || !password) {
+                showMessage('Please fill all fields', 'error');
+                return;
+            }
+
+            // Use mobile as email (Firebase requires email format)
+            const email = `${mobile}@win999.com`;
+            
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                showMessage('Login successful! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        };
+
+        window.signup = async function() {
+            const name = document.getElementById('signupName').value;
+            const dob = document.getElementById('signupDob').value;
+            const mobile = document.getElementById('signupMobile').value;
+            const password = document.getElementById('signupPassword').value;
+            
+            if (!name || !dob || !mobile || !password) {
+                showMessage('Please fill all fields', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters', 'error');
+                return;
+            }
+            
+            const email = `${mobile}@win999.com`;
+            
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Save extra user data to Firestore
+                await setDoc(doc(db, 'users', user.uid), {
+                    name: name,
+                    dob: dob,
+                    mobile: mobile,
+                    email: email,
+                    createdAt: new Date().toISOString()
+                });
+                
+                showMessage('Account created successfully! Redirecting...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+            } catch (error) {
+                showMessage(error.message, 'error');
+            }
+        };
+    </script>
+</body>
+</html>
