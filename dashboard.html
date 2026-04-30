@@ -339,8 +339,14 @@
             margin-bottom: 5px;
         }
 
+        .market-timing {
+            font-size: 11px;
+            color: #0066ff;
+            margin-bottom: 3px;
+        }
+
         .market-result {
-            font-size: 13px;
+            font-size: 12px;
             color: #ff0000;
             font-weight: 500;
         }
@@ -456,6 +462,37 @@
             cursor: pointer;
             color: #999;
         }
+        /* Amount Selector */
+        .amount-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .amount-option {
+            background: #f0f0f0;
+            padding: 10px;
+            text-align: center;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .amount-option.selected {
+            background: #ff0000;
+            color: white;
+        }
+
+        .amount-option:hover {
+            background: #ff6666;
+            color: white;
+        }
+
+        .custom-amount {
+            margin-top: 10px;
+        }
 
         /* QR Code */
         .qr-code {
@@ -479,6 +516,43 @@
             margin: 10px 0;
             font-weight: bold;
             color: #ff0000;
+        }
+
+        .pay-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .pay-buttons button {
+            flex: 1;
+        }
+
+        /* Game Rates Grid */
+        .rates-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .rate-card {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .rate-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .rate-value {
+            color: #ff0000;
+            font-size: 18px;
+            font-weight: bold;
         }
 
         /* Disclaimer */
@@ -583,114 +657,159 @@
             <div class="nav-label">Support</div>
         </div>
     </div>
-    <!-- Deposit Modal with QR -->
-    <div id="depositModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeDepositModal()">&times;</span>
-            <h3>Deposit Money</h3>
+<!-- Deposit Modal with Amount Selector -->
+<div id="depositModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeDepositModal()">&times;</span>
+        <h3>Deposit Money</h3>
+        <p style="margin-bottom: 10px;">Select Amount (₹500 - ₹50000)</p>
+        <div class="amount-selector" id="amountSelector">
+            <div class="amount-option" onclick="selectAmount(500)">₹500</div>
+            <div class="amount-option" onclick="selectAmount(1000)">₹1000</div>
+            <div class="amount-option" onclick="selectAmount(2000)">₹2000</div>
+            <div class="amount-option" onclick="selectAmount(5000)">₹5000</div>
+            <div class="amount-option" onclick="selectAmount(10000)">₹10000</div>
+            <div class="amount-option" onclick="selectAmount(20000)">₹20000</div>
+        </div>
+        <div class="custom-amount">
+            <input type="number" id="customAmount" placeholder="Or enter custom amount (500-50000)">
+        </div>
+        <div id="qrSection" style="display: none;">
             <div class="qr-code">
                 <p style="margin-bottom: 10px;">Scan QR Code to Pay</p>
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=paytm%3A%2F%2Fpay%3Fpa%3Dwin888%40paytm" alt="QR Code">
+                <img id="qrImage" src="https://i.imgur.com/14a2kJA.jpeg" alt="QR Code">
                 <div class="upi-id">
                     💳 UPI ID: win888@paytm
                 </div>
-                <p style="font-size: 12px; color: #666;">Scan and pay any amount</p>
+                <p style="font-size: 12px; color: #666;">Amount: ₹<span id="displayAmount">0</span></p>
             </div>
-            <button onclick="confirmPayment()">✅ I have paid</button>
-        </div>
-    </div>
-
-    <!-- Withdraw Modal -->
-    <div id="withdrawModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeWithdrawModal()">&times;</span>
-            <h3>Withdraw Money</h3>
-            <input type="number" id="withdrawAmount" placeholder="Enter amount">
-            <input type="text" id="withdrawAccount" placeholder="Bank / UPI details">
-            <button onclick="processWithdraw()">Submit Withdrawal Request</button>
-        </div>
-    </div>
-
-    <!-- Insufficient Balance Modal -->
-    <div id="insufficientModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeInsufficientModal()">&times;</span>
-            <h3>⚠️ Insufficient Balance</h3>
-            <p style="text-align: center; margin: 20px 0;">Please deposit and play</p>
-            <button onclick="closeInsufficientModal(); showDepositModal()">💰 Deposit Now</button>
-        </div>
-    </div>
-
-    <!-- Play Modal -->
-    <div id="playModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closePlayModal()">&times;</span>
-            <h3>Place Your Bid</h3>
-            <p id="selectedMarket" style="margin-bottom: 15px;"></p>
-            <input type="number" id="bidAmount" placeholder="Enter amount">
-            <input type="text" id="bidNumber" placeholder="Enter your number (e.g., 123)">
-            <button onclick="submitBid()">Submit Bid</button>
-        </div>
-    </div>
-
-    <!-- Game Rates Modal -->
-    <div id="ratesModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeRatesModal()">&times;</span>
-            <h3>Game Rates</h3>
-            <div class="rates-list">
-                <div class="rate-item"><span>Single Digit</span><span>95x</span></div>
-                <div class="rate-item"><span>Double Digit</span><span>95x</span></div>
-                <div class="rate-item"><span>Triple Digit</span><span>950x</span></div>
-                <div class="rate-item"><span>Half Sangam</span><span>5000x</span></div>
-                <div class="rate-item"><span>Full Sangam</span><span>10000x</span></div>
+            <div class="pay-buttons">
+                <button onclick="openUpiApp()">📱 Pay with UPI</button>
+                <button onclick="confirmPayment()">✅ I have paid</button>
             </div>
         </div>
+        <button id="proceedBtn" onclick="proceedToPayment()">Proceed to Pay</button>
     </div>
+</div>
 
-    <!-- Profile Modal -->
-    <div id="profileModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeProfileModal()">&times;</span>
-            <h3>My Profile</h3>
-            <div id="profileInfo"></div>
+<!-- Withdraw Modal -->
+<div id="withdrawModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeWithdrawModal()">&times;</span>
+        <h3>Withdraw Money</h3>
+        <input type="number" id="withdrawAmount" placeholder="Enter amount">
+        <input type="text" id="withdrawAccount" placeholder="Bank / UPI details">
+        <button onclick="processWithdraw()">Submit Withdrawal Request</button>
+    </div>
+</div>
+
+<!-- Insufficient Balance Modal -->
+<div id="insufficientModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeInsufficientModal()">&times;</span>
+        <h3>⚠️ Insufficient Balance</h3>
+        <p style="text-align: center; margin: 20px 0;">Please deposit and play</p>
+        <button onclick="closeInsufficientModal(); showDepositModal()">💰 Deposit Now</button>
+    </div>
+</div>
+
+<!-- Play Modal -->
+<div id="playModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closePlayModal()">&times;</span>
+        <h3>Place Your Bid</h3>
+        <p id="selectedMarket" style="margin-bottom: 15px;"></p>
+        <select id="bidType" onchange="updateBidRate()">
+            <option value="single">Single (1-10)</option>
+            <option value="jodi">Jodi (1-100)</option>
+            <option value="singlePanel">Single Pannel (1-160)</option>
+            <option value="doublePanel">Double Pannel (1-320)</option>
+            <option value="triplePanel">Tripple Pannel (1-1000)</option>
+            <option value="sangam">Sangam (1-10000)</option>
+        </select>
+        <input type="number" id="bidAmount" placeholder="Enter amount">
+        <input type="text" id="bidNumber" placeholder="Enter your number">
+        <p id="winningRate" style="font-size: 12px; color: #ff0000; margin-top: 10px;">Winning rate: 1-10</p>
+        <button onclick="submitBid()">Submit Bid</button>
+    </div>
+</div>
+
+<!-- Game Rates Modal -->
+<div id="ratesModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeRatesModal()">&times;</span>
+        <h3>Game Rates</h3>
+        <div class="rates-grid">
+            <div class="rate-card">
+                <div class="rate-name">Single</div>
+                <div class="rate-value">1-10</div>
+            </div>
+            <div class="rate-card">
+                <div class="rate-name">Jodi</div>
+                <div class="rate-value">1-100</div>
+            </div>
+            <div class="rate-card">
+                <div class="rate-name">Single Pannel</div>
+                <div class="rate-value">1-160</div>
+            </div>
+            <div class="rate-card">
+                <div class="rate-name">Double Pannel</div>
+                <div class="rate-value">1-320</div>
+            </div>
+            <div class="rate-card">
+                <div class="rate-name">Tripple Pannel</div>
+                <div class="rate-value">1-1000</div>
+            </div>
+            <div class="rate-card">
+                <div class="rate-name">Sangam</div>
+                <div class="rate-value">1-10000</div>
+            </div>
         </div>
     </div>
+</div>
 
-    <!-- Bid History Modal -->
-    <div id="bidHistoryModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeBidHistoryModal()">&times;</span>
-            <h3>Bid History</h3>
-            <div id="bidHistoryList" style="text-align: center; padding: 20px;">You have no data. Play and visit again!</div>
-        </div>
+<!-- Profile Modal -->
+<div id="profileModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeProfileModal()">&times;</span>
+        <h3>My Profile</h3>
+        <div id="profileInfo"></div>
     </div>
+</div>
 
-    <!-- Passbook Modal -->
-    <div id="passbookModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closePassbookModal()">&times;</span>
-            <h3>Passbook</h3>
-            <div id="passbookList" style="text-align: center; padding: 20px;">You have no data. Play and visit again!</div>
-        </div>
+<!-- Bid History Modal -->
+<div id="bidHistoryModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeBidHistoryModal()">&times;</span>
+        <h3>Bid History</h3>
+        <div id="bidHistoryList" style="text-align: center; padding: 20px;">You have no data. Play and visit again!</div>
     </div>
+</div>
 
-    <!-- Support Modal -->
-    <div id="supportModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeSupportModal()">&times;</span>
-            <h3>Support</h3>
-            <p>📞 Phone: +91 9113224019</p>
-            <p>💬 WhatsApp: <a href="https://wa.me/919113224019">Click to Chat</a></p>
-            <p>📧 Email: support@win777.com</p>
-            <p>⏰ 24/7 Customer Support</p>
-        </div>
+<!-- Passbook Modal -->
+<div id="passbookModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closePassbookModal()">&times;</span>
+        <h3>Passbook</h3>
+        <div id="passbookList" style="text-align: center; padding: 20px;">You have no data. Play and visit again!</div>
     </div>
+</div>
 
+<!-- Support Modal -->
+<div id="supportModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeSupportModal()">&times;</span>
+        <h3>Support</h3>
+        <p>📞 Phone: +91 9113224019</p>
+        <p>💬 WhatsApp: <a href="https://wa.me/919113224019">Click to Chat</a></p>
+        <p>📧 Email: support@win777.com</p>
+        <p>⏰ 24/7 Customer Support</p>
+    </div>
+</div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, orderBy, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
@@ -710,19 +829,31 @@
         let userData = null;
         let userBalance = 0;
         let selectedMarketForPlay = null;
+        let selectedDepositAmount = 0;
+        let currentBidRate = 10;
 
-        // Market names with results (you can edit results here)
+        // Markets with names, timings, and results (you can edit timings and results here)
         const markets = [
-            { name: "Mumbai", result: "123-61-560" },
-            { name: "Delhi", result: "456-78-234" },
-            { name: "Kolkata", result: "789-90-567" },
-            { name: "Bangalore", result: "234-45-890" },
-            { name: "Chennai", result: "567-12-345" },
-            { name: "Hyderabad", result: "890-34-678" },
-            { name: "Ahmedabad", result: "345-67-901" },
-            { name: "Pune", result: "678-89-432" },
-            { name: "Jaipur", result: "901-23-765" }
+            { name: "Mumbai", timing: "12:30pm - 01:20pm", result: "123-61-560" },
+            { name: "Delhi", timing: "01:30pm - 02:20pm", result: "456-78-234" },
+            { name: "Kolkata", timing: "02:30pm - 03:20pm", result: "789-90-567" },
+            { name: "Bangalore", timing: "03:30pm - 04:20pm", result: "234-45-890" },
+            { name: "Chennai", timing: "04:30pm - 05:20pm", result: "567-12-345" },
+            { name: "Hyderabad", timing: "05:30pm - 06:20pm", result: "890-34-678" },
+            { name: "Ahmedabad", timing: "06:30pm - 07:20pm", result: "345-67-901" },
+            { name: "Pune", timing: "07:30pm - 08:20pm", result: "678-89-432" },
+            { name: "Jaipur", timing: "08:30pm - 09:20pm", result: "901-23-765" }
         ];
+
+        // Bid rates mapping
+        const bidRates = {
+            single: 10,
+            jodi: 100,
+            singlePanel: 160,
+            doublePanel: 320,
+            triplePanel: 1000,
+            sangam: 10000
+        };
 
         // Check auth state
         onAuthStateChanged(auth, async (user) => {
@@ -760,6 +891,7 @@
                 <div class="market-item">
                     <div class="market-info">
                         <div class="market-name">${market.name}</div>
+                        <div class="market-timing">⏰ ${market.timing}</div>
                         <div class="market-result">Result: ${market.result}</div>
                     </div>
                     <button class="play-btn" onclick="openPlayModal('${market.name}')">Play</button>
@@ -777,7 +909,67 @@
             loadMarkets();
         };
 
-        // Open Play Modal
+        // Update market timings (you can edit timings anytime)
+        window.updateMarketTimings = function(newTimings) {
+            markets.forEach((market, index) => {
+                if (newTimings[market.name]) {
+                    market.timing = newTimings[market.name];
+                }
+            });
+            loadMarkets();
+        };
+
+        // Deposit Functions
+        window.selectAmount = function(amount) {
+            document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
+            event.target.classList.add('selected');
+            selectedDepositAmount = amount;
+            document.getElementById('customAmount').value = '';
+        };
+
+        window.proceedToPayment = function() {
+            const customAmount = parseInt(document.getElementById('customAmount').value);
+            if (customAmount >= 500 && customAmount <= 50000) {
+                selectedDepositAmount = customAmount;
+            }
+            
+            if (!selectedDepositAmount || selectedDepositAmount < 500 || selectedDepositAmount > 50000) {
+                alert('Please select amount between ₹500 and ₹50000');
+                return;
+            }
+            
+            document.getElementById('displayAmount').innerText = selectedDepositAmount;
+            document.getElementById('qrSection').style.display = 'block';
+            document.getElementById('proceedBtn').style.display = 'none';
+        };
+
+        window.openUpiApp = function() {
+            const upiUrl = `paytm://pay?pa=win888@paytm&am=${selectedDepositAmount}&cu=INR`;
+            window.location.href = upiUrl;
+            setTimeout(() => {
+                window.location.href = `upi://pay?pa=win888@paytm&am=${selectedDepositAmount}&cu=INR`;
+            }, 100);
+        };
+
+        window.confirmPayment = async function() {
+            alert('Payment confirmation sent to admin. Your balance will be updated after manual verification.');
+            closeDepositModal();
+            
+            await addDoc(collection(db, 'depositRequests'), {
+                userId: currentUser.uid,
+                userMobile: userData?.mobile,
+                amount: selectedDepositAmount,
+                status: 'pending',
+                date: new Date().toISOString()
+            });
+            
+            selectedDepositAmount = 0;
+            document.getElementById('qrSection').style.display = 'none';
+            document.getElementById('proceedBtn').style.display = 'block';
+            document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
+        };
+
+        // Play Functions
         window.openPlayModal = function(marketName) {
             if (userBalance <= 0) {
                 document.getElementById('insufficientModal').style.display = 'flex';
@@ -788,7 +980,14 @@
             document.getElementById('playModal').style.display = 'flex';
         };
 
+        window.updateBidRate = function() {
+            const bidType = document.getElementById('bidType').value;
+            currentBidRate = bidRates[bidType];
+            document.getElementById('winningRate').innerHTML = `Winning rate: 1-${currentBidRate}`;
+        };
+
         window.submitBid = async function() {
+            const bidType = document.getElementById('bidType').value;
             const amount = document.getElementById('bidAmount').value;
             const number = document.getElementById('bidNumber').value;
             
@@ -816,13 +1015,15 @@
             await addDoc(collection(db, 'bids'), {
                 userId: currentUser.uid,
                 market: selectedMarketForPlay,
+                bidType: bidType,
                 amount: parseFloat(amount),
                 number: number,
+                rate: currentBidRate,
                 status: 'pending',
                 date: new Date().toISOString()
             });
             
-            alert(`Bid placed successfully!\nMarket: ${selectedMarketForPlay}\nAmount: ₹${amount}\nNumber: ${number}`);
+            alert(`Bid placed successfully!\nMarket: ${selectedMarketForPlay}\nType: ${bidType}\nAmount: ₹${amount}\nNumber: ${number}\nWinning Rate: 1-${currentBidRate}`);
             closePlayModal();
             document.getElementById('bidAmount').value = '';
             document.getElementById('bidNumber').value = '';
@@ -868,29 +1069,21 @@
             window.location.href = 'index.html';
         };
 
-        // Deposit
+        // Deposit Modal
         window.showDepositModal = function() {
             document.getElementById('depositModal').style.display = 'flex';
         };
 
         window.closeDepositModal = function() {
             document.getElementById('depositModal').style.display = 'none';
+            document.getElementById('qrSection').style.display = 'none';
+            document.getElementById('proceedBtn').style.display = 'block';
+            document.getElementById('customAmount').value = '';
+            selectedDepositAmount = 0;
+            document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
         };
 
-        window.confirmPayment = async function() {
-            alert('Payment confirmation sent to admin. Your balance will be updated after manual verification.');
-            closeDepositModal();
-            
-            // Save deposit request for admin
-            await addDoc(collection(db, 'depositRequests'), {
-                userId: currentUser.uid,
-                userMobile: userData?.mobile,
-                status: 'pending',
-                date: new Date().toISOString()
-            });
-        };
-
-        // Withdraw
+        // Withdraw Functions
         window.showWithdrawModal = function() {
             document.getElementById('withdrawModal').style.display = 'flex';
         };
