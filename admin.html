@@ -5,240 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WIN777 - Admin Panel</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: #f0f2f5;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .header {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .logo {
-            font-size: 28px;
-            font-weight: 800;
-            color: #ff0000;
-        }
-
-        .logout-btn {
-            background: #ff0000;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .tab-btn {
-            background: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-
-        .tab-btn.active {
-            background: #ff0000;
-            color: white;
-        }
-
-        .section {
-            display: none;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .section.active {
-            display: block;
-        }
-
-        .section-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #ff0000;
-            border-bottom: 2px solid #ff0000;
-            padding-bottom: 10px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #333;
-        }
-
-        input, textarea, select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-
-        button {
-            background: #ff0000;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        .markets-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-
-        .markets-table th,
-        .markets-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .markets-table th {
-            background: #f8f9fa;
-            font-weight: 600;
-        }
-
-        .edit-btn {
-            background: #0066ff;
-            padding: 6px 12px;
-            font-size: 12px;
-            margin-right: 5px;
-        }
-
-        .delete-btn {
-            background: #ff0000;
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-
-        .add-btn {
-            background: #00cc00;
-            margin-top: 20px;
-        }
-
-        .qr-preview {
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .qr-preview img {
-            max-width: 200px;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            padding: 10px;
-        }
-
-        .request-card {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .approve-btn {
-            background: #00cc00;
-        }
-
-        .reject-btn {
-            background: #ff0000;
-        }
-
-        .status-pending {
-            color: #ff6600;
-            font-weight: bold;
-        }
-
-        .status-approved {
-            color: #00cc00;
-            font-weight: bold;
-        }
-
-        .login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 2000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .login-box {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            width: 350px;
-            text-align: center;
-        }
-
-        .login-box h2 {
-            color: #ff0000;
-            margin-bottom: 20px;
-        }
-
-        .login-box input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-
-        .error-msg {
-            color: #ff0000;
-            margin-top: 10px;
-            font-size: 14px;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #f0f2f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 28px; font-weight: 800; color: #ff0000; }
+        .logout-btn { background: #ff0000; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-left: 10px; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn { background: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 500; }
+        .tab-btn.active { background: #ff0000; color: white; }
+        .section { display: none; background: white; padding: 25px; border-radius: 12px; }
+        .section.active { display: block; }
+        .section-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; color: #ff0000; border-bottom: 2px solid #ff0000; padding-bottom: 10px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        button { background: #ff0000; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        .markets-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .markets-table th, .markets-table td { padding: 12px; text-align: left; border-bottom: 1px solid #e0e0e0; }
+        .markets-table th { background: #f8f9fa; }
+        .edit-btn { background: #0066ff; padding: 6px 12px; font-size: 12px; margin-right: 5px; }
+        .delete-btn { background: #ff0000; padding: 6px 12px; font-size: 12px; }
+        .add-btn { background: #00cc00; }
+        .request-card { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .approve-btn { background: #00cc00; }
+        .reject-btn { background: #ff0000; }
+        .status-pending { color: #ff6600; font-weight: bold; }
+        .status-approved { color: #00cc00; font-weight: bold; }
+        .qr-preview { text-align: center; margin: 20px 0; }
+        .qr-preview img { max-width: 200px; border: 1px solid #ddd; border-radius: 12px; padding: 10px; }
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; justify-content: center; align-items: center; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; width: 350px; text-align: center; }
+        .login-box h2 { color: #ff0000; margin-bottom: 20px; }
+        .login-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
+        .error-msg { color: #ff0000; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -264,8 +64,8 @@
 
         <div class="tabs">
             <button class="tab-btn active" onclick="showTab('markets')">📊 Markets</button>
-            <button class="tab-btn" onclick="showTab('deposits')">💰 Deposit Requests</button>
-            <button class="tab-btn" onclick="showTab('withdrawals')">💸 Withdrawal Requests</button>
+            <button class="tab-btn" onclick="showTab('deposits')">💰 Deposits</button>
+            <button class="tab-btn" onclick="showTab('withdrawals')">💸 Withdrawals</button>
             <button class="tab-btn" onclick="showTab('settings')">⚙️ Settings</button>
             <button class="tab-btn" onclick="showTab('users')">👥 Users</button>
         </div>
@@ -288,25 +88,11 @@
 
         <div id="settingsSection" class="section">
             <div class="section-title">App Settings</div>
-            <div class="settings-group">
-                <h3 style="margin-bottom:15px;">QR Code Settings</h3>
-                <div class="form-group">
-                    <label>QR Code Image URL</label>
-                    <input type="text" id="qrUrl" placeholder="https://i.imgur.com/14a2kJA.jpeg">
-                </div>
-                <div class="qr-preview">
-                    <img id="qrPreview" src="https://i.imgur.com/14a2kJA.jpeg" alt="QR Preview">
-                </div>
-                <button onclick="updateQrSettings()">Update QR Code</button>
-            </div>
-            <div class="settings-group">
-                <h3 style="margin-bottom:15px;">UPI Settings</h3>
-                <div class="form-group">
-                    <label>UPI ID</label>
-                    <input type="text" id="upiId" placeholder="win888@paytm">
-                </div>
-                <button onclick="updateUpiSettings()">Update UPI ID</button>
-            </div>
+            <div class="form-group"><label>QR Code Image URL</label><input type="text" id="qrUrl" placeholder="https://i.imgur.com/14a2kJA.jpeg"></div>
+            <div class="qr-preview"><img id="qrPreview" src="https://i.imgur.com/14a2kJA.jpeg" alt="QR Preview"></div>
+            <button onclick="updateQrSettings()">Update QR Code</button>
+            <div class="form-group" style="margin-top:20px;"><label>UPI ID</label><input type="text" id="upiId" placeholder="win888@paytm"></div>
+            <button onclick="updateUpiSettings()">Update UPI ID</button>
         </div>
 
         <div id="usersSection" class="section">
@@ -318,10 +104,10 @@
     <div id="addMarketModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
         <div style="background:white; padding:30px; border-radius:12px; width:400px; max-width:90%;">
             <h3>Add New Market</h3>
-            <div class="form-group"><label>Market Name</label><input type="text" id="newMarketName"></div>
+            <div class="form-group"><label>Market Name</label><input type="text" id="newMarketName" placeholder="e.g., Mumbai"></div>
             <div class="form-group"><label>Timing</label><input type="text" id="newMarketTiming" placeholder="e.g., 12:30pm - 01:20pm"></div>
             <div class="form-group"><label>Result</label><input type="text" id="newMarketResult" placeholder="e.g., 123-61-560"></div>
-            <div class="form-group"><label>Order</label><input type="number" id="newMarketOrder" placeholder="Display order"></div>
+            <div class="form-group"><label>Order</label><input type="number" id="newMarketOrder" placeholder="1,2,3..."></div>
             <button onclick="addMarket()">Add Market</button>
             <button onclick="closeAddMarketModal()" style="background:#666; margin-top:10px;">Cancel</button>
         </div>
@@ -345,7 +131,7 @@
             <h3>Change Admin Password</h3>
             <div class="form-group"><label>Current Password</label><input type="password" id="currentPassword"></div>
             <div class="form-group"><label>New Password</label><input type="password" id="newPassword"></div>
-            <div class="form-group"><label>Confirm New Password</label><input type="password" id="confirmPassword"></div>
+            <div class="form-group"><label>Confirm Password</label><input type="password" id="confirmPassword"></div>
             <button onclick="changePassword()">Change Password</button>
             <button onclick="closeChangePasswordModal()" style="background:#666; margin-top:10px;">Cancel</button>
         </div>
@@ -353,7 +139,7 @@
 </div>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, orderBy, updateDoc, deleteDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, query, orderBy, onSnapshot, addDoc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
@@ -369,18 +155,14 @@
         const db = getFirestore(app);
 
         let adminPasswordHash = "Gani99@@";
-        let marketsUnsubscribe = null;
-        let depositsUnsubscribe = null;
-        let withdrawalsUnsubscribe = null;
-        let usersUnsubscribe = null;
+        let marketsUnsubscribe, depositsUnsubscribe, withdrawalsUnsubscribe, usersUnsubscribe;
 
         window.checkAdminPassword = function() {
-            const enteredPassword = document.getElementById('adminPassword').value;
-            if (enteredPassword === adminPasswordHash) {
+            if (document.getElementById('adminPassword').value === adminPasswordHash) {
                 localStorage.setItem('adminAuthenticated', 'true');
                 document.getElementById('loginOverlay').style.display = 'none';
                 document.getElementById('adminContent').style.display = 'block';
-                initializeAdminPanel();
+                initializeAdmin();
             } else {
                 document.getElementById('loginError').innerText = 'Invalid password!';
             }
@@ -389,10 +171,10 @@
         if (localStorage.getItem('adminAuthenticated') === 'true') {
             document.getElementById('loginOverlay').style.display = 'none';
             document.getElementById('adminContent').style.display = 'block';
-            initializeAdminPanel();
+            initializeAdmin();
         }
 
-        async function initializeAdminPanel() {
+        async function initializeAdmin() {
             setupMarketsListener();
             setupDepositsListener();
             setupWithdrawalsListener();
@@ -404,20 +186,17 @@
             if (marketsUnsubscribe) marketsUnsubscribe();
             const q = query(collection(db, 'markets'), orderBy('order'));
             marketsUnsubscribe = onSnapshot(q, (snapshot) => {
-                const marketsList = document.getElementById('marketsList');
-                if (snapshot.empty) {
-                    marketsList.innerHTML = '<p>No markets found. Add your first market!</p>';
-                    return;
-                }
+                const list = document.getElementById('marketsList');
+                if (snapshot.empty) { list.innerHTML = '<p>No markets found. Add your first market!</p>'; return; }
                 let html = '<table class="markets-table"><thead><tr><th>Order</th><th>Market Name</th><th>Timing</th><th>Result</th><th>Actions</th></tr></thead><tbody>';
                 snapshot.forEach(doc => {
-                    const market = doc.data();
-                    html += `<tr><td>${market.order || '-'}</td><td>${market.name}</td><td>${market.timing}</td><td>${market.result}</td>
+                    const m = doc.data();
+                    html += `<tr><td>${m.order || '-'}</td><td>${m.name}</td><td>${m.timing}</td><td>${m.result}</td>
                     <td><button class="edit-btn" onclick="editMarket('${doc.id}')">Edit</button>
                     <button class="delete-btn" onclick="deleteMarket('${doc.id}')">Delete</button></td></tr>`;
                 });
                 html += '</tbody></table>';
-                marketsList.innerHTML = html;
+                list.innerHTML = html;
             });
         }
 
@@ -425,43 +204,35 @@
             if (depositsUnsubscribe) depositsUnsubscribe();
             const q = query(collection(db, 'depositRequests'), orderBy('date', 'desc'));
             depositsUnsubscribe = onSnapshot(q, (snapshot) => {
-                const depositsList = document.getElementById('depositsList');
-                if (snapshot.empty) {
-                    depositsList.innerHTML = '<p>No deposit requests</p>';
-                    return;
-                }
+                const list = document.getElementById('depositsList');
+                if (snapshot.empty) { list.innerHTML = '<p>No deposit requests</p>'; return; }
                 let html = '';
                 snapshot.forEach(doc => {
-                    const req = doc.data();
-                    html += `<div class="request-card"><div><strong>${req.userName || 'User'}</strong><br>
-                    📱 ${req.userMobile}<br>💰 Amount: ₹${req.amount}<br>🎁 Bonus: ₹${req.bonusAmount || 0}<br>
-                    📅 ${new Date(req.date).toLocaleString()}<br>Status: <span class="status-${req.status}">${req.status}</span></div>
-                    ${req.status === 'pending' ? `<div><button class="approve-btn" onclick="approveDeposit('${doc.id}', ${req.amount}, ${req.bonusAmount || 0}, '${req.userId}')">Approve</button>
+                    const r = doc.data();
+                    html += `<div class="request-card"><div><strong>${r.userName || 'User'}</strong><br>📱 ${r.userMobile}<br>💰 ₹${r.amount}<br>🎁 Bonus: ₹${r.bonusAmount || 0}<br>📅 ${new Date(r.date).toLocaleString()}<br>Status: <span class="status-${r.status}">${r.status}</span></div>
+                    ${r.status === 'pending' ? `<div><button class="approve-btn" onclick="approveDeposit('${doc.id}', ${r.amount}, ${r.bonusAmount || 0}, '${r.userId}')">Approve</button>
                     <button class="reject-btn" onclick="rejectDeposit('${doc.id}')">Reject</button></div>` : ''}</div>`;
                 });
-                depositsList.innerHTML = html;
+                list.innerHTML = html;
             });
         }
 
         function setupWithdrawalsListener() {
             if (withdrawalsUnsubscribe) withdrawalsUnsubscribe();
-            const q = query(collection(db, 'transactions'), where('type', '==', 'withdrawal'), orderBy('date', 'desc'));
+            const q = query(collection(db, 'transactions'), orderBy('date', 'desc'));
             withdrawalsUnsubscribe = onSnapshot(q, (snapshot) => {
-                const withdrawalsList = document.getElementById('withdrawalsList');
-                if (snapshot.empty) {
-                    withdrawalsList.innerHTML = '<p>No withdrawal requests</p>';
-                    return;
-                }
+                const list = document.getElementById('withdrawalsList');
+                if (snapshot.empty) { list.innerHTML = '<p>No withdrawal requests</p>'; return; }
                 let html = '';
                 snapshot.forEach(doc => {
-                    const req = doc.data();
-                    html += `<div class="request-card"><div><strong>User: ${req.userId}</strong><br>
-                    💰 Amount: ₹${req.amount}<br>🏦 Account: ${req.accountDetails || 'N/A'}<br>
-                    📅 ${new Date(req.date).toLocaleString()}<br>Status: <span class="status-${req.status}">${req.status}</span></div>
-                    ${req.status === 'pending' ? `<div><button class="approve-btn" onclick="approveWithdrawal('${doc.id}', ${req.amount}, '${req.userId}')">Approve</button>
-                    <button class="reject-btn" onclick="rejectWithdrawal('${doc.id}', ${req.amount}, '${req.userId}')">Reject</button></div>` : ''}</div>`;
+                    const r = doc.data();
+                    if (r.type === 'withdrawal') {
+                        html += `<div class="request-card"><div><strong>User: ${r.userId}</strong><br>💰 ₹${r.amount}<br>🏦 ${r.accountDetails || 'N/A'}<br>📅 ${new Date(r.date).toLocaleString()}<br>Status: <span class="status-${r.status}">${r.status}</span></div>
+                        ${r.status === 'pending' ? `<div><button class="approve-btn" onclick="approveWithdrawal('${doc.id}', ${r.amount}, '${r.userId}')">Approve</button>
+                        <button class="reject-btn" onclick="rejectWithdrawal('${doc.id}', ${r.amount}, '${r.userId}')">Reject</button></div>` : ''}</div>`;
+                    }
                 });
-                withdrawalsList.innerHTML = html;
+                list.innerHTML = html;
             });
         }
 
@@ -469,38 +240,40 @@
             if (usersUnsubscribe) usersUnsubscribe();
             const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
             usersUnsubscribe = onSnapshot(q, (snapshot) => {
-                const usersList = document.getElementById('usersList');
-                if (snapshot.empty) {
-                    usersList.innerHTML = '<p>No users found</p>';
-                    return;
-                }
-                let html = '<table class="markets-table"><thead><tr><th>Name</th><th>Mobile</th><th>Balance</th><th>Joined</th><th>Actions</th></tr></thead><tbody>';
+                const list = document.getElementById('usersList');
+                if (snapshot.empty) { list.innerHTML = '<p>No users found</p>'; return; }
+                let html = '<table class="markets-table"><thead><tr><th>Name</th><th>Mobile</th><th>Balance</th><th>Joined</th><th>Action</th></tr></thead><tbody>';
                 snapshot.forEach(doc => {
-                    const user = doc.data();
-                    html += `<tr><td>${user.name || 'N/A'}</td><td>${user.mobile || 'N/A'}</td>
-                    <td>₹${user.balance || 0}</td><td>${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</td>
+                    const u = doc.data();
+                    html += `<tr><td>${u.name || 'N/A'}</td><td>${u.mobile || 'N/A'}</td><td>₹${u.balance || 0}</td>
+                    <td>${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'}</td>
                     <td><button class="edit-btn" onclick="adjustBalance('${doc.id}')">Adjust Balance</button></td></tr>`;
                 });
                 html += '</tbody></table>';
-                usersList.innerHTML = html;
+                list.innerHTML = html;
             });
         }
 
-        function showTab(tab) {
+        async function loadSettings() {
+            const docSnap = await getDoc(doc(db, 'settings', 'app'));
+            if (docSnap.exists()) {
+                document.getElementById('qrUrl').value = docSnap.data().qrUrl || 'https://i.imgur.com/14a2kJA.jpeg';
+                document.getElementById('upiId').value = docSnap.data().upiId || 'win888@paytm';
+                document.getElementById('qrPreview').src = docSnap.data().qrUrl || 'https://i.imgur.com/14a2kJA.jpeg';
+            }
+        }
+
+        window.showTab = function(tab) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`${tab}Section`).classList.add('active');
             event.target.classList.add('active');
-        }
+        };
 
-        window.showAddMarketModal = function() {
-            document.getElementById('addMarketModal').style.display = 'flex';
-        };
-        window.closeAddMarketModal = function() {
-            document.getElementById('addMarketModal').style.display = 'none';
-        };
+        window.showAddMarketModal = function() { document.getElementById('addMarketModal').style.display = 'flex'; };
+        window.closeAddMarketModal = function() { document.getElementById('addMarketModal').style.display = 'none'; };
         window.addMarket = async function() {
-            const name = document.getElementById('newMarketName').value;
+            const name = document.getElementById('newMarketName').value.trim();
             if (!name) { alert('Enter market name'); return; }
             await setDoc(doc(db, 'markets', name), {
                 name: name,
@@ -510,6 +283,10 @@
             });
             alert('Market added!');
             closeAddMarketModal();
+            document.getElementById('newMarketName').value = '';
+            document.getElementById('newMarketTiming').value = '';
+            document.getElementById('newMarketResult').value = '';
+            document.getElementById('newMarketOrder').value = '';
         };
 
         window.editMarket = async function(id) {
@@ -524,9 +301,7 @@
                 document.getElementById('editMarketModal').style.display = 'flex';
             }
         };
-        window.closeEditMarketModal = function() {
-            document.getElementById('editMarketModal').style.display = 'none';
-        };
+        window.closeEditMarketModal = function() { document.getElementById('editMarketModal').style.display = 'none'; };
         window.updateMarket = async function() {
             const id = document.getElementById('editMarketId').value;
             await updateDoc(doc(db, 'markets', id), {
@@ -539,10 +314,7 @@
             closeEditMarketModal();
         };
         window.deleteMarket = async function(id) {
-            if (confirm('Delete this market?')) {
-                await deleteDoc(doc(db, 'markets', id));
-                alert('Deleted!');
-            }
+            if (confirm('Delete this market?')) { await deleteDoc(doc(db, 'markets', id)); alert('Deleted!'); }
         };
 
         window.approveDeposit = async function(id, amount, bonus, userId) {
@@ -556,10 +328,7 @@
             }
         };
         window.rejectDeposit = async function(id) {
-            if (confirm('Reject?')) {
-                await updateDoc(doc(db, 'depositRequests', id), { status: 'rejected' });
-                alert('Rejected!');
-            }
+            if (confirm('Reject?')) { await updateDoc(doc(db, 'depositRequests', id), { status: 'rejected' }); alert('Rejected!'); }
         };
 
         window.approveWithdrawal = async function(id, amount, userId) {
@@ -586,36 +355,30 @@
             }
         };
 
-        async function loadSettings() {
-            const docSnap = await getDoc(doc(db, 'settings', 'app'));
-            if (docSnap.exists()) {
-                document.getElementById('qrUrl').value = docSnap.data().qrUrl || 'https://i.imgur.com/14a2kJA.jpeg';
-                document.getElementById('upiId').value = docSnap.data().upiId || 'win888@paytm';
-                document.getElementById('qrPreview').src = docSnap.data().qrUrl || 'https://i.imgur.com/14a2kJA.jpeg';
-            }
-        }
         window.updateQrSettings = async function() {
-            await setDoc(doc(db, 'settings', 'app'), { qrUrl: document.getElementById('qrUrl').value, upiId: document.getElementById('upiId').value }, { merge: true });
+            await setDoc(doc(db, 'settings', 'app'), {
+                qrUrl: document.getElementById('qrUrl').value,
+                upiId: document.getElementById('upiId').value
+            }, { merge: true });
             document.getElementById('qrPreview').src = document.getElementById('qrUrl').value;
             alert('QR updated!');
         };
         window.updateUpiSettings = async function() {
-            await setDoc(doc(db, 'settings', 'app'), { upiId: document.getElementById('upiId').value, qrUrl: document.getElementById('qrUrl').value }, { merge: true });
+            await setDoc(doc(db, 'settings', 'app'), {
+                upiId: document.getElementById('upiId').value,
+                qrUrl: document.getElementById('qrUrl').value
+            }, { merge: true });
             alert('UPI updated!');
         };
 
-        window.showChangePassword = function() {
-            document.getElementById('changePasswordModal').style.display = 'flex';
-        };
-        window.closeChangePasswordModal = function() {
-            document.getElementById('changePasswordModal').style.display = 'none';
-        };
+        window.showChangePassword = function() { document.getElementById('changePasswordModal').style.display = 'flex'; };
+        window.closeChangePasswordModal = function() { document.getElementById('changePasswordModal').style.display = 'none'; };
         window.changePassword = function() {
             const current = document.getElementById('currentPassword').value;
             const newPass = document.getElementById('newPassword').value;
             const confirm = document.getElementById('confirmPassword').value;
             if (current !== adminPasswordHash) { alert('Current password incorrect'); return; }
-            if (newPass.length < 6) { alert('Password must be 6+ chars'); return; }
+            if (newPass.length < 6) { alert('Password must be 6+ characters'); return; }
             if (newPass !== confirm) { alert('Passwords do not match'); return; }
             adminPasswordHash = newPass;
             localStorage.setItem('adminPassword', newPass);
@@ -634,8 +397,8 @@
             localStorage.removeItem('adminAuthenticated');
             document.getElementById('loginOverlay').style.display = 'flex';
             document.getElementById('adminContent').style.display = 'none';
+            document.getElementById('adminPassword').value = '';
         };
-        window.showTab = showTab;
     </script>
 </body>
 </html>
