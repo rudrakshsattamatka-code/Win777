@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WIN777</title>
+    <title>WIN777 - Login</title>
     <style>
         * {
             margin: 0;
@@ -115,21 +115,10 @@
             justify-content: center;
         }
 
-        /* Headline */
-        .headline {
-            font-size: 56px;
-            font-weight: 800;
-            text-align: center;
-            color: #ff0000;
-            letter-spacing: 3px;
-            margin-bottom: 15px;
-            margin-top: 0;
-        }
-
-        /* Image Section */
+        /* Image Section - Only this image */
         .image-section {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
 
         .app-image {
@@ -299,6 +288,12 @@
             border-radius: 4px;
             cursor: pointer;
         }
+        .close-modal {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
 
         /* WhatsApp Help */
         .whatsapp-help {
@@ -338,10 +333,9 @@
     </div>
 
     <div class="container">
-        <div class="headline">WIN777</div>
-
+        <!-- Only this image, headline removed -->
         <div class="image-section">
-            <img src="https://i.imgur.com/YtceaNk.png" alt="App Image" class="app-image">
+            <img src="https://i.imgur.com/CXcohGO.png" alt="WIN777" class="app-image">
         </div>
         
         <div class="button-group">
@@ -397,7 +391,7 @@
     <!-- Forgot Password Modal -->
     <div id="forgotModal" class="modal">
         <div class="modal-content">
-            <span class="close-modal" onclick="closeForgotPassword()" style="float:right; font-size:24px; cursor:pointer;">&times;</span>
+            <span class="close-modal" onclick="closeForgotPassword()">&times;</span>
             <h3>Reset Password</h3>
             <p style="margin-bottom:15px;">Enter your mobile number to reset password</p>
             <input type="tel" id="resetMobile" placeholder="Enter mobile number">
@@ -411,6 +405,7 @@
             <span>💬</span> Need Help? Chat with us
         </a>
     </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
