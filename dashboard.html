@@ -751,7 +751,7 @@
                     <img id="qrImage" src="https://i.imgur.com/14a2kJA.jpeg" alt="QR Code">
                 </div>
                 <div class="upi-id-container">
-                    <span class="upi-id-text"><strong>UPI ID:</strong> win888@paytm</span>
+                    <span class="upi-id-text"><strong>UPI ID:</strong> <span id="upiIdDisplay">win888@paytm</span></span>
                     <button class="copy-btn" onclick="copyUpiId()">📋 Copy</button>
                 </div>
                 <p><strong>Amount:</strong> ₹<span id="displayAmount">0</span></p>
@@ -882,7 +882,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, orderBy, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, orderBy, updateDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
@@ -908,20 +908,7 @@
         let countdownInterval = null;
         let secondsLeft = 30;
         let isFirstDeposit = true;
-
-        // ========== YOU CAN EDIT MARKETS HERE ==========
-        const markets = [
-            { name: "Mumbai", timing: "12:30pm - 01:20pm", result: "123-61-560" },
-            { name: "Delhi", timing: "01:30pm - 02:20pm", result: "456-78-234" },
-            { name: "Kolkata", timing: "02:30pm - 03:20pm", result: "789-90-567" },
-            { name: "Bangalore", timing: "03:30pm - 04:20pm", result: "234-45-890" },
-            { name: "Chennai", timing: "04:30pm - 05:20pm", result: "567-12-345" },
-            { name: "Hyderabad", timing: "05:30pm - 06:20pm", result: "890-34-678" },
-            { name: "Ahmedabad", timing: "06:30pm - 07:20pm", result: "345-67-901" },
-            { name: "Pune", timing: "07:30pm - 08:20pm", result: "678-89-432" },
-            { name: "Jaipur", timing: "08:30pm - 09:20pm", result: "901-23-765" }
-        ];
-        // ================================================
+        let markets = [];
 
         const bidRates = {
             single: 10,
@@ -940,7 +927,8 @@
             currentUser = user;
             await loadUserData();
             await checkFirstDeposit();
-            loadMarkets();
+            await loadMarketsFromFirebase();
+            await loadSettings();
             updateBalanceDisplay();
             startAutoRefresh();
         });
@@ -964,18 +952,74 @@
             isFirstDeposit = depositQuery.empty;
         }
 
-        function updateBalanceDisplay() {
-            document.getElementById('balanceDisplay').innerHTML = `💰 Balance: ₹${userBalance}`;
+        async function loadSettings() {
+            const settingsDoc = await getDoc(doc(db, 'settings', 'app'));
+            if (settingsDoc.exists()) {
+                const settings = settingsDoc.data();
+                if (settings.qrUrl) {
+                    document.getElementById('qrImage').src = settings.qrUrl;
+                }
+                if (settings.upiId) {
+                    document.getElementById('upiIdDisplay').innerText = settings.upiId;
+                }
+            }
         }
 
-        function loadMarkets() {
+        async function loadMarketsFromFirebase() {
+            const marketsSnapshot = await getDocs(query(collection(db, 'markets'), orderBy('order')));
+            
+            if (marketsSnapshot.empty) {
+                const defaultMarkets = [
+                    { name: "Mumbai", timing: "12:30pm - 01:20pm", result: "123-61-560", order: 1 },
+                    { name: "Delhi", timing: "01:30pm - 02:20pm", result: "456-78-234", order: 2 },
+                    { name: "Kolkata", timing: "02:30pm - 03:20pm", result: "789-90-567", order: 3 },
+                    { name: "Bangalore", timing: "03:30pm - 04:20pm", result: "234-45-890", order: 4 },
+                    { name: "Chennai", timing: "04:30pm - 05:20pm", result: "567-12-345", order: 5 },
+                    { name: "Hyderabad", timing: "05:30pm - 06:20pm", result: "890-34-678", order: 6 },
+                    { name: "Ahmedabad", timing: "06:30pm - 07:20pm", result: "345-67-901", order: 7 },
+                    { name: "Pune", timing: "07:30pm - 08:20pm", result: "678-89-432", order: 8 },
+                    { name: "Jaipur", timing: "08:30pm - 09:20pm", result: "901-23-765", order: 9 }
+                ];
+                
+                for (const market of defaultMarkets) {
+                    await setDoc(doc(db, 'markets', market.name), market);
+                }
+                markets = defaultMarkets;
+            } else {
+                markets = [];
+                marketsSnapshot.forEach(doc => {
+                    markets.push(doc.data());
+                });
+                markets.sort((a, b) => (a.order || 0) - (b.order || 0));
+            }
+            
+            displayMarkets();
+            
+            onSnapshot(query(collection(db, 'markets'), orderBy('order')), (snapshot) => {
+                markets = [];
+                snapshot.forEach(doc => {
+                    markets.push(doc.data());
+                });
+                markets.sort((a, b) => (a.order || 0) - (b.order || 0));
+                displayMarkets();
+            });
+        }
+
+        function displayMarkets() {
             const list = document.getElementById('marketsList');
+            if (!list) return;
+            
+            if (markets.length === 0) {
+                list.innerHTML = '<div style="text-align: center; padding: 20px;">No markets available</div>';
+                return;
+            }
+            
             list.innerHTML = markets.map(market => `
                 <div class="market-item">
                     <div class="market-info">
-                        <div class="market-name">${market.name}</div>
-                        <div class="market-timing">⏰ ${market.timing}</div>
-                        <div class="market-result">Result: ${market.result}</div>
+                        <div class="market-name">${market.name || 'N/A'}</div>
+                        <div class="market-timing">⏰ ${market.timing || 'N/A'}</div>
+                        <div class="market-result">Result: ${market.result || 'N/A'}</div>
                     </div>
                     <button class="play-btn" onclick="openPlayModal('${market.name}')">Play</button>
                 </div>
@@ -998,7 +1042,7 @@
             }, 1000);
             
             refreshInterval = setInterval(() => {
-                refreshMarketData();
+                loadMarketsFromFirebase();
             }, 30000);
         }
         
@@ -1008,19 +1052,13 @@
                 timerElement.innerHTML = `🔄 Auto refreshes in ${secondsLeft}s...`;
             }
         }
-        
-        function refreshMarketData() {
-            loadMarkets();
-        }
 
-        // Copy UPI ID function
         window.copyUpiId = function() {
-            const upiId = "win888@paytm";
+            const upiId = document.getElementById('upiIdDisplay').innerText;
             navigator.clipboard.writeText(upiId);
             alert("UPI ID copied: " + upiId);
         };
 
-        // Deposit Functions
         window.selectAmount = function(amount) {
             document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
             event.target.classList.add('selected');
