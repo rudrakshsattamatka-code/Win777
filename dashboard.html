@@ -763,11 +763,17 @@
         };
 
         window.logout = async function() {
-            if (refreshInterval) clearInterval(refreshInterval);
-            if (countdownInterval) clearInterval(countdownInterval);
-            await signOut(auth);
-            window.location.href = 'index.html';
-        };
+    if (refreshInterval) clearInterval(refreshInterval);
+    if (countdownInterval) clearInterval(countdownInterval);
+    
+    // Clear all stored data
+    localStorage.removeItem('win777_user');
+    sessionStorage.removeItem('mpin_authenticated');
+    sessionStorage.removeItem('mpin_user_id');
+    
+    await signOut(auth);
+    window.location.href = 'index.html';
+};
 
         window.showDepositModal = function() { document.getElementById('depositModal').style.display = 'flex'; };
         window.closeDepositModal = function() {
