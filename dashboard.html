@@ -879,439 +879,464 @@
         <p>⏰ 24/7 Customer Support</p>
     </div>
 </div>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, orderBy, updateDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, orderBy, updateDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
-            authDomain: "win777-be203.firebaseapp.com",
-            projectId: "win777-be203",
-            storageBucket: "win777-be203.firebasestorage.app",
-            messagingSenderId: "504655373119",
-            appId: "1:504655373119:web:4b964d6e6f0df20ebc698a",
-            measurementId: "G-XL2RBDZHE2"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
+        authDomain: "win777-be203.firebaseapp.com",
+        projectId: "win777-be203",
+        storageBucket: "win777-be203.firebasestorage.app",
+        messagingSenderId: "504655373119",
+        appId: "1:504655373119:web:4b964d6e6f0df20ebc698a",
+        measurementId: "G-XL2RBDZHE2"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        let currentUser = null;
-        let userData = null;
-        let userBalance = 0;
-        let selectedMarketForPlay = null;
-        let selectedDepositAmount = 0;
-        let currentBidRate = 10;
-        let refreshInterval = null;
-        let countdownInterval = null;
-        let secondsLeft = 30;
-        let isFirstDeposit = true;
-        let markets = [];
+    let currentUser = null;
+    let userData = null;
+    let userBalance = 0;
+    let selectedMarketForPlay = null;
+    let selectedDepositAmount = 0;
+    let currentBidRate = 10;
+    let refreshInterval = null;
+    let countdownInterval = null;
+    let secondsLeft = 30;
+    let isFirstDeposit = true;
+    let markets = [];
 
-        const bidRates = {
-            single: 10,
-            jodi: 100,
-            singlePanel: 160,
-            doublePanel: 320,
-            triplePanel: 1000,
-            sangam: 10000
-        };
+    const bidRates = {
+        single: 10,
+        jodi: 100,
+        singlePanel: 160,
+        doublePanel: 320,
+        triplePanel: 1000,
+        sangam: 10000
+    };
 
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                window.location.href = 'index.html';
-                return;
-            }
-            currentUser = user;
-            await loadUserData();
-            await checkFirstDeposit();
-            await loadMarketsFromFirebase();
-            await loadSettings();
+    onAuthStateChanged(auth, async (user) => {
+        if (!user) {
+            window.location.href = 'index.html';
+            return;
+        }
+        currentUser = user;
+        console.log("User logged in:", currentUser.uid);
+        await loadUserData();
+        await checkFirstDeposit();
+        await loadSettings();
+        await setupMarketsListener(); // Setup real-time listener
+        updateBalanceDisplay();
+        startAutoRefresh();
+    });
+
+    async function loadUserData() {
+        const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+        if (userDoc.exists()) {
+            userData = userDoc.data();
+            userBalance = userData.balance || 0;
+            document.getElementById('userDetails').innerHTML = `
+                <h3>${userData.name}</h3>
+                <p>📱 ${userData.mobile}</p>
+            `;
+            document.getElementById('avatar').textContent = userData.name.charAt(0).toUpperCase();
             updateBalanceDisplay();
-            startAutoRefresh();
-        });
+        } else {
+            console.log("User document not found");
+        }
+    }
 
-        async function loadUserData() {
-            const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-            if (userDoc.exists()) {
-                userData = userDoc.data();
-                userBalance = userData.balance || 0;
-                document.getElementById('userDetails').innerHTML = `
-                    <h3>${userData.name}</h3>
-                    <p>📱 ${userData.mobile}</p>
-                `;
-                document.getElementById('avatar').textContent = userData.name.charAt(0).toUpperCase();
-                updateBalanceDisplay();
+    async function checkFirstDeposit() {
+        const depositQuery = await getDocs(query(collection(db, 'depositRequests'), where('userId', '==', currentUser.uid)));
+        isFirstDeposit = depositQuery.empty;
+    }
+
+    async function loadSettings() {
+        const settingsDoc = await getDoc(doc(db, 'settings', 'app'));
+        if (settingsDoc.exists()) {
+            const settings = settingsDoc.data();
+            if (settings.qrUrl) {
+                document.getElementById('qrImage').src = settings.qrUrl;
+            }
+            if (settings.upiId) {
+                document.getElementById('upiIdDisplay').innerText = settings.upiId;
             }
         }
+    }
 
-        async function checkFirstDeposit() {
-            const depositQuery = await getDocs(query(collection(db, 'depositRequests'), where('userId', '==', currentUser.uid)));
-            isFirstDeposit = depositQuery.empty;
-        }
-
-        async function loadSettings() {
-            const settingsDoc = await getDoc(doc(db, 'settings', 'app'));
-            if (settingsDoc.exists()) {
-                const settings = settingsDoc.data();
-                if (settings.qrUrl) {
-                    document.getElementById('qrImage').src = settings.qrUrl;
-                }
-                if (settings.upiId) {
-                    document.getElementById('upiIdDisplay').innerText = settings.upiId;
-                }
-            }
-        }
-
-        async function loadMarketsFromFirebase() {
-            const marketsSnapshot = await getDocs(query(collection(db, 'markets'), orderBy('order')));
+    // Setup real-time listener for markets
+    function setupMarketsListener() {
+        const q = query(collection(db, 'markets'), orderBy('order'));
+        
+        onSnapshot(q, (snapshot) => {
+            console.log("Markets updated, count:", snapshot.size);
+            markets = [];
             
-            if (marketsSnapshot.empty) {
-                const defaultMarkets = [
-                    { name: "Mumbai", timing: "12:30pm - 01:20pm", result: "123-61-560", order: 1 },
-                    { name: "Delhi", timing: "01:30pm - 02:20pm", result: "456-78-234", order: 2 },
-                    { name: "Kolkata", timing: "02:30pm - 03:20pm", result: "789-90-567", order: 3 },
-                    { name: "Bangalore", timing: "03:30pm - 04:20pm", result: "234-45-890", order: 4 },
-                    { name: "Chennai", timing: "04:30pm - 05:20pm", result: "567-12-345", order: 5 },
-                    { name: "Hyderabad", timing: "05:30pm - 06:20pm", result: "890-34-678", order: 6 },
-                    { name: "Ahmedabad", timing: "06:30pm - 07:20pm", result: "345-67-901", order: 7 },
-                    { name: "Pune", timing: "07:30pm - 08:20pm", result: "678-89-432", order: 8 },
-                    { name: "Jaipur", timing: "08:30pm - 09:20pm", result: "901-23-765", order: 9 }
-                ];
-                
-                for (const market of defaultMarkets) {
-                    await setDoc(doc(db, 'markets', market.name), market);
-                }
-                markets = defaultMarkets;
+            if (snapshot.empty) {
+                console.log("No markets found, creating default markets...");
+                createDefaultMarkets();
             } else {
-                markets = [];
-                marketsSnapshot.forEach(doc => {
-                    markets.push(doc.data());
+                snapshot.forEach(doc => {
+                    markets.push({ id: doc.id, ...doc.data() });
                 });
                 markets.sort((a, b) => (a.order || 0) - (b.order || 0));
+                displayMarkets();
             }
-            
-            displayMarkets();
-            
-            onSnapshot(query(collection(db, 'markets'), orderBy('order')), (snapshot) => {
+        }, (error) => {
+            console.error("Error loading markets:", error);
+        });
+    }
+
+    async function createDefaultMarkets() {
+        const defaultMarkets = [
+            { name: "Mumbai", timing: "12:30pm - 01:20pm", result: "123-61-560", order: 1 },
+            { name: "Delhi", timing: "01:30pm - 02:20pm", result: "456-78-234", order: 2 },
+            { name: "Kolkata", timing: "02:30pm - 03:20pm", result: "789-90-567", order: 3 },
+            { name: "Bangalore", timing: "03:30pm - 04:20pm", result: "234-45-890", order: 4 },
+            { name: "Chennai", timing: "04:30pm - 05:20pm", result: "567-12-345", order: 5 },
+            { name: "Hyderabad", timing: "05:30pm - 06:20pm", result: "890-34-678", order: 6 },
+            { name: "Ahmedabad", timing: "06:30pm - 07:20pm", result: "345-67-901", order: 7 },
+            { name: "Pune", timing: "07:30pm - 08:20pm", result: "678-89-432", order: 8 },
+            { name: "Jaipur", timing: "08:30pm - 09:20pm", result: "901-23-765", order: 9 }
+        ];
+        
+        for (const market of defaultMarkets) {
+            await setDoc(doc(db, 'markets', market.name), market);
+        }
+        console.log("Default markets created");
+    }
+
+    function displayMarkets() {
+        const list = document.getElementById('marketsList');
+        if (!list) {
+            console.error("marketsList element not found");
+            return;
+        }
+        
+        if (!markets || markets.length === 0) {
+            console.log("No markets to display");
+            list.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Loading markets...</div>';
+            return;
+        }
+        
+        console.log("Displaying", markets.length, "markets");
+        list.innerHTML = markets.map(market => `
+            <div class="market-item">
+                <div class="market-info">
+                    <div class="market-name">${market.name || 'N/A'}</div>
+                    <div class="market-timing">⏰ ${market.timing || 'N/A'}</div>
+                    <div class="market-result">Result: ${market.result || 'N/A'}</div>
+                </div>
+                <button class="play-btn" onclick="openPlayModal('${market.name}')">Play</button>
+            </div>
+        `).join('');
+    }
+
+    function startAutoRefresh() {
+        if (refreshInterval) clearInterval(refreshInterval);
+        if (countdownInterval) clearInterval(countdownInterval);
+        
+        secondsLeft = 30;
+        updateTimerDisplay();
+        
+        countdownInterval = setInterval(() => {
+            secondsLeft--;
+            updateTimerDisplay();
+            if (secondsLeft <= 0) {
+                secondsLeft = 30;
+            }
+        }, 1000);
+        
+        // Refresh markets by re-triggering the listener (already real-time, but this forces UI update)
+        refreshInterval = setInterval(() => {
+            console.log("Manual refresh triggered");
+            const q = query(collection(db, 'markets'), orderBy('order'));
+            getDocs(q).then((snapshot) => {
                 markets = [];
                 snapshot.forEach(doc => {
-                    markets.push(doc.data());
+                    markets.push({ id: doc.id, ...doc.data() });
                 });
                 markets.sort((a, b) => (a.order || 0) - (b.order || 0));
                 displayMarkets();
             });
+        }, 30000);
+    }
+    
+    function updateTimerDisplay() {
+        const timerElement = document.getElementById('refreshTimer');
+        if (timerElement) {
+            timerElement.innerHTML = `🔄 Auto refreshes in ${secondsLeft}s...`;
         }
+    }
 
-        function displayMarkets() {
-            const list = document.getElementById('marketsList');
-            if (!list) return;
-            
-            if (markets.length === 0) {
-                list.innerHTML = '<div style="text-align: center; padding: 20px;">No markets available</div>';
-                return;
-            }
-            
-            list.innerHTML = markets.map(market => `
-                <div class="market-item">
-                    <div class="market-info">
-                        <div class="market-name">${market.name || 'N/A'}</div>
-                        <div class="market-timing">⏰ ${market.timing || 'N/A'}</div>
-                        <div class="market-result">Result: ${market.result || 'N/A'}</div>
-                    </div>
-                    <button class="play-btn" onclick="openPlayModal('${market.name}')">Play</button>
-                </div>
-            `).join('');
-        }
+    window.copyUpiId = function() {
+        const upiId = document.getElementById('upiIdDisplay').innerText;
+        navigator.clipboard.writeText(upiId);
+        alert("UPI ID copied: " + upiId);
+    };
 
-        function startAutoRefresh() {
-            if (refreshInterval) clearInterval(refreshInterval);
-            if (countdownInterval) clearInterval(countdownInterval);
-            
-            secondsLeft = 30;
-            updateTimerDisplay();
-            
-            countdownInterval = setInterval(() => {
-                secondsLeft--;
-                updateTimerDisplay();
-                if (secondsLeft <= 0) {
-                    secondsLeft = 30;
-                }
-            }, 1000);
-            
-            refreshInterval = setInterval(() => {
-                loadMarketsFromFirebase();
-            }, 30000);
+    window.selectAmount = function(amount) {
+        document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
+        event.target.classList.add('selected');
+        selectedDepositAmount = amount;
+        document.getElementById('customAmount').value = '';
+    };
+
+    window.proceedToPayment = function() {
+        const customAmount = parseInt(document.getElementById('customAmount').value);
+        if (customAmount >= 500 && customAmount <= 5000) {
+            selectedDepositAmount = customAmount;
         }
         
-        function updateTimerDisplay() {
-            const timerElement = document.getElementById('refreshTimer');
-            if (timerElement) {
-                timerElement.innerHTML = `🔄 Auto refreshes in ${secondsLeft}s...`;
-            }
+        if (!selectedDepositAmount || selectedDepositAmount < 500 || selectedDepositAmount > 5000) {
+            alert('Please select amount between ₹500 and ₹5000');
+            return;
         }
+        
+        document.getElementById('displayAmount').innerText = selectedDepositAmount;
+        document.getElementById('qrSection').style.display = 'block';
+        document.getElementById('proceedBtn').style.display = 'none';
+    };
 
-        window.copyUpiId = function() {
-            const upiId = document.getElementById('upiIdDisplay').innerText;
-            navigator.clipboard.writeText(upiId);
-            alert("UPI ID copied: " + upiId);
-        };
+    window.confirmPayment = async function() {
+        let bonusAmount = 0;
+        let bonusText = "";
+        
+        if (isFirstDeposit) {
+            bonusAmount = selectedDepositAmount * 0.3;
+            bonusText = `\n🎉 First deposit bonus: ₹${bonusAmount} will be added after verification!`;
+        }
+        
+        alert(`Payment confirmation sent to admin. Your balance will be updated after manual verification.${bonusText}`);
+        closeDepositModal();
+        
+        await addDoc(collection(db, 'depositRequests'), {
+            userId: currentUser.uid,
+            userMobile: userData?.mobile,
+            userName: userData?.name,
+            amount: selectedDepositAmount,
+            bonusAmount: bonusAmount,
+            isFirstDeposit: isFirstDeposit,
+            status: 'pending',
+            date: new Date().toISOString()
+        });
+        
+        selectedDepositAmount = 0;
+        document.getElementById('qrSection').style.display = 'none';
+        document.getElementById('proceedBtn').style.display = 'block';
+        document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
+    };
 
-        window.selectAmount = function(amount) {
-            document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
-            event.target.classList.add('selected');
-            selectedDepositAmount = amount;
-            document.getElementById('customAmount').value = '';
-        };
+    window.openPlayModal = function(marketName) {
+        if (userBalance <= 0) {
+            document.getElementById('insufficientModal').style.display = 'flex';
+            return;
+        }
+        selectedMarketForPlay = marketName;
+        document.getElementById('selectedMarket').innerHTML = `Market: <strong>${marketName}</strong>`;
+        document.getElementById('playModal').style.display = 'flex';
+    };
 
-        window.proceedToPayment = function() {
-            const customAmount = parseInt(document.getElementById('customAmount').value);
-            if (customAmount >= 500 && customAmount <= 5000) {
-                selectedDepositAmount = customAmount;
-            }
-            
-            if (!selectedDepositAmount || selectedDepositAmount < 500 || selectedDepositAmount > 5000) {
-                alert('Please select amount between ₹500 and ₹5000');
-                return;
-            }
-            
-            document.getElementById('displayAmount').innerText = selectedDepositAmount;
-            document.getElementById('qrSection').style.display = 'block';
-            document.getElementById('proceedBtn').style.display = 'none';
-        };
+    window.updateBidRate = function() {
+        const bidType = document.getElementById('bidType').value;
+        currentBidRate = bidRates[bidType];
+        document.getElementById('winningRate').innerHTML = `Winning rate: 1-${currentBidRate}`;
+    };
 
-        window.confirmPayment = async function() {
-            let bonusAmount = 0;
-            let bonusText = "";
-            
-            if (isFirstDeposit) {
-                bonusAmount = selectedDepositAmount * 0.3;
-                bonusText = `\n🎉 First deposit bonus: ₹${bonusAmount} will be added after verification!`;
-            }
-            
-            alert(`Payment confirmation sent to admin. Your balance will be updated after manual verification.${bonusText}`);
-            closeDepositModal();
-            
-            await addDoc(collection(db, 'depositRequests'), {
-                userId: currentUser.uid,
-                userMobile: userData?.mobile,
-                userName: userData?.name,
-                amount: selectedDepositAmount,
-                bonusAmount: bonusAmount,
-                isFirstDeposit: isFirstDeposit,
-                status: 'pending',
-                date: new Date().toISOString()
-            });
-            
-            selectedDepositAmount = 0;
-            document.getElementById('qrSection').style.display = 'none';
-            document.getElementById('proceedBtn').style.display = 'block';
-            document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
-        };
-
-        window.openPlayModal = function(marketName) {
-            if (userBalance <= 0) {
-                document.getElementById('insufficientModal').style.display = 'flex';
-                return;
-            }
-            selectedMarketForPlay = marketName;
-            document.getElementById('selectedMarket').innerHTML = `Market: <strong>${marketName}</strong>`;
-            document.getElementById('playModal').style.display = 'flex';
-        };
-
-        window.updateBidRate = function() {
-            const bidType = document.getElementById('bidType').value;
-            currentBidRate = bidRates[bidType];
-            document.getElementById('winningRate').innerHTML = `Winning rate: 1-${currentBidRate}`;
-        };
-
-        window.submitBid = async function() {
-            const bidType = document.getElementById('bidType').value;
-            const amount = document.getElementById('bidAmount').value;
-            const number = document.getElementById('bidNumber').value;
-            
-            if (!amount || !number) {
-                alert('Please fill all fields');
-                return;
-            }
-            
-            if (parseFloat(amount) > userBalance) {
-                alert('Insufficient balance!');
-                closePlayModal();
-                document.getElementById('insufficientModal').style.display = 'flex';
-                return;
-            }
-            
-            const newBalance = userBalance - parseFloat(amount);
-            await updateDoc(doc(db, 'users', currentUser.uid), {
-                balance: newBalance
-            });
-            userBalance = newBalance;
-            updateBalanceDisplay();
-            
-            await addDoc(collection(db, 'bids'), {
-                userId: currentUser.uid,
-                market: selectedMarketForPlay,
-                bidType: bidType,
-                amount: parseFloat(amount),
-                number: number,
-                rate: currentBidRate,
-                status: 'pending',
-                date: new Date().toISOString()
-            });
-            
-            alert(`Bid placed successfully!\nMarket: ${selectedMarketForPlay}\nType: ${bidType}\nAmount: ₹${amount}\nNumber: ${number}`);
+    window.submitBid = async function() {
+        const bidType = document.getElementById('bidType').value;
+        const amount = document.getElementById('bidAmount').value;
+        const number = document.getElementById('bidNumber').value;
+        
+        if (!amount || !number) {
+            alert('Please fill all fields');
+            return;
+        }
+        
+        if (parseFloat(amount) > userBalance) {
+            alert('Insufficient balance!');
             closePlayModal();
-            document.getElementById('bidAmount').value = '';
-            document.getElementById('bidNumber').value = '';
-        };
+            document.getElementById('insufficientModal').style.display = 'flex';
+            return;
+        }
+        
+        const newBalance = userBalance - parseFloat(amount);
+        await updateDoc(doc(db, 'users', currentUser.uid), {
+            balance: newBalance
+        });
+        userBalance = newBalance;
+        updateBalanceDisplay();
+        
+        await addDoc(collection(db, 'bids'), {
+            userId: currentUser.uid,
+            market: selectedMarketForPlay,
+            bidType: bidType,
+            amount: parseFloat(amount),
+            number: number,
+            rate: currentBidRate,
+            status: 'pending',
+            date: new Date().toISOString()
+        });
+        
+        alert(`Bid placed successfully!\nMarket: ${selectedMarketForPlay}\nType: ${bidType}\nAmount: ₹${amount}\nNumber: ${number}`);
+        closePlayModal();
+        document.getElementById('bidAmount').value = '';
+        document.getElementById('bidNumber').value = '';
+    };
 
-        window.checkBalanceBeforeWithdraw = function() {
-            if (userBalance <= 0) {
-                document.getElementById('insufficientModal').style.display = 'flex';
-            } else {
-                showWithdrawModal();
-            }
-        };
+    window.checkBalanceBeforeWithdraw = function() {
+        if (userBalance <= 0) {
+            document.getElementById('insufficientModal').style.display = 'flex';
+        } else {
+            showWithdrawModal();
+        }
+    };
 
-        window.toggleMenu = function() {
-            const menu = document.getElementById('sideMenu');
-            const overlay = document.getElementById('overlay');
-            menu.classList.toggle('open');
-            overlay.classList.toggle('show');
-        };
+    window.toggleMenu = function() {
+        const menu = document.getElementById('sideMenu');
+        const overlay = document.getElementById('overlay');
+        menu.classList.toggle('open');
+        overlay.classList.toggle('show');
+    };
 
-        window.showGameRates = function() {
-            toggleMenu();
-            document.getElementById('ratesModal').style.display = 'flex';
-        };
+    window.showGameRates = function() {
+        toggleMenu();
+        document.getElementById('ratesModal').style.display = 'flex';
+    };
 
-        window.showProfile = function() {
-            toggleMenu();
-            const profileInfo = document.getElementById('profileInfo');
-            profileInfo.innerHTML = `
-                <p><strong>Name:</strong> ${userData?.name || 'N/A'}</p>
-                <p><strong>Mobile:</strong> ${userData?.mobile || 'N/A'}</p>
-                <p><strong>Email:</strong> ${currentUser?.email || 'N/A'}</p>
-                <p><strong>Balance:</strong> ₹${userBalance}</p>
-                <p><strong>Member since:</strong> ${new Date(userData?.createdAt).toLocaleDateString() || 'N/A'}</p>
-            `;
-            document.getElementById('profileModal').style.display = 'flex';
-        };
+    window.showProfile = function() {
+        toggleMenu();
+        const profileInfo = document.getElementById('profileInfo');
+        profileInfo.innerHTML = `
+            <p><strong>Name:</strong> ${userData?.name || 'N/A'}</p>
+            <p><strong>Mobile:</strong> ${userData?.mobile || 'N/A'}</p>
+            <p><strong>Email:</strong> ${currentUser?.email || 'N/A'}</p>
+            <p><strong>Balance:</strong> ₹${userBalance}</p>
+            <p><strong>Member since:</strong> ${new Date(userData?.createdAt).toLocaleDateString() || 'N/A'}</p>
+        `;
+        document.getElementById('profileModal').style.display = 'flex';
+    };
 
-        window.logout = async function() {
-            if (refreshInterval) clearInterval(refreshInterval);
-            if (countdownInterval) clearInterval(countdownInterval);
-            await signOut(auth);
-            window.location.href = 'index.html';
-        };
+    window.logout = async function() {
+        if (refreshInterval) clearInterval(refreshInterval);
+        if (countdownInterval) clearInterval(countdownInterval);
+        await signOut(auth);
+        window.location.href = 'index.html';
+    };
 
-        window.showDepositModal = function() {
-            document.getElementById('depositModal').style.display = 'flex';
-        };
+    window.showDepositModal = function() {
+        document.getElementById('depositModal').style.display = 'flex';
+    };
 
-        window.closeDepositModal = function() {
-            document.getElementById('depositModal').style.display = 'none';
-            document.getElementById('qrSection').style.display = 'none';
-            document.getElementById('proceedBtn').style.display = 'block';
-            document.getElementById('customAmount').value = '';
-            selectedDepositAmount = 0;
-            document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
-        };
+    window.closeDepositModal = function() {
+        document.getElementById('depositModal').style.display = 'none';
+        document.getElementById('qrSection').style.display = 'none';
+        document.getElementById('proceedBtn').style.display = 'block';
+        document.getElementById('customAmount').value = '';
+        selectedDepositAmount = 0;
+        document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
+    };
 
-        window.showWithdrawModal = function() {
-            document.getElementById('withdrawModal').style.display = 'flex';
-        };
+    window.showWithdrawModal = function() {
+        document.getElementById('withdrawModal').style.display = 'flex';
+    };
 
-        window.closeWithdrawModal = function() {
-            document.getElementById('withdrawModal').style.display = 'none';
-            document.getElementById('withdrawAmount').value = '';
-            document.getElementById('withdrawAccount').value = '';
-        };
+    window.closeWithdrawModal = function() {
+        document.getElementById('withdrawModal').style.display = 'none';
+        document.getElementById('withdrawAmount').value = '';
+        document.getElementById('withdrawAccount').value = '';
+    };
 
-        window.processWithdraw = async function() {
-            const amount = document.getElementById('withdrawAmount').value;
-            const account = document.getElementById('withdrawAccount').value;
-            
-            if (!amount || !account) {
-                alert('Please fill all fields');
-                return;
-            }
-            
-            if (parseFloat(amount) > userBalance) {
-                alert('Insufficient balance!');
-                closeWithdrawModal();
-                return;
-            }
-            
-            await addDoc(collection(db, 'transactions'), {
-                userId: currentUser.uid,
-                type: 'withdrawal',
-                amount: parseFloat(amount),
-                accountDetails: account,
-                status: 'pending',
-                date: new Date().toISOString()
-            });
-            
-            alert(`Withdrawal request of ₹${amount} submitted! Will be processed within 24 hours.`);
+    window.processWithdraw = async function() {
+        const amount = document.getElementById('withdrawAmount').value;
+        const account = document.getElementById('withdrawAccount').value;
+        
+        if (!amount || !account) {
+            alert('Please fill all fields');
+            return;
+        }
+        
+        if (parseFloat(amount) > userBalance) {
+            alert('Insufficient balance!');
             closeWithdrawModal();
-        };
+            return;
+        }
+        
+        await addDoc(collection(db, 'transactions'), {
+            userId: currentUser.uid,
+            type: 'withdrawal',
+            amount: parseFloat(amount),
+            accountDetails: account,
+            status: 'pending',
+            date: new Date().toISOString()
+        });
+        
+        alert(`Withdrawal request of ₹${amount} submitted! Will be processed within 24 hours.`);
+        closeWithdrawModal();
+    };
 
-        window.showHome = function() {
-            window.location.reload();
-        };
+    window.showHome = function() {
+        window.location.reload();
+    };
 
-        window.showBidHistory = async function() {
-            document.getElementById('bidHistoryModal').style.display = 'flex';
-        };
+    window.showBidHistory = async function() {
+        document.getElementById('bidHistoryModal').style.display = 'flex';
+    };
 
-        window.showPassbook = async function() {
-            document.getElementById('passbookModal').style.display = 'flex';
-        };
+    window.showPassbook = async function() {
+        document.getElementById('passbookModal').style.display = 'flex';
+    };
 
-        window.showSupport = function() {
-            document.getElementById('supportModal').style.display = 'flex';
-        };
+    window.showSupport = function() {
+        document.getElementById('supportModal').style.display = 'flex';
+    };
 
-        window.closeInsufficientModal = function() {
-            document.getElementById('insufficientModal').style.display = 'none';
-        };
+    window.closeInsufficientModal = function() {
+        document.getElementById('insufficientModal').style.display = 'none';
+    };
 
-        window.closePlayModal = function() {
-            document.getElementById('playModal').style.display = 'none';
-        };
+    window.closePlayModal = function() {
+        document.getElementById('playModal').style.display = 'none';
+    };
 
-        window.closeRatesModal = function() {
-            document.getElementById('ratesModal').style.display = 'none';
-        };
+    window.closeRatesModal = function() {
+        document.getElementById('ratesModal').style.display = 'none';
+    };
 
-        window.closeProfileModal = function() {
-            document.getElementById('profileModal').style.display = 'none';
-        };
+    window.closeProfileModal = function() {
+        document.getElementById('profileModal').style.display = 'none';
+    };
 
-        window.closeBidHistoryModal = function() {
-            document.getElementById('bidHistoryModal').style.display = 'none';
-        };
+    window.closeBidHistoryModal = function() {
+        document.getElementById('bidHistoryModal').style.display = 'none';
+    };
 
-        window.closePassbookModal = function() {
-            document.getElementById('passbookModal').style.display = 'none';
-        };
+    window.closePassbookModal = function() {
+        document.getElementById('passbookModal').style.display = 'none';
+    };
 
-        window.closeSupportModal = function() {
-            document.getElementById('supportModal').style.display = 'none';
-        };
+    window.closeSupportModal = function() {
+        document.getElementById('supportModal').style.display = 'none';
+    };
 
-        window.onclick = function(event) {
-            const modals = ['depositModal', 'withdrawModal', 'ratesModal', 'profileModal', 'bidHistoryModal', 'passbookModal', 'supportModal', 'insufficientModal', 'playModal'];
-            modals.forEach(modalId => {
-                const modal = document.getElementById(modalId);
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-        };
-    </script>
-</body>
-</html>
+    window.onclick = function(event) {
+        const modals = ['depositModal', 'withdrawModal', 'ratesModal', 'profileModal', 'bidHistoryModal', 'passbookModal', 'supportModal', 'insufficientModal', 'playModal'];
+        modals.forEach(modalId => {
+            const modal = document.getElementById(modalId);
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        });
+    };
+    
+    function updateBalanceDisplay() {
+        const balanceEl = document.getElementById('balanceDisplay');
+        if (balanceEl) {
+            balanceEl.innerHTML = `💰 Balance: ₹${userBalance}`;
+        }
+    }
+</script>
