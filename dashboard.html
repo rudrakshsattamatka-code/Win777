@@ -20,7 +20,6 @@
             overflow-x: hidden;
         }
 
-        /* Animated Background */
         .bg-animation {
             position: fixed;
             top: 0;
@@ -39,22 +38,10 @@
         }
 
         @keyframes floatParticle {
-            0%, 100% {
-                transform: translateY(0) translateX(0) rotate(0deg);
-                opacity: 0.3;
-            }
-            25% {
-                transform: translateY(-50px) translateX(30px) rotate(90deg);
-                opacity: 0.6;
-            }
-            50% {
-                transform: translateY(50px) translateX(-30px) rotate(180deg);
-                opacity: 0.4;
-            }
-            75% {
-                transform: translateY(-30px) translateX(-40px) rotate(270deg);
-                opacity: 0.7;
-            }
+            0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0.3; }
+            25% { transform: translateY(-50px) translateX(30px) rotate(90deg); opacity: 0.6; }
+            50% { transform: translateY(50px) translateX(-30px) rotate(180deg); opacity: 0.4; }
+            75% { transform: translateY(-30px) translateX(-40px) rotate(270deg); opacity: 0.7; }
         }
 
         .wave {
@@ -63,22 +50,13 @@
             left: 0;
             width: 100%;
             height: 100px;
-            background: repeating-linear-gradient(
-                transparent,
-                transparent 49px,
-                rgba(255, 0, 0, 0.05) 49px,
-                rgba(255, 0, 0, 0.08) 50px
-            );
+            background: repeating-linear-gradient(transparent, transparent 49px, rgba(255,0,0,0.05) 49px, rgba(255,0,0,0.08) 50px);
             animation: waveMove 4s linear infinite;
         }
 
         @keyframes waveMove {
-            0% {
-                background-position: 0 0;
-            }
-            100% {
-                background-position: 100px 0;
-            }
+            0% { background-position: 0 0; }
+            100% { background-position: 100px 0; }
         }
 
         .glow {
@@ -92,17 +70,10 @@
         }
 
         @keyframes glowPulse {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 0.3;
-            }
-            50% {
-                transform: scale(1.3);
-                opacity: 0.6;
-            }
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.3); opacity: 0.6; }
         }
 
-        /* Header */
         .header {
             background: white;
             padding: 15px 20px;
@@ -133,7 +104,6 @@
             font-size: 14px;
         }
 
-        /* 3-Line Menu Button */
         .menu-btn {
             background: none;
             border: none;
@@ -143,7 +113,6 @@
             padding: 8px;
         }
 
-        /* Side Menu */
         .side-menu {
             position: fixed;
             top: 0;
@@ -197,7 +166,6 @@
             display: block;
         }
 
-        /* Main Container */
         .container {
             max-width: 600px;
             margin: 0 auto;
@@ -206,7 +174,6 @@
             z-index: 2;
         }
 
-        /* User Profile Card */
         .profile-card {
             background: #f8f9fa;
             padding: 20px;
@@ -240,7 +207,6 @@
             font-size: 14px;
         }
 
-        /* Sliding Message */
         .sliding-message {
             background: #ff0000;
             color: white;
@@ -259,15 +225,10 @@
         }
 
         @keyframes slide {
-            0% {
-                transform: translateX(100%);
-            }
-            100% {
-                transform: translateX(-100%);
-            }
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
         }
 
-        /* Offer Banner */
         .offer-banner {
             background: linear-gradient(135deg, #ff0000, #ff6600);
             color: white;
@@ -284,7 +245,6 @@
             50% { transform: scale(1.02); }
         }
 
-        /* Action Buttons */
         .action-buttons {
             display: flex;
             gap: 15px;
@@ -316,7 +276,6 @@
             transform: scale(0.98);
         }
 
-        /* Markets Section - Vertical Layout */
         .markets-section {
             margin-bottom: 30px;
         }
@@ -342,7 +301,6 @@
             justify-content: space-between;
             align-items: center;
             border: 1px solid #e0e0e0;
-            transition: all 0.2s;
         }
 
         .market-info {
@@ -376,14 +334,8 @@
             border-radius: 25px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
         }
 
-        .play-btn:active {
-            transform: scale(0.95);
-        }
-
-        /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -400,11 +352,6 @@
         .nav-item {
             text-align: center;
             cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .nav-item:active {
-            transform: scale(0.95);
         }
 
         .nav-icon {
@@ -423,7 +370,6 @@
             font-weight: 500;
         }
 
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -479,7 +425,7 @@
             cursor: pointer;
             color: #999;
         }
-        /* Amount Selector */
+
         .amount-selector {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -494,7 +440,6 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
-            transition: all 0.2s;
         }
 
         .amount-option.selected {
@@ -502,16 +447,6 @@
             color: white;
         }
 
-        .amount-option:hover {
-            background: #ff6666;
-            color: white;
-        }
-
-        .custom-amount {
-            margin-top: 10px;
-        }
-
-        /* QR Code Section */
         .qr-section {
             text-align: center;
             margin: 20px 0;
@@ -521,9 +456,6 @@
             width: 200px;
             height: 200px;
             margin: 10px auto;
-            border-radius: 12px;
-            background: white;
-            padding: 10px;
         }
 
         .qr-image img {
@@ -543,12 +475,6 @@
             gap: 10px;
         }
 
-        .upi-id-text {
-            font-weight: bold;
-            color: #ff0000;
-            word-break: break-all;
-        }
-
         .copy-btn {
             background: #0066ff;
             color: white;
@@ -560,21 +486,6 @@
             margin: 0;
         }
 
-        .copy-btn:active {
-            transform: scale(0.95);
-        }
-
-        .offer-text {
-            background: #ffffcc;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            margin: 15px 0;
-            color: #ff6600;
-            font-weight: bold;
-        }
-
-        /* Game Rates Grid */
         .rates-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -601,7 +512,6 @@
             font-weight: bold;
         }
 
-        /* Disclaimer */
         .disclaimer {
             margin-top: 30px;
             padding: 15px;
@@ -619,50 +529,36 @@
             text-align: right;
             margin-bottom: 10px;
         }
-
-        .paid-note {
-            font-size: 11px;
-            color: #666;
-            text-align: center;
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
 
-    <!-- Animated Background -->
     <div class="bg-animation">
-        <div class="particle" style="width: 100px; height: 100px; top: 10%; left: 5%; animation-duration: 12s;"></div>
-        <div class="particle" style="width: 60px; height: 60px; top: 70%; left: 85%; animation-duration: 18s;"></div>
-        <div class="particle" style="width: 150px; height: 150px; top: 40%; left: 15%; animation-duration: 14s;"></div>
-        <div class="particle" style="width: 80px; height: 80px; top: 80%; left: 20%; animation-duration: 16s;"></div>
-        <div class="particle" style="width: 120px; height: 120px; top: 20%; right: 10%; animation-duration: 20s;"></div>
+        <div class="particle" style="width: 100px; height: 100px; top: 10%; left: 5%;"></div>
+        <div class="particle" style="width: 60px; height: 60px; top: 70%; left: 85%;"></div>
+        <div class="particle" style="width: 150px; height: 150px; top: 40%; left: 15%;"></div>
+        <div class="particle" style="width: 80px; height: 80px; top: 80%; left: 20%;"></div>
         <div class="glow" style="top: 20%; left: -50px;"></div>
         <div class="glow" style="bottom: 10%; right: -50px;"></div>
         <div class="wave"></div>
-        <div class="wave" style="animation-delay: -2s; opacity: 0.5;"></div>
     </div>
 
-    <!-- Header -->
     <div class="header">
         <div class="logo">WIN777</div>
         <div class="balance-box" id="balanceDisplay">💰 Balance: ₹0</div>
         <button class="menu-btn" onclick="toggleMenu()">☰</button>
     </div>
 
-    <!-- Side Menu -->
-    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
     <div class="side-menu" id="sideMenu">
         <div class="close-menu" onclick="toggleMenu()">×</div>
         <div class="menu-item" onclick="showGameRates()">🎮 Game Rates</div>
         <div class="menu-item" onclick="showProfile()">👤 Profile</div>
         <div class="menu-item" onclick="logout()">🚪 Logout</div>
     </div>
+    <div class="overlay" id="overlay" onclick="toggleMenu()"></div>
 
-    <!-- Main Container -->
     <div class="container">
-        <!-- User Profile -->
-        <div class="profile-card" id="profileCard">
+        <div class="profile-card">
             <div class="avatar" id="avatar">U</div>
             <div class="user-details" id="userDetails">
                 <h3>Loading...</h3>
@@ -670,41 +566,35 @@
             </div>
         </div>
 
-        <!-- Offer Banner -->
         <div class="offer-banner">
             🎉 FIRST DEPOSIT BONUS: Get 30% EXTRA on your first deposit! 🎉
         </div>
 
-        <!-- Sliding Message -->
         <div class="sliding-message">
             <div class="sliding-text">
                 🚀 NEW: Deposit and withdrawal are now faster than ever! Complete in just 5 to 10 minutes! 🚀
             </div>
         </div>
 
-        <!-- Action Buttons -->
         <div class="action-buttons">
             <button class="action-btn deposit-btn" onclick="showDepositModal()">💰 Deposit</button>
             <button class="action-btn withdraw-btn" onclick="checkBalanceBeforeWithdraw()">💸 Withdrawal</button>
         </div>
 
-        <!-- Markets Section -->
         <div class="markets-section">
             <div class="section-title">📊 Live Markets</div>
             <div class="auto-refresh" id="refreshTimer">Auto refreshes in 30s...</div>
             <div class="markets-list" id="marketsList">
-                <!-- Markets will be loaded here -->
+                <div style="text-align: center; padding: 20px;">Loading markets...</div>
             </div>
         </div>
 
-        <!-- Disclaimer -->
         <div class="disclaimer">
             ⚠️ Disclaimer: This is a demo application. All transactions are for testing purposes.<br>
             Terms & Conditions apply. Please play responsibly. 18+ only.
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
     <div class="bottom-nav">
         <div class="nav-item" onclick="showBidHistory()">
             <div class="nav-icon">📋</div>
@@ -723,17 +613,16 @@
             <div class="nav-label">Support</div>
         </div>
     </div>
-<!-- Deposit Modal with QR Code -->
+<!-- Deposit Modal -->
 <div id="depositModal" class="modal">
     <div class="modal-content">
         <span class="close-modal" onclick="closeDepositModal()">&times;</span>
         <h3>Deposit Money</h3>
-        <div class="offer-text">
-            🎁 First Deposit: Get 30% extra!<br>
-            Min ₹500 | Max ₹5000
+        <div class="offer-text" style="background:#ffffcc; padding:10px; border-radius:8px; margin-bottom:15px; text-align:center;">
+            🎁 First Deposit: Get 30% extra!<br>Min ₹500 | Max ₹5000
         </div>
-        <p style="margin-bottom: 10px;">Select Amount (₹500 - ₹5000)</p>
-        <div class="amount-selector" id="amountSelector">
+        <p>Select Amount (₹500 - ₹5000)</p>
+        <div class="amount-selector">
             <div class="amount-option" onclick="selectAmount(500)">₹500</div>
             <div class="amount-option" onclick="selectAmount(1000)">₹1000</div>
             <div class="amount-option" onclick="selectAmount(1500)">₹1500</div>
@@ -741,27 +630,22 @@
             <div class="amount-option" onclick="selectAmount(3000)">₹3000</div>
             <div class="amount-option" onclick="selectAmount(5000)">₹5000</div>
         </div>
-        <div class="custom-amount">
-            <input type="number" id="customAmount" placeholder="Or enter custom amount (500-5000)">
-        </div>
-        <div id="qrSection" style="display: none;">
+        <input type="number" id="customAmount" placeholder="Or enter custom amount (500-5000)">
+        <div id="qrSection" style="display:none; margin-top:20px;">
             <div class="qr-section">
                 <p>Scan QR Code to Pay</p>
                 <div class="qr-image">
                     <img id="qrImage" src="https://i.imgur.com/14a2kJA.jpeg" alt="QR Code">
                 </div>
                 <div class="upi-id-container">
-                    <span class="upi-id-text"><strong>UPI ID:</strong> <span id="upiIdDisplay">win888@paytm</span></span>
+                    <span><strong>UPI ID:</strong> <span id="upiIdDisplay">win888@paytm</span></span>
                     <button class="copy-btn" onclick="copyUpiId()">📋 Copy</button>
                 </div>
                 <p><strong>Amount:</strong> ₹<span id="displayAmount">0</span></p>
             </div>
             <button onclick="confirmPayment()">✅ I have paid</button>
-            <div class="paid-note">
-                * After payment, click "I have paid". Admin will verify and update balance.
-            </div>
         </div>
-        <button id="proceedBtn" onclick="proceedToPayment()">Add Cash →</button>
+        <button id="proceedBtn" onclick="proceedToPayment()" style="margin-top:20px;">Add Cash →</button>
     </div>
 </div>
 
@@ -781,7 +665,7 @@
     <div class="modal-content">
         <span class="close-modal" onclick="closeInsufficientModal()">&times;</span>
         <h3>⚠️ Insufficient Balance</h3>
-        <p style="text-align: center; margin: 20px 0;">Please deposit and play</p>
+        <p style="text-align:center; margin:20px 0;">Please deposit and play</p>
         <button onclick="closeInsufficientModal(); showDepositModal()">💰 Deposit Now</button>
     </div>
 </div>
@@ -791,7 +675,7 @@
     <div class="modal-content">
         <span class="close-modal" onclick="closePlayModal()">&times;</span>
         <h3>Place Your Bid</h3>
-        <p id="selectedMarket" style="margin-bottom: 15px;"></p>
+        <p id="selectedMarket" style="margin-bottom:15px;"></p>
         <select id="bidType" onchange="updateBidRate()">
             <option value="single">Single (1-10)</option>
             <option value="jodi">Jodi (1-100)</option>
@@ -802,7 +686,7 @@
         </select>
         <input type="number" id="bidAmount" placeholder="Enter amount">
         <input type="text" id="bidNumber" placeholder="Enter your number">
-        <p id="winningRate" style="font-size: 12px; color: #ff0000; margin-top: 10px;">Winning rate: 1-10</p>
+        <p id="winningRate" style="font-size:12px; color:#ff0000; margin-top:10px;">Winning rate: 1-10</p>
         <button onclick="submitBid()">Submit Bid</button>
     </div>
 </div>
@@ -813,30 +697,12 @@
         <span class="close-modal" onclick="closeRatesModal()">&times;</span>
         <h3>Game Rates</h3>
         <div class="rates-grid">
-            <div class="rate-card">
-                <div class="rate-name">Single</div>
-                <div class="rate-value">1-10</div>
-            </div>
-            <div class="rate-card">
-                <div class="rate-name">Jodi</div>
-                <div class="rate-value">1-100</div>
-            </div>
-            <div class="rate-card">
-                <div class="rate-name">Single Pannel</div>
-                <div class="rate-value">1-160</div>
-            </div>
-            <div class="rate-card">
-                <div class="rate-name">Double Pannel</div>
-                <div class="rate-value">1-320</div>
-            </div>
-            <div class="rate-card">
-                <div class="rate-name">Tripple Pannel</div>
-                <div class="rate-value">1-1000</div>
-            </div>
-            <div class="rate-card">
-                <div class="rate-name">Sangam</div>
-                <div class="rate-value">1-10000</div>
-            </div>
+            <div class="rate-card"><div class="rate-name">Single</div><div class="rate-value">1-10</div></div>
+            <div class="rate-card"><div class="rate-name">Jodi</div><div class="rate-value">1-100</div></div>
+            <div class="rate-card"><div class="rate-name">Single Pannel</div><div class="rate-value">1-160</div></div>
+            <div class="rate-card"><div class="rate-name">Double Pannel</div><div class="rate-value">1-320</div></div>
+            <div class="rate-card"><div class="rate-name">Tripple Pannel</div><div class="rate-value">1-1000</div></div>
+            <div class="rate-card"><div class="rate-name">Sangam</div><div class="rate-value">1-10000</div></div>
         </div>
     </div>
 </div>
@@ -855,7 +721,7 @@
     <div class="modal-content">
         <span class="close-modal" onclick="closeBidHistoryModal()">&times;</span>
         <h3>Bid History</h3>
-        <div id="bidHistoryList" style="text-align: center; padding: 20px;">You have no data. Play and visit again!</div>
+        <div id="bidHistoryList" style="text-align:center; padding:20px;">You have no data. Play and visit again!</div>
     </div>
 </div>
 
@@ -864,7 +730,7 @@
     <div class="modal-content">
         <span class="close-modal" onclick="closePassbookModal()">&times;</span>
         <h3>Passbook</h3>
-        <div id="passbookList" style="text-align: center; padding: 20px;">You have no data. Play and visit again!</div>
+        <div id="passbookList" style="text-align:center; padding:20px;">You have no data. Play and visit again!</div>
     </div>
 </div>
 
@@ -904,19 +770,10 @@
     let selectedMarketForPlay = null;
     let selectedDepositAmount = 0;
     let currentBidRate = 10;
-    let refreshInterval = null;
-    let countdownInterval = null;
-    let secondsLeft = 30;
-    let isFirstDeposit = true;
     let markets = [];
 
     const bidRates = {
-        single: 10,
-        jodi: 100,
-        singlePanel: 160,
-        doublePanel: 320,
-        triplePanel: 1000,
-        sangam: 10000
+        single: 10, jodi: 100, singlePanel: 160, doublePanel: 320, triplePanel: 1000, sangam: 10000
     };
 
     onAuthStateChanged(auth, async (user) => {
@@ -925,11 +782,10 @@
             return;
         }
         currentUser = user;
-        console.log("User logged in:", currentUser.uid);
         await loadUserData();
-        await checkFirstDeposit();
+        await createDefaultMarketsIfEmpty();
+        setupMarketsListener();
         await loadSettings();
-        await setupMarketsListener(); // Setup real-time listener
         updateBalanceDisplay();
         startAutoRefresh();
     });
@@ -944,98 +800,73 @@
                 <p>📱 ${userData.mobile}</p>
             `;
             document.getElementById('avatar').textContent = userData.name.charAt(0).toUpperCase();
-            updateBalanceDisplay();
-        } else {
-            console.log("User document not found");
         }
     }
 
-    async function checkFirstDeposit() {
-        const depositQuery = await getDocs(query(collection(db, 'depositRequests'), where('userId', '==', currentUser.uid)));
-        isFirstDeposit = depositQuery.empty;
-    }
-
-    async function loadSettings() {
-        const settingsDoc = await getDoc(doc(db, 'settings', 'app'));
-        if (settingsDoc.exists()) {
-            const settings = settingsDoc.data();
-            if (settings.qrUrl) {
-                document.getElementById('qrImage').src = settings.qrUrl;
+    async function createDefaultMarketsIfEmpty() {
+        const snapshot = await getDocs(collection(db, 'markets'));
+        if (snapshot.empty) {
+            const defaultMarkets = [
+                { name: "Mumbai", timing: "12:30pm - 01:20pm", result: "123-61-560", order: 1 },
+                { name: "Delhi", timing: "01:30pm - 02:20pm", result: "456-78-234", order: 2 },
+                { name: "Kolkata", timing: "02:30pm - 03:20pm", result: "789-90-567", order: 3 },
+                { name: "Bangalore", timing: "03:30pm - 04:20pm", result: "234-45-890", order: 4 },
+                { name: "Chennai", timing: "04:30pm - 05:20pm", result: "567-12-345", order: 5 },
+                { name: "Hyderabad", timing: "05:30pm - 06:20pm", result: "890-34-678", order: 6 },
+                { name: "Ahmedabad", timing: "06:30pm - 07:20pm", result: "345-67-901", order: 7 },
+                { name: "Pune", timing: "07:30pm - 08:20pm", result: "678-89-432", order: 8 },
+                { name: "Jaipur", timing: "08:30pm - 09:20pm", result: "901-23-765", order: 9 }
+            ];
+            for (const market of defaultMarkets) {
+                await setDoc(doc(db, 'markets', market.name), market);
             }
-            if (settings.upiId) {
-                document.getElementById('upiIdDisplay').innerText = settings.upiId;
-            }
+            console.log("Default markets created");
         }
     }
 
-    // Setup real-time listener for markets
     function setupMarketsListener() {
         const q = query(collection(db, 'markets'), orderBy('order'));
-        
         onSnapshot(q, (snapshot) => {
-            console.log("Markets updated, count:", snapshot.size);
             markets = [];
-            
-            if (snapshot.empty) {
-                console.log("No markets found, creating default markets...");
-                createDefaultMarkets();
-            } else {
-                snapshot.forEach(doc => {
-                    markets.push({ id: doc.id, ...doc.data() });
-                });
-                markets.sort((a, b) => (a.order || 0) - (b.order || 0));
-                displayMarkets();
-            }
-        }, (error) => {
-            console.error("Error loading markets:", error);
+            snapshot.forEach(doc => {
+                markets.push({ id: doc.id, ...doc.data() });
+            });
+            displayMarkets();
         });
-    }
-
-    async function createDefaultMarkets() {
-        const defaultMarkets = [
-            { name: "Mumbai", timing: "12:30pm - 01:20pm", result: "123-61-560", order: 1 },
-            { name: "Delhi", timing: "01:30pm - 02:20pm", result: "456-78-234", order: 2 },
-            { name: "Kolkata", timing: "02:30pm - 03:20pm", result: "789-90-567", order: 3 },
-            { name: "Bangalore", timing: "03:30pm - 04:20pm", result: "234-45-890", order: 4 },
-            { name: "Chennai", timing: "04:30pm - 05:20pm", result: "567-12-345", order: 5 },
-            { name: "Hyderabad", timing: "05:30pm - 06:20pm", result: "890-34-678", order: 6 },
-            { name: "Ahmedabad", timing: "06:30pm - 07:20pm", result: "345-67-901", order: 7 },
-            { name: "Pune", timing: "07:30pm - 08:20pm", result: "678-89-432", order: 8 },
-            { name: "Jaipur", timing: "08:30pm - 09:20pm", result: "901-23-765", order: 9 }
-        ];
-        
-        for (const market of defaultMarkets) {
-            await setDoc(doc(db, 'markets', market.name), market);
-        }
-        console.log("Default markets created");
     }
 
     function displayMarkets() {
         const list = document.getElementById('marketsList');
-        if (!list) {
-            console.error("marketsList element not found");
+        if (!list) return;
+        
+        if (markets.length === 0) {
+            list.innerHTML = '<div style="text-align: center; padding: 20px;">No markets available</div>';
             return;
         }
         
-        if (!markets || markets.length === 0) {
-            console.log("No markets to display");
-            list.innerHTML = '<div style="text-align: center; padding: 20px; color: #999;">Loading markets...</div>';
-            return;
-        }
-        
-        console.log("Displaying", markets.length, "markets");
         list.innerHTML = markets.map(market => `
             <div class="market-item">
                 <div class="market-info">
-                    <div class="market-name">${market.name || 'N/A'}</div>
-                    <div class="market-timing">⏰ ${market.timing || 'N/A'}</div>
-                    <div class="market-result">Result: ${market.result || 'N/A'}</div>
+                    <div class="market-name">${market.name}</div>
+                    <div class="market-timing">⏰ ${market.timing}</div>
+                    <div class="market-result">Result: ${market.result}</div>
                 </div>
                 <button class="play-btn" onclick="openPlayModal('${market.name}')">Play</button>
             </div>
         `).join('');
     }
 
+    async function loadSettings() {
+        const settingsDoc = await getDoc(doc(db, 'settings', 'app'));
+        if (settingsDoc.exists()) {
+            const settings = settingsDoc.data();
+            if (settings.qrUrl) document.getElementById('qrImage').src = settings.qrUrl;
+            if (settings.upiId) document.getElementById('upiIdDisplay').innerText = settings.upiId;
+        }
+    }
+
+    let refreshInterval, countdownInterval, secondsLeft = 30;
+    
     function startAutoRefresh() {
         if (refreshInterval) clearInterval(refreshInterval);
         if (countdownInterval) clearInterval(countdownInterval);
@@ -1046,31 +877,26 @@
         countdownInterval = setInterval(() => {
             secondsLeft--;
             updateTimerDisplay();
-            if (secondsLeft <= 0) {
-                secondsLeft = 30;
-            }
+            if (secondsLeft <= 0) secondsLeft = 30;
         }, 1000);
         
-        // Refresh markets by re-triggering the listener (already real-time, but this forces UI update)
         refreshInterval = setInterval(() => {
-            console.log("Manual refresh triggered");
             const q = query(collection(db, 'markets'), orderBy('order'));
-            getDocs(q).then((snapshot) => {
+            getDocs(q).then(snapshot => {
                 markets = [];
-                snapshot.forEach(doc => {
-                    markets.push({ id: doc.id, ...doc.data() });
-                });
-                markets.sort((a, b) => (a.order || 0) - (b.order || 0));
+                snapshot.forEach(doc => markets.push({ id: doc.id, ...doc.data() }));
                 displayMarkets();
             });
         }, 30000);
     }
     
     function updateTimerDisplay() {
-        const timerElement = document.getElementById('refreshTimer');
-        if (timerElement) {
-            timerElement.innerHTML = `🔄 Auto refreshes in ${secondsLeft}s...`;
-        }
+        const el = document.getElementById('refreshTimer');
+        if (el) el.innerHTML = `🔄 Auto refreshes in ${secondsLeft}s...`;
+    }
+
+    function updateBalanceDisplay() {
+        document.getElementById('balanceDisplay').innerHTML = `💰 Balance: ₹${userBalance}`;
     }
 
     window.copyUpiId = function() {
@@ -1088,9 +914,7 @@
 
     window.proceedToPayment = function() {
         const customAmount = parseInt(document.getElementById('customAmount').value);
-        if (customAmount >= 500 && customAmount <= 5000) {
-            selectedDepositAmount = customAmount;
-        }
+        if (customAmount >= 500 && customAmount <= 5000) selectedDepositAmount = customAmount;
         
         if (!selectedDepositAmount || selectedDepositAmount < 500 || selectedDepositAmount > 5000) {
             alert('Please select amount between ₹500 and ₹5000');
@@ -1101,242 +925,232 @@
         document.getElementById('qrSection').style.display = 'block';
         document.getElementById('proceedBtn').style.display = 'none';
     };
+        window.confirmPayment = async function() {
+            let bonusAmount = 0;
+            const depositQuery = await getDocs(query(collection(db, 'depositRequests'), where('userId', '==', currentUser.uid)));
+            const isFirstDeposit = depositQuery.empty;
+            
+            if (isFirstDeposit) bonusAmount = selectedDepositAmount * 0.3;
+            
+            alert(`Payment confirmation sent to admin. Your balance will be updated after manual verification.${isFirstDeposit ? `\n🎉 First deposit bonus: ₹${bonusAmount}` : ''}`);
+            
+            await addDoc(collection(db, 'depositRequests'), {
+                userId: currentUser.uid,
+                userMobile: userData?.mobile,
+                userName: userData?.name,
+                amount: selectedDepositAmount,
+                bonusAmount: bonusAmount,
+                isFirstDeposit: isFirstDeposit,
+                status: 'pending',
+                date: new Date().toISOString()
+            });
+            
+            closeDepositModal();
+            selectedDepositAmount = 0;
+            document.getElementById('qrSection').style.display = 'none';
+            document.getElementById('proceedBtn').style.display = 'block';
+            document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
+        };
 
-    window.confirmPayment = async function() {
-        let bonusAmount = 0;
-        let bonusText = "";
-        
-        if (isFirstDeposit) {
-            bonusAmount = selectedDepositAmount * 0.3;
-            bonusText = `\n🎉 First deposit bonus: ₹${bonusAmount} will be added after verification!`;
-        }
-        
-        alert(`Payment confirmation sent to admin. Your balance will be updated after manual verification.${bonusText}`);
-        closeDepositModal();
-        
-        await addDoc(collection(db, 'depositRequests'), {
-            userId: currentUser.uid,
-            userMobile: userData?.mobile,
-            userName: userData?.name,
-            amount: selectedDepositAmount,
-            bonusAmount: bonusAmount,
-            isFirstDeposit: isFirstDeposit,
-            status: 'pending',
-            date: new Date().toISOString()
-        });
-        
-        selectedDepositAmount = 0;
-        document.getElementById('qrSection').style.display = 'none';
-        document.getElementById('proceedBtn').style.display = 'block';
-        document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
-    };
-
-    window.openPlayModal = function(marketName) {
-        if (userBalance <= 0) {
-            document.getElementById('insufficientModal').style.display = 'flex';
-            return;
-        }
-        selectedMarketForPlay = marketName;
-        document.getElementById('selectedMarket').innerHTML = `Market: <strong>${marketName}</strong>`;
-        document.getElementById('playModal').style.display = 'flex';
-    };
-
-    window.updateBidRate = function() {
-        const bidType = document.getElementById('bidType').value;
-        currentBidRate = bidRates[bidType];
-        document.getElementById('winningRate').innerHTML = `Winning rate: 1-${currentBidRate}`;
-    };
-
-    window.submitBid = async function() {
-        const bidType = document.getElementById('bidType').value;
-        const amount = document.getElementById('bidAmount').value;
-        const number = document.getElementById('bidNumber').value;
-        
-        if (!amount || !number) {
-            alert('Please fill all fields');
-            return;
-        }
-        
-        if (parseFloat(amount) > userBalance) {
-            alert('Insufficient balance!');
-            closePlayModal();
-            document.getElementById('insufficientModal').style.display = 'flex';
-            return;
-        }
-        
-        const newBalance = userBalance - parseFloat(amount);
-        await updateDoc(doc(db, 'users', currentUser.uid), {
-            balance: newBalance
-        });
-        userBalance = newBalance;
-        updateBalanceDisplay();
-        
-        await addDoc(collection(db, 'bids'), {
-            userId: currentUser.uid,
-            market: selectedMarketForPlay,
-            bidType: bidType,
-            amount: parseFloat(amount),
-            number: number,
-            rate: currentBidRate,
-            status: 'pending',
-            date: new Date().toISOString()
-        });
-        
-        alert(`Bid placed successfully!\nMarket: ${selectedMarketForPlay}\nType: ${bidType}\nAmount: ₹${amount}\nNumber: ${number}`);
-        closePlayModal();
-        document.getElementById('bidAmount').value = '';
-        document.getElementById('bidNumber').value = '';
-    };
-
-    window.checkBalanceBeforeWithdraw = function() {
-        if (userBalance <= 0) {
-            document.getElementById('insufficientModal').style.display = 'flex';
-        } else {
-            showWithdrawModal();
-        }
-    };
-
-    window.toggleMenu = function() {
-        const menu = document.getElementById('sideMenu');
-        const overlay = document.getElementById('overlay');
-        menu.classList.toggle('open');
-        overlay.classList.toggle('show');
-    };
-
-    window.showGameRates = function() {
-        toggleMenu();
-        document.getElementById('ratesModal').style.display = 'flex';
-    };
-
-    window.showProfile = function() {
-        toggleMenu();
-        const profileInfo = document.getElementById('profileInfo');
-        profileInfo.innerHTML = `
-            <p><strong>Name:</strong> ${userData?.name || 'N/A'}</p>
-            <p><strong>Mobile:</strong> ${userData?.mobile || 'N/A'}</p>
-            <p><strong>Email:</strong> ${currentUser?.email || 'N/A'}</p>
-            <p><strong>Balance:</strong> ₹${userBalance}</p>
-            <p><strong>Member since:</strong> ${new Date(userData?.createdAt).toLocaleDateString() || 'N/A'}</p>
-        `;
-        document.getElementById('profileModal').style.display = 'flex';
-    };
-
-    window.logout = async function() {
-        if (refreshInterval) clearInterval(refreshInterval);
-        if (countdownInterval) clearInterval(countdownInterval);
-        await signOut(auth);
-        window.location.href = 'index.html';
-    };
-
-    window.showDepositModal = function() {
-        document.getElementById('depositModal').style.display = 'flex';
-    };
-
-    window.closeDepositModal = function() {
-        document.getElementById('depositModal').style.display = 'none';
-        document.getElementById('qrSection').style.display = 'none';
-        document.getElementById('proceedBtn').style.display = 'block';
-        document.getElementById('customAmount').value = '';
-        selectedDepositAmount = 0;
-        document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
-    };
-
-    window.showWithdrawModal = function() {
-        document.getElementById('withdrawModal').style.display = 'flex';
-    };
-
-    window.closeWithdrawModal = function() {
-        document.getElementById('withdrawModal').style.display = 'none';
-        document.getElementById('withdrawAmount').value = '';
-        document.getElementById('withdrawAccount').value = '';
-    };
-
-    window.processWithdraw = async function() {
-        const amount = document.getElementById('withdrawAmount').value;
-        const account = document.getElementById('withdrawAccount').value;
-        
-        if (!amount || !account) {
-            alert('Please fill all fields');
-            return;
-        }
-        
-        if (parseFloat(amount) > userBalance) {
-            alert('Insufficient balance!');
-            closeWithdrawModal();
-            return;
-        }
-        
-        await addDoc(collection(db, 'transactions'), {
-            userId: currentUser.uid,
-            type: 'withdrawal',
-            amount: parseFloat(amount),
-            accountDetails: account,
-            status: 'pending',
-            date: new Date().toISOString()
-        });
-        
-        alert(`Withdrawal request of ₹${amount} submitted! Will be processed within 24 hours.`);
-        closeWithdrawModal();
-    };
-
-    window.showHome = function() {
-        window.location.reload();
-    };
-
-    window.showBidHistory = async function() {
-        document.getElementById('bidHistoryModal').style.display = 'flex';
-    };
-
-    window.showPassbook = async function() {
-        document.getElementById('passbookModal').style.display = 'flex';
-    };
-
-    window.showSupport = function() {
-        document.getElementById('supportModal').style.display = 'flex';
-    };
-
-    window.closeInsufficientModal = function() {
-        document.getElementById('insufficientModal').style.display = 'none';
-    };
-
-    window.closePlayModal = function() {
-        document.getElementById('playModal').style.display = 'none';
-    };
-
-    window.closeRatesModal = function() {
-        document.getElementById('ratesModal').style.display = 'none';
-    };
-
-    window.closeProfileModal = function() {
-        document.getElementById('profileModal').style.display = 'none';
-    };
-
-    window.closeBidHistoryModal = function() {
-        document.getElementById('bidHistoryModal').style.display = 'none';
-    };
-
-    window.closePassbookModal = function() {
-        document.getElementById('passbookModal').style.display = 'none';
-    };
-
-    window.closeSupportModal = function() {
-        document.getElementById('supportModal').style.display = 'none';
-    };
-
-    window.onclick = function(event) {
-        const modals = ['depositModal', 'withdrawModal', 'ratesModal', 'profileModal', 'bidHistoryModal', 'passbookModal', 'supportModal', 'insufficientModal', 'playModal'];
-        modals.forEach(modalId => {
-            const modal = document.getElementById(modalId);
-            if (event.target === modal) {
-                modal.style.display = 'none';
+        window.openPlayModal = function(marketName) {
+            if (userBalance <= 0) {
+                document.getElementById('insufficientModal').style.display = 'flex';
+                return;
             }
-        });
-    };
-    
-    function updateBalanceDisplay() {
-        const balanceEl = document.getElementById('balanceDisplay');
-        if (balanceEl) {
-            balanceEl.innerHTML = `💰 Balance: ₹${userBalance}`;
-        }
-    }
-</script>
+            selectedMarketForPlay = marketName;
+            document.getElementById('selectedMarket').innerHTML = `Market: <strong>${marketName}</strong>`;
+            document.getElementById('playModal').style.display = 'flex';
+        };
+
+        window.updateBidRate = function() {
+            const bidType = document.getElementById('bidType').value;
+            currentBidRate = bidRates[bidType];
+            document.getElementById('winningRate').innerHTML = `Winning rate: 1-${currentBidRate}`;
+        };
+
+        window.submitBid = async function() {
+            const bidType = document.getElementById('bidType').value;
+            const amount = document.getElementById('bidAmount').value;
+            const number = document.getElementById('bidNumber').value;
+            
+            if (!amount || !number) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            if (parseFloat(amount) > userBalance) {
+                alert('Insufficient balance!');
+                closePlayModal();
+                document.getElementById('insufficientModal').style.display = 'flex';
+                return;
+            }
+            
+            const newBalance = userBalance - parseFloat(amount);
+            await updateDoc(doc(db, 'users', currentUser.uid), { balance: newBalance });
+            userBalance = newBalance;
+            updateBalanceDisplay();
+            
+            await addDoc(collection(db, 'bids'), {
+                userId: currentUser.uid,
+                market: selectedMarketForPlay,
+                bidType: bidType,
+                amount: parseFloat(amount),
+                number: number,
+                rate: currentBidRate,
+                status: 'pending',
+                date: new Date().toISOString()
+            });
+            
+            alert(`Bid placed successfully!\nMarket: ${selectedMarketForPlay}\nType: ${bidType}\nAmount: ₹${amount}\nNumber: ${number}`);
+            closePlayModal();
+            document.getElementById('bidAmount').value = '';
+            document.getElementById('bidNumber').value = '';
+        };
+
+        window.checkBalanceBeforeWithdraw = function() {
+            if (userBalance <= 0) {
+                document.getElementById('insufficientModal').style.display = 'flex';
+            } else {
+                showWithdrawModal();
+            }
+        };
+
+        window.toggleMenu = function() {
+            const menu = document.getElementById('sideMenu');
+            const overlay = document.getElementById('overlay');
+            menu.classList.toggle('open');
+            overlay.classList.toggle('show');
+        };
+
+        window.showGameRates = function() {
+            toggleMenu();
+            document.getElementById('ratesModal').style.display = 'flex';
+        };
+
+        window.showProfile = function() {
+            toggleMenu();
+            const profileInfo = document.getElementById('profileInfo');
+            profileInfo.innerHTML = `
+                <p><strong>Name:</strong> ${userData?.name || 'N/A'}</p>
+                <p><strong>Mobile:</strong> ${userData?.mobile || 'N/A'}</p>
+                <p><strong>Email:</strong> ${currentUser?.email || 'N/A'}</p>
+                <p><strong>Balance:</strong> ₹${userBalance}</p>
+                <p><strong>Member since:</strong> ${new Date(userData?.createdAt).toLocaleDateString() || 'N/A'}</p>
+            `;
+            document.getElementById('profileModal').style.display = 'flex';
+        };
+
+        window.logout = async function() {
+            if (refreshInterval) clearInterval(refreshInterval);
+            if (countdownInterval) clearInterval(countdownInterval);
+            await signOut(auth);
+            window.location.href = 'index.html';
+        };
+
+        window.showDepositModal = function() {
+            document.getElementById('depositModal').style.display = 'flex';
+        };
+
+        window.closeDepositModal = function() {
+            document.getElementById('depositModal').style.display = 'none';
+            document.getElementById('qrSection').style.display = 'none';
+            document.getElementById('proceedBtn').style.display = 'block';
+            document.getElementById('customAmount').value = '';
+            selectedDepositAmount = 0;
+            document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
+        };
+
+        window.showWithdrawModal = function() {
+            document.getElementById('withdrawModal').style.display = 'flex';
+        };
+
+        window.closeWithdrawModal = function() {
+            document.getElementById('withdrawModal').style.display = 'none';
+            document.getElementById('withdrawAmount').value = '';
+            document.getElementById('withdrawAccount').value = '';
+        };
+
+        window.processWithdraw = async function() {
+            const amount = document.getElementById('withdrawAmount').value;
+            const account = document.getElementById('withdrawAccount').value;
+            
+            if (!amount || !account) {
+                alert('Please fill all fields');
+                return;
+            }
+            
+            if (parseFloat(amount) > userBalance) {
+                alert('Insufficient balance!');
+                closeWithdrawModal();
+                return;
+            }
+            
+            await addDoc(collection(db, 'transactions'), {
+                userId: currentUser.uid,
+                type: 'withdrawal',
+                amount: parseFloat(amount),
+                accountDetails: account,
+                status: 'pending',
+                date: new Date().toISOString()
+            });
+            
+            alert(`Withdrawal request of ₹${amount} submitted! Will be processed within 24 hours.`);
+            closeWithdrawModal();
+        };
+
+        window.showHome = function() {
+            window.location.reload();
+        };
+
+        window.showBidHistory = async function() {
+            document.getElementById('bidHistoryModal').style.display = 'flex';
+        };
+
+        window.showPassbook = async function() {
+            document.getElementById('passbookModal').style.display = 'flex';
+        };
+
+        window.showSupport = function() {
+            document.getElementById('supportModal').style.display = 'flex';
+        };
+
+        window.closeInsufficientModal = function() {
+            document.getElementById('insufficientModal').style.display = 'none';
+        };
+
+        window.closePlayModal = function() {
+            document.getElementById('playModal').style.display = 'none';
+        };
+
+        window.closeRatesModal = function() {
+            document.getElementById('ratesModal').style.display = 'none';
+        };
+
+        window.closeProfileModal = function() {
+            document.getElementById('profileModal').style.display = 'none';
+        };
+
+        window.closeBidHistoryModal = function() {
+            document.getElementById('bidHistoryModal').style.display = 'none';
+        };
+
+        window.closePassbookModal = function() {
+            document.getElementById('passbookModal').style.display = 'none';
+        };
+
+        window.closeSupportModal = function() {
+            document.getElementById('supportModal').style.display = 'none';
+        };
+
+        window.onclick = function(event) {
+            const modals = ['depositModal', 'withdrawModal', 'ratesModal', 'profileModal', 'bidHistoryModal', 'passbookModal', 'supportModal', 'insufficientModal', 'playModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        };
+    </script>
+</body>
+</html>
