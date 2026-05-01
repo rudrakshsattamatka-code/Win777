@@ -22,7 +22,6 @@
             margin: 0 auto;
         }
 
-        /* Header */
         .header {
             background: white;
             padding: 20px;
@@ -47,9 +46,9 @@
             padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
+            margin-left: 10px;
         }
 
-        /* Tabs */
         .tabs {
             display: flex;
             gap: 10px;
@@ -73,7 +72,6 @@
             color: white;
         }
 
-        /* Sections */
         .section {
             display: none;
             background: white;
@@ -95,7 +93,6 @@
             padding-bottom: 10px;
         }
 
-        /* Forms */
         .form-group {
             margin-bottom: 20px;
         }
@@ -126,11 +123,6 @@
             font-weight: 500;
         }
 
-        button:active {
-            transform: scale(0.98);
-        }
-
-        /* Markets Table */
         .markets-table {
             width: 100%;
             border-collapse: collapse;
@@ -167,7 +159,6 @@
             margin-top: 20px;
         }
 
-        /* QR Preview */
         .qr-preview {
             text-align: center;
             margin: 20px 0;
@@ -180,7 +171,6 @@
             padding: 10px;
         }
 
-        /* Request Cards */
         .request-card {
             background: #f8f9fa;
             padding: 15px;
@@ -210,12 +200,6 @@
             font-weight: bold;
         }
 
-        .status-rejected {
-            color: #ff0000;
-            font-weight: bold;
-        }
-
-        /* Password Modal */
         .login-overlay {
             position: fixed;
             top: 0;
@@ -274,7 +258,7 @@
             <div class="logo">WIN777 - Admin Panel</div>
             <div>
                 <button class="logout-btn" onclick="showChangePassword()">🔑 Change Password</button>
-                <button class="logout-btn" onclick="logout()" style="margin-left: 10px;">Logout</button>
+                <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
         </div>
 
@@ -286,31 +270,26 @@
             <button class="tab-btn" onclick="showTab('users')">👥 Users</button>
         </div>
 
-        <!-- Markets Section -->
         <div id="marketsSection" class="section active">
             <div class="section-title">Manage Markets</div>
             <div id="marketsList"></div>
             <button class="add-btn" onclick="showAddMarketModal()">+ Add New Market</button>
         </div>
 
-        <!-- Deposit Requests Section -->
         <div id="depositsSection" class="section">
             <div class="section-title">Deposit Requests</div>
             <div id="depositsList"></div>
         </div>
 
-        <!-- Withdrawal Requests Section -->
         <div id="withdrawalsSection" class="section">
             <div class="section-title">Withdrawal Requests</div>
             <div id="withdrawalsList"></div>
         </div>
 
-        <!-- Settings Section -->
         <div id="settingsSection" class="section">
             <div class="section-title">App Settings</div>
-            
             <div class="settings-group">
-                <h3 style="margin-bottom: 15px;">QR Code Settings</h3>
+                <h3 style="margin-bottom:15px;">QR Code Settings</h3>
                 <div class="form-group">
                     <label>QR Code Image URL</label>
                     <input type="text" id="qrUrl" placeholder="https://i.imgur.com/14a2kJA.jpeg">
@@ -320,9 +299,8 @@
                 </div>
                 <button onclick="updateQrSettings()">Update QR Code</button>
             </div>
-
             <div class="settings-group">
-                <h3 style="margin-bottom: 15px;">UPI Settings</h3>
+                <h3 style="margin-bottom:15px;">UPI Settings</h3>
                 <div class="form-group">
                     <label>UPI ID</label>
                     <input type="text" id="upiId" placeholder="win888@paytm">
@@ -331,533 +309,333 @@
             </div>
         </div>
 
-        <!-- Users Section -->
         <div id="usersSection" class="section">
             <div class="section-title">User Management</div>
             <div id="usersList"></div>
         </div>
     </div>
 
-    <!-- Add Market Modal -->
-    <div id="addMarketModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: white; padding: 30px; border-radius: 12px; width: 400px; max-width: 90%;">
-            <h3 style="margin-bottom: 20px;">Add New Market</h3>
-            <div class="form-group">
-                <label>Market Name</label>
-                <input type="text" id="newMarketName" placeholder="Enter market name">
-            </div>
-            <div class="form-group">
-                <label>Timing</label>
-                <input type="text" id="newMarketTiming" placeholder="e.g., 12:30pm - 01:20pm">
-            </div>
-            <div class="form-group">
-                <label>Result</label>
-                <input type="text" id="newMarketResult" placeholder="e.g., 123-61-560">
-            </div>
-            <div class="form-group">
-                <label>Order (1-100)</label>
-                <input type="number" id="newMarketOrder" placeholder="Display order">
-            </div>
+    <div id="addMarketModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+        <div style="background:white; padding:30px; border-radius:12px; width:400px; max-width:90%;">
+            <h3>Add New Market</h3>
+            <div class="form-group"><label>Market Name</label><input type="text" id="newMarketName"></div>
+            <div class="form-group"><label>Timing</label><input type="text" id="newMarketTiming" placeholder="e.g., 12:30pm - 01:20pm"></div>
+            <div class="form-group"><label>Result</label><input type="text" id="newMarketResult" placeholder="e.g., 123-61-560"></div>
+            <div class="form-group"><label>Order</label><input type="number" id="newMarketOrder" placeholder="Display order"></div>
             <button onclick="addMarket()">Add Market</button>
-            <button onclick="closeAddMarketModal()" style="background: #666; margin-top: 10px;">Cancel</button>
+            <button onclick="closeAddMarketModal()" style="background:#666; margin-top:10px;">Cancel</button>
         </div>
     </div>
 
-    <!-- Edit Market Modal -->
-    <div id="editMarketModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: white; padding: 30px; border-radius: 12px; width: 400px; max-width: 90%;">
-            <h3 style="margin-bottom: 20px;">Edit Market</h3>
+    <div id="editMarketModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+        <div style="background:white; padding:30px; border-radius:12px; width:400px; max-width:90%;">
+            <h3>Edit Market</h3>
             <input type="hidden" id="editMarketId">
-            <div class="form-group">
-                <label>Market Name</label>
-                <input type="text" id="editMarketName">
-            </div>
-            <div class="form-group">
-                <label>Timing</label>
-                <input type="text" id="editMarketTiming">
-            </div>
-            <div class="form-group">
-                <label>Result</label>
-                <input type="text" id="editMarketResult">
-            </div>
-            <div class="form-group">
-                <label>Order</label>
-                <input type="number" id="editMarketOrder">
-            </div>
+            <div class="form-group"><label>Market Name</label><input type="text" id="editMarketName"></div>
+            <div class="form-group"><label>Timing</label><input type="text" id="editMarketTiming"></div>
+            <div class="form-group"><label>Result</label><input type="text" id="editMarketResult"></div>
+            <div class="form-group"><label>Order</label><input type="number" id="editMarketOrder"></div>
             <button onclick="updateMarket()">Update Market</button>
-            <button onclick="closeEditMarketModal()" style="background: #666; margin-top: 10px;">Cancel</button>
+            <button onclick="closeEditMarketModal()" style="background:#666; margin-top:10px;">Cancel</button>
         </div>
     </div>
 
-    <!-- Change Password Modal -->
-    <div id="changePasswordModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
-        <div style="background: white; padding: 30px; border-radius: 12px; width: 400px; max-width: 90%;">
-            <h3 style="margin-bottom: 20px;">Change Admin Password</h3>
-            <div class="form-group">
-                <label>Current Password</label>
-                <input type="password" id="currentPassword" placeholder="Enter current password">
-            </div>
-            <div class="form-group">
-                <label>New Password</label>
-                <input type="password" id="newPassword" placeholder="Enter new password">
-            </div>
-            <div class="form-group">
-                <label>Confirm New Password</label>
-                <input type="password" id="confirmPassword" placeholder="Confirm new password">
-            </div>
+    <div id="changePasswordModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
+        <div style="background:white; padding:30px; border-radius:12px; width:400px; max-width:90%;">
+            <h3>Change Admin Password</h3>
+            <div class="form-group"><label>Current Password</label><input type="password" id="currentPassword"></div>
+            <div class="form-group"><label>New Password</label><input type="password" id="newPassword"></div>
+            <div class="form-group"><label>Confirm New Password</label><input type="password" id="confirmPassword"></div>
             <button onclick="changePassword()">Change Password</button>
-            <button onclick="closeChangePasswordModal()" style="background: #666; margin-top: 10px;">Cancel</button>
+            <button onclick="closeChangePasswordModal()" style="background:#666; margin-top:10px;">Cancel</button>
         </div>
     </div>
 </div>
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, orderBy, updateDoc, deleteDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, orderBy, updateDoc, deleteDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
-        authDomain: "win777-be203.firebaseapp.com",
-        projectId: "win777-be203",
-        storageBucket: "win777-be203.firebasestorage.app",
-        messagingSenderId: "504655373119",
-        appId: "1:504655373119:web:4b964d6e6f0df20ebc698a",
-        measurementId: "G-XL2RBDZHE2"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
+            authDomain: "win777-be203.firebaseapp.com",
+            projectId: "win777-be203",
+            storageBucket: "win777-be203.firebasestorage.app",
+            messagingSenderId: "504655373119",
+            appId: "1:504655373119:web:4b964d6e6f0df20ebc698a",
+            measurementId: "G-XL2RBDZHE2"
+        };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-    let currentUser = null;
-    let adminPasswordHash = "Gani99@@";
-    let marketsUnsubscribe = null;
-    let depositsUnsubscribe = null;
-    let withdrawalsUnsubscribe = null;
-    let usersUnsubscribe = null;
+        let adminPasswordHash = "Gani99@@";
+        let marketsUnsubscribe = null;
+        let depositsUnsubscribe = null;
+        let withdrawalsUnsubscribe = null;
+        let usersUnsubscribe = null;
 
-    // Check admin password
-    window.checkAdminPassword = function() {
-        const enteredPassword = document.getElementById('adminPassword').value;
-        if (enteredPassword === adminPasswordHash) {
-            localStorage.setItem('adminAuthenticated', 'true');
+        window.checkAdminPassword = function() {
+            const enteredPassword = document.getElementById('adminPassword').value;
+            if (enteredPassword === adminPasswordHash) {
+                localStorage.setItem('adminAuthenticated', 'true');
+                document.getElementById('loginOverlay').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                initializeAdminPanel();
+            } else {
+                document.getElementById('loginError').innerText = 'Invalid password!';
+            }
+        };
+
+        if (localStorage.getItem('adminAuthenticated') === 'true') {
             document.getElementById('loginOverlay').style.display = 'none';
             document.getElementById('adminContent').style.display = 'block';
             initializeAdminPanel();
-        } else {
-            document.getElementById('loginError').innerText = 'Invalid password!';
         }
-    };
 
-    // Check if already authenticated
-    if (localStorage.getItem('adminAuthenticated') === 'true') {
-        document.getElementById('loginOverlay').style.display = 'none';
-        document.getElementById('adminContent').style.display = 'block';
-        initializeAdminPanel();
-    }
+        async function initializeAdminPanel() {
+            setupMarketsListener();
+            setupDepositsListener();
+            setupWithdrawalsListener();
+            setupUsersListener();
+            await loadSettings();
+        }
 
-    async function initializeAdminPanel() {
-        console.log("Initializing admin panel...");
-        setupMarketsListener();
-        setupDepositsListener();
-        setupWithdrawalsListener();
-        setupUsersListener();
-        await loadSettings();
-    }
+        function setupMarketsListener() {
+            if (marketsUnsubscribe) marketsUnsubscribe();
+            const q = query(collection(db, 'markets'), orderBy('order'));
+            marketsUnsubscribe = onSnapshot(q, (snapshot) => {
+                const marketsList = document.getElementById('marketsList');
+                if (snapshot.empty) {
+                    marketsList.innerHTML = '<p>No markets found. Add your first market!</p>';
+                    return;
+                }
+                let html = '<table class="markets-table"><thead><tr><th>Order</th><th>Market Name</th><th>Timing</th><th>Result</th><th>Actions</th></tr></thead><tbody>';
+                snapshot.forEach(doc => {
+                    const market = doc.data();
+                    html += `<tr><td>${market.order || '-'}</td><td>${market.name}</td><td>${market.timing}</td><td>${market.result}</td>
+                    <td><button class="edit-btn" onclick="editMarket('${doc.id}')">Edit</button>
+                    <button class="delete-btn" onclick="deleteMarket('${doc.id}')">Delete</button></td></tr>`;
+                });
+                html += '</tbody></table>';
+                marketsList.innerHTML = html;
+            });
+        }
 
-    // Setup real-time listener for Markets
-    function setupMarketsListener() {
-        if (marketsUnsubscribe) marketsUnsubscribe();
-        
-        const q = query(collection(db, 'markets'), orderBy('order'));
-        marketsUnsubscribe = onSnapshot(q, (snapshot) => {
-            console.log("Markets updated, count:", snapshot.size);
-            const marketsList = document.getElementById('marketsList');
-            
-            if (snapshot.empty) {
-                marketsList.innerHTML = '<p>No markets found. Add your first market!</p>';
-                return;
+        function setupDepositsListener() {
+            if (depositsUnsubscribe) depositsUnsubscribe();
+            const q = query(collection(db, 'depositRequests'), orderBy('date', 'desc'));
+            depositsUnsubscribe = onSnapshot(q, (snapshot) => {
+                const depositsList = document.getElementById('depositsList');
+                if (snapshot.empty) {
+                    depositsList.innerHTML = '<p>No deposit requests</p>';
+                    return;
+                }
+                let html = '';
+                snapshot.forEach(doc => {
+                    const req = doc.data();
+                    html += `<div class="request-card"><div><strong>${req.userName || 'User'}</strong><br>
+                    📱 ${req.userMobile}<br>💰 Amount: ₹${req.amount}<br>🎁 Bonus: ₹${req.bonusAmount || 0}<br>
+                    📅 ${new Date(req.date).toLocaleString()}<br>Status: <span class="status-${req.status}">${req.status}</span></div>
+                    ${req.status === 'pending' ? `<div><button class="approve-btn" onclick="approveDeposit('${doc.id}', ${req.amount}, ${req.bonusAmount || 0}, '${req.userId}')">Approve</button>
+                    <button class="reject-btn" onclick="rejectDeposit('${doc.id}')">Reject</button></div>` : ''}</div>`;
+                });
+                depositsList.innerHTML = html;
+            });
+        }
+
+        function setupWithdrawalsListener() {
+            if (withdrawalsUnsubscribe) withdrawalsUnsubscribe();
+            const q = query(collection(db, 'transactions'), where('type', '==', 'withdrawal'), orderBy('date', 'desc'));
+            withdrawalsUnsubscribe = onSnapshot(q, (snapshot) => {
+                const withdrawalsList = document.getElementById('withdrawalsList');
+                if (snapshot.empty) {
+                    withdrawalsList.innerHTML = '<p>No withdrawal requests</p>';
+                    return;
+                }
+                let html = '';
+                snapshot.forEach(doc => {
+                    const req = doc.data();
+                    html += `<div class="request-card"><div><strong>User: ${req.userId}</strong><br>
+                    💰 Amount: ₹${req.amount}<br>🏦 Account: ${req.accountDetails || 'N/A'}<br>
+                    📅 ${new Date(req.date).toLocaleString()}<br>Status: <span class="status-${req.status}">${req.status}</span></div>
+                    ${req.status === 'pending' ? `<div><button class="approve-btn" onclick="approveWithdrawal('${doc.id}', ${req.amount}, '${req.userId}')">Approve</button>
+                    <button class="reject-btn" onclick="rejectWithdrawal('${doc.id}', ${req.amount}, '${req.userId}')">Reject</button></div>` : ''}</div>`;
+                });
+                withdrawalsList.innerHTML = html;
+            });
+        }
+
+        function setupUsersListener() {
+            if (usersUnsubscribe) usersUnsubscribe();
+            const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
+            usersUnsubscribe = onSnapshot(q, (snapshot) => {
+                const usersList = document.getElementById('usersList');
+                if (snapshot.empty) {
+                    usersList.innerHTML = '<p>No users found</p>';
+                    return;
+                }
+                let html = '<table class="markets-table"><thead><tr><th>Name</th><th>Mobile</th><th>Balance</th><th>Joined</th><th>Actions</th></tr></thead><tbody>';
+                snapshot.forEach(doc => {
+                    const user = doc.data();
+                    html += `<tr><td>${user.name || 'N/A'}</td><td>${user.mobile || 'N/A'}</td>
+                    <td>₹${user.balance || 0}</td><td>${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</td>
+                    <td><button class="edit-btn" onclick="adjustBalance('${doc.id}')">Adjust Balance</button></td></tr>`;
+                });
+                html += '</tbody></table>';
+                usersList.innerHTML = html;
+            });
+        }
+
+        function showTab(tab) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(`${tab}Section`).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        window.showAddMarketModal = function() {
+            document.getElementById('addMarketModal').style.display = 'flex';
+        };
+        window.closeAddMarketModal = function() {
+            document.getElementById('addMarketModal').style.display = 'none';
+        };
+        window.addMarket = async function() {
+            const name = document.getElementById('newMarketName').value;
+            if (!name) { alert('Enter market name'); return; }
+            await setDoc(doc(db, 'markets', name), {
+                name: name,
+                timing: document.getElementById('newMarketTiming').value || 'Coming Soon',
+                result: document.getElementById('newMarketResult').value || '---',
+                order: parseInt(document.getElementById('newMarketOrder').value) || 999
+            });
+            alert('Market added!');
+            closeAddMarketModal();
+        };
+
+        window.editMarket = async function(id) {
+            const docSnap = await getDoc(doc(db, 'markets', id));
+            if (docSnap.exists()) {
+                const m = docSnap.data();
+                document.getElementById('editMarketId').value = id;
+                document.getElementById('editMarketName').value = m.name;
+                document.getElementById('editMarketTiming').value = m.timing;
+                document.getElementById('editMarketResult').value = m.result;
+                document.getElementById('editMarketOrder').value = m.order;
+                document.getElementById('editMarketModal').style.display = 'flex';
             }
-            
-            let html = '<table class="markets-table"><thead><tr><th>Order</th><th>Market Name</th><th>Timing</th><th>Result</th><th>Actions</th></tr></thead><tbody>';
-            snapshot.forEach(doc => {
-                const market = doc.data();
-                html += `
-                    <tr>
-                        <td>${market.order || '-'}</td>
-                        <td>${market.name}</td>
-                        <td>${market.timing}</td>
-                        <td>${market.result}</td>
-                        <td>
-                            <button class="edit-btn" onclick="editMarket('${doc.id}')">Edit</button>
-                            <button class="delete-btn" onclick="deleteMarket('${doc.id}')">Delete</button>
-                        </td>
-                    </tr>
-                `;
+        };
+        window.closeEditMarketModal = function() {
+            document.getElementById('editMarketModal').style.display = 'none';
+        };
+        window.updateMarket = async function() {
+            const id = document.getElementById('editMarketId').value;
+            await updateDoc(doc(db, 'markets', id), {
+                name: document.getElementById('editMarketName').value,
+                timing: document.getElementById('editMarketTiming').value,
+                result: document.getElementById('editMarketResult').value,
+                order: parseInt(document.getElementById('editMarketOrder').value)
             });
-            html += '</tbody></table>';
-            marketsList.innerHTML = html;
-        }, (error) => {
-            console.error("Error loading markets:", error);
-        });
-    }
-
-    // Setup real-time listener for Deposit Requests
-    function setupDepositsListener() {
-        if (depositsUnsubscribe) depositsUnsubscribe();
-        
-        const q = query(collection(db, 'depositRequests'), orderBy('date', 'desc'));
-        depositsUnsubscribe = onSnapshot(q, (snapshot) => {
-            console.log("Deposits updated, count:", snapshot.size);
-            const depositsList = document.getElementById('depositsList');
-            
-            if (snapshot.empty) {
-                depositsList.innerHTML = '<p>No deposit requests</p>';
-                return;
+            alert('Market updated!');
+            closeEditMarketModal();
+        };
+        window.deleteMarket = async function(id) {
+            if (confirm('Delete this market?')) {
+                await deleteDoc(doc(db, 'markets', id));
+                alert('Deleted!');
             }
-            
-            let html = '';
-            snapshot.forEach(doc => {
-                const req = doc.data();
-                html += `
-                    <div class="request-card">
-                        <div>
-                            <strong>${req.userName || 'User'}</strong><br>
-                            📱 ${req.userMobile}<br>
-                            💰 Amount: ₹${req.amount}<br>
-                            🎁 Bonus: ₹${req.bonusAmount || 0}<br>
-                            📅 ${new Date(req.date).toLocaleString()}<br>
-                            Status: <span class="status-${req.status}">${req.status}</span>
-                        </div>
-                        ${req.status === 'pending' ? `
-                        <div>
-                            <button class="approve-btn" onclick="approveDeposit('${doc.id}', ${req.amount}, ${req.bonusAmount || 0}, '${req.userId}')">Approve</button>
-                            <button class="reject-btn" onclick="rejectDeposit('${doc.id}')">Reject</button>
-                        </div>
-                        ` : ''}
-                    </div>
-                `;
-            });
-            depositsList.innerHTML = html;
-        }, (error) => {
-            console.error("Error loading deposits:", error);
-        });
-    }
+        };
 
-    // Setup real-time listener for Withdrawal Requests
-    function setupWithdrawalsListener() {
-        if (withdrawalsUnsubscribe) withdrawalsUnsubscribe();
-        
-        const q = query(collection(db, 'transactions'), where('type', '==', 'withdrawal'), orderBy('date', 'desc'));
-        withdrawalsUnsubscribe = onSnapshot(q, (snapshot) => {
-            console.log("Withdrawals updated, count:", snapshot.size);
-            const withdrawalsList = document.getElementById('withdrawalsList');
-            
-            if (snapshot.empty) {
-                withdrawalsList.innerHTML = '<p>No withdrawal requests</p>';
-                return;
-            }
-            
-            let html = '';
-            snapshot.forEach(doc => {
-                const req = doc.data();
-                html += `
-                    <div class="request-card">
-                        <div>
-                            <strong>User: ${req.userId}</strong><br>
-                            💰 Amount: ₹${req.amount}<br>
-                            🏦 Account: ${req.accountDetails || 'N/A'}<br>
-                            📅 ${new Date(req.date).toLocaleString()}<br>
-                            Status: <span class="status-${req.status}">${req.status}</span>
-                        </div>
-                        ${req.status === 'pending' ? `
-                        <div>
-                            <button class="approve-btn" onclick="approveWithdrawal('${doc.id}', ${req.amount}, '${req.userId}')">Approve</button>
-                            <button class="reject-btn" onclick="rejectWithdrawal('${doc.id}', ${req.amount}, '${req.userId}')">Reject</button>
-                        </div>
-                        ` : ''}
-                    </div>
-                `;
-            });
-            withdrawalsList.innerHTML = html;
-        }, (error) => {
-            console.error("Error loading withdrawals:", error);
-        });
-    }
-
-    // Setup real-time listener for Users
-    function setupUsersListener() {
-        if (usersUnsubscribe) usersUnsubscribe();
-        
-        const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
-        usersUnsubscribe = onSnapshot(q, (snapshot) => {
-            console.log("Users updated, count:", snapshot.size);
-            const usersList = document.getElementById('usersList');
-            
-            if (snapshot.empty) {
-                usersList.innerHTML = '<p>No users found</p>';
-                return;
-            }
-            
-            let html = '<table class="markets-table"><thead><tr><th>Name</th><th>Mobile</th><th>Balance</th><th>Joined</th><th>Actions</th></tr></thead><tbody>';
-            snapshot.forEach(doc => {
-                const user = doc.data();
-                html += `
-                    <tr>
-                        <td>${user.name || 'N/A'}</td>
-                        <td>${user.mobile || 'N/A'}</td>
-                        <td>₹${user.balance || 0}</td>
-                        <td>${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</td>
-                        <td>
-                            <button class="edit-btn" onclick="adjustBalance('${doc.id}')">Adjust Balance</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            html += '</tbody></table>';
-            usersList.innerHTML = html;
-        }, (error) => {
-            console.error("Error loading users:", error);
-        });
-    }
-
-    function showTab(tab) {
-        document.querySelectorAll('.section').forEach(section => {
-            section.classList.remove('active');
-        });
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        
-        document.getElementById(`${tab}Section`).classList.add('active');
-        event.target.classList.add('active');
-    }
-
-    window.showAddMarketModal = function() {
-        document.getElementById('addMarketModal').style.display = 'flex';
-    };
-
-    window.closeAddMarketModal = function() {
-        document.getElementById('addMarketModal').style.display = 'none';
-        document.getElementById('newMarketName').value = '';
-        document.getElementById('newMarketTiming').value = '';
-        document.getElementById('newMarketResult').value = '';
-        document.getElementById('newMarketOrder').value = '';
-    };
-
-    window.addMarket = async function() {
-        const name = document.getElementById('newMarketName').value;
-        const timing = document.getElementById('newMarketTiming').value;
-        const result = document.getElementById('newMarketResult').value;
-        const order = parseInt(document.getElementById('newMarketOrder').value) || 999;
-        
-        if (!name) {
-            alert('Please enter market name');
-            return;
-        }
-        
-        await setDoc(doc(db, 'markets', name), {
-            name: name,
-            timing: timing || 'Coming Soon',
-            result: result || '---',
-            order: order
-        });
-        
-        alert('Market added successfully!');
-        closeAddMarketModal();
-    };
-
-    window.editMarket = async function(marketId) {
-        const marketDoc = await getDoc(doc(db, 'markets', marketId));
-        if (marketDoc.exists()) {
-            const market = marketDoc.data();
-            document.getElementById('editMarketId').value = marketId;
-            document.getElementById('editMarketName').value = market.name;
-            document.getElementById('editMarketTiming').value = market.timing;
-            document.getElementById('editMarketResult').value = market.result;
-            document.getElementById('editMarketOrder').value = market.order;
-            document.getElementById('editMarketModal').style.display = 'flex';
-        }
-    };
-
-    window.closeEditMarketModal = function() {
-        document.getElementById('editMarketModal').style.display = 'none';
-    };
-
-    window.updateMarket = async function() {
-        const marketId = document.getElementById('editMarketId').value;
-        const name = document.getElementById('editMarketName').value;
-        const timing = document.getElementById('editMarketTiming').value;
-        const result = document.getElementById('editMarketResult').value;
-        const order = parseInt(document.getElementById('editMarketOrder').value);
-        
-        await updateDoc(doc(db, 'markets', marketId), {
-            name: name,
-            timing: timing,
-            result: result,
-            order: order
-        });
-        
-        alert('Market updated successfully!');
-        closeEditMarketModal();
-    };
-
-    window.deleteMarket = async function(marketId) {
-        if (confirm('Are you sure you want to delete this market?')) {
-            await deleteDoc(doc(db, 'markets', marketId));
-            alert('Market deleted successfully!');
-        }
-    };
-
-    window.approveDeposit = async function(requestId, amount, bonus, userId) {
-        if (confirm(`Approve deposit of ₹${amount}? Bonus: ₹${bonus}`)) {
-            const userRef = doc(db, 'users', userId);
-            const userDoc = await getDoc(userRef);
-            const currentBalance = userDoc.exists() ? (userDoc.data().balance || 0) : 0;
-            const newBalance = currentBalance + amount + bonus;
-            await updateDoc(userRef, { balance: newBalance });
-            
-            await updateDoc(doc(db, 'depositRequests', requestId), {
-                status: 'approved',
-                approvedAt: new Date().toISOString()
-            });
-            
-            alert('Deposit approved and balance updated!');
-        }
-    };
-
-    window.rejectDeposit = async function(requestId) {
-        if (confirm('Reject this deposit request?')) {
-            await updateDoc(doc(db, 'depositRequests', requestId), {
-                status: 'rejected',
-                rejectedAt: new Date().toISOString()
-            });
-            alert('Deposit rejected!');
-        }
-    };
-
-    window.approveWithdrawal = async function(requestId, amount, userId) {
-        if (confirm(`Approve withdrawal of ₹${amount}?`)) {
-            await updateDoc(doc(db, 'transactions', requestId), {
-                status: 'approved',
-                approvedAt: new Date().toISOString()
-            });
-            alert('Withdrawal approved!');
-        }
-    };
-
-    window.rejectWithdrawal = async function(requestId, amount, userId) {
-        if (confirm('Reject this withdrawal request?')) {
-            await updateDoc(doc(db, 'transactions', requestId), {
-                status: 'rejected',
-                rejectedAt: new Date().toISOString()
-            });
-            
-            const userRef = doc(db, 'users', userId);
-            const userDoc = await getDoc(userRef);
-            if (userDoc.exists()) {
-                const newBalance = (userDoc.data().balance || 0) + amount;
+        window.approveDeposit = async function(id, amount, bonus, userId) {
+            if (confirm(`Approve ₹${amount}? Bonus: ₹${bonus}`)) {
+                const userRef = doc(db, 'users', userId);
+                const userDoc = await getDoc(userRef);
+                const newBalance = (userDoc.data()?.balance || 0) + amount + bonus;
                 await updateDoc(userRef, { balance: newBalance });
+                await updateDoc(doc(db, 'depositRequests', id), { status: 'approved', approvedAt: new Date().toISOString() });
+                alert('Approved!');
             }
-            
-            alert('Withdrawal rejected and amount refunded!');
+        };
+        window.rejectDeposit = async function(id) {
+            if (confirm('Reject?')) {
+                await updateDoc(doc(db, 'depositRequests', id), { status: 'rejected' });
+                alert('Rejected!');
+            }
+        };
+
+        window.approveWithdrawal = async function(id, amount, userId) {
+            if (confirm(`Approve withdrawal ₹${amount}?`)) {
+                await updateDoc(doc(db, 'transactions', id), { status: 'approved' });
+                alert('Approved!');
+            }
+        };
+        window.rejectWithdrawal = async function(id, amount, userId) {
+            if (confirm('Reject and refund?')) {
+                await updateDoc(doc(db, 'transactions', id), { status: 'rejected' });
+                const userRef = doc(db, 'users', userId);
+                const userDoc = await getDoc(userRef);
+                await updateDoc(userRef, { balance: (userDoc.data()?.balance || 0) + amount });
+                alert('Rejected and refunded!');
+            }
+        };
+
+        window.adjustBalance = async function(userId) {
+            const newBalance = prompt('Enter new balance:');
+            if (newBalance && !isNaN(parseFloat(newBalance))) {
+                await updateDoc(doc(db, 'users', userId), { balance: parseFloat(newBalance) });
+                alert('Balance updated!');
+            }
+        };
+
+        async function loadSettings() {
+            const docSnap = await getDoc(doc(db, 'settings', 'app'));
+            if (docSnap.exists()) {
+                document.getElementById('qrUrl').value = docSnap.data().qrUrl || 'https://i.imgur.com/14a2kJA.jpeg';
+                document.getElementById('upiId').value = docSnap.data().upiId || 'win888@paytm';
+                document.getElementById('qrPreview').src = docSnap.data().qrUrl || 'https://i.imgur.com/14a2kJA.jpeg';
+            }
         }
-    };
+        window.updateQrSettings = async function() {
+            await setDoc(doc(db, 'settings', 'app'), { qrUrl: document.getElementById('qrUrl').value, upiId: document.getElementById('upiId').value }, { merge: true });
+            document.getElementById('qrPreview').src = document.getElementById('qrUrl').value;
+            alert('QR updated!');
+        };
+        window.updateUpiSettings = async function() {
+            await setDoc(doc(db, 'settings', 'app'), { upiId: document.getElementById('upiId').value, qrUrl: document.getElementById('qrUrl').value }, { merge: true });
+            alert('UPI updated!');
+        };
 
-    window.adjustBalance = async function(userId) {
-        const newBalance = prompt('Enter new balance amount:');
-        if (newBalance !== null && !isNaN(parseFloat(newBalance))) {
-            await updateDoc(doc(db, 'users', userId), {
-                balance: parseFloat(newBalance)
-            });
-            alert('Balance updated successfully!');
-        }
-    };
+        window.showChangePassword = function() {
+            document.getElementById('changePasswordModal').style.display = 'flex';
+        };
+        window.closeChangePasswordModal = function() {
+            document.getElementById('changePasswordModal').style.display = 'none';
+        };
+        window.changePassword = function() {
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            if (current !== adminPasswordHash) { alert('Current password incorrect'); return; }
+            if (newPass.length < 6) { alert('Password must be 6+ chars'); return; }
+            if (newPass !== confirm) { alert('Passwords do not match'); return; }
+            adminPasswordHash = newPass;
+            localStorage.setItem('adminPassword', newPass);
+            alert('Password changed!');
+            closeChangePasswordModal();
+        };
 
-    async function loadSettings() {
-        const settingsDoc = await getDoc(doc(db, 'settings', 'app'));
-        if (settingsDoc.exists()) {
-            const settings = settingsDoc.data();
-            document.getElementById('qrUrl').value = settings.qrUrl || 'https://i.imgur.com/14a2kJA.jpeg';
-            document.getElementById('upiId').value = settings.upiId || 'win888@paytm';
-            document.getElementById('qrPreview').src = settings.qrUrl || 'https://i.imgur.com/14a2kJA.jpeg';
-        }
-    }
+        const saved = localStorage.getItem('adminPassword');
+        if (saved) adminPasswordHash = saved;
 
-    window.updateQrSettings = async function() {
-        const qrUrl = document.getElementById('qrUrl').value;
-        await setDoc(doc(db, 'settings', 'app'), {
-            qrUrl: qrUrl,
-            upiId: document.getElementById('upiId').value
-        }, { merge: true });
-        document.getElementById('qrPreview').src = qrUrl;
-        alert('QR code updated successfully!');
-    };
-
-    window.updateUpiSettings = async function() {
-        const upiId = document.getElementById('upiId').value;
-        await setDoc(doc(db, 'settings', 'app'), {
-            qrUrl: document.getElementById('qrUrl').value,
-            upiId: upiId
-        }, { merge: true });
-        alert('UPI ID updated successfully!');
-    };
-
-    window.showChangePassword = function() {
-        document.getElementById('changePasswordModal').style.display = 'flex';
-    };
-
-    window.closeChangePasswordModal = function() {
-        document.getElementById('changePasswordModal').style.display = 'none';
-        document.getElementById('currentPassword').value = '';
-        document.getElementById('newPassword').value = '';
-        document.getElementById('confirmPassword').value = '';
-    };
-
-    window.changePassword = function() {
-        const currentPass = document.getElementById('currentPassword').value;
-        const newPass = document.getElementById('newPassword').value;
-        const confirmPass = document.getElementById('confirmPassword').value;
-        
-        if (currentPass !== adminPasswordHash) {
-            alert('Current password is incorrect!');
-            return;
-        }
-        
-        if (newPass.length < 6) {
-            alert('New password must be at least 6 characters!');
-            return;
-        }
-        
-        if (newPass !== confirmPass) {
-            alert('New passwords do not match!');
-            return;
-        }
-        
-        adminPasswordHash = newPass;
-        localStorage.setItem('adminPassword', newPass);
-        alert('Password changed successfully!');
-        closeChangePasswordModal();
-    };
-
-    // Load saved password
-    const savedPassword = localStorage.getItem('adminPassword');
-    if (savedPassword) {
-        adminPasswordHash = savedPassword;
-    }
-
-    window.logout = function() {
-        // Clean up listeners
-        if (marketsUnsubscribe) marketsUnsubscribe();
-        if (depositsUnsubscribe) depositsUnsubscribe();
-        if (withdrawalsUnsubscribe) withdrawalsUnsubscribe();
-        if (usersUnsubscribe) usersUnsubscribe();
-        
-        localStorage.removeItem('adminAuthenticated');
-        document.getElementById('loginOverlay').style.display = 'flex';
-        document.getElementById('adminContent').style.display = 'none';
-        document.getElementById('adminPassword').value = '';
-    };
-
-    window.showTab = showTab;
-</script>
+        window.logout = function() {
+            if (marketsUnsubscribe) marketsUnsubscribe();
+            if (depositsUnsubscribe) depositsUnsubscribe();
+            if (withdrawalsUnsubscribe) withdrawalsUnsubscribe();
+            if (usersUnsubscribe) usersUnsubscribe();
+            localStorage.removeItem('adminAuthenticated');
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('adminContent').style.display = 'none';
+        };
+        window.showTab = showTab;
+    </script>
+</body>
+</html>
