@@ -511,37 +511,57 @@
             margin-top: 10px;
         }
 
-        /* UPI Apps Selection */
-        .upi-apps {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
+        /* QR Code Section */
+        .qr-section {
+            text-align: center;
             margin: 20px 0;
         }
 
-        .upi-app {
-            text-align: center;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 8px;
-            transition: all 0.2s;
-            flex: 1;
-        }
-
-        .upi-app:hover {
-            background: #f0f0f0;
-        }
-
-        .upi-app img {
-            width: 50px;
-            height: 50px;
+        .qr-image {
+            width: 200px;
+            height: 200px;
+            margin: 10px auto;
             border-radius: 12px;
+            background: white;
+            padding: 10px;
         }
 
-        .upi-app span {
-            display: block;
+        .qr-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .upi-id-container {
+            background: #f0f0f0;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upi-id-text {
+            font-weight: bold;
+            color: #ff0000;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            background: #0066ff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
             font-size: 12px;
-            margin-top: 5px;
+            margin: 0;
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
         }
 
         .offer-text {
@@ -598,6 +618,13 @@
             color: #0066ff;
             text-align: right;
             margin-bottom: 10px;
+        }
+
+        .paid-note {
+            font-size: 11px;
+            color: #666;
+            text-align: center;
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -696,7 +723,7 @@
             <div class="nav-label">Support</div>
         </div>
     </div>
-<!-- Deposit Modal with Amount Selector -->
+<!-- Deposit Modal with QR Code -->
 <div id="depositModal" class="modal">
     <div class="modal-content">
         <span class="close-modal" onclick="closeDepositModal()">&times;</span>
@@ -717,31 +744,22 @@
         <div class="custom-amount">
             <input type="number" id="customAmount" placeholder="Or enter custom amount (500-5000)">
         </div>
-        <div id="upiSection" style="display: none;">
-            <p style="text-align: center; margin: 10px 0;">Choose Payment Method</p>
-            <div class="upi-apps">
-                <div class="upi-app" onclick="openUpiApp('phonepe')">
-                    <span>📱</span>
-                    <span>PhonePe</span>
+        <div id="qrSection" style="display: none;">
+            <div class="qr-section">
+                <p>Scan QR Code to Pay</p>
+                <div class="qr-image">
+                    <img id="qrImage" src="https://i.imgur.com/14a2kJA.jpeg" alt="QR Code">
                 </div>
-                <div class="upi-app" onclick="openUpiApp('paytm')">
-                    <span>📱</span>
-                    <span>Paytm</span>
+                <div class="upi-id-container">
+                    <span class="upi-id-text"><strong>UPI ID:</strong> win888@paytm</span>
+                    <button class="copy-btn" onclick="copyUpiId()">📋 Copy</button>
                 </div>
-                <div class="upi-app" onclick="openUpiApp('gpay')">
-                    <span>📱</span>
-                    <span>Google Pay</span>
-                </div>
+                <p><strong>Amount:</strong> ₹<span id="displayAmount">0</span></p>
             </div>
-            <div class="upi-id" style="text-align: center; padding: 10px; background: #f0f0f0; border-radius: 8px;">
-                <strong>UPI ID:</strong> win888@paytm<br>
-                <strong>Amount:</strong> ₹<span id="displayAmount">0</span>
-            </div>
-            <p style="font-size: 11px; color: #666; text-align: center; margin-top: 10px;">
-                Click on any app above to pay directly<br>
-                After payment, click "I have paid"
-            </p>
             <button onclick="confirmPayment()">✅ I have paid</button>
+            <div class="paid-note">
+                * After payment, click "I have paid". Admin will verify and update balance.
+            </div>
         </div>
         <button id="proceedBtn" onclick="proceedToPayment()">Add Cash →</button>
     </div>
@@ -889,11 +907,9 @@
         let refreshInterval = null;
         let countdownInterval = null;
         let secondsLeft = 30;
-        let isFirstDepositCheckDone = false;
         let isFirstDeposit = true;
 
         // ========== YOU CAN EDIT MARKETS HERE ==========
-        // Update market names, timings, and results directly in this array
         const markets = [
             { name: "Mumbai", timing: "12:30pm - 01:20pm", result: "123-61-560" },
             { name: "Delhi", timing: "01:30pm - 02:20pm", result: "456-78-234" },
@@ -907,7 +923,6 @@
         ];
         // ================================================
 
-        // Bid rates mapping
         const bidRates = {
             single: 10,
             jodi: 100,
@@ -917,7 +932,6 @@
             sangam: 10000
         };
 
-        // Check auth state
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = 'index.html';
@@ -946,10 +960,8 @@
         }
 
         async function checkFirstDeposit() {
-            // Check if user has made any deposit before
             const depositQuery = await getDocs(query(collection(db, 'depositRequests'), where('userId', '==', currentUser.uid)));
             isFirstDeposit = depositQuery.empty;
-            isFirstDepositCheckDone = true;
         }
 
         function updateBalanceDisplay() {
@@ -970,7 +982,6 @@
             `).join('');
         }
 
-        // Auto refresh every 30 seconds
         function startAutoRefresh() {
             if (refreshInterval) clearInterval(refreshInterval);
             if (countdownInterval) clearInterval(countdownInterval);
@@ -999,28 +1010,14 @@
         }
         
         function refreshMarketData() {
-            console.log("Refreshing market data...");
             loadMarkets();
         }
 
-        // Update market results (call this function to update results)
-        window.updateMarketResults = function(newResults) {
-            markets.forEach((market, index) => {
-                if (newResults[market.name]) {
-                    market.result = newResults[market.name];
-                }
-            });
-            loadMarkets();
-        };
-
-        // Update market timings (call this function to update timings)
-        window.updateMarketTimings = function(newTimings) {
-            markets.forEach((market, index) => {
-                if (newTimings[market.name]) {
-                    market.timing = newTimings[market.name];
-                }
-            });
-            loadMarkets();
+        // Copy UPI ID function
+        window.copyUpiId = function() {
+            const upiId = "win888@paytm";
+            navigator.clipboard.writeText(upiId);
+            alert("UPI ID copied: " + upiId);
         };
 
         // Deposit Functions
@@ -1043,55 +1040,14 @@
             }
             
             document.getElementById('displayAmount').innerText = selectedDepositAmount;
-            document.getElementById('upiSection').style.display = 'block';
+            document.getElementById('qrSection').style.display = 'block';
             document.getElementById('proceedBtn').style.display = 'none';
-        };
-
-        // Fixed UPI Intent URLs that actually work
-        window.openUpiApp = function(app) {
-            const amount = selectedDepositAmount;
-            const upiId = "win888@paytm";
-            const name = "WIN777";
-            const note = "Deposit to WIN777 account";
-            
-            // Create UPI URL with proper format
-            const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
-            
-            // App-specific URLs
-            let appUrl = "";
-            switch(app) {
-                case 'phonepe':
-                    appUrl = `phonepe://pay?pa=${upiId}&am=${amount}`;
-                    break;
-                case 'paytm':
-                    appUrl = `paytmmp://pay?pa=${upiId}&am=${amount}`;
-                    break;
-                case 'gpay':
-                    appUrl = `googlepay://pay?pa=${upiId}&am=${amount}`;
-                    break;
-                default:
-                    appUrl = upiUrl;
-            }
-            
-            // Try to open the app first
-            window.location.href = appUrl;
-            
-            // Fallback to web intent after 2 seconds if app doesn't open
-            setTimeout(() => {
-                window.location.href = upiUrl;
-            }, 500);
-            
-            // Second fallback - open web page with QR
-            setTimeout(() => {
-                window.open(`https://www.phonepe.com/upi-intent/?pa=${upiId}&am=${amount}`, '_blank');
-            }, 1500);
         };
 
         window.confirmPayment = async function() {
             let bonusAmount = 0;
             let bonusText = "";
             
-            // Check first deposit bonus
             if (isFirstDeposit) {
                 bonusAmount = selectedDepositAmount * 0.3;
                 bonusText = `\n🎉 First deposit bonus: ₹${bonusAmount} will be added after verification!`;
@@ -1100,7 +1056,6 @@
             alert(`Payment confirmation sent to admin. Your balance will be updated after manual verification.${bonusText}`);
             closeDepositModal();
             
-            // Save deposit request
             await addDoc(collection(db, 'depositRequests'), {
                 userId: currentUser.uid,
                 userMobile: userData?.mobile,
@@ -1113,12 +1068,11 @@
             });
             
             selectedDepositAmount = 0;
-            document.getElementById('upiSection').style.display = 'none';
+            document.getElementById('qrSection').style.display = 'none';
             document.getElementById('proceedBtn').style.display = 'block';
             document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
         };
 
-        // Play Functions
         window.openPlayModal = function(marketName) {
             if (userBalance <= 0) {
                 document.getElementById('insufficientModal').style.display = 'flex';
@@ -1184,7 +1138,6 @@
             }
         };
 
-        // Menu functions
         window.toggleMenu = function() {
             const menu = document.getElementById('sideMenu');
             const overlay = document.getElementById('overlay');
@@ -1217,21 +1170,19 @@
             window.location.href = 'index.html';
         };
 
-        // Deposit Modal
         window.showDepositModal = function() {
             document.getElementById('depositModal').style.display = 'flex';
         };
 
         window.closeDepositModal = function() {
             document.getElementById('depositModal').style.display = 'none';
-            document.getElementById('upiSection').style.display = 'none';
+            document.getElementById('qrSection').style.display = 'none';
             document.getElementById('proceedBtn').style.display = 'block';
             document.getElementById('customAmount').value = '';
             selectedDepositAmount = 0;
             document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
         };
 
-        // Withdraw Functions
         window.showWithdrawModal = function() {
             document.getElementById('withdrawModal').style.display = 'flex';
         };
@@ -1270,7 +1221,6 @@
             closeWithdrawModal();
         };
 
-        // Bottom Navigation
         window.showHome = function() {
             window.location.reload();
         };
@@ -1287,7 +1237,6 @@
             document.getElementById('supportModal').style.display = 'flex';
         };
 
-        // Close modals
         window.closeInsufficientModal = function() {
             document.getElementById('insufficientModal').style.display = 'none';
         };
@@ -1316,7 +1265,6 @@
             document.getElementById('supportModal').style.display = 'none';
         };
 
-        // Close modals when clicking outside
         window.onclick = function(event) {
             const modals = ['depositModal', 'withdrawModal', 'ratesModal', 'profileModal', 'bidHistoryModal', 'passbookModal', 'supportModal', 'insufficientModal', 'playModal'];
             modals.forEach(modalId => {
