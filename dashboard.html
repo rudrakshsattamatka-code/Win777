@@ -718,7 +718,7 @@
             <input type="number" id="customAmount" placeholder="Or enter custom amount (500-5000)">
         </div>
         <div id="upiSection" style="display: none;">
-            <p style="text-align: center; margin: 10px 0;">Choose UPI App to Pay</p>
+            <p style="text-align: center; margin: 10px 0;">Choose Payment Method</p>
             <div class="upi-apps">
                 <div class="upi-app" onclick="openUpiApp('phonepe')">
                     <span>📱</span>
@@ -733,10 +733,14 @@
                     <span>Google Pay</span>
                 </div>
             </div>
-            <div class="upi-id" style="text-align: center;">
-                UPI ID: win888@paytm
+            <div class="upi-id" style="text-align: center; padding: 10px; background: #f0f0f0; border-radius: 8px;">
+                <strong>UPI ID:</strong> win888@paytm<br>
+                <strong>Amount:</strong> ₹<span id="displayAmount">0</span>
             </div>
-            <p style="font-size: 12px; color: #666; text-align: center;">Amount: ₹<span id="displayAmount">0</span></p>
+            <p style="font-size: 11px; color: #666; text-align: center; margin-top: 10px;">
+                Click on any app above to pay directly<br>
+                After payment, click "I have paid"
+            </p>
             <button onclick="confirmPayment()">✅ I have paid</button>
         </div>
         <button id="proceedBtn" onclick="proceedToPayment()">Add Cash →</button>
@@ -885,6 +889,8 @@
         let refreshInterval = null;
         let countdownInterval = null;
         let secondsLeft = 30;
+        let isFirstDepositCheckDone = false;
+        let isFirstDeposit = true;
 
         // ========== YOU CAN EDIT MARKETS HERE ==========
         // Update market names, timings, and results directly in this array
@@ -919,6 +925,7 @@
             }
             currentUser = user;
             await loadUserData();
+            await checkFirstDeposit();
             loadMarkets();
             updateBalanceDisplay();
             startAutoRefresh();
@@ -936,6 +943,13 @@
                 document.getElementById('avatar').textContent = userData.name.charAt(0).toUpperCase();
                 updateBalanceDisplay();
             }
+        }
+
+        async function checkFirstDeposit() {
+            // Check if user has made any deposit before
+            const depositQuery = await getDocs(query(collection(db, 'depositRequests'), where('userId', '==', currentUser.uid)));
+            isFirstDeposit = depositQuery.empty;
+            isFirstDepositCheckDone = true;
         }
 
         function updateBalanceDisplay() {
@@ -985,8 +999,6 @@
         }
         
         function refreshMarketData() {
-            // Simulate fetching new market data
-            // You can replace this with an API call to your backend
             console.log("Refreshing market data...");
             loadMarkets();
         }
@@ -1006,16 +1018,6 @@
             markets.forEach((market, index) => {
                 if (newTimings[market.name]) {
                     market.timing = newTimings[market.name];
-                }
-            });
-            loadMarkets();
-        };
-
-        // Update market names (call this function to update names)
-        window.updateMarketNames = function(newNames) {
-            markets.forEach((market, index) => {
-                if (newNames[market.name]) {
-                    market.name = newNames[market.name];
                 }
             });
             loadMarkets();
@@ -1045,47 +1047,64 @@
             document.getElementById('proceedBtn').style.display = 'none';
         };
 
+        // Fixed UPI Intent URLs that actually work
         window.openUpiApp = function(app) {
-            let upiUrl = '';
-            const upiIntent = `pay?pa=win888@paytm&pn=WIN777&am=${selectedDepositAmount}&cu=INR`;
+            const amount = selectedDepositAmount;
+            const upiId = "win888@paytm";
+            const name = "WIN777";
+            const note = "Deposit to WIN777 account";
             
+            // Create UPI URL with proper format
+            const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+            
+            // App-specific URLs
+            let appUrl = "";
             switch(app) {
                 case 'phonepe':
-                    upiUrl = `phonepe://${upiIntent}`;
+                    appUrl = `phonepe://pay?pa=${upiId}&am=${amount}`;
                     break;
                 case 'paytm':
-                    upiUrl = `paytmmp://${upiIntent}`;
+                    appUrl = `paytmmp://pay?pa=${upiId}&am=${amount}`;
                     break;
                 case 'gpay':
-                    upiUrl = `tez://${upiIntent}`;
+                    appUrl = `googlepay://pay?pa=${upiId}&am=${amount}`;
                     break;
                 default:
-                    upiUrl = `upi://${upiIntent}`;
+                    appUrl = upiUrl;
             }
             
-            window.location.href = upiUrl;
+            // Try to open the app first
+            window.location.href = appUrl;
             
-            // Fallback to web intent
+            // Fallback to web intent after 2 seconds if app doesn't open
             setTimeout(() => {
-                window.location.href = `https://upay.xyz/?pa=win888@paytm&am=${selectedDepositAmount}&cu=INR`;
-            }, 100);
+                window.location.href = upiUrl;
+            }, 500);
+            
+            // Second fallback - open web page with QR
+            setTimeout(() => {
+                window.open(`https://www.phonepe.com/upi-intent/?pa=${upiId}&am=${amount}`, '_blank');
+            }, 1500);
         };
 
         window.confirmPayment = async function() {
             let bonusAmount = 0;
-            // Check if first deposit (you can implement logic to check user's first deposit)
-            const isFirstDeposit = true; // Replace with actual check
+            let bonusText = "";
+            
+            // Check first deposit bonus
             if (isFirstDeposit) {
                 bonusAmount = selectedDepositAmount * 0.3;
-                alert(`🎉 First deposit bonus: ₹${bonusAmount} added!`);
+                bonusText = `\n🎉 First deposit bonus: ₹${bonusAmount} will be added after verification!`;
             }
             
-            alert('Payment confirmation sent to admin. Your balance will be updated after manual verification.');
+            alert(`Payment confirmation sent to admin. Your balance will be updated after manual verification.${bonusText}`);
             closeDepositModal();
             
+            // Save deposit request
             await addDoc(collection(db, 'depositRequests'), {
                 userId: currentUser.uid,
                 userMobile: userData?.mobile,
+                userName: userData?.name,
                 amount: selectedDepositAmount,
                 bonusAmount: bonusAmount,
                 isFirstDeposit: isFirstDeposit,
