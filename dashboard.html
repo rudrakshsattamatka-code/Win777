@@ -267,6 +267,23 @@
             }
         }
 
+        /* Offer Banner */
+        .offer-banner {
+            background: linear-gradient(135deg, #ff0000, #ff6600);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
         /* Action Buttons */
         .action-buttons {
             display: flex;
@@ -494,38 +511,47 @@
             margin-top: 10px;
         }
 
-        /* QR Code */
-        .qr-code {
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            margin: 15px 0;
-        }
-
-        .qr-code img {
-            width: 200px;
-            height: 200px;
-        }
-
-        .upi-id {
-            background: #f0f0f0;
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
-            margin: 10px 0;
-            font-weight: bold;
-            color: #ff0000;
-        }
-
-        .pay-buttons {
+        /* UPI Apps Selection */
+        .upi-apps {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
         }
 
-        .pay-buttons button {
+        .upi-app {
+            text-align: center;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.2s;
             flex: 1;
+        }
+
+        .upi-app:hover {
+            background: #f0f0f0;
+        }
+
+        .upi-app img {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+        }
+
+        .upi-app span {
+            display: block;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .offer-text {
+            background: #ffffcc;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 15px 0;
+            color: #ff6600;
+            font-weight: bold;
         }
 
         /* Game Rates Grid */
@@ -565,6 +591,13 @@
             line-height: 1.4;
             background: #f8f9fa;
             border-radius: 8px;
+        }
+
+        .auto-refresh {
+            font-size: 11px;
+            color: #0066ff;
+            text-align: right;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -610,6 +643,11 @@
             </div>
         </div>
 
+        <!-- Offer Banner -->
+        <div class="offer-banner">
+            🎉 FIRST DEPOSIT BONUS: Get 30% EXTRA on your first deposit! 🎉
+        </div>
+
         <!-- Sliding Message -->
         <div class="sliding-message">
             <div class="sliding-text">
@@ -623,9 +661,10 @@
             <button class="action-btn withdraw-btn" onclick="checkBalanceBeforeWithdraw()">💸 Withdrawal</button>
         </div>
 
-        <!-- Markets Section - Vertical -->
+        <!-- Markets Section -->
         <div class="markets-section">
             <div class="section-title">📊 Live Markets</div>
+            <div class="auto-refresh" id="refreshTimer">Auto refreshes in 30s...</div>
             <div class="markets-list" id="marketsList">
                 <!-- Markets will be loaded here -->
             </div>
@@ -662,33 +701,45 @@
     <div class="modal-content">
         <span class="close-modal" onclick="closeDepositModal()">&times;</span>
         <h3>Deposit Money</h3>
-        <p style="margin-bottom: 10px;">Select Amount (₹500 - ₹50000)</p>
+        <div class="offer-text">
+            🎁 First Deposit: Get 30% extra!<br>
+            Min ₹500 | Max ₹5000
+        </div>
+        <p style="margin-bottom: 10px;">Select Amount (₹500 - ₹5000)</p>
         <div class="amount-selector" id="amountSelector">
             <div class="amount-option" onclick="selectAmount(500)">₹500</div>
             <div class="amount-option" onclick="selectAmount(1000)">₹1000</div>
+            <div class="amount-option" onclick="selectAmount(1500)">₹1500</div>
             <div class="amount-option" onclick="selectAmount(2000)">₹2000</div>
+            <div class="amount-option" onclick="selectAmount(3000)">₹3000</div>
             <div class="amount-option" onclick="selectAmount(5000)">₹5000</div>
-            <div class="amount-option" onclick="selectAmount(10000)">₹10000</div>
-            <div class="amount-option" onclick="selectAmount(20000)">₹20000</div>
         </div>
         <div class="custom-amount">
-            <input type="number" id="customAmount" placeholder="Or enter custom amount (500-50000)">
+            <input type="number" id="customAmount" placeholder="Or enter custom amount (500-5000)">
         </div>
-        <div id="qrSection" style="display: none;">
-            <div class="qr-code">
-                <p style="margin-bottom: 10px;">Scan QR Code to Pay</p>
-                <img id="qrImage" src="https://i.imgur.com/14a2kJA.jpeg" alt="QR Code">
-                <div class="upi-id">
-                    💳 UPI ID: win888@paytm
+        <div id="upiSection" style="display: none;">
+            <p style="text-align: center; margin: 10px 0;">Choose UPI App to Pay</p>
+            <div class="upi-apps">
+                <div class="upi-app" onclick="openUpiApp('phonepe')">
+                    <span>📱</span>
+                    <span>PhonePe</span>
                 </div>
-                <p style="font-size: 12px; color: #666;">Amount: ₹<span id="displayAmount">0</span></p>
+                <div class="upi-app" onclick="openUpiApp('paytm')">
+                    <span>📱</span>
+                    <span>Paytm</span>
+                </div>
+                <div class="upi-app" onclick="openUpiApp('gpay')">
+                    <span>📱</span>
+                    <span>Google Pay</span>
+                </div>
             </div>
-            <div class="pay-buttons">
-                <button onclick="openUpiApp()">📱 Pay with UPI</button>
-                <button onclick="confirmPayment()">✅ I have paid</button>
+            <div class="upi-id" style="text-align: center;">
+                UPI ID: win888@paytm
             </div>
+            <p style="font-size: 12px; color: #666; text-align: center;">Amount: ₹<span id="displayAmount">0</span></p>
+            <button onclick="confirmPayment()">✅ I have paid</button>
         </div>
-        <button id="proceedBtn" onclick="proceedToPayment()">Proceed to Pay</button>
+        <button id="proceedBtn" onclick="proceedToPayment()">Add Cash →</button>
     </div>
 </div>
 
@@ -831,8 +882,12 @@
         let selectedMarketForPlay = null;
         let selectedDepositAmount = 0;
         let currentBidRate = 10;
+        let refreshInterval = null;
+        let countdownInterval = null;
+        let secondsLeft = 30;
 
-        // Markets with names, timings, and results (you can edit timings and results here)
+        // ========== YOU CAN EDIT MARKETS HERE ==========
+        // Update market names, timings, and results directly in this array
         const markets = [
             { name: "Mumbai", timing: "12:30pm - 01:20pm", result: "123-61-560" },
             { name: "Delhi", timing: "01:30pm - 02:20pm", result: "456-78-234" },
@@ -844,6 +899,7 @@
             { name: "Pune", timing: "07:30pm - 08:20pm", result: "678-89-432" },
             { name: "Jaipur", timing: "08:30pm - 09:20pm", result: "901-23-765" }
         ];
+        // ================================================
 
         // Bid rates mapping
         const bidRates = {
@@ -865,6 +921,7 @@
             await loadUserData();
             loadMarkets();
             updateBalanceDisplay();
+            startAutoRefresh();
         });
 
         async function loadUserData() {
@@ -899,7 +956,42 @@
             `).join('');
         }
 
-        // Update market results (you can edit results anytime)
+        // Auto refresh every 30 seconds
+        function startAutoRefresh() {
+            if (refreshInterval) clearInterval(refreshInterval);
+            if (countdownInterval) clearInterval(countdownInterval);
+            
+            secondsLeft = 30;
+            updateTimerDisplay();
+            
+            countdownInterval = setInterval(() => {
+                secondsLeft--;
+                updateTimerDisplay();
+                if (secondsLeft <= 0) {
+                    secondsLeft = 30;
+                }
+            }, 1000);
+            
+            refreshInterval = setInterval(() => {
+                refreshMarketData();
+            }, 30000);
+        }
+        
+        function updateTimerDisplay() {
+            const timerElement = document.getElementById('refreshTimer');
+            if (timerElement) {
+                timerElement.innerHTML = `🔄 Auto refreshes in ${secondsLeft}s...`;
+            }
+        }
+        
+        function refreshMarketData() {
+            // Simulate fetching new market data
+            // You can replace this with an API call to your backend
+            console.log("Refreshing market data...");
+            loadMarkets();
+        }
+
+        // Update market results (call this function to update results)
         window.updateMarketResults = function(newResults) {
             markets.forEach((market, index) => {
                 if (newResults[market.name]) {
@@ -909,11 +1001,21 @@
             loadMarkets();
         };
 
-        // Update market timings (you can edit timings anytime)
+        // Update market timings (call this function to update timings)
         window.updateMarketTimings = function(newTimings) {
             markets.forEach((market, index) => {
                 if (newTimings[market.name]) {
                     market.timing = newTimings[market.name];
+                }
+            });
+            loadMarkets();
+        };
+
+        // Update market names (call this function to update names)
+        window.updateMarketNames = function(newNames) {
+            markets.forEach((market, index) => {
+                if (newNames[market.name]) {
+                    market.name = newNames[market.name];
                 }
             });
             loadMarkets();
@@ -929,29 +1031,55 @@
 
         window.proceedToPayment = function() {
             const customAmount = parseInt(document.getElementById('customAmount').value);
-            if (customAmount >= 500 && customAmount <= 50000) {
+            if (customAmount >= 500 && customAmount <= 5000) {
                 selectedDepositAmount = customAmount;
             }
             
-            if (!selectedDepositAmount || selectedDepositAmount < 500 || selectedDepositAmount > 50000) {
-                alert('Please select amount between ₹500 and ₹50000');
+            if (!selectedDepositAmount || selectedDepositAmount < 500 || selectedDepositAmount > 5000) {
+                alert('Please select amount between ₹500 and ₹5000');
                 return;
             }
             
             document.getElementById('displayAmount').innerText = selectedDepositAmount;
-            document.getElementById('qrSection').style.display = 'block';
+            document.getElementById('upiSection').style.display = 'block';
             document.getElementById('proceedBtn').style.display = 'none';
         };
 
-        window.openUpiApp = function() {
-            const upiUrl = `paytm://pay?pa=win888@paytm&am=${selectedDepositAmount}&cu=INR`;
+        window.openUpiApp = function(app) {
+            let upiUrl = '';
+            const upiIntent = `pay?pa=win888@paytm&pn=WIN777&am=${selectedDepositAmount}&cu=INR`;
+            
+            switch(app) {
+                case 'phonepe':
+                    upiUrl = `phonepe://${upiIntent}`;
+                    break;
+                case 'paytm':
+                    upiUrl = `paytmmp://${upiIntent}`;
+                    break;
+                case 'gpay':
+                    upiUrl = `tez://${upiIntent}`;
+                    break;
+                default:
+                    upiUrl = `upi://${upiIntent}`;
+            }
+            
             window.location.href = upiUrl;
+            
+            // Fallback to web intent
             setTimeout(() => {
-                window.location.href = `upi://pay?pa=win888@paytm&am=${selectedDepositAmount}&cu=INR`;
+                window.location.href = `https://upay.xyz/?pa=win888@paytm&am=${selectedDepositAmount}&cu=INR`;
             }, 100);
         };
 
         window.confirmPayment = async function() {
+            let bonusAmount = 0;
+            // Check if first deposit (you can implement logic to check user's first deposit)
+            const isFirstDeposit = true; // Replace with actual check
+            if (isFirstDeposit) {
+                bonusAmount = selectedDepositAmount * 0.3;
+                alert(`🎉 First deposit bonus: ₹${bonusAmount} added!`);
+            }
+            
             alert('Payment confirmation sent to admin. Your balance will be updated after manual verification.');
             closeDepositModal();
             
@@ -959,12 +1087,14 @@
                 userId: currentUser.uid,
                 userMobile: userData?.mobile,
                 amount: selectedDepositAmount,
+                bonusAmount: bonusAmount,
+                isFirstDeposit: isFirstDeposit,
                 status: 'pending',
                 date: new Date().toISOString()
             });
             
             selectedDepositAmount = 0;
-            document.getElementById('qrSection').style.display = 'none';
+            document.getElementById('upiSection').style.display = 'none';
             document.getElementById('proceedBtn').style.display = 'block';
             document.querySelectorAll('.amount-option').forEach(opt => opt.classList.remove('selected'));
         };
@@ -1003,7 +1133,6 @@
                 return;
             }
             
-            // Deduct balance
             const newBalance = userBalance - parseFloat(amount);
             await updateDoc(doc(db, 'users', currentUser.uid), {
                 balance: newBalance
@@ -1011,7 +1140,6 @@
             userBalance = newBalance;
             updateBalanceDisplay();
             
-            // Save bid
             await addDoc(collection(db, 'bids'), {
                 userId: currentUser.uid,
                 market: selectedMarketForPlay,
@@ -1023,13 +1151,12 @@
                 date: new Date().toISOString()
             });
             
-            alert(`Bid placed successfully!\nMarket: ${selectedMarketForPlay}\nType: ${bidType}\nAmount: ₹${amount}\nNumber: ${number}\nWinning Rate: 1-${currentBidRate}`);
+            alert(`Bid placed successfully!\nMarket: ${selectedMarketForPlay}\nType: ${bidType}\nAmount: ₹${amount}\nNumber: ${number}`);
             closePlayModal();
             document.getElementById('bidAmount').value = '';
             document.getElementById('bidNumber').value = '';
         };
 
-        // Check balance before withdraw
         window.checkBalanceBeforeWithdraw = function() {
             if (userBalance <= 0) {
                 document.getElementById('insufficientModal').style.display = 'flex';
@@ -1065,6 +1192,8 @@
         };
 
         window.logout = async function() {
+            if (refreshInterval) clearInterval(refreshInterval);
+            if (countdownInterval) clearInterval(countdownInterval);
             await signOut(auth);
             window.location.href = 'index.html';
         };
@@ -1076,7 +1205,7 @@
 
         window.closeDepositModal = function() {
             document.getElementById('depositModal').style.display = 'none';
-            document.getElementById('qrSection').style.display = 'none';
+            document.getElementById('upiSection').style.display = 'none';
             document.getElementById('proceedBtn').style.display = 'block';
             document.getElementById('customAmount').value = '';
             selectedDepositAmount = 0;
