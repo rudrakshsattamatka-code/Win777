@@ -410,85 +410,77 @@
         </div>
     </div>
 </div>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, orderBy, updateDoc, deleteDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, orderBy, updateDoc, deleteDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
-            authDomain: "win777-be203.firebaseapp.com",
-            projectId: "win777-be203",
-            storageBucket: "win777-be203.firebasestorage.app",
-            messagingSenderId: "504655373119",
-            appId: "1:504655373119:web:4b964d6e6f0df20ebc698a",
-            measurementId: "G-XL2RBDZHE2"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
+        authDomain: "win777-be203.firebaseapp.com",
+        projectId: "win777-be203",
+        storageBucket: "win777-be203.firebasestorage.app",
+        messagingSenderId: "504655373119",
+        appId: "1:504655373119:web:4b964d6e6f0df20ebc698a",
+        measurementId: "G-XL2RBDZHE2"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        let currentUser = null;
-        let adminPasswordHash = "Gani99@@"; // Default password
+    let currentUser = null;
+    let adminPasswordHash = "Gani99@@";
+    let marketsUnsubscribe = null;
+    let depositsUnsubscribe = null;
+    let withdrawalsUnsubscribe = null;
+    let usersUnsubscribe = null;
 
-        // Check admin password
-        window.checkAdminPassword = function() {
-            const enteredPassword = document.getElementById('adminPassword').value;
-            if (enteredPassword === adminPasswordHash) {
-                localStorage.setItem('adminAuthenticated', 'true');
-                document.getElementById('loginOverlay').style.display = 'none';
-                document.getElementById('adminContent').style.display = 'block';
-                initializeAdminPanel();
-            } else {
-                document.getElementById('loginError').innerText = 'Invalid password!';
-            }
-        };
-
-        // Check if already authenticated
-        if (localStorage.getItem('adminAuthenticated') === 'true') {
+    // Check admin password
+    window.checkAdminPassword = function() {
+        const enteredPassword = document.getElementById('adminPassword').value;
+        if (enteredPassword === adminPasswordHash) {
+            localStorage.setItem('adminAuthenticated', 'true');
             document.getElementById('loginOverlay').style.display = 'none';
             document.getElementById('adminContent').style.display = 'block';
             initializeAdminPanel();
+        } else {
+            document.getElementById('loginError').innerText = 'Invalid password!';
         }
+    };
 
-        async function initializeAdminPanel() {
-            await loadMarkets();
-            await loadDepositRequests();
-            await loadWithdrawalRequests();
-            await loadUsers();
-            await loadSettings();
-            
-            // Real-time listeners
-            onSnapshot(collection(db, 'markets'), () => loadMarkets());
-            onSnapshot(collection(db, 'depositRequests'), () => loadDepositRequests());
-            onSnapshot(collection(db, 'transactions'), () => loadWithdrawalRequests());
-        }
+    // Check if already authenticated
+    if (localStorage.getItem('adminAuthenticated') === 'true') {
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('adminContent').style.display = 'block';
+        initializeAdminPanel();
+    }
 
-        function showTab(tab) {
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            document.getElementById(`${tab}Section`).classList.add('active');
-            event.target.classList.add('active');
-        }
+    async function initializeAdminPanel() {
+        console.log("Initializing admin panel...");
+        setupMarketsListener();
+        setupDepositsListener();
+        setupWithdrawalsListener();
+        setupUsersListener();
+        await loadSettings();
+    }
 
-        // Load Markets
-        async function loadMarkets() {
-            const marketsSnapshot = await getDocs(query(collection(db, 'markets'), orderBy('order')));
+    // Setup real-time listener for Markets
+    function setupMarketsListener() {
+        if (marketsUnsubscribe) marketsUnsubscribe();
+        
+        const q = query(collection(db, 'markets'), orderBy('order'));
+        marketsUnsubscribe = onSnapshot(q, (snapshot) => {
+            console.log("Markets updated, count:", snapshot.size);
             const marketsList = document.getElementById('marketsList');
             
-            if (marketsSnapshot.empty) {
+            if (snapshot.empty) {
                 marketsList.innerHTML = '<p>No markets found. Add your first market!</p>';
                 return;
             }
             
             let html = '<table class="markets-table"><thead><tr><th>Order</th><th>Market Name</th><th>Timing</th><th>Result</th><th>Actions</th></tr></thead><tbody>';
-            marketsSnapshot.forEach(doc => {
+            snapshot.forEach(doc => {
                 const market = doc.data();
                 html += `
                     <tr>
@@ -505,96 +497,27 @@
             });
             html += '</tbody></table>';
             marketsList.innerHTML = html;
-        }
+        }, (error) => {
+            console.error("Error loading markets:", error);
+        });
+    }
 
-        window.showAddMarketModal = function() {
-            document.getElementById('addMarketModal').style.display = 'flex';
-        };
-
-        window.closeAddMarketModal = function() {
-            document.getElementById('addMarketModal').style.display = 'none';
-            document.getElementById('newMarketName').value = '';
-            document.getElementById('newMarketTiming').value = '';
-            document.getElementById('newMarketResult').value = '';
-            document.getElementById('newMarketOrder').value = '';
-        };
-
-        window.addMarket = async function() {
-            const name = document.getElementById('newMarketName').value;
-            const timing = document.getElementById('newMarketTiming').value;
-            const result = document.getElementById('newMarketResult').value;
-            const order = parseInt(document.getElementById('newMarketOrder').value) || 999;
-            
-            if (!name) {
-                alert('Please enter market name');
-                return;
-            }
-            
-            await setDoc(doc(db, 'markets', name), {
-                name: name,
-                timing: timing || 'Coming Soon',
-                result: result || '---',
-                order: order
-            });
-            
-            alert('Market added successfully!');
-            closeAddMarketModal();
-        };
-
-        window.editMarket = async function(marketId) {
-            const marketDoc = await getDoc(doc(db, 'markets', marketId));
-            if (marketDoc.exists()) {
-                const market = marketDoc.data();
-                document.getElementById('editMarketId').value = marketId;
-                document.getElementById('editMarketName').value = market.name;
-                document.getElementById('editMarketTiming').value = market.timing;
-                document.getElementById('editMarketResult').value = market.result;
-                document.getElementById('editMarketOrder').value = market.order;
-                document.getElementById('editMarketModal').style.display = 'flex';
-            }
-        };
-
-        window.closeEditMarketModal = function() {
-            document.getElementById('editMarketModal').style.display = 'none';
-        };
-
-        window.updateMarket = async function() {
-            const marketId = document.getElementById('editMarketId').value;
-            const name = document.getElementById('editMarketName').value;
-            const timing = document.getElementById('editMarketTiming').value;
-            const result = document.getElementById('editMarketResult').value;
-            const order = parseInt(document.getElementById('editMarketOrder').value);
-            
-            await updateDoc(doc(db, 'markets', marketId), {
-                name: name,
-                timing: timing,
-                result: result,
-                order: order
-            });
-            
-            alert('Market updated successfully!');
-            closeEditMarketModal();
-        };
-
-        window.deleteMarket = async function(marketId) {
-            if (confirm('Are you sure you want to delete this market?')) {
-                await deleteDoc(doc(db, 'markets', marketId));
-                alert('Market deleted successfully!');
-            }
-        };
-
-        // Load Deposit Requests
-        async function loadDepositRequests() {
-            const depositsSnapshot = await getDocs(query(collection(db, 'depositRequests'), orderBy('date', 'desc')));
+    // Setup real-time listener for Deposit Requests
+    function setupDepositsListener() {
+        if (depositsUnsubscribe) depositsUnsubscribe();
+        
+        const q = query(collection(db, 'depositRequests'), orderBy('date', 'desc'));
+        depositsUnsubscribe = onSnapshot(q, (snapshot) => {
+            console.log("Deposits updated, count:", snapshot.size);
             const depositsList = document.getElementById('depositsList');
             
-            if (depositsSnapshot.empty) {
+            if (snapshot.empty) {
                 depositsList.innerHTML = '<p>No deposit requests</p>';
                 return;
             }
             
             let html = '';
-            depositsSnapshot.forEach(doc => {
+            snapshot.forEach(doc => {
                 const req = doc.data();
                 html += `
                     <div class="request-card">
@@ -616,54 +539,34 @@
                 `;
             });
             depositsList.innerHTML = html;
-        }
+        }, (error) => {
+            console.error("Error loading deposits:", error);
+        });
+    }
 
-        window.approveDeposit = async function(requestId, amount, bonus, userId) {
-            if (confirm(`Approve deposit of ₹${amount}? Bonus: ₹${bonus}`)) {
-                const userRef = doc(db, 'users', userId);
-                const userDoc = await getDoc(userRef);
-                const currentBalance = userDoc.exists() ? (userDoc.data().balance || 0) : 0;
-                const newBalance = currentBalance + amount + bonus;
-                await updateDoc(userRef, { balance: newBalance });
-                
-                await updateDoc(doc(db, 'depositRequests', requestId), {
-                    status: 'approved',
-                    approvedAt: new Date().toISOString()
-                });
-                
-                alert('Deposit approved and balance updated!');
-            }
-        };
-
-        window.rejectDeposit = async function(requestId) {
-            if (confirm('Reject this deposit request?')) {
-                await updateDoc(doc(db, 'depositRequests', requestId), {
-                    status: 'rejected',
-                    rejectedAt: new Date().toISOString()
-                });
-                alert('Deposit rejected!');
-            }
-        };
-
-        // Load Withdrawal Requests
-        async function loadWithdrawalRequests() {
-            const withdrawalsSnapshot = await getDocs(query(collection(db, 'transactions'), where('type', '==', 'withdrawal'), orderBy('date', 'desc')));
+    // Setup real-time listener for Withdrawal Requests
+    function setupWithdrawalsListener() {
+        if (withdrawalsUnsubscribe) withdrawalsUnsubscribe();
+        
+        const q = query(collection(db, 'transactions'), where('type', '==', 'withdrawal'), orderBy('date', 'desc'));
+        withdrawalsUnsubscribe = onSnapshot(q, (snapshot) => {
+            console.log("Withdrawals updated, count:", snapshot.size);
             const withdrawalsList = document.getElementById('withdrawalsList');
             
-            if (withdrawalsSnapshot.empty) {
+            if (snapshot.empty) {
                 withdrawalsList.innerHTML = '<p>No withdrawal requests</p>';
                 return;
             }
             
             let html = '';
-            withdrawalsSnapshot.forEach(doc => {
+            snapshot.forEach(doc => {
                 const req = doc.data();
                 html += `
                     <div class="request-card">
                         <div>
-                            <strong>User ID: ${req.userId}</strong><br>
+                            <strong>User: ${req.userId}</strong><br>
                             💰 Amount: ₹${req.amount}<br>
-                            🏦 Account: ${req.accountDetails}<br>
+                            🏦 Account: ${req.accountDetails || 'N/A'}<br>
                             📅 ${new Date(req.date).toLocaleString()}<br>
                             Status: <span class="status-${req.status}">${req.status}</span>
                         </div>
@@ -677,55 +580,34 @@
                 `;
             });
             withdrawalsList.innerHTML = html;
-        }
+        }, (error) => {
+            console.error("Error loading withdrawals:", error);
+        });
+    }
 
-        window.approveWithdrawal = async function(requestId, amount, userId) {
-            if (confirm(`Approve withdrawal of ₹${amount}?`)) {
-                await updateDoc(doc(db, 'transactions', requestId), {
-                    status: 'approved',
-                    approvedAt: new Date().toISOString()
-                });
-                alert('Withdrawal approved!');
-            }
-        };
-
-        window.rejectWithdrawal = async function(requestId, amount, userId) {
-            if (confirm('Reject this withdrawal request?')) {
-                await updateDoc(doc(db, 'transactions', requestId), {
-                    status: 'rejected',
-                    rejectedAt: new Date().toISOString()
-                });
-                
-                const userRef = doc(db, 'users', userId);
-                const userDoc = await getDoc(userRef);
-                if (userDoc.exists()) {
-                    const newBalance = (userDoc.data().balance || 0) + amount;
-                    await updateDoc(userRef, { balance: newBalance });
-                }
-                
-                alert('Withdrawal rejected and amount refunded!');
-            }
-        };
-
-        // Load Users
-        async function loadUsers() {
-            const usersSnapshot = await getDocs(collection(db, 'users'));
+    // Setup real-time listener for Users
+    function setupUsersListener() {
+        if (usersUnsubscribe) usersUnsubscribe();
+        
+        const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
+        usersUnsubscribe = onSnapshot(q, (snapshot) => {
+            console.log("Users updated, count:", snapshot.size);
             const usersList = document.getElementById('usersList');
             
-            if (usersSnapshot.empty) {
+            if (snapshot.empty) {
                 usersList.innerHTML = '<p>No users found</p>';
                 return;
             }
             
             let html = '<table class="markets-table"><thead><tr><th>Name</th><th>Mobile</th><th>Balance</th><th>Joined</th><th>Actions</th></tr></thead><tbody>';
-            usersSnapshot.forEach(doc => {
+            snapshot.forEach(doc => {
                 const user = doc.data();
                 html += `
                     <tr>
-                        <td>${user.name}</td>
-                        <td>${user.mobile}</td>
+                        <td>${user.name || 'N/A'}</td>
+                        <td>${user.mobile || 'N/A'}</td>
                         <td>₹${user.balance || 0}</td>
-                        <td>${new Date(user.createdAt).toLocaleDateString()}</td>
+                        <td>${user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</td>
                         <td>
                             <button class="edit-btn" onclick="adjustBalance('${doc.id}')">Adjust Balance</button>
                         </td>
@@ -734,102 +616,248 @@
             });
             html += '</tbody></table>';
             usersList.innerHTML = html;
+        }, (error) => {
+            console.error("Error loading users:", error);
+        });
+    }
+
+    function showTab(tab) {
+        document.querySelectorAll('.section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        document.getElementById(`${tab}Section`).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    window.showAddMarketModal = function() {
+        document.getElementById('addMarketModal').style.display = 'flex';
+    };
+
+    window.closeAddMarketModal = function() {
+        document.getElementById('addMarketModal').style.display = 'none';
+        document.getElementById('newMarketName').value = '';
+        document.getElementById('newMarketTiming').value = '';
+        document.getElementById('newMarketResult').value = '';
+        document.getElementById('newMarketOrder').value = '';
+    };
+
+    window.addMarket = async function() {
+        const name = document.getElementById('newMarketName').value;
+        const timing = document.getElementById('newMarketTiming').value;
+        const result = document.getElementById('newMarketResult').value;
+        const order = parseInt(document.getElementById('newMarketOrder').value) || 999;
+        
+        if (!name) {
+            alert('Please enter market name');
+            return;
         }
+        
+        await setDoc(doc(db, 'markets', name), {
+            name: name,
+            timing: timing || 'Coming Soon',
+            result: result || '---',
+            order: order
+        });
+        
+        alert('Market added successfully!');
+        closeAddMarketModal();
+    };
 
-        window.adjustBalance = async function(userId) {
-            const newBalance = prompt('Enter new balance amount:');
-            if (newBalance !== null && !isNaN(parseFloat(newBalance))) {
-                await updateDoc(doc(db, 'users', userId), {
-                    balance: parseFloat(newBalance)
-                });
-                alert('Balance updated successfully!');
-                loadUsers();
-            }
-        };
-
-        // Load Settings
-        async function loadSettings() {
-            const settingsDoc = await getDoc(doc(db, 'settings', 'app'));
-            if (settingsDoc.exists()) {
-                const settings = settingsDoc.data();
-                document.getElementById('qrUrl').value = settings.qrUrl || 'https://i.imgur.com/14a2kJA.jpeg';
-                document.getElementById('upiId').value = settings.upiId || 'win888@paytm';
-                document.getElementById('qrPreview').src = settings.qrUrl || 'https://i.imgur.com/14a2kJA.jpeg';
-            }
+    window.editMarket = async function(marketId) {
+        const marketDoc = await getDoc(doc(db, 'markets', marketId));
+        if (marketDoc.exists()) {
+            const market = marketDoc.data();
+            document.getElementById('editMarketId').value = marketId;
+            document.getElementById('editMarketName').value = market.name;
+            document.getElementById('editMarketTiming').value = market.timing;
+            document.getElementById('editMarketResult').value = market.result;
+            document.getElementById('editMarketOrder').value = market.order;
+            document.getElementById('editMarketModal').style.display = 'flex';
         }
+    };
 
-        window.updateQrSettings = async function() {
-            const qrUrl = document.getElementById('qrUrl').value;
-            await setDoc(doc(db, 'settings', 'app'), {
-                qrUrl: qrUrl,
-                upiId: document.getElementById('upiId').value
-            }, { merge: true });
-            document.getElementById('qrPreview').src = qrUrl;
-            alert('QR code updated successfully!');
-        };
+    window.closeEditMarketModal = function() {
+        document.getElementById('editMarketModal').style.display = 'none';
+    };
 
-        window.updateUpiSettings = async function() {
-            const upiId = document.getElementById('upiId').value;
-            await setDoc(doc(db, 'settings', 'app'), {
-                qrUrl: document.getElementById('qrUrl').value,
-                upiId: upiId
-            }, { merge: true });
-            alert('UPI ID updated successfully!');
-        };
+    window.updateMarket = async function() {
+        const marketId = document.getElementById('editMarketId').value;
+        const name = document.getElementById('editMarketName').value;
+        const timing = document.getElementById('editMarketTiming').value;
+        const result = document.getElementById('editMarketResult').value;
+        const order = parseInt(document.getElementById('editMarketOrder').value);
+        
+        await updateDoc(doc(db, 'markets', marketId), {
+            name: name,
+            timing: timing,
+            result: result,
+            order: order
+        });
+        
+        alert('Market updated successfully!');
+        closeEditMarketModal();
+    };
 
-        // Change Password Functions
-        window.showChangePassword = function() {
-            document.getElementById('changePasswordModal').style.display = 'flex';
-        };
-
-        window.closeChangePasswordModal = function() {
-            document.getElementById('changePasswordModal').style.display = 'none';
-            document.getElementById('currentPassword').value = '';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('confirmPassword').value = '';
-        };
-
-        window.changePassword = function() {
-            const currentPass = document.getElementById('currentPassword').value;
-            const newPass = document.getElementById('newPassword').value;
-            const confirmPass = document.getElementById('confirmPassword').value;
-            
-            if (currentPass !== adminPasswordHash) {
-                alert('Current password is incorrect!');
-                return;
-            }
-            
-            if (newPass.length < 6) {
-                alert('New password must be at least 6 characters!');
-                return;
-            }
-            
-            if (newPass !== confirmPass) {
-                alert('New passwords do not match!');
-                return;
-            }
-            
-            adminPasswordHash = newPass;
-            localStorage.setItem('adminPassword', newPass);
-            alert('Password changed successfully!');
-            closeChangePasswordModal();
-        };
-
-        // Load saved password
-        const savedPassword = localStorage.getItem('adminPassword');
-        if (savedPassword) {
-            adminPasswordHash = savedPassword;
+    window.deleteMarket = async function(marketId) {
+        if (confirm('Are you sure you want to delete this market?')) {
+            await deleteDoc(doc(db, 'markets', marketId));
+            alert('Market deleted successfully!');
         }
+    };
 
-        window.logout = function() {
-            localStorage.removeItem('adminAuthenticated');
-            localStorage.removeItem('adminPassword');
-            document.getElementById('loginOverlay').style.display = 'flex';
-            document.getElementById('adminContent').style.display = 'none';
-            document.getElementById('adminPassword').value = '';
-        };
+    window.approveDeposit = async function(requestId, amount, bonus, userId) {
+        if (confirm(`Approve deposit of ₹${amount}? Bonus: ₹${bonus}`)) {
+            const userRef = doc(db, 'users', userId);
+            const userDoc = await getDoc(userRef);
+            const currentBalance = userDoc.exists() ? (userDoc.data().balance || 0) : 0;
+            const newBalance = currentBalance + amount + bonus;
+            await updateDoc(userRef, { balance: newBalance });
+            
+            await updateDoc(doc(db, 'depositRequests', requestId), {
+                status: 'approved',
+                approvedAt: new Date().toISOString()
+            });
+            
+            alert('Deposit approved and balance updated!');
+        }
+    };
 
-        window.showTab = showTab;
-    </script>
-</body>
-</html>
+    window.rejectDeposit = async function(requestId) {
+        if (confirm('Reject this deposit request?')) {
+            await updateDoc(doc(db, 'depositRequests', requestId), {
+                status: 'rejected',
+                rejectedAt: new Date().toISOString()
+            });
+            alert('Deposit rejected!');
+        }
+    };
+
+    window.approveWithdrawal = async function(requestId, amount, userId) {
+        if (confirm(`Approve withdrawal of ₹${amount}?`)) {
+            await updateDoc(doc(db, 'transactions', requestId), {
+                status: 'approved',
+                approvedAt: new Date().toISOString()
+            });
+            alert('Withdrawal approved!');
+        }
+    };
+
+    window.rejectWithdrawal = async function(requestId, amount, userId) {
+        if (confirm('Reject this withdrawal request?')) {
+            await updateDoc(doc(db, 'transactions', requestId), {
+                status: 'rejected',
+                rejectedAt: new Date().toISOString()
+            });
+            
+            const userRef = doc(db, 'users', userId);
+            const userDoc = await getDoc(userRef);
+            if (userDoc.exists()) {
+                const newBalance = (userDoc.data().balance || 0) + amount;
+                await updateDoc(userRef, { balance: newBalance });
+            }
+            
+            alert('Withdrawal rejected and amount refunded!');
+        }
+    };
+
+    window.adjustBalance = async function(userId) {
+        const newBalance = prompt('Enter new balance amount:');
+        if (newBalance !== null && !isNaN(parseFloat(newBalance))) {
+            await updateDoc(doc(db, 'users', userId), {
+                balance: parseFloat(newBalance)
+            });
+            alert('Balance updated successfully!');
+        }
+    };
+
+    async function loadSettings() {
+        const settingsDoc = await getDoc(doc(db, 'settings', 'app'));
+        if (settingsDoc.exists()) {
+            const settings = settingsDoc.data();
+            document.getElementById('qrUrl').value = settings.qrUrl || 'https://i.imgur.com/14a2kJA.jpeg';
+            document.getElementById('upiId').value = settings.upiId || 'win888@paytm';
+            document.getElementById('qrPreview').src = settings.qrUrl || 'https://i.imgur.com/14a2kJA.jpeg';
+        }
+    }
+
+    window.updateQrSettings = async function() {
+        const qrUrl = document.getElementById('qrUrl').value;
+        await setDoc(doc(db, 'settings', 'app'), {
+            qrUrl: qrUrl,
+            upiId: document.getElementById('upiId').value
+        }, { merge: true });
+        document.getElementById('qrPreview').src = qrUrl;
+        alert('QR code updated successfully!');
+    };
+
+    window.updateUpiSettings = async function() {
+        const upiId = document.getElementById('upiId').value;
+        await setDoc(doc(db, 'settings', 'app'), {
+            qrUrl: document.getElementById('qrUrl').value,
+            upiId: upiId
+        }, { merge: true });
+        alert('UPI ID updated successfully!');
+    };
+
+    window.showChangePassword = function() {
+        document.getElementById('changePasswordModal').style.display = 'flex';
+    };
+
+    window.closeChangePasswordModal = function() {
+        document.getElementById('changePasswordModal').style.display = 'none';
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+    };
+
+    window.changePassword = function() {
+        const currentPass = document.getElementById('currentPassword').value;
+        const newPass = document.getElementById('newPassword').value;
+        const confirmPass = document.getElementById('confirmPassword').value;
+        
+        if (currentPass !== adminPasswordHash) {
+            alert('Current password is incorrect!');
+            return;
+        }
+        
+        if (newPass.length < 6) {
+            alert('New password must be at least 6 characters!');
+            return;
+        }
+        
+        if (newPass !== confirmPass) {
+            alert('New passwords do not match!');
+            return;
+        }
+        
+        adminPasswordHash = newPass;
+        localStorage.setItem('adminPassword', newPass);
+        alert('Password changed successfully!');
+        closeChangePasswordModal();
+    };
+
+    // Load saved password
+    const savedPassword = localStorage.getItem('adminPassword');
+    if (savedPassword) {
+        adminPasswordHash = savedPassword;
+    }
+
+    window.logout = function() {
+        // Clean up listeners
+        if (marketsUnsubscribe) marketsUnsubscribe();
+        if (depositsUnsubscribe) depositsUnsubscribe();
+        if (withdrawalsUnsubscribe) withdrawalsUnsubscribe();
+        if (usersUnsubscribe) usersUnsubscribe();
+        
+        localStorage.removeItem('adminAuthenticated');
+        document.getElementById('loginOverlay').style.display = 'flex';
+        document.getElementById('adminContent').style.display = 'none';
+        document.getElementById('adminPassword').value = '';
+    };
+
+    window.showTab = showTab;
+</script>
