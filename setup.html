@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup - WIN777</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #ff0000, #000);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 20px;
+        }
+        button {
+            background: #ff0000;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        .success {
+            background: #00cc00;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .error {
+            background: #ff0000;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid white;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 WIN777 Setup Tool</h1>
+        <p>Click the button below to automatically create all Firebase collections and data</p>
+        <button onclick="setupEverything()">🔧 Run Setup</button>
+        <div id="result"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
+            authDomain: "win777-be203.firebaseapp.com",
+            projectId: "win777-be203",
+            storageBucket: "win777-be203.firebasestorage.app",
+            messagingSenderId: "504655373119",
+            appId: "1:504655373119:web:4b964d6e6f0df20ebc698a",
+            measurementId: "G-XL2RBDZHE2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        window.setupEverything = async function() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="loading"></div> Setting up...';
+            
+            try {
+                // Create all 9 markets
+                const markets = [
+                    { name: "Mumbai", timing: "12:30pm - 01:20pm", result: "123-61-560", order: 1 },
+                    { name: "Delhi", timing: "01:30pm - 02:20pm", result: "456-78-234", order: 2 },
+                    { name: "Kolkata", timing: "02:30pm - 03:20pm", result: "789-90-567", order: 3 },
+                    { name: "Bangalore", timing: "03:30pm - 04:20pm", result: "234-45-890", order: 4 },
+                    { name: "Chennai", timing: "04:30pm - 05:20pm", result: "567-12-345", order: 5 },
+                    { name: "Hyderabad", timing: "05:30pm - 06:20pm", result: "890-34-678", order: 6 },
+                    { name: "Ahmedabad", timing: "06:30pm - 07:20pm", result: "345-67-901", order: 7 },
+                    { name: "Pune", timing: "07:30pm - 08:20pm", result: "678-89-432", order: 8 },
+                    { name: "Jaipur", timing: "08:30pm - 09:20pm", result: "901-23-765", order: 9 }
+                ];
+                
+                let marketCount = 0;
+                for (const market of markets) {
+                    await setDoc(doc(db, 'markets', market.name), market);
+                    marketCount++;
+                }
+                
+                // Create settings
+                await setDoc(doc(db, 'settings', 'app'), {
+                    qrUrl: "https://i.imgur.com/14a2kJA.jpeg",
+                    upiId: "win888@paytm"
+                });
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        ✅ Setup Complete!<br>
+                        ✓ ${marketCount} markets created<br>
+                        ✓ Settings created<br>
+                        <br>
+                        🎉 You can now use your app!
+                    </div>
+                    <button onclick="window.location.href='dashboard.html'">Go to Dashboard</button>
+                    <button onclick="window.location.href='admin.html'">Go to Admin Panel</button>
+                `;
+                
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Error: ${error.message}<br>
+                        <br>
+                        Make sure:<br>
+                        1. You are logged into Firebase<br>
+                        2. Firestore Database is enabled<br>
+                        3. Rules allow write access
+                    </div>
+                `;
+            }
+        };
+    </script>
+</body>
+</html>
