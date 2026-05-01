@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>WIN777 - Login</title>
     <style>
         * {
@@ -393,7 +393,7 @@
             <img src="https://i.imgur.com/CXcohGO.png" alt="WIN777" class="app-image">
         </div>
         
-        <!-- Saved User Section (shown if user saved in localStorage) -->
+        <!-- Saved User Section -->
         <div id="savedUserSection" class="saved-user-card hidden">
             <div class="saved-user-name" id="savedUserName"></div>
             <div class="saved-user-mobile" id="savedUserMobile"></div>
@@ -489,7 +489,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -508,9 +508,32 @@
 
         let currentUserId = null;
         let currentUserData = null;
+        let isLoggingOut = false;
 
-        // Check for saved user on page load
-        window.onload = function() {
+        // Check if already logged in via Firebase
+        onAuthStateChanged(auth, async (user) => {
+            if (user && !isLoggingOut) {
+                // User is already logged in, check if we're on login page
+                const userDoc = await getDoc(doc(db, 'users', user.uid));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    // Save to localStorage for MPIN login
+                    localStorage.setItem('win777_user', JSON.stringify({
+                        uid: user.uid,
+                        name: userData.name,
+                        mobile: userData.mobile
+                    }));
+                    // Redirect to dashboard
+                    window.location.href = 'dashboard.html';
+                }
+            } else if (!user && !isLoggingOut) {
+                // Not logged in, show login page normally
+                checkSavedUser();
+            }
+        });
+
+        // Check for saved user
+        function checkSavedUser() {
             const savedUser = localStorage.getItem('win777_user');
             if (savedUser) {
                 const user = JSON.parse(savedUser);
@@ -524,7 +547,10 @@
                 document.getElementById('savedUserSection').classList.add('hidden');
                 document.getElementById('normalLoginSection').classList.remove('hidden');
             }
-        };
+        }
+
+        // Call on page load
+        checkSavedUser();
 
         window.showLogin = function() {
             document.getElementById('loginForm').classList.remove('hidden');
@@ -543,11 +569,22 @@
             document.getElementById('normalLoginSection').classList.remove('hidden');
             document.getElementById('loginMobile').value = '';
             document.getElementById('loginPassword').value = '';
+            // Clear saved user from localStorage
+            localStorage.removeItem('win777_user');
         };
 
         window.switchUser = function() {
-            localStorage.removeItem('win777_user');
-            showNormalLogin();
+            // Sign out from Firebase
+            isLoggingOut = true;
+            auth.signOut().then(() => {
+                isLoggingOut = false;
+                localStorage.removeItem('win777_user');
+                showNormalLogin();
+            }).catch(() => {
+                isLoggingOut = false;
+                localStorage.removeItem('win777_user');
+                showNormalLogin();
+            });
         };
 
         window.showForgotPassword = function() {
@@ -628,7 +665,21 @@
                 if (userData.mpin === enteredMpin) {
                     document.getElementById('mpinLoginModal').style.display = 'none';
                     clearMpinBoxes();
-                    window.location.href = 'dashboard.html';
+                    // Sign in to Firebase with stored credentials
+                    const email = `${currentUserData.mobile}@win777.com`;
+                    try {
+                        // We need to sign in to Firebase to maintain session
+                        // For this, we need the password. Since we don't have it, we'll use a different approach
+                        // Actually, we can just redirect and let dashboard check auth state
+                        // But since user is already in localStorage, we can set a session flag
+                        sessionStorage.setItem('mpin_authenticated', 'true');
+                        sessionStorage.setItem('mpin_user_id', currentUserId);
+                        window.location.href = 'dashboard.html';
+                    } catch (error) {
+                        console.error("Login error:", error);
+                        alert("Please login with password first");
+                        showNormalLogin();
+                    }
                 } else {
                     alert('Invalid MPIN! Please try again.');
                     clearMpinBoxes();
@@ -670,16 +721,27 @@
                     // Check if user has MPIN set
                     if (!userData.mpin) {
                         // First time login - ask to create MPIN
-                        await createMpin(userId, userData);
-                    } else {
-                        // Save user to localStorage for MPIN login next time
-                        localStorage.setItem('win777_user', JSON.stringify({
-                            uid: userId,
-                            name: userData.name,
-                            mobile: userData.mobile
-                        }));
-                        window.location.href = 'dashboard.html';
+                        const mpin = prompt("Set your 4-digit MPIN for quick login (numbers only):");
+                        if (mpin && mpin.length === 4 && !isNaN(mpin)) {
+                            await updateDoc(doc(db, 'users', userId), {
+                                mpin: mpin
+                            });
+                            alert('MPIN created successfully! Next time you can login with MPIN only.');
+                        } else if (mpin) {
+                            alert('MPIN must be 4 digits!');
+                            window.location.reload();
+                            return;
+                        }
                     }
+                    
+                    // Save user to localStorage
+                    localStorage.setItem('win777_user', JSON.stringify({
+                        uid: userId,
+                        name: userData.name,
+                        mobile: userData.mobile
+                    }));
+                    
+                    window.location.href = 'dashboard.html';
                 } else {
                     showMessage('User data not found', 'error');
                 }
@@ -693,31 +755,6 @@
                 }
             }
         };
-
-        async function createMpin(userId, userData) {
-            const mpin = prompt("Set your 4-digit MPIN for quick login (numbers only):");
-            if (mpin && mpin.length === 4 && !isNaN(mpin)) {
-                await updateDoc(doc(db, 'users', userId), {
-                    mpin: mpin
-                });
-                
-                // Save user to localStorage
-                localStorage.setItem('win777_user', JSON.stringify({
-                    uid: userId,
-                    name: userData.name,
-                    mobile: userData.mobile
-                }));
-                
-                alert('MPIN created successfully! Next time you can login with MPIN only.');
-                window.location.href = 'dashboard.html';
-            } else if (mpin) {
-                alert('MPIN must be 4 digits! Please try again.');
-                createMpin(userId, userData);
-            } else {
-                alert('MPIN is required for quick login. Please login again.');
-                window.location.reload();
-            }
-        }
 
         window.resetPassword = async function() {
             const mobile = document.getElementById('resetMobile').value.trim();
