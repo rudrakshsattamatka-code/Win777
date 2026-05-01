@@ -172,6 +172,18 @@
             margin-top: 20px;
         }
 
+        .switch-link {
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .switch-link a {
+            color: #0066ff;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
         .forgot-password {
             text-align: right;
             margin-top: 10px;
@@ -281,8 +293,8 @@
         }
 
         .mpin-box {
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             text-align: center;
             font-size: 24px;
             font-weight: bold;
@@ -317,6 +329,49 @@
             font-size: 14px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
+
+        /* Saved User Card */
+        .saved-user-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .saved-user-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff0000;
+            margin-bottom: 5px;
+        }
+        
+        .saved-user-mobile {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .login-with-mpin-btn {
+            background: #ff0000;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .switch-user-btn {
+            background: none;
+            border: none;
+            color: #0066ff;
+            margin-top: 10px;
+            cursor: pointer;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -338,46 +393,57 @@
             <img src="https://i.imgur.com/CXcohGO.png" alt="WIN777" class="app-image">
         </div>
         
-        <div class="button-group">
-            <button class="action-btn login-btn" onclick="showLogin()">Login</button>
-            <button class="action-btn create-account-btn" onclick="showSignup()">Create Account</button>
+        <!-- Saved User Section (shown if user saved in localStorage) -->
+        <div id="savedUserSection" class="saved-user-card hidden">
+            <div class="saved-user-name" id="savedUserName"></div>
+            <div class="saved-user-mobile" id="savedUserMobile"></div>
+            <button class="login-with-mpin-btn" onclick="showMpinLogin()">🔐 Login with MPIN</button>
+            <button class="switch-user-btn" onclick="switchUser()">↻ Switch Account</button>
         </div>
+        
+        <!-- Normal Login Section -->
+        <div id="normalLoginSection">
+            <div class="button-group">
+                <button class="action-btn login-btn" onclick="showLogin()">Login</button>
+                <button class="action-btn create-account-btn" onclick="showSignup()">Create Account</button>
+            </div>
 
-        <!-- Login Form -->
-        <div id="loginForm">
-            <div class="form-group">
-                <label>Mobile Number</label>
-                <input type="tel" id="loginMobile" placeholder="Enter mobile number">
+            <!-- Login Form -->
+            <div id="loginForm">
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="tel" id="loginMobile" placeholder="Enter mobile number">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter password">
+                </div>
+                <div class="forgot-password">
+                    <a onclick="showForgotPassword()">Forgot Password?</a>
+                </div>
+                <button class="submit-btn" onclick="login()">Login →</button>
             </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="loginPassword" placeholder="Enter password">
-            </div>
-            <div class="forgot-password">
-                <a onclick="showForgotPassword()">Forgot Password?</a>
-            </div>
-            <button class="submit-btn" onclick="login()">Login →</button>
-        </div>
 
-        <!-- Signup Form -->
-        <div id="signupForm" class="hidden">
-            <div class="form-group">
-                <label>Full Name</label>
-                <input type="text" id="signupName" placeholder="Enter full name">
+            <!-- Signup Form -->
+            <div id="signupForm" class="hidden">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signupName" placeholder="Enter full name">
+                </div>
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="tel" id="signupMobile" placeholder="Enter mobile number">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signupPassword" placeholder="Create password">
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" id="signupConfirmPassword" placeholder="Confirm your password">
+                </div>
+                <button class="submit-btn" onclick="signup()">Create Account →</button>
             </div>
-            <div class="form-group">
-                <label>Mobile Number</label>
-                <input type="tel" id="signupMobile" placeholder="Enter mobile number">
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="signupPassword" placeholder="Create password">
-            </div>
-            <div class="form-group">
-                <label>Confirm Password</label>
-                <input type="password" id="signupConfirmPassword" placeholder="Confirm your password">
-            </div>
-            <button class="submit-btn" onclick="signup()">Create Account →</button>
         </div>
 
         <div id="message" class="message hidden"></div>
@@ -399,43 +465,28 @@
         </div>
     </div>
 
-    <!-- Create MPIN Modal (First Time) -->
-    <div id="createMpinModal" class="modal">
-        <div class="modal-content">
-            <h3>🔐 Create MPIN</h3>
-            <p>Set a 4-digit MPIN for quick login</p>
-            <div class="mpin-boxes">
-                <input type="password" maxlength="1" class="mpin-box" id="mpin1" onkeyup="moveToNext(1, event)">
-                <input type="password" maxlength="1" class="mpin-box" id="mpin2" onkeyup="moveToNext(2, event)">
-                <input type="password" maxlength="1" class="mpin-box" id="mpin3" onkeyup="moveToNext(3, event)">
-                <input type="password" maxlength="1" class="mpin-box" id="mpin4" onkeyup="moveToNext(4, event)">
-            </div>
-            <button onclick="saveMpin()">Save MPIN</button>
-        </div>
-    </div>
-
-    <!-- Enter MPIN Modal -->
-    <div id="enterMpinModal" class="modal">
+    <!-- MPIN Login Modal -->
+    <div id="mpinLoginModal" class="modal">
         <div class="modal-content">
             <h3>🔐 Enter MPIN</h3>
-            <p>Enter your 4-digit MPIN to continue</p>
+            <p id="mpinLoginName" style="margin-bottom:10px;"></p>
             <div class="mpin-boxes">
-                <input type="password" maxlength="1" class="mpin-box" id="loginMpin1" onkeyup="moveToNextLogin(1, event)">
-                <input type="password" maxlength="1" class="mpin-box" id="loginMpin2" onkeyup="moveToNextLogin(2, event)">
-                <input type="password" maxlength="1" class="mpin-box" id="loginMpin3" onkeyup="moveToNextLogin(3, event)">
-                <input type="password" maxlength="1" class="mpin-box" id="loginMpin4" onkeyup="moveToNextLogin(4, event)">
+                <input type="password" maxlength="1" class="mpin-box" id="mpin1" onkeyup="moveToNext(1, event)" oninput="checkMpinComplete()">
+                <input type="password" maxlength="1" class="mpin-box" id="mpin2" onkeyup="moveToNext(2, event)" oninput="checkMpinComplete()">
+                <input type="password" maxlength="1" class="mpin-box" id="mpin3" onkeyup="moveToNext(3, event)" oninput="checkMpinComplete()">
+                <input type="password" maxlength="1" class="mpin-box" id="mpin4" onkeyup="moveToNext(4, event)" oninput="checkMpinComplete()">
             </div>
-            <button onclick="verifyMpin()">Verify MPIN</button>
-            <button onclick="closeMpinModal(); showLogin()" style="background: #666;">Back to Login</button>
+            <button id="verifyMpinBtn" onclick="verifyMpinLogin()">Verify MPIN</button>
+            <button onclick="closeMpinModal(); showNormalLogin()" style="background: #666;">Back to Login</button>
         </div>
     </div>
-
     <!-- WhatsApp Help -->
     <div class="whatsapp-help">
         <a href="https://wa.me/919113224019" class="whatsapp-btn" target="_blank">
             <span>💬</span> Need Help? Chat with us
         </a>
     </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -455,8 +506,25 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        let tempUserId = null;
-        let tempUserData = null;
+        let currentUserId = null;
+        let currentUserData = null;
+
+        // Check for saved user on page load
+        window.onload = function() {
+            const savedUser = localStorage.getItem('win777_user');
+            if (savedUser) {
+                const user = JSON.parse(savedUser);
+                document.getElementById('savedUserName').innerText = user.name;
+                document.getElementById('savedUserMobile').innerText = user.mobile;
+                document.getElementById('savedUserSection').classList.remove('hidden');
+                document.getElementById('normalLoginSection').classList.add('hidden');
+                currentUserId = user.uid;
+                currentUserData = user;
+            } else {
+                document.getElementById('savedUserSection').classList.add('hidden');
+                document.getElementById('normalLoginSection').classList.remove('hidden');
+            }
+        };
 
         window.showLogin = function() {
             document.getElementById('loginForm').classList.remove('hidden');
@@ -470,6 +538,18 @@
             hideMessage();
         };
 
+        window.showNormalLogin = function() {
+            document.getElementById('savedUserSection').classList.add('hidden');
+            document.getElementById('normalLoginSection').classList.remove('hidden');
+            document.getElementById('loginMobile').value = '';
+            document.getElementById('loginPassword').value = '';
+        };
+
+        window.switchUser = function() {
+            localStorage.removeItem('win777_user');
+            showNormalLogin();
+        };
+
         window.showForgotPassword = function() {
             document.getElementById('forgotModal').style.display = 'flex';
         };
@@ -477,6 +557,12 @@
         window.closeForgotPassword = function() {
             document.getElementById('forgotModal').style.display = 'none';
             document.getElementById('resetMobile').value = '';
+        };
+
+        window.showMpinLogin = function() {
+            document.getElementById('mpinLoginName').innerHTML = `Welcome back, ${currentUserData.name}`;
+            document.getElementById('mpinLoginModal').style.display = 'flex';
+            document.getElementById('mpin1').focus();
         };
 
         function showMessage(text, type) {
@@ -504,15 +590,14 @@
             }
         };
 
-        window.moveToNextLogin = function(index, event) {
-            const current = document.getElementById(`loginMpin${index}`);
-            if (current.value.length === 1) {
-                if (index < 4) {
-                    document.getElementById(`loginMpin${index + 1}`).focus();
-                }
-            }
-            if (event.key === 'Backspace' && current.value.length === 0 && index > 1) {
-                document.getElementById(`loginMpin${index - 1}`).focus();
+        window.checkMpinComplete = function() {
+            const mpin1 = document.getElementById('mpin1').value;
+            const mpin2 = document.getElementById('mpin2').value;
+            const mpin3 = document.getElementById('mpin3').value;
+            const mpin4 = document.getElementById('mpin4').value;
+            
+            if (mpin1 && mpin2 && mpin3 && mpin4) {
+                verifyMpinLogin();
             }
         };
 
@@ -523,70 +608,45 @@
                    document.getElementById('mpin4').value;
         }
 
-        function getLoginMpinFromBoxes() {
-            return document.getElementById('loginMpin1').value +
-                   document.getElementById('loginMpin2').value +
-                   document.getElementById('loginMpin3').value +
-                   document.getElementById('loginMpin4').value;
-        }
-
         function clearMpinBoxes() {
             for (let i = 1; i <= 4; i++) {
                 document.getElementById(`mpin${i}`).value = '';
-                document.getElementById(`loginMpin${i}`).value = '';
             }
         }
 
-        window.saveMpin = async function() {
-            const mpin = getMpinFromBoxes();
-            if (mpin.length !== 4) {
-                alert('Please enter 4-digit MPIN');
-                return;
-            }
-            
-            if (isNaN(mpin)) {
-                alert('MPIN must contain only numbers');
-                return;
-            }
-            
-            // Save MPIN to user's document
-            await updateDoc(doc(db, 'users', tempUserId), {
-                mpin: mpin,
-                hasMpin: true
-            });
-            
-            document.getElementById('createMpinModal').style.display = 'none';
-            clearMpinBoxes();
-            alert('MPIN created successfully!');
-            
-            // Redirect to dashboard
-            window.location.href = 'dashboard.html';
-        };
-
-        window.verifyMpin = async function() {
-            const enteredMpin = getLoginMpinFromBoxes();
+        window.verifyMpinLogin = async function() {
+            const enteredMpin = getMpinFromBoxes();
             if (enteredMpin.length !== 4) {
                 alert('Please enter 4-digit MPIN');
                 return;
             }
             
-            if (tempUserData && tempUserData.mpin === enteredMpin) {
-                document.getElementById('enterMpinModal').style.display = 'none';
-                clearMpinBoxes();
-                window.location.href = 'dashboard.html';
+            // Verify MPIN from Firebase
+            const userDoc = await getDoc(doc(db, 'users', currentUserId));
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                if (userData.mpin === enteredMpin) {
+                    document.getElementById('mpinLoginModal').style.display = 'none';
+                    clearMpinBoxes();
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert('Invalid MPIN! Please try again.');
+                    clearMpinBoxes();
+                    document.getElementById('mpin1').focus();
+                }
             } else {
-                alert('Invalid MPIN! Please try again.');
-                clearMpinBoxes();
-                document.getElementById('loginMpin1').focus();
+                alert('User not found! Please login with password.');
+                closeMpinModal();
+                showNormalLogin();
             }
         };
 
         window.closeMpinModal = function() {
-            document.getElementById('enterMpinModal').style.display = 'none';
+            document.getElementById('mpinLoginModal').style.display = 'none';
             clearMpinBoxes();
         };
 
-        // Login Function with MPIN Check
+        // Login Function
         window.login = async function() {
             const mobile = document.getElementById('loginMobile').value.trim();
             const password = document.getElementById('loginPassword').value;
@@ -600,21 +660,25 @@
             
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                tempUserId = userCredential.user.uid;
+                const userId = userCredential.user.uid;
                 
-                // Get user data to check MPIN
-                const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+                // Get user data
+                const userDoc = await getDoc(doc(db, 'users', userId));
                 if (userDoc.exists()) {
-                    tempUserData = userDoc.data();
+                    const userData = userDoc.data();
                     
-                    if (tempUserData.hasMpin && tempUserData.mpin) {
-                        // User has MPIN, ask to enter
-                        document.getElementById('enterMpinModal').style.display = 'flex';
-                        document.getElementById('loginMpin1').focus();
+                    // Check if user has MPIN set
+                    if (!userData.mpin) {
+                        // First time login - ask to create MPIN
+                        await createMpin(userId, userData);
                     } else {
-                        // First time login, ask to create MPIN
-                        document.getElementById('createMpinModal').style.display = 'flex';
-                        document.getElementById('mpin1').focus();
+                        // Save user to localStorage for MPIN login next time
+                        localStorage.setItem('win777_user', JSON.stringify({
+                            uid: userId,
+                            name: userData.name,
+                            mobile: userData.mobile
+                        }));
+                        window.location.href = 'dashboard.html';
                     }
                 } else {
                     showMessage('User data not found', 'error');
@@ -629,6 +693,31 @@
                 }
             }
         };
+
+        async function createMpin(userId, userData) {
+            const mpin = prompt("Set your 4-digit MPIN for quick login (numbers only):");
+            if (mpin && mpin.length === 4 && !isNaN(mpin)) {
+                await updateDoc(doc(db, 'users', userId), {
+                    mpin: mpin
+                });
+                
+                // Save user to localStorage
+                localStorage.setItem('win777_user', JSON.stringify({
+                    uid: userId,
+                    name: userData.name,
+                    mobile: userData.mobile
+                }));
+                
+                alert('MPIN created successfully! Next time you can login with MPIN only.');
+                window.location.href = 'dashboard.html';
+            } else if (mpin) {
+                alert('MPIN must be 4 digits! Please try again.');
+                createMpin(userId, userData);
+            } else {
+                alert('MPIN is required for quick login. Please login again.');
+                window.location.reload();
+            }
+        }
 
         window.resetPassword = async function() {
             const mobile = document.getElementById('resetMobile').value.trim();
@@ -683,7 +772,6 @@
                     mobile: mobile,
                     email: email,
                     balance: 0,
-                    hasMpin: false,
                     createdAt: new Date().toISOString()
                 });
                 
@@ -705,19 +793,13 @@
 
         window.onclick = function(event) {
             const forgotModal = document.getElementById('forgotModal');
-            const createMpinModal = document.getElementById('createMpinModal');
-            const enterMpinModal = document.getElementById('enterMpinModal');
+            const mpinModal = document.getElementById('mpinLoginModal');
             
             if (event.target === forgotModal) {
                 closeForgotPassword();
             }
-            if (event.target === createMpinModal) {
-                document.getElementById('createMpinModal').style.display = 'none';
-                clearMpinBoxes();
-            }
-            if (event.target === enterMpinModal) {
-                document.getElementById('enterMpinModal').style.display = 'none';
-                clearMpinBoxes();
+            if (event.target === mpinModal) {
+                closeMpinModal();
             }
         };
     </script>
