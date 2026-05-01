@@ -30,7 +30,6 @@
             overflow: hidden;
         }
 
-        /* Floating Particles */
         .particle {
             position: absolute;
             background: linear-gradient(135deg, rgba(255,0,0,0.1), rgba(255,0,0,0.05));
@@ -57,7 +56,6 @@
             }
         }
 
-        /* Wave Effect */
         .wave {
             position: absolute;
             bottom: 0;
@@ -82,7 +80,6 @@
             }
         }
 
-        /* Glowing Orbs */
         .glow {
             position: absolute;
             width: 200px;
@@ -104,7 +101,7 @@
             }
         }
 
-        /* Main Container - Centered, no top space */
+        /* Main Container */
         .container {
             position: relative;
             z-index: 1;
@@ -118,7 +115,7 @@
             justify-content: center;
         }
 
-        /* Headline - Red */
+        /* Headline */
         .headline {
             font-size: 56px;
             font-weight: 800;
@@ -141,7 +138,7 @@
             border-radius: 12px;
         }
 
-        /* Button Group - Login & Create Account side by side */
+        /* Button Group */
         .button-group {
             display: flex;
             gap: 15px;
@@ -200,7 +197,6 @@
             color: #bbb;
         }
 
-        /* Submit Button */
         .submit-btn {
             width: 100%;
             padding: 14px;
@@ -214,7 +210,6 @@
             margin-top: 20px;
         }
 
-        /* Forgot Password Link */
         .forgot-password {
             text-align: right;
             margin-top: 10px;
@@ -227,11 +222,39 @@
             cursor: pointer;
         }
 
-        .forgot-password a:hover {
-            text-decoration: underline;
+        .message {
+            margin-top: 20px;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+            border-radius: 4px;
         }
 
-        /* Modal Styles */
+        .error {
+            background: #fee;
+            color: #c00;
+        }
+
+        .success {
+            background: #efe;
+            color: #060;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .disclaimer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+            font-size: 11px;
+            color: #999;
+            line-height: 1.5;
+        }
+
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -251,7 +274,6 @@
             border-radius: 8px;
             width: 350px;
             max-width: 90%;
-            position: relative;
         }
 
         .modal-content h3 {
@@ -276,53 +298,9 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
         }
 
-        .close-modal {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 20px;
-            cursor: pointer;
-            color: #999;
-        }
-
-        /* Message */
-        .message {
-            margin-top: 20px;
-            padding: 12px;
-            text-align: center;
-            font-size: 14px;
-            border-radius: 4px;
-        }
-
-        .error {
-            background: #fee;
-            color: #c00;
-        }
-
-        .success {
-            background: #efe;
-            color: #060;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        /* Disclaimer */
-        .disclaimer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
-            text-align: center;
-            font-size: 11px;
-            color: #999;
-            line-height: 1.5;
-        }
-
-        /* WhatsApp Help Button */
+        /* WhatsApp Help */
         .whatsapp-help {
             position: fixed;
             bottom: 30px;
@@ -342,11 +320,6 @@
             font-weight: 500;
             font-size: 14px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        }
-
-        .whatsapp-btn:hover {
-            transform: scale(1.05);
         }
     </style>
 </head>
@@ -354,35 +327,29 @@
 
     <!-- Animated Background -->
     <div class="bg-animation">
-        <div class="particle" style="width: 100px; height: 100px; top: 10%; left: 5%; animation-duration: 12s;"></div>
-        <div class="particle" style="width: 60px; height: 60px; top: 70%; left: 85%; animation-duration: 18s; animation-delay: -3s;"></div>
-        <div class="particle" style="width: 150px; height: 150px; top: 40%; left: 15%; animation-duration: 14s; animation-delay: -5s;"></div>
-        <div class="particle" style="width: 80px; height: 80px; top: 80%; left: 20%; animation-duration: 16s; animation-delay: -2s;"></div>
-        <div class="particle" style="width: 120px; height: 120px; top: 20%; right: 10%; animation-duration: 20s; animation-delay: -7s;"></div>
-        
+        <div class="particle" style="width: 100px; height: 100px; top: 10%; left: 5%;"></div>
+        <div class="particle" style="width: 60px; height: 60px; top: 70%; left: 85%;"></div>
+        <div class="particle" style="width: 150px; height: 150px; top: 40%; left: 15%;"></div>
+        <div class="particle" style="width: 80px; height: 80px; top: 80%; left: 20%;"></div>
+        <div class="particle" style="width: 120px; height: 120px; top: 20%; right: 10%;"></div>
         <div class="glow" style="top: 20%; left: -50px;"></div>
-        <div class="glow" style="bottom: 10%; right: -50px; animation-delay: -3s;"></div>
-        
+        <div class="glow" style="bottom: 10%; right: -50px;"></div>
         <div class="wave"></div>
-        <div class="wave" style="animation-delay: -2s; opacity: 0.5;"></div>
     </div>
 
     <div class="container">
-        <!-- Red Headline -->
         <div class="headline">WIN777</div>
 
-        <!-- Image Section -->
         <div class="image-section">
-            <img src="your-image.jpg" alt="App Image" class="app-image" id="appImage">
+            <img src="https://i.imgur.com/a0BDwAL.jpeg" alt="App Image" class="app-image">
         </div>
         
-        <!-- Two Buttons Side by Side -->
         <div class="button-group">
             <button class="action-btn login-btn" onclick="showLogin()">Login</button>
             <button class="action-btn create-account-btn" onclick="showSignup()">Create Account</button>
         </div>
 
-        <!-- Login Form (shown by default) -->
+        <!-- Login Form -->
         <div id="loginForm">
             <div class="form-group">
                 <label>Mobile Number</label>
@@ -398,7 +365,7 @@
             <button class="submit-btn" onclick="login()">Login →</button>
         </div>
 
-        <!-- Signup Form (hidden by default) -->
+        <!-- Signup Form -->
         <div id="signupForm" class="hidden">
             <div class="form-group">
                 <label>Full Name</label>
@@ -421,7 +388,6 @@
 
         <div id="message" class="message hidden"></div>
 
-        <!-- Disclaimer -->
         <div class="disclaimer">
             By using this app, you agree to our Terms & Conditions and Privacy Policy.<br>
             This is a demo application for learning purposes. All rights reserved.
@@ -431,27 +397,25 @@
     <!-- Forgot Password Modal -->
     <div id="forgotModal" class="modal">
         <div class="modal-content">
-            <span class="close-modal" onclick="closeForgotPassword()">&times;</span>
+            <span class="close-modal" onclick="closeForgotPassword()" style="float:right; font-size:24px; cursor:pointer;">&times;</span>
             <h3>Reset Password</h3>
-            <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Enter your mobile number. We'll send a password reset link to your email.</p>
+            <p style="margin-bottom:15px;">Enter your mobile number to reset password</p>
             <input type="tel" id="resetMobile" placeholder="Enter mobile number">
             <button onclick="resetPassword()">Send Reset Link</button>
         </div>
     </div>
 
-    <!-- WhatsApp Help Button -->
+    <!-- WhatsApp Help -->
     <div class="whatsapp-help">
         <a href="https://wa.me/919113224019" class="whatsapp-btn" target="_blank">
             <span>💬</span> Need Help? Chat with us
         </a>
     </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Your Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
             authDomain: "win777-be203.firebaseapp.com",
@@ -462,12 +426,10 @@
             measurementId: "G-XL2RBDZHE2"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // Functions to switch between forms
         window.showLogin = function() {
             document.getElementById('loginForm').classList.remove('hidden');
             document.getElementById('signupForm').classList.add('hidden');
@@ -517,7 +479,7 @@
                 showMessage('Login successful! Redirecting...', 'success');
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
-                }, 1000);
+                }, 1500);
             } catch (error) {
                 if (error.code === 'auth/user-not-found') {
                     showMessage('No account found with this mobile number', 'error');
@@ -541,7 +503,7 @@
             
             try {
                 await sendPasswordResetEmail(auth, email);
-                showMessage('Password reset link sent to your registered email!', 'success');
+                showMessage('Password reset link sent to your email!', 'success');
                 closeForgotPassword();
             } catch (error) {
                 if (error.code === 'auth/user-not-found') {
@@ -581,12 +543,13 @@
                     name: name,
                     mobile: mobile,
                     email: email,
+                    balance: 0,
                     createdAt: new Date().toISOString()
                 });
                 showMessage('Account created successfully! Redirecting...', 'success');
                 setTimeout(() => {
                     window.location.href = 'dashboard.html';
-                }, 1000);
+                }, 1500);
             } catch (error) {
                 if (error.code === 'auth/email-already-in-use') {
                     showMessage('Mobile number already registered', 'error');
@@ -596,7 +559,6 @@
             }
         };
 
-        // Close modal when clicking outside
         window.onclick = function(event) {
             const modal = document.getElementById('forgotModal');
             if (event.target === modal) {
