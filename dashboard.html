@@ -432,7 +432,7 @@
         </div>
         <p>Select Amount (₹100 - ₹5000)</p>
         <div class="amount-selector">
-            <div class="amount-option" onclick="selectAmount(500)">₹500</div>
+            <div class="amount-option" onclick="selectAmount(100)">₹500</div>
             <div class="amount-option" onclick="selectAmount(1000)">₹1000</div>
             <div class="amount-option" onclick="selectAmount(1500)">₹1500</div>
             <div class="amount-option" onclick="selectAmount(2000)">₹2000</div>
@@ -675,9 +675,9 @@
 
     window.proceedToPayment = function() {
         const customAmount = parseInt(document.getElementById('customAmount').value);
-        if (customAmount >= 500 && customAmount <= 5000) selectedDepositAmount = customAmount;
-        if (!selectedDepositAmount || selectedDepositAmount < 500 || selectedDepositAmount > 5000) {
-            alert('Please select amount between ₹500 and ₹5000');
+        if (customAmount >= 100 && customAmount <= 5000) selectedDepositAmount = customAmount;
+        if (!selectedDepositAmount || selectedDepositAmount < 100 || selectedDepositAmount > 5000) {
+            alert('Please select amount between ₹100 and ₹5000');
             return;
         }
         document.getElementById('displayAmount').innerText = selectedDepositAmount;
