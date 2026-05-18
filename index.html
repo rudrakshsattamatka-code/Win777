@@ -5,359 +5,96 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>win777 - Login</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 450px;
-            width: 100%;
-        }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .logo img {
-            max-width: 180px;
-            height: auto;
-            border-radius: 20px;
-        }
-
-        .card {
-            background: rgba(26, 26, 46, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 32px;
-            padding: 35px 30px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
-            color: #ccc;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 15px 18px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 16px;
-            color: white;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-
-        .input-group input:focus {
-            outline: none;
-            border-color: #f5b042;
-            background: rgba(255,255,255,0.12);
-        }
-
-        .input-group input::placeholder {
-            color: #666;
-        }
-
-        .mobile-input {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .country-code {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 16px;
-            padding: 15px 12px;
-            color: white;
-            font-weight: bold;
-        }
-
-        .mobile-input input {
-            flex: 1;
-        }
-
-        .btn-primary {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #f5b042, #ff6b6b);
-            border: none;
-            border-radius: 16px;
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            margin-top: 10px;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-        }
-
-        .btn-whatsapp {
-            width: 100%;
-            padding: 15px;
-            background: #25D366;
-            border: none;
-            border-radius: 16px;
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .btn-call {
-            width: 100%;
-            padding: 15px;
-            background: #1e88e5;
-            border: none;
-            border-radius: 16px;
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .forgot-link {
-            text-align: center;
-            margin: 15px 0;
-        }
-
-        .forgot-link span {
-            color: #f5b042;
-            font-size: 13px;
-            cursor: pointer;
-            text-decoration: underline;
-        }
-
-        .toggle-link {
-            text-align: center;
-            margin-top: 25px;
-            color: #aaa;
-            font-size: 14px;
-        }
-
-        .toggle-link span {
-            color: #f5b042;
-            cursor: pointer;
-            text-decoration: underline;
-            font-weight: bold;
-        }
-
-        .support-bar {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0 10px;
-        }
-
-        .support-bar button {
-            flex: 1;
-            padding: 12px;
-            border-radius: 16px;
-            font-size: 14px;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 20px;
-            right: 20px;
-            background: #1a1a2e;
-            padding: 15px;
-            border-radius: 16px;
-            text-align: center;
-            z-index: 1000;
-            border-left: 4px solid #f5b042;
-            color: white;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #fff;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 0.6s linear infinite;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .disclaimer {
-            text-align: center;
-            margin-top: 30px;
-            font-size: 11px;
-            color: #666;
-        }
-
-        .disclaimer a {
-            color: #f5b042;
-            text-decoration: none;
-        }
-        
-        .otp-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .otp-group input {
-            flex: 2;
-        }
-        
-        .otp-group button {
-            flex: 1;
-            padding: 15px;
-            background: #2a2a4a;
-            border: 1px solid #f5b042;
-            border-radius: 16px;
-            color: #f5b042;
-            cursor: pointer;
-        }
-        
-        .back-link {
-            text-align: center;
-            margin-top: 15px;
-        }
-        
-        .back-link span {
-            color: #aaa;
-            cursor: pointer;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .container { max-width: 450px; width: 100%; }
+        .logo { text-align: center; margin-bottom: 30px; }
+        .logo img { max-width: 180px; height: auto; border-radius: 20px; }
+        .card { background: rgba(26, 26, 46, 0.95); border-radius: 32px; padding: 35px 30px; border: 1px solid rgba(255,255,255,0.1); }
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; margin-bottom: 8px; font-size: 14px; color: #ccc; }
+        .input-group input { width: 100%; padding: 15px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; color: white; font-size: 16px; }
+        .input-group input:focus { outline: none; border-color: #f5b042; }
+        .mobile-input { display: flex; gap: 10px; align-items: center; }
+        .country-code { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 15px 12px; color: white; }
+        .mobile-input input { flex: 1; }
+        .btn-primary { width: 100%; padding: 15px; background: linear-gradient(135deg, #f5b042, #ff6b6b); border: none; border-radius: 16px; color: white; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        .btn-whatsapp { width: 100%; padding: 15px; background: #25D366; border: none; border-radius: 16px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-call { width: 100%; padding: 15px; background: #1e88e5; border: none; border-radius: 16px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .forgot-link { text-align: center; margin: 15px 0; }
+        .forgot-link span { color: #f5b042; font-size: 13px; cursor: pointer; text-decoration: underline; }
+        .toggle-link { text-align: center; margin-top: 25px; color: #aaa; }
+        .toggle-link span { color: #f5b042; cursor: pointer; text-decoration: underline; }
+        .otp-group { display: flex; gap: 10px; margin-top: 15px; }
+        .otp-group input { flex: 2; padding: 14px; background: #2a2a4a; border-radius: 12px; color: white; border: none; text-align: center; font-size: 18px; }
+        .otp-group button { flex: 1; padding: 14px; background: #f5b042; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .back-link { text-align: center; margin-top: 15px; }
+        .back-link span { color: #aaa; cursor: pointer; text-decoration: underline; }
+        .toast { position: fixed; bottom: 30px; left: 20px; right: 20px; background: #1a1a2e; padding: 15px; border-radius: 16px; text-align: center; z-index: 1000; border-left: 4px solid #f5b042; }
+        .loading { display: inline-block; width: 20px; height: 20px; border: 2px solid #fff; border-radius: 50%; border-top-color: transparent; animation: spin 0.6s linear infinite; margin-right: 8px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .disclaimer { text-align: center; margin-top: 30px; font-size: 11px; color: #666; }
+        .support-bar { display: flex; gap: 10px; margin: 20px 0 10px; }
+        .support-bar button { flex: 1; padding: 12px; border-radius: 16px; font-weight: bold; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="logo">
-        <img id="logoImage" src="https://i.imgur.com/a0BDwAL.jpeg" alt="WIN777 Logo" style="max-width: 180px;">
-    </div>
-
-    <div class="card">
-        <div id="authForm"></div>
-    </div>
-
-    <div class="disclaimer">
-        ⚡ Support: 9019941895 (Call & WhatsApp) | Min Deposit ₹100 | Max ₹49,000
-    </div>
+    <div class="logo"><img id="logoImage" src="https://i.imgur.com/a0BDwAL.jpeg" style="max-width: 180px;"></div>
+    <div class="card"><div id="authForm"></div></div>
+    <div class="disclaimer">⚡ Support: 9019941895 (Call & WhatsApp) | Min Deposit ₹100 | Max ₹49,000</div>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, updatePassword, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
+
+<script>
     const firebaseConfig = {
         apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
         authDomain: "win777-be203.firebaseapp.com",
         projectId: "win777-be203",
         storageBucket: "win777-be203.firebasestorage.app",
         messagingSenderId: "504655373119",
-        appId: "1:504655373119:web:4b964d6e6f0df20ebc698a",
-        measurementId: "G-XL2RBDZHE2"
+        appId: "1:504655373119:web:4b964d6e6f0df20ebc698a"
     };
     
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-    
-    window.db = db;
-    window.auth = auth;
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
     
     let confirmationResult = null;
-    let resetPhoneNumber = "";
+    let pendingUser = null;
     const SUPPORT_NUMBER = "9019941895";
     
-    // Load Logo
-    async function loadLogo() {
-        try {
-            const logoDoc = await getDoc(doc(db, "logoSetting", "current"));
-            if (logoDoc.exists()) {
-                const logoImg = document.getElementById('logoImage');
-                logoImg.src = logoDoc.data().imageUrl;
-                logoImg.style.maxWidth = logoDoc.data().size || "180px";
-            }
-        } catch(e) { console.log("Logo error:", e); }
-    }
-    
-    // Recaptcha
-    function initRecaptcha() {
-        return new Promise((resolve) => {
-            if (document.getElementById('recaptcha-container')) { resolve(); return; }
-            const div = document.createElement('div');
-            div.id = 'recaptcha-container';
-            document.body.appendChild(div);
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible', 'callback': () => resolve() });
-            resolve();
-        });
-    }
-    
-    // Toast
     function showToast(msg) {
-        const existing = document.querySelector('.toast');
-        if(existing) existing.remove();
-        const toast = document.createElement('div');
+        let toast = document.querySelector('.toast');
+        if(toast) toast.remove();
+        toast = document.createElement('div');
         toast.className = 'toast';
         toast.innerHTML = msg;
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }
     
-    // WhatsApp & Call
-    window.openWhatsApp = () => window.open(`https://wa.me/${SUPPORT_NUMBER}?text=Hello%20WIN777%20Support`, '_blank');
+    function setLoading(btnId, loading) {
+        let btn = document.getElementById(btnId);
+        if(btn) {
+            if(loading) {
+                btn.innerHTML = '<span class="loading"></span> Please wait...';
+                btn.disabled = true;
+            } else {
+                btn.innerHTML = btn.getAttribute('data-original') || 'Send OTP';
+                btn.disabled = false;
+            }
+        }
+    }
+    
+    window.openWhatsApp = () => window.open(`https://wa.me/${SUPPORT_NUMBER}`, '_blank');
     window.makeCall = () => window.location.href = `tel:${SUPPORT_NUMBER}`;
     
-    // Show Login Form
+    // Login Form
     function showLoginForm() {
         document.getElementById('authForm').innerHTML = `
             <div class="input-group">
@@ -369,186 +106,234 @@
             </div>
             <div class="input-group">
                 <label>🔒 Password</label>
-                <input type="password" id="password" placeholder="Enter your password">
+                <input type="password" id="password" placeholder="Enter password">
             </div>
-            <div class="forgot-link">
-                <span onclick="showForgotPassword()">🔐 Forgot Password? Reset with OTP</span>
-            </div>
-            <button class="btn-primary" onclick="handleLogin()">Login</button>
+            <div class="forgot-link"><span onclick="showForgotPassword()">🔐 Forgot Password?</span></div>
+            <button class="btn-primary" id="loginBtn" data-original="Login" onclick="handleLogin()">Login</button>
             <div class="support-bar">
                 <button style="background:#25D366; color:white;" onclick="openWhatsApp()">💬 WhatsApp</button>
-                <button style="background:#1e88e5; color:white;" onclick="makeCall()">📞 Call Support</button>
+                <button style="background:#1e88e5; color:white;" onclick="makeCall()">📞 Call</button>
             </div>
-            <div class="toggle-link">
-                Don't have an account? <span onclick="showOTPRegister()">Register with OTP</span>
-            </div>
+            <div class="toggle-link">Don't have an account? <span onclick="showRegisterForm()">Create Account</span></div>
         `;
     }
+// Register Form
+function showRegisterForm() {
+    document.getElementById('authForm').innerHTML = `
+        <div class="input-group"><label>👤 Full Name</label><input type="text" id="fullName" placeholder="Enter your name"></div>
+        <div class="input-group">
+            <label>📱 Mobile Number</label>
+            <div class="mobile-input">
+                <span class="country-code">+91</span>
+                <input type="tel" id="regMobile" placeholder="9876543210" maxlength="10">
+            </div>
+        </div>
+        <div class="input-group"><label>🔒 Password</label><input type="password" id="regPassword" placeholder="Min 6 characters"></div>
+        <div class="input-group"><label>🔒 Confirm Password</label><input type="password" id="confirmPassword" placeholder="Re-enter password"></div>
+        <div id="otpSection" style="display:none;">
+            <div class="otp-group">
+                <input type="text" id="otpCode" placeholder="6-digit OTP" maxlength="6">
+                <button onclick="verifyOTP()">Verify</button>
+            </div>
+        </div>
+        <button class="btn-primary" id="sendOtpBtn" data-original="Send OTP" onclick="sendOTP()">Send OTP</button>
+        <div class="toggle-link">Already have an account? <span onclick="showLoginForm()">Login</span></div>
+    `;
+}
+
+// Send OTP
+window.sendOTP = async () => {
+    const fullName = document.getElementById('fullName')?.value.trim();
+    const mobile = document.getElementById('regMobile')?.value.trim();
+    const password = document.getElementById('regPassword')?.value;
+    const confirm = document.getElementById('confirmPassword')?.value;
     
-    // Login Handler
-    window.handleLogin = async () => {
-        const mobile = document.getElementById('mobileNumber').value.trim();
-        const password = document.getElementById('password').value;
-        if(!mobile || mobile.length !== 10) { showToast("Enter valid mobile number"); return; }
-        if(!password) { showToast("Enter password"); return; }
-        const email = `${mobile}@win777.user`;
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            showToast("Login successful!");
-            setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
-        } catch(e) {
-            if(e.code === 'auth/user-not-found') showToast("User not found. Register first.");
-            else if(e.code === 'auth/wrong-password') showToast("Wrong password!");
-            else showToast("Error: " + e.message);
-        }
-    };
-    // Show OTP Register Form
-    window.showOTPRegister = () => {
-        document.getElementById('authForm').innerHTML = `
-            <div class="input-group">
-                <label>📱 Mobile Number</label>
-                <div class="mobile-input">
-                    <span class="country-code">+91</span>
-                    <input type="tel" id="regMobile" placeholder="9876543210" maxlength="10">
-                </div>
-            </div>
-            <div class="input-group">
-                <label>🔒 Create Password</label>
-                <input type="password" id="regPassword" placeholder="Min 6 characters">
-            </div>
-            <div id="otpSection" style="display:none;">
-                <div class="otp-group">
-                    <input type="text" id="otpCode" placeholder="6-digit OTP" maxlength="6">
-                    <button onclick="verifyOTP()">Verify OTP</button>
-                </div>
-            </div>
-            <button class="btn-primary" id="sendOtpBtn" onclick="sendOTP()">Send OTP</button>
-            <div class="support-bar">
-                <button style="background:#25D366; color:white;" onclick="openWhatsApp()">💬 WhatsApp</button>
-                <button style="background:#1e88e5; color:white;" onclick="makeCall()">📞 Call Support</button>
-            </div>
-            <div class="toggle-link">
-                Already have an account? <span onclick="showLoginForm()">Login</span>
-            </div>
-        `;
-    };
+    if(!fullName) { showToast("Enter your name"); return; }
+    if(!mobile || mobile.length !== 10) { showToast("Enter valid mobile number"); return; }
+    if(!password || password.length < 6) { showToast("Password must be 6+ characters"); return; }
+    if(password !== confirm) { showToast("Passwords don't match"); return; }
     
-    window.sendOTP = async () => {
-        const mobile = document.getElementById('regMobile').value;
-        const password = document.getElementById('regPassword').value;
-        if(!mobile || mobile.length !== 10) { showToast("Valid mobile required"); return; }
-        if(!password || password.length < 6) { showToast("Password min 6 chars"); return; }
-        await initRecaptcha();
-        try {
-            const result = await signInWithPhoneNumber(auth, "+91"+mobile, window.recaptchaVerifier);
-            confirmationResult = result;
-            showToast("OTP sent!");
-            document.getElementById('otpSection').style.display = 'block';
-            document.getElementById('sendOtpBtn').innerHTML = "OTP Sent ✓";
-            document.getElementById('sendOtpBtn').disabled = true;
-        } catch(e) { showToast("Error: "+e.message); }
-    };
+    // Check if user exists
+    const existing = await db.collection("users").where("mobile", "==", mobile).get();
+    if(!existing.empty) { showToast("Mobile already registered! Login instead."); return; }
     
-    window.verifyOTP = async () => {
-        const otp = document.getElementById('otpCode').value;
-        const mobile = document.getElementById('regMobile').value;
-        const password = document.getElementById('regPassword').value;
-        if(!otp || otp.length !== 6) { showToast("Enter 6-digit OTP"); return; }
-        try {
-            const result = await confirmationResult.confirm(otp);
-            const email = `${mobile}@win777.user`;
-            await setDoc(doc(db, "users", result.user.uid), {
-                mobile, email, password, balance: 0, totalDeposits: 0, totalWithdrawals: 0, createdAt: new Date(), isActive: true
-            });
-            showToast("Account created! Redirecting...");
-            setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
-        } catch(e) { showToast("Invalid OTP"); }
-    };
+    pendingUser = { fullName, mobile, password };
     
+    // Setup recaptcha
+    if(!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('sendOtpBtn', {
+            'size': 'invisible',
+            'callback': () => {}
+        });
+    }
+    
+    setLoading('sendOtpBtn', true);
+    
+    try {
+        const result = await auth.signInWithPhoneNumber("+91" + mobile, window.recaptchaVerifier);
+        confirmationResult = result;
+        showToast("OTP sent to " + mobile);
+        document.getElementById('otpSection').style.display = 'block';
+        let btn = document.getElementById('sendOtpBtn');
+        btn.innerHTML = "OTP Sent ✓";
+        btn.disabled = true;
+    } catch(error) {
+        showToast("Error: " + error.message);
+        setLoading('sendOtpBtn', false);
+    }
+};
+
+// Verify OTP and Create Account
+window.verifyOTP = async () => {
+    const otp = document.getElementById('otpCode')?.value;
+    if(!otp || otp.length !== 6) { showToast("Enter 6-digit OTP"); return; }
+    
+    try {
+        const result = await confirmationResult.confirm(otp);
+        const user = result.user;
+        const email = `${pendingUser.mobile}@win777.user`;
+        
+        // Create email/password account
+        await auth.createUserWithEmailAndPassword(email, pendingUser.password);
+        
+        // Save to Firestore
+        await db.collection("users").doc(user.uid).set({
+            uid: user.uid,
+            fullName: pendingUser.fullName,
+            mobile: pendingUser.mobile,
+            email: email,
+            password: pendingUser.password,
+            balance: 0,
+            createdAt: new Date(),
+            isActive: true
+        });
+        
+        showToast("✅ Account created! Redirecting...");
+        setTimeout(() => window.location.href = 'dashboard.html', 1500);
+    } catch(error) {
+        showToast("Invalid OTP: " + error.message);
+    }
+};
+
+// Login
+window.handleLogin = async () => {
+    const mobile = document.getElementById('mobileNumber')?.value.trim();
+    const password = document.getElementById('password')?.value;
+    
+    if(!mobile || mobile.length !== 10) { showToast("Enter valid mobile"); return; }
+    if(!password) { showToast("Enter password"); return; }
+    
+    setLoading('loginBtn', true);
+    
+    try {
+        await auth.signInWithEmailAndPassword(`${mobile}@win777.user`, password);
+        showToast("Login successful!");
+        setTimeout(() => window.location.href = 'dashboard.html', 1000);
+    } catch(error) {
+        if(error.code === 'auth/user-not-found') showToast("User not found. Register first.");
+        else if(error.code === 'auth/wrong-password') showToast("Wrong password!");
+        else showToast("Error: " + error.message);
+        setLoading('loginBtn', false);
+    }
+};
     // Forgot Password
     window.showForgotPassword = () => {
         document.getElementById('authForm').innerHTML = `
             <div class="input-group">
-                <label>📱 Enter Registered Mobile Number</label>
+                <label>📱 Registered Mobile Number</label>
                 <div class="mobile-input">
                     <span class="country-code">+91</span>
                     <input type="tel" id="resetMobile" placeholder="9876543210" maxlength="10">
                 </div>
             </div>
-            <button class="btn-primary" id="sendResetBtn" onclick="sendResetOTP()">Send OTP</button>
+            <div id="resetOtpSection" style="display:none;">
+                <div class="otp-group">
+                    <input type="text" id="resetOtp" placeholder="Enter OTP" maxlength="6">
+                    <button onclick="verifyResetOTP()">Verify</button>
+                </div>
+                <div id="newPwdSection" style="display:none; margin-top:15px;">
+                    <input type="password" id="newPassword" placeholder="New Password" style="width:100%; padding:14px; background:#2a2a4a; border-radius:12px; color:white;">
+                    <button class="btn-primary" onclick="updateUserPassword()" style="margin-top:10px;">Reset Password</button>
+                </div>
+            </div>
+            <button class="btn-primary" id="resetBtn" data-original="Send OTP" onclick="sendResetOTP()">Send OTP</button>
             <div class="back-link"><span onclick="showLoginForm()">← Back to Login</span></div>
         `;
     };
     
     window.sendResetOTP = async () => {
-        const mobile = document.getElementById('resetMobile').value;
-        if(!mobile || mobile.length !== 10) { showToast("Valid mobile required"); return; }
-        const usersRef = collection(db, "users");
-        const q = query(usersRef, where("mobile", "==", mobile));
-        const snap = await getDocs(q);
-        if(snap.empty) { showToast("No account found with this number"); return; }
-        resetPhoneNumber = mobile;
-        await initRecaptcha();
+        const mobile = document.getElementById('resetMobile')?.value;
+        if(!mobile || mobile.length !== 10) { showToast("Enter valid mobile"); return; }
+        
+        const existing = await db.collection("users").where("mobile", "==", mobile).get();
+        if(existing.empty) { showToast("No account found with this number"); return; }
+        
+        pendingUser = { mobile };
+        
+        if(!window.recaptchaVerifier) {
+            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('resetBtn', {
+                'size': 'invisible',
+                'callback': () => {}
+            });
+        }
+        
+        setLoading('resetBtn', true);
+        
         try {
-            const result = await signInWithPhoneNumber(auth, "+91"+mobile, window.recaptchaVerifier);
+            const result = await auth.signInWithPhoneNumber("+91" + mobile, window.recaptchaVerifier);
             confirmationResult = result;
-            showToast("OTP sent for password reset!");
-            document.getElementById('authForm').innerHTML = `
-                <div class="input-group"><label>Mobile: ${mobile}</label></div>
-                <div class="otp-group">
-                    <input type="text" id="resetOtp" placeholder="6-digit OTP" maxlength="6">
-                    <button onclick="verifyResetOTP()">Verify OTP</button>
-                </div>
-                <div id="newPwdSection" style="display:none;">
-                    <div class="input-group"><input type="password" id="newPassword" placeholder="New Password (min 6 chars)"></div>
-                    <button class="btn-primary" onclick="updateUserPassword()">Reset Password</button>
-                </div>
-                <div class="back-link"><span onclick="showForgotPassword()">← Back</span></div>
-            `;
-        } catch(e) { showToast("Error: "+e.message); }
+            showToast("OTP sent!");
+            document.getElementById('resetOtpSection').style.display = 'block';
+            let btn = document.getElementById('resetBtn');
+            btn.innerHTML = "OTP Sent ✓";
+            btn.disabled = true;
+        } catch(error) {
+            showToast("Error: " + error.message);
+            setLoading('resetBtn', false);
+        }
     };
     
     window.verifyResetOTP = async () => {
-        const otp = document.getElementById('resetOtp').value;
-        if(!otp || otp.length !== 6) { showToast("Enter 6-digit OTP"); return; }
+        const otp = document.getElementById('resetOtp')?.value;
+        if(!otp || otp.length !== 6) { showToast("Enter OTP"); return; }
+        
         try {
             await confirmationResult.confirm(otp);
-            showToast("Phone verified! Set new password.");
+            showToast("Phone verified!");
             document.getElementById('newPwdSection').style.display = 'block';
-        } catch(e) { showToast("Invalid OTP"); }
+        } catch(error) {
+            showToast("Invalid OTP");
+        }
     };
     
     window.updateUserPassword = async () => {
-        const newPassword = document.getElementById('newPassword').value;
-        if(!newPassword || newPassword.length < 6) { showToast("Password min 6 chars"); return; }
+        const newPassword = document.getElementById('newPassword')?.value;
+        if(!newPassword || newPassword.length < 6) { showToast("Password must be 6+ characters"); return; }
+        
         try {
             const user = auth.currentUser;
-            if(user) await updatePassword(user, newPassword);
-            const usersRef = collection(db, "users");
-            const q = query(usersRef, where("mobile", "==", resetPhoneNumber));
-            const snap = await getDocs(q);
-            for(const docSnap of snap.docs) {
-                await updateDoc(doc(db, "users", docSnap.id), { password: newPassword });
-            }
+            if(user) await user.updatePassword(newPassword);
+            
+            const existing = await db.collection("users").where("mobile", "==", pendingUser.mobile).get();
+            existing.forEach(doc => doc.ref.update({ password: newPassword }));
+            
             showToast("Password reset successful! Login now.");
             setTimeout(() => showLoginForm(), 1500);
-        } catch(e) { showToast("Error: "+e.message); }
+        } catch(error) {
+            showToast("Error: " + error.message);
+        }
     };
     
-    // Check auth state
-    onAuthStateChanged(auth, (user) => {
+    auth.onAuthStateChanged((user) => {
         if(user && user.email && !user.email.includes('temp')) {
             window.location.href = 'dashboard.html';
         }
     });
     
-    // Load logo and show login form
-    loadLogo();
     showLoginForm();
     
-    // Expose functions globally
     window.showLoginForm = showLoginForm;
-    window.showOTPRegister = showOTPRegister;
+    window.showRegisterForm = showRegisterForm;
     window.showForgotPassword = showForgotPassword;
     window.handleLogin = handleLogin;
     window.sendOTP = sendOTP;
