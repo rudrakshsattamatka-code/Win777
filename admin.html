@@ -3,402 +3,444 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WIN777 - Admin Panel</title>
+    <title>win777 - Admin Panel</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #f0f2f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 28px; font-weight: 800; color: #ff0000; }
-        .logout-btn { background: #ff0000; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-left: 10px; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .tab-btn { background: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 500; }
-        .tab-btn.active { background: #ff0000; color: white; }
-        .section { display: none; background: white; padding: 25px; border-radius: 12px; }
-        .section.active { display: block; }
-        .section-title { font-size: 20px; font-weight: 600; margin-bottom: 20px; color: #ff0000; border-bottom: 2px solid #ff0000; padding-bottom: 10px; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 500; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
-        button { background: #ff0000; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        .markets-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .markets-table th, .markets-table td { padding: 12px; text-align: left; border-bottom: 1px solid #e0e0e0; }
-        .markets-table th { background: #f8f9fa; }
-        .edit-btn { background: #0066ff; padding: 6px 12px; font-size: 12px; margin-right: 5px; }
-        .delete-btn { background: #ff0000; padding: 6px 12px; font-size: 12px; }
-        .add-btn { background: #00cc00; }
-        .request-card { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-        .approve-btn { background: #00cc00; }
-        .reject-btn { background: #ff0000; }
-        .status-pending { color: #ff6600; font-weight: bold; }
-        .status-approved { color: #00cc00; font-weight: bold; }
-        .qr-preview { text-align: center; margin: 20px 0; }
-        .qr-preview img { max-width: 200px; border: 1px solid #ddd; border-radius: 12px; padding: 10px; }
-        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; display: flex; justify-content: center; align-items: center; }
-        .login-box { background: white; padding: 40px; border-radius: 12px; width: 350px; text-align: center; }
-        .login-box h2 { color: #ff0000; margin-bottom: 20px; }
-        .login-box input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
-        .error-msg { color: #ff0000; margin-top: 10px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: linear-gradient(135deg, #0f0c29, #302b63); min-height: 100vh; color: white; }
+        .login-container { background: rgba(26, 26, 46, 0.95); border-radius: 32px; padding: 40px; max-width: 400px; width: 90%; margin: 100px auto; text-align: center; }
+        .login-container h2 { margin-bottom: 20px; color: #f5b042; }
+        .login-container input { width: 100%; padding: 15px; margin: 10px 0; background: #2a2a4a; border: 1px solid #3a3a6a; border-radius: 12px; color: white; }
+        .login-container button { width: 100%; padding: 15px; background: #f5b042; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .admin-panel { display: none; padding: 20px; max-width: 1400px; margin: 0 auto; }
+        .header { background: rgba(26, 26, 46, 0.95); padding: 20px; border-radius: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+        .tab-btn { background: #2a2a4a; border: none; padding: 10px 20px; border-radius: 30px; color: white; cursor: pointer; }
+        .tab-btn.active { background: #f5b042; color: #0f0c29; }
+        .content-panel { display: none; background: rgba(26, 26, 46, 0.8); border-radius: 20px; padding: 20px; }
+        .content-panel.active { display: block; }
+        .card { background: rgba(26, 26, 46, 0.9); border-radius: 20px; padding: 20px; margin-bottom: 20px; }
+        input, select, textarea { background: #2a2a4a; border: 1px solid #3a3a6a; padding: 12px; border-radius: 12px; width: 100%; margin-bottom: 12px; color: white; }
+        button { background: #f5b042; border: none; padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: bold; margin: 5px; }
+        button.danger { background: #dc2626; color: white; }
+        button.success { background: #22c55e; color: white; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .status-pending { color: #f59e0b; }
+        .status-approved { color: #22c55e; }
+        .blocked { color: #ef4444; text-decoration: line-through; }
+        .logo-preview { max-width: 200px; margin: 10px 0; border-radius: 12px; }
+        @media (max-width: 768px) { th, td { font-size: 12px; padding: 8px; } }
     </style>
 </head>
 <body>
 
-<div id="loginOverlay" class="login-overlay">
-    <div class="login-box">
-        <h2>Admin Login</h2>
-        <input type="password" id="adminPassword" placeholder="Enter Password">
-        <button onclick="checkAdminPassword()">Login</button>
-        <div id="loginError" class="error-msg"></div>
-    </div>
+<div id="loginForm" class="login-container">
+    <h2>🔐 Admin Login</h2>
+    <input type="password" id="adminPassword" placeholder="Enter Password">
+    <button onclick="checkLogin()">Login</button>
+    <div id="errorMsg" style="color:#ef4444; margin-top:10px;"></div>
 </div>
 
-<div id="adminContent" style="display: none;">
-    <div class="container">
-        <div class="header">
-            <div class="logo">WIN777 - Admin Panel</div>
-            <div>
-                <button class="logout-btn" onclick="showChangePassword()">🔑 Change Password</button>
-                <button class="logout-btn" onclick="logout()">Logout</button>
-            </div>
+<div id="adminPanel" class="admin-panel">
+    <div class="header">
+        <div>
+            <h1>🎰 WIN777 Admin</h1>
+            <p style="font-size:12px; color:#aaa;">Support: 9019941895 (Call/WhatsApp)</p>
         </div>
-
-        <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('markets')">📊 Markets</button>
-            <button class="tab-btn" onclick="showTab('deposits')">💰 Deposits</button>
-            <button class="tab-btn" onclick="showTab('withdrawals')">💸 Withdrawals</button>
-            <button class="tab-btn" onclick="showTab('settings')">⚙️ Settings</button>
-            <button class="tab-btn" onclick="showTab('users')">👥 Users</button>
-        </div>
-
-        <div id="marketsSection" class="section active">
-            <div class="section-title">Manage Markets</div>
-            <div id="marketsList"></div>
-            <button class="add-btn" onclick="showAddMarketModal()">+ Add New Market</button>
-        </div>
-
-        <div id="depositsSection" class="section">
-            <div class="section-title">Deposit Requests</div>
-            <div id="depositsList"></div>
-        </div>
-
-        <div id="withdrawalsSection" class="section">
-            <div class="section-title">Withdrawal Requests</div>
-            <div id="withdrawalsList"></div>
-        </div>
-
-        <div id="settingsSection" class="section">
-            <div class="section-title">App Settings</div>
-            <div class="form-group"><label>QR Code Image URL</label><input type="text" id="qrUrl" placeholder="https://i.imgur.com/14a2kJA.jpeg"></div>
-            <div class="qr-preview"><img id="qrPreview" src="https://i.imgur.com/14a2kJA.jpeg" alt="QR Preview"></div>
-            <button onclick="updateQrSettings()">Update QR Code</button>
-            <div class="form-group" style="margin-top:20px;"><label>UPI ID</label><input type="text" id="upiId" placeholder="win888@paytm"></div>
-            <button onclick="updateUpiSettings()">Update UPI ID</button>
-        </div>
-
-        <div id="usersSection" class="section">
-            <div class="section-title">User Management</div>
-            <div id="usersList"></div>
-        </div>
+        <button onclick="logout()" style="background:#dc2626;">Logout</button>
     </div>
-
-    <div id="addMarketModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
-        <div style="background:white; padding:30px; border-radius:12px; width:400px; max-width:90%;">
-            <h3>Add New Market</h3>
-            <div class="form-group"><label>Market Name</label><input type="text" id="newMarketName" placeholder="e.g., Mumbai"></div>
-            <div class="form-group"><label>Timing</label><input type="text" id="newMarketTiming" placeholder="e.g., 12:30pm - 01:20pm"></div>
-            <div class="form-group"><label>Result</label><input type="text" id="newMarketResult" placeholder="e.g., 123-61-560"></div>
-            <div class="form-group"><label>Order</label><input type="number" id="newMarketOrder" placeholder="1,2,3..."></div>
-            <button onclick="addMarket()">Add Market</button>
-            <button onclick="closeAddMarketModal()" style="background:#666; margin-top:10px;">Cancel</button>
-        </div>
+    
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="deposits">💰 Deposits</button>
+        <button class="tab-btn" data-tab="withdrawals">💸 Withdrawals</button>
+        <button class="tab-btn" data-tab="results">🎯 Declare Results</button>
+        <button class="tab-btn" data-tab="users">👥 Users</button>
+        <button class="tab-btn" data-tab="markets">📊 Markets</button>
+        <button class="tab-btn" data-tab="bids">🎲 All Bids</button>
+        <button class="tab-btn" data-tab="logo">🖼️ Logo Settings</button>
+        <button class="tab-btn" data-tab="settings">⚙️ Settings</button>
+        <button class="tab-btn" data-tab="history">🗑️ Clear History</button>
     </div>
-
-    <div id="editMarketModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
-        <div style="background:white; padding:30px; border-radius:12px; width:400px; max-width:90%;">
-            <h3>Edit Market</h3>
-            <input type="hidden" id="editMarketId">
-            <div class="form-group"><label>Market Name</label><input type="text" id="editMarketName"></div>
-            <div class="form-group"><label>Timing</label><input type="text" id="editMarketTiming"></div>
-            <div class="form-group"><label>Result</label><input type="text" id="editMarketResult"></div>
-            <div class="form-group"><label>Order</label><input type="number" id="editMarketOrder"></div>
-            <button onclick="updateMarket()">Update Market</button>
-            <button onclick="closeEditMarketModal()" style="background:#666; margin-top:10px;">Cancel</button>
-        </div>
-    </div>
-
-    <div id="changePasswordModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center;">
-        <div style="background:white; padding:30px; border-radius:12px; width:400px; max-width:90%;">
-            <h3>Change Admin Password</h3>
-            <div class="form-group"><label>Current Password</label><input type="password" id="currentPassword"></div>
-            <div class="form-group"><label>New Password</label><input type="password" id="newPassword"></div>
-            <div class="form-group"><label>Confirm Password</label><input type="password" id="confirmPassword"></div>
-            <button onclick="changePassword()">Change Password</button>
-            <button onclick="closeChangePasswordModal()" style="background:#666; margin-top:10px;">Cancel</button>
-        </div>
-    </div>
+    
+    <div id="deposits" class="content-panel active"><div class="card"><h2>Pending Deposits</h2><div id="depositsList"></div></div></div>
+    <div id="withdrawals" class="content-panel"><div class="card"><h2>Withdrawal Requests</h2><div id="withdrawalsList"></div></div></div>
+    <div id="results" class="content-panel"><div class="card"><h2>Declare Winning Results</h2><select id="resultMarket" style="margin-bottom:10px;"></select><input type="text" id="resultNumber" placeholder="Winning Number"><button onclick="declareResult()">Declare Winner</button><div id="recentResults"></div></div></div>
+    <div id="users" class="content-panel"><div class="card"><h2>Manage Users</h2><div id="usersList"></div><div style="margin-top:20px;"><h3>Add User</h3><input type="text" id="newUserMobile" placeholder="Mobile Number"><input type="password" id="newUserPassword" placeholder="Password"><button onclick="addUser()">Add User</button></div></div></div>
+    <div id="markets" class="content-panel"><div class="card"><h2>➕ Add New Market</h2><div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:10px;"><input type="text" id="newMarketName" placeholder="Market Name"><input type="text" id="newMarketCode" placeholder="Code"><input type="time" id="newOpenTime" value="09:00"><input type="time" id="newCloseTime" value="18:00"><select id="newMarketStatus"><option value="open">Open</option><option value="running">Running</option><option value="closed">Closed</option></select><button onclick="addNewMarket()" style="background:#22c55e;">➕ Add Market</button></div></div><div class="card"><h2>📊 Edit Markets</h2><div id="marketsList"></div></div></div>
+    <div id="bids" class="content-panel"><div class="card"><h2>All Bids</h2><div id="bidsList"></div></div></div>
+    <div id="logo" class="content-panel"><div class="card"><h2>🖼️ Logo Settings</h2><div id="logoPreview"><img id="adminLogoPreview" src="https://i.imgur.com/a0BDwAL.jpeg" class="logo-preview" style="max-width:200px;"></div><input type="text" id="logoUrl" placeholder="Image URL (e.g., https://i.imgur.com/xxx.jpeg)"><input type="text" id="logoSize" placeholder="Logo Size (e.g., 180px, 200px, 50%)"><button onclick="updateLogo()">Update Logo</button><p style="margin-top:10px; font-size:12px; color:#aaa;">Tip: Upload image to Imgur or any hosting and paste the direct image URL</p></div></div>
+    <div id="settings" class="content-panel"><div class="card"><h2>⚙️ Payment Settings</h2><label>UPI ID for Deposits</label><input type="text" id="upiId" placeholder="Enter UPI ID"><button onclick="updateUpiId()">Update UPI ID</button><p style="margin-top:10px; font-size:12px; color:#aaa;">Current UPI: <span id="currentUpiId"></span></p></div></div>
+    <div id="history" class="content-panel"><div class="card"><h2>Clear Data</h2><button class="danger" onclick="clearDeposits()" style="margin:5px;">Clear All Deposits History</button><button class="danger" onclick="clearWithdrawals()" style="margin:5px;">Clear All Withdrawals History</button><button class="danger" onclick="clearAllBids()" style="margin:5px;">Clear All Bids History</button><button class="danger" onclick="resetAllData()" style="margin:5px;">⚠️ RESET EVERYTHING</button></div></div>
 </div>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, getDoc, collection, query, orderBy, onSnapshot, addDoc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
-            authDomain: "win777-be203.firebaseapp.com",
-            projectId: "win777-be203",
-            storageBucket: "win777-be203.firebasestorage.app",
-            messagingSenderId: "504655373119",
-            appId: "1:504655373119:web:4b964d6e6f0df20ebc698a",
-            measurementId: "G-XL2RBDZHE2"
-        };
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, getDocs, updateDoc, doc, addDoc, deleteDoc, onSnapshot, query, where, orderBy, setDoc, getDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    const firebaseConfig = {
+        apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
+        authDomain: "win777-be203.firebaseapp.com",
+        projectId: "win777-be203",
+        storageBucket: "win777-be203.firebasestorage.app",
+        messagingSenderId: "504655373119",
+        appId: "1:504655373119:web:4b964d6e6f0df20ebc698a"
+    };
 
-        let adminPasswordHash = "Gani99@@";
-        let marketsUnsubscribe, depositsUnsubscribe, withdrawalsUnsubscribe, usersUnsubscribe;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    
+    const ADMIN_PASSWORD = "Gani99";
+    let isLoggedIn = false;
 
-        window.checkAdminPassword = function() {
-            if (document.getElementById('adminPassword').value === adminPasswordHash) {
-                localStorage.setItem('adminAuthenticated', 'true');
-                document.getElementById('loginOverlay').style.display = 'none';
-                document.getElementById('adminContent').style.display = 'block';
-                initializeAdmin();
-            } else {
-                document.getElementById('loginError').innerText = 'Invalid password!';
+    // Winning multipliers
+    const WINNING_MULTIPLIERS = {
+        "Single Digit": 10,
+        "Jodi Digit": 100,
+        "Single Pana": 160,
+        "Double Pana": 320,
+        "Triple Pana": 1000,
+        "Half Sangam": 1600,
+        "Full Sangam": 25000
+    };
+
+    window.checkLogin = () => {
+        if(document.getElementById('adminPassword').value === ADMIN_PASSWORD) {
+            isLoggedIn = true;
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            loadAllData();
+            setupListeners();
+            loadUpiId();
+            loadLogo();
+        } else {
+            document.getElementById('errorMsg').innerHTML = 'Wrong password!';
+        }
+    };
+    
+    window.logout = () => {
+        isLoggedIn = false;
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('adminPanel').style.display = 'none';
+        document.getElementById('adminPassword').value = '';
+    };
+// Logo Functions
+async function loadLogo() {
+    const logoDoc = await getDoc(doc(db, "logoSetting", "current"));
+    if(logoDoc.exists()) {
+        document.getElementById('logoUrl').value = logoDoc.data().imageUrl || "";
+        document.getElementById('logoSize').value = logoDoc.data().size || "180px";
+        document.getElementById('adminLogoPreview').src = logoDoc.data().imageUrl || "https://i.imgur.com/a0BDwAL.jpeg";
+        document.getElementById('adminLogoPreview').style.maxWidth = logoDoc.data().size || "180px";
+    }
+}
+
+window.updateLogo = async () => {
+    const logoUrl = document.getElementById('logoUrl').value;
+    const logoSize = document.getElementById('logoSize').value;
+    if(!logoUrl) {
+        alert("Please enter image URL");
+        return;
+    }
+    await setDoc(doc(db, "logoSetting", "current"), {
+        imageUrl: logoUrl,
+        size: logoSize || "180px",
+        updatedAt: new Date()
+    });
+    alert("Logo updated successfully! Users will see the new logo.");
+    loadLogo();
+};
+
+// UPI Functions
+async function loadUpiId() {
+    const upiDoc = await getDoc(doc(db, "settings", "upi"));
+    if(upiDoc.exists()) {
+        document.getElementById('currentUpiId').innerHTML = upiDoc.data().upiId;
+        document.getElementById('upiId').value = upiDoc.data().upiId;
+    } else {
+        await setDoc(doc(db, "settings", "upi"), { upiId: "win777@okhdfcbank" });
+        document.getElementById('currentUpiId').innerHTML = "win777@okhdfcbank";
+    }
+}
+
+window.updateUpiId = async () => {
+    const newUpiId = document.getElementById('upiId').value;
+    if(!newUpiId) { alert("Enter UPI ID"); return; }
+    await setDoc(doc(db, "settings", "upi"), { upiId: newUpiId, updatedAt: new Date() });
+    alert("UPI ID updated successfully!");
+    loadUpiId();
+};
+
+// Market Functions
+window.addNewMarket = async () => {
+    const name = document.getElementById('newMarketName').value;
+    const code = document.getElementById('newMarketCode').value;
+    const openTime = document.getElementById('newOpenTime').value;
+    const closeTime = document.getElementById('newCloseTime').value;
+    const status = document.getElementById('newMarketStatus').value;
+    if(!name) { alert("Please enter market name"); return; }
+    await addDoc(collection(db, "markets"), { name, code: code || "---", openTime, closeTime, status, createdAt: new Date() });
+    alert("Market added!");
+    document.getElementById('newMarketName').value = '';
+    document.getElementById('newMarketCode').value = '';
+    loadMarkets();
+};
+
+window.updateMarket = async (id, field, value) => {
+    await updateDoc(doc(db, "markets", id), { [field]: value });
+    showToast("Market updated!");
+};
+
+window.deleteMarket = async (id) => {
+    if(confirm("Delete this market?")) {
+        await deleteDoc(doc(db, "markets", id));
+        loadMarkets();
+    }
+};
+
+window.editMarketName = (id, currentName) => {
+    const newName = prompt("Enter new market name:", currentName);
+    if(newName && newName !== currentName) updateMarket(id, 'name', newName);
+};
+
+window.editMarketCode = (id, currentCode) => {
+    const newCode = prompt("Enter new market code:", currentCode);
+    if(newCode && newCode !== currentCode) updateMarket(id, 'code', newCode);
+};
+
+// Deposit Approval
+window.approveDeposit = async (id, userId, amount) => {
+    if(confirm(`Approve ₹${amount} deposit?`)) {
+        await updateDoc(doc(db, "deposits", id), { status: "approved", approvedAt: new Date() });
+        const userRef = doc(db, "users", userId);
+        const userSnap = await getDoc(userRef);
+        const currBalance = userSnap.data()?.balance || 0;
+        await updateDoc(userRef, { balance: currBalance + amount });
+        alert("Deposit approved!");
+    }
+};
+
+// Withdrawal Approval
+window.approveWithdrawal = async (id, userId, amount) => {
+    if(confirm(`Approve withdrawal of ₹${amount}?`)) {
+        const userRef = doc(db, "users", userId);
+        const userSnap = await getDoc(userRef);
+        const currBalance = userSnap.data()?.balance || 0;
+        if(currBalance >= amount) {
+            await updateDoc(userRef, { balance: currBalance - amount });
+            await updateDoc(doc(db, "withdrawals", id), { status: "approved", approvedAt: new Date() });
+            alert("Withdrawal approved!");
+        } else {
+            alert("Insufficient balance!");
+        }
+    }
+};
+
+// User Management
+window.blockUser = async (userId) => {
+    if(confirm("Block this user?")) {
+        await updateDoc(doc(db, "users", userId), { blocked: true });
+        alert("User blocked");
+    }
+};
+
+window.deleteUser = async (userId) => {
+    if(confirm("Delete user permanently?")) {
+        await deleteDoc(doc(db, "users", userId));
+        alert("User deleted");
+    }
+};
+
+window.addUser = async () => {
+    const mobile = document.getElementById('newUserMobile').value;
+    const password = document.getElementById('newUserPassword').value;
+    if(!mobile || mobile.length !== 10) { alert("Valid mobile required"); return; }
+    if(!password || password.length < 6) { alert("Password min 6 chars"); return; }
+    const email = `${mobile}@win777.user`;
+    try {
+        const userCred = await createUserWithEmailAndPassword(auth, email, password);
+        await setDoc(doc(db, "users", userCred.user.uid), {
+            mobile, email, password, balance: 0, totalDeposits: 0, totalWithdrawals: 0, createdAt: new Date(), isActive: true
+        });
+        alert("User added!");
+        document.getElementById('newUserMobile').value = '';
+        document.getElementById('newUserPassword').value = '';
+    } catch(error) { alert("Error: " + error.message); }
+};
+
+// Declare Results with Auto Add Winnings
+window.declareResult = async () => {
+    const market = document.getElementById('resultMarket').value;
+    const resultNumber = document.getElementById('resultNumber').value;
+    if(!market || !resultNumber) { alert("Select market and enter result"); return; }
+    
+    const bidsSnap = await getDocs(query(collection(db, "bids"), where("market", "==", market), where("status", "==", "pending")));
+    let winnersCount = 0;
+    let totalWinnings = 0;
+    
+    for(const bidDoc of bidsSnap) {
+        const bid = bidDoc.data();
+        const multiplier = WINNING_MULTIPLIERS[bid.gameType] || 1;
+        let isWin = false;
+        let winAmount = 0;
+        
+        // Simplified win detection
+        if(bid.gameType === "Single Digit" && bid.bidDetails?.digits) {
+            for(const digit of bid.bidDetails.digits) {
+                if(digit.digit === resultNumber) { isWin = true; winAmount = digit.points * multiplier; break; }
             }
-        };
-
-        if (localStorage.getItem('adminAuthenticated') === 'true') {
-            document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('adminContent').style.display = 'block';
-            initializeAdmin();
-        }
-
-        async function initializeAdmin() {
-            setupMarketsListener();
-            setupDepositsListener();
-            setupWithdrawalsListener();
-            setupUsersListener();
-            await loadSettings();
-        }
-
-        function setupMarketsListener() {
-            if (marketsUnsubscribe) marketsUnsubscribe();
-            const q = query(collection(db, 'markets'), orderBy('order'));
-            marketsUnsubscribe = onSnapshot(q, (snapshot) => {
-                const list = document.getElementById('marketsList');
-                if (snapshot.empty) { list.innerHTML = '<p>No markets found. Add your first market!</p>'; return; }
-                let html = '<table class="markets-table"><thead><tr><th>Order</th><th>Market Name</th><th>Timing</th><th>Result</th><th>Actions</th></tr></thead><tbody>';
-                snapshot.forEach(doc => {
-                    const m = doc.data();
-                    html += `<tr><td>${m.order || '-'}</td><td>${m.name}</td><td>${m.timing}</td><td>${m.result}</td>
-                    <td><button class="edit-btn" onclick="editMarket('${doc.id}')">Edit</button>
-                    <button class="delete-btn" onclick="deleteMarket('${doc.id}')">Delete</button></td></tr>`;
-                });
-                html += '</tbody></table>';
-                list.innerHTML = html;
-            });
-        }
-
-        function setupDepositsListener() {
-            if (depositsUnsubscribe) depositsUnsubscribe();
-            const q = query(collection(db, 'depositRequests'), orderBy('date', 'desc'));
-            depositsUnsubscribe = onSnapshot(q, (snapshot) => {
-                const list = document.getElementById('depositsList');
-                if (snapshot.empty) { list.innerHTML = '<p>No deposit requests</p>'; return; }
-                let html = '';
-                snapshot.forEach(doc => {
-                    const r = doc.data();
-                    html += `<div class="request-card"><div><strong>${r.userName || 'User'}</strong><br>📱 ${r.userMobile}<br>💰 ₹${r.amount}<br>🎁 Bonus: ₹${r.bonusAmount || 0}<br>📅 ${new Date(r.date).toLocaleString()}<br>Status: <span class="status-${r.status}">${r.status}</span></div>
-                    ${r.status === 'pending' ? `<div><button class="approve-btn" onclick="approveDeposit('${doc.id}', ${r.amount}, ${r.bonusAmount || 0}, '${r.userId}')">Approve</button>
-                    <button class="reject-btn" onclick="rejectDeposit('${doc.id}')">Reject</button></div>` : ''}</div>`;
-                });
-                list.innerHTML = html;
-            });
-        }
-
-        function setupWithdrawalsListener() {
-            if (withdrawalsUnsubscribe) withdrawalsUnsubscribe();
-            const q = query(collection(db, 'transactions'), orderBy('date', 'desc'));
-            withdrawalsUnsubscribe = onSnapshot(q, (snapshot) => {
-                const list = document.getElementById('withdrawalsList');
-                if (snapshot.empty) { list.innerHTML = '<p>No withdrawal requests</p>'; return; }
-                let html = '';
-                snapshot.forEach(doc => {
-                    const r = doc.data();
-                    if (r.type === 'withdrawal') {
-                        html += `<div class="request-card"><div><strong>User: ${r.userId}</strong><br>💰 ₹${r.amount}<br>🏦 ${r.accountDetails || 'N/A'}<br>📅 ${new Date(r.date).toLocaleString()}<br>Status: <span class="status-${r.status}">${r.status}</span></div>
-                        ${r.status === 'pending' ? `<div><button class="approve-btn" onclick="approveWithdrawal('${doc.id}', ${r.amount}, '${r.userId}')">Approve</button>
-                        <button class="reject-btn" onclick="rejectWithdrawal('${doc.id}', ${r.amount}, '${r.userId}')">Reject</button></div>` : ''}</div>`;
-                    }
-                });
-                list.innerHTML = html;
-            });
-        }
-
-        function setupUsersListener() {
-            if (usersUnsubscribe) usersUnsubscribe();
-            const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
-            usersUnsubscribe = onSnapshot(q, (snapshot) => {
-                const list = document.getElementById('usersList');
-                if (snapshot.empty) { list.innerHTML = '<p>No users found</p>'; return; }
-                let html = '<table class="markets-table"><thead><tr><th>Name</th><th>Mobile</th><th>Balance</th><th>Joined</th><th>Action</th></tr></thead><tbody>';
-                snapshot.forEach(doc => {
-                    const u = doc.data();
-                    html += `<tr><td>${u.name || 'N/A'}</td><td>${u.mobile || 'N/A'}</td><td>₹${u.balance || 0}</td>
-                    <td>${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A'}</td>
-                    <td><button class="edit-btn" onclick="adjustBalance('${doc.id}')">Adjust Balance</button></td></tr>`;
-                });
-                html += '</tbody></table>';
-                list.innerHTML = html;
-            });
-        }
-
-        async function loadSettings() {
-            const docSnap = await getDoc(doc(db, 'settings', 'app'));
-            if (docSnap.exists()) {
-                document.getElementById('qrUrl').value = docSnap.data().qrUrl || 'https://i.imgur.com/14a2kJA.jpeg';
-                document.getElementById('upiId').value = docSnap.data().upiId || 'win888@paytm';
-                document.getElementById('qrPreview').src = docSnap.data().qrUrl || 'https://i.imgur.com/14a2kJA.jpeg';
+        } else if(bid.gameType === "Jodi Digit" && bid.bidDetails?.jodis) {
+            for(const jodi of bid.bidDetails.jodis) {
+                if(jodi.jodi === resultNumber) { isWin = true; winAmount = jodi.points * multiplier; break; }
+            }
+        } else if(bid.gameType === "Single Pana" && bid.bidDetails?.panas) {
+            for(const pana of bid.bidDetails.panas) {
+                if(pana.pana === resultNumber) { isWin = true; winAmount = pana.points * multiplier; break; }
+            }
+        } else if(bid.gameType === "Double Pana" && bid.bidDetails?.doublePanas) {
+            for(const dp of bid.bidDetails.doublePanas) {
+                if(dp.doublePana === resultNumber) { isWin = true; winAmount = dp.points * multiplier; break; }
+            }
+        } else if(bid.gameType === "Triple Pana" && bid.bidDetails?.triples) {
+            for(const triple of bid.bidDetails.triples) {
+                if(triple.triple === resultNumber) { isWin = true; winAmount = triple.points * multiplier; break; }
+            }
+        } else if(bid.gameType === "Half Sangam" && bid.bidDetails?.halfSangams) {
+            for(const hs of bid.bidDetails.halfSangams) {
+                if(hs.closeDigit === resultNumber) { isWin = true; winAmount = hs.points * multiplier; break; }
+            }
+        } else if(bid.gameType === "Full Sangam" && bid.bidDetails?.fullSangams) {
+            for(const fs of bid.bidDetails.fullSangams) {
+                if(fs.closePana === resultNumber) { isWin = true; winAmount = fs.points * multiplier; break; }
             }
         }
-
-        window.showTab = function(tab) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        
+        if(isWin) {
+            await updateDoc(doc(db, "bids", bidDoc.id), { status: "won", result: resultNumber, winAmount });
+            const userRef = doc(db, "users", bid.userId);
+            const userSnap = await getDoc(userRef);
+            const newBalance = (userSnap.data()?.balance || 0) + winAmount;
+            await updateDoc(userRef, { balance: newBalance });
+            winnersCount++;
+            totalWinnings += winAmount;
+        } else {
+            await updateDoc(doc(db, "bids", bidDoc.id), { status: "lost", result: resultNumber, winAmount: 0 });
+        }
+    }
+    
+    alert(`✅ RESULTS DECLARED!\nMarket: ${market}\nWinning Number: ${resultNumber}\nWinners: ${winnersCount}\nTotal Winnings: ₹${totalWinnings}`);
+    document.getElementById('resultNumber').value = '';
+    loadAllBids();
+};
+    // Clear History Functions
+    window.clearDeposits = async () => { if(confirm("Delete all deposits?")) { const snap = await getDocs(collection(db, "deposits")); const batch = writeBatch(db); snap.forEach(d => batch.delete(d.ref)); await batch.commit(); alert("Deposits cleared"); loadDeposits(); } };
+    window.clearWithdrawals = async () => { if(confirm("Delete all withdrawals?")) { const snap = await getDocs(collection(db, "withdrawals")); const batch = writeBatch(db); snap.forEach(d => batch.delete(d.ref)); await batch.commit(); alert("Withdrawals cleared"); loadWithdrawals(); } };
+    window.clearAllBids = async () => { if(confirm("Delete all bids?")) { const snap = await getDocs(collection(db, "bids")); const batch = writeBatch(db); snap.forEach(d => batch.delete(d.ref)); await batch.commit(); alert("Bids cleared"); loadAllBids(); } };
+    window.resetAllData = async () => { if(confirm("RESET EVERYTHING?")) { await clearDeposits(); await clearWithdrawals(); await clearAllBids(); alert("All data reset"); } };
+    
+    // View User Bets
+    window.viewUserBets = async (userId) => {
+        const betsSnap = await getDocs(query(collection(db, "bids"), where("userId", "==", userId), orderBy("timestamp", "desc")));
+        const userDoc = await getDoc(doc(db, "users", userId));
+        const userMobile = userDoc.data()?.mobile || userId;
+        let html = `<div style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.95); z-index:10000; overflow:auto; padding:20px;"><div style="max-width:800px; margin:0 auto; background:#1a1a2e; border-radius:20px; padding:20px;"><h2>User Bets: ${userMobile}</h2><div style="overflow-x:auto;"><table style="width:100%;"><thead><tr><th>Date</th><th>Game</th><th>Market</th><th>Points</th><th>Result</th><th>Status</th></tr></thead><tbody>`;
+        for(const betDoc of betsSnap) {
+            const b = betDoc.data();
+            html += `<tr>
+                <td>${b.timestamp?.toDate?.().toLocaleString() || 'N/A'}</td>
+                <td>${b.gameType}</td>
+                <td>${b.market}</td>
+                <td>₹${b.totalPoints}</td>
+                <td>${b.result || '-'}</td>
+                <td>${b.status || 'Pending'}</td>
+            </tr>`;
+        }
+        html += `</tbody><tr></div><button onclick="this.parentElement.parentElement.remove()" style="margin-top:20px;">Close</button></div></div>`;
+        document.body.insertAdjacentHTML('beforeend', html);
+    };
+    
+    window.copyToClipboard = (text) => { navigator.clipboard.writeText(text); alert("Password copied!"); };
+    function showToast(msg) { alert(msg); }
+    
+    // Load Functions
+    async function loadDeposits() {
+        const snap = await getDocs(query(collection(db, "deposits"), where("status", "==", "pending"), orderBy("createdAt", "desc")));
+        if(snap.empty) { document.getElementById('depositsList').innerHTML = "<p>No pending deposits</p>"; return; }
+        let html = '<td><th>User</th><th>Amount</th><th>Transaction ID</th><th>UPI ID</th><th>Time</th><th>Action</th></tr>';
+        snap.forEach(d => { const data = d.data(); html += `<tr><td>${data.userMobile || data.userId.slice(0,8)}</td><td>₹${data.amount}</td><td>${data.transactionId}</td><td>${data.upiId || '-'}</td><td>${data.createdAt?.toDate?.().toLocaleString() || 'Now'}</td><td><button onclick="approveDeposit('${d.id}','${data.userId}',${data.amount})">Approve</button></td></tr>`; });
+        document.getElementById('depositsList').innerHTML = `<table style="width:100%">${html}</table>`;
+    }
+    
+    async function loadWithdrawals() {
+        const snap = await getDocs(query(collection(db, "withdrawals"), where("status", "==", "pending"), orderBy("createdAt", "desc")));
+        if(snap.empty) { document.getElementById('withdrawalsList').innerHTML = "<p>No pending withdrawals</p>"; return; }
+        let html = '<tr><th>User</th><th>Account</th><th>IFSC</th><th>Amount</th><th>Action</th></tr>';
+        snap.forEach(d => { const data = d.data(); html += `<tr><td>${data.userId.slice(0,8)}</td><td>${data.accountNumber}</td><td>${data.ifscCode}</td><td>₹${data.amount}</td><td><button onclick="approveWithdrawal('${d.id}','${data.userId}',${data.amount})">Approve</button></td></tr>`; });
+        document.getElementById('withdrawalsList').innerHTML = `<table style="width:100%">${html}</table>`;
+    }
+    
+    async function loadUsers() {
+        const snap = await getDocs(collection(db, "users"));
+        let html = '<tr><th>Mobile</th><th>Password</th><th>Balance</th><th>Status</th><th>Actions</th></tr>';
+        for(const docSnap of snap) {
+            const u = docSnap.data();
+            html += `<tr class="${u.blocked ? 'blocked' : ''}">
+                <td>${u.mobile || 'N/A'}</td>
+                <td><span style="font-family:monospace;">${u.password || 'N/A'}</span> <button onclick="copyToClipboard('${u.password}')">📋</button></td>
+                <td>₹${u.balance || 0}</td>
+                <td>${u.blocked ? 'Blocked' : 'Active'}</td>
+                <td><button onclick="viewUserBets('${docSnap.id}')">📜 Bets</button> <button onclick="blockUser('${docSnap.id}')">Block</button> <button class="danger" onclick="deleteUser('${docSnap.id}')">Delete</button></td>
+            </tr>`;
+        }
+        document.getElementById('usersList').innerHTML = `<table style="width:100%">${html}</table>`;
+    }
+    
+    async function loadMarkets() {
+        const snap = await getDocs(collection(db, "markets"));
+        let html = '<table><th>Market</th><th>Code</th><th>Open</th><th>Close</th><th>Status</th><th>Action</th></tr>';
+        for(const docSnap of snap) {
+            const m = docSnap.data();
+            html += `<tr>
+                <td><span style="cursor:pointer; color:#f5b042;" onclick="editMarketName('${docSnap.id}', '${m.name}')">✏️ ${m.name}</span></td>
+                <td><span style="cursor:pointer;" onclick="editMarketCode('${docSnap.id}', '${m.code}')">📝 ${m.code}</span></td>
+                <td><input type="time" value="${m.openTime}" onchange="updateMarket('${docSnap.id}', 'openTime', this.value)" style="width:90px;"></td>
+                <td><input type="time" value="${m.closeTime}" onchange="updateMarket('${docSnap.id}', 'closeTime', this.value)" style="width:90px;"></td>
+                <td><select onchange="updateMarket('${docSnap.id}', 'status', this.value)"><option ${m.status === 'open' ? 'selected' : ''}>open</option><option ${m.status === 'running' ? 'selected' : ''}>running</option><option ${m.status === 'closed' ? 'selected' : ''}>closed</option></select></td>
+                <td><button class="danger" onclick="deleteMarket('${docSnap.id}')">Delete</button></td>
+            </tr>`;
+        }
+        document.getElementById('marketsList').innerHTML = `<table style="width:100%">${html}</table>`;
+        let options = '<option value="">Select Market</option>';
+        snap.forEach(d => options += `<option value="${d.data().name}">${d.data().name}</option>`);
+        document.getElementById('resultMarket').innerHTML = options;
+    }
+    
+    async function loadAllBids() {
+        const snap = await getDocs(query(collection(db, "bids"), orderBy("timestamp", "desc")));
+        let html = '<tr><th>User</th><th>Game</th><th>Market</th><th>Points</th><th>Result</th><th>Status</th></tr>';
+        snap.forEach(d => { const b = d.data(); html += `<tr><td>${b.userId.slice(0,8)}</td><td>${b.gameType}</td><td>${b.market}</td><td>₹${b.totalPoints}</td><td>${b.result || '-'}</td><td>${b.status || 'Pending'}</td></tr>`; });
+        document.getElementById('bidsList').innerHTML = `<table style="width:100%">${html}</table>`;
+    }
+    
+    function setupListeners() {
+        onSnapshot(collection(db, "deposits"), () => loadDeposits());
+        onSnapshot(collection(db, "withdrawals"), () => loadWithdrawals());
+        onSnapshot(collection(db, "users"), () => loadUsers());
+        onSnapshot(collection(db, "markets"), () => loadMarkets());
+        onSnapshot(collection(db, "bids"), () => loadAllBids());
+    }
+    
+    async function loadAllData() { await loadDeposits(); await loadWithdrawals(); await loadUsers(); await loadMarkets(); await loadAllBids(); }
+    
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`${tab}Section`).classList.add('active');
-            event.target.classList.add('active');
-        };
-
-        window.showAddMarketModal = function() { document.getElementById('addMarketModal').style.display = 'flex'; };
-        window.closeAddMarketModal = function() { document.getElementById('addMarketModal').style.display = 'none'; };
-        window.addMarket = async function() {
-            const name = document.getElementById('newMarketName').value.trim();
-            if (!name) { alert('Enter market name'); return; }
-            await setDoc(doc(db, 'markets', name), {
-                name: name,
-                timing: document.getElementById('newMarketTiming').value || 'Coming Soon',
-                result: document.getElementById('newMarketResult').value || '---',
-                order: parseInt(document.getElementById('newMarketOrder').value) || 999
-            });
-            alert('Market added!');
-            closeAddMarketModal();
-            document.getElementById('newMarketName').value = '';
-            document.getElementById('newMarketTiming').value = '';
-            document.getElementById('newMarketResult').value = '';
-            document.getElementById('newMarketOrder').value = '';
-        };
-
-        window.editMarket = async function(id) {
-            const docSnap = await getDoc(doc(db, 'markets', id));
-            if (docSnap.exists()) {
-                const m = docSnap.data();
-                document.getElementById('editMarketId').value = id;
-                document.getElementById('editMarketName').value = m.name;
-                document.getElementById('editMarketTiming').value = m.timing;
-                document.getElementById('editMarketResult').value = m.result;
-                document.getElementById('editMarketOrder').value = m.order;
-                document.getElementById('editMarketModal').style.display = 'flex';
-            }
-        };
-        window.closeEditMarketModal = function() { document.getElementById('editMarketModal').style.display = 'none'; };
-        window.updateMarket = async function() {
-            const id = document.getElementById('editMarketId').value;
-            await updateDoc(doc(db, 'markets', id), {
-                name: document.getElementById('editMarketName').value,
-                timing: document.getElementById('editMarketTiming').value,
-                result: document.getElementById('editMarketResult').value,
-                order: parseInt(document.getElementById('editMarketOrder').value)
-            });
-            alert('Market updated!');
-            closeEditMarketModal();
-        };
-        window.deleteMarket = async function(id) {
-            if (confirm('Delete this market?')) { await deleteDoc(doc(db, 'markets', id)); alert('Deleted!'); }
-        };
-
-        window.approveDeposit = async function(id, amount, bonus, userId) {
-            if (confirm(`Approve ₹${amount}? Bonus: ₹${bonus}`)) {
-                const userRef = doc(db, 'users', userId);
-                const userDoc = await getDoc(userRef);
-                const newBalance = (userDoc.data()?.balance || 0) + amount + bonus;
-                await updateDoc(userRef, { balance: newBalance });
-                await updateDoc(doc(db, 'depositRequests', id), { status: 'approved', approvedAt: new Date().toISOString() });
-                alert('Approved!');
-            }
-        };
-        window.rejectDeposit = async function(id) {
-            if (confirm('Reject?')) { await updateDoc(doc(db, 'depositRequests', id), { status: 'rejected' }); alert('Rejected!'); }
-        };
-
-        window.approveWithdrawal = async function(id, amount, userId) {
-            if (confirm(`Approve withdrawal ₹${amount}?`)) {
-                await updateDoc(doc(db, 'transactions', id), { status: 'approved' });
-                alert('Approved!');
-            }
-        };
-        window.rejectWithdrawal = async function(id, amount, userId) {
-            if (confirm('Reject and refund?')) {
-                await updateDoc(doc(db, 'transactions', id), { status: 'rejected' });
-                const userRef = doc(db, 'users', userId);
-                const userDoc = await getDoc(userRef);
-                await updateDoc(userRef, { balance: (userDoc.data()?.balance || 0) + amount });
-                alert('Rejected and refunded!');
-            }
-        };
-
-        window.adjustBalance = async function(userId) {
-            const newBalance = prompt('Enter new balance:');
-            if (newBalance && !isNaN(parseFloat(newBalance))) {
-                await updateDoc(doc(db, 'users', userId), { balance: parseFloat(newBalance) });
-                alert('Balance updated!');
-            }
-        };
-
-        window.updateQrSettings = async function() {
-            await setDoc(doc(db, 'settings', 'app'), {
-                qrUrl: document.getElementById('qrUrl').value,
-                upiId: document.getElementById('upiId').value
-            }, { merge: true });
-            document.getElementById('qrPreview').src = document.getElementById('qrUrl').value;
-            alert('QR updated!');
-        };
-        window.updateUpiSettings = async function() {
-            await setDoc(doc(db, 'settings', 'app'), {
-                upiId: document.getElementById('upiId').value,
-                qrUrl: document.getElementById('qrUrl').value
-            }, { merge: true });
-            alert('UPI updated!');
-        };
-
-        window.showChangePassword = function() { document.getElementById('changePasswordModal').style.display = 'flex'; };
-        window.closeChangePasswordModal = function() { document.getElementById('changePasswordModal').style.display = 'none'; };
-        window.changePassword = function() {
-            const current = document.getElementById('currentPassword').value;
-            const newPass = document.getElementById('newPassword').value;
-            const confirm = document.getElementById('confirmPassword').value;
-            if (current !== adminPasswordHash) { alert('Current password incorrect'); return; }
-            if (newPass.length < 6) { alert('Password must be 6+ characters'); return; }
-            if (newPass !== confirm) { alert('Passwords do not match'); return; }
-            adminPasswordHash = newPass;
-            localStorage.setItem('adminPassword', newPass);
-            alert('Password changed!');
-            closeChangePasswordModal();
-        };
-
-        const saved = localStorage.getItem('adminPassword');
-        if (saved) adminPasswordHash = saved;
-
-        window.logout = function() {
-            if (marketsUnsubscribe) marketsUnsubscribe();
-            if (depositsUnsubscribe) depositsUnsubscribe();
-            if (withdrawalsUnsubscribe) withdrawalsUnsubscribe();
-            if (usersUnsubscribe) usersUnsubscribe();
-            localStorage.removeItem('adminAuthenticated');
-            document.getElementById('loginOverlay').style.display = 'flex';
-            document.getElementById('adminContent').style.display = 'none';
-            document.getElementById('adminPassword').value = '';
-        };
-    </script>
+            btn.classList.add('active');
+            document.querySelectorAll('.content-panel').forEach(p => p.classList.remove('active'));
+            document.getElementById(btn.dataset.tab).classList.add('active');
+        });
+    });
+</script>
 </body>
 </html>
