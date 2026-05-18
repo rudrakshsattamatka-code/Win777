@@ -4,28 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>win777 - Login</title>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, updatePassword, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
-            authDomain: "win777-be203.firebaseapp.com",
-            projectId: "win777-be203",
-            storageBucket: "win777-be203.firebasestorage.app",
-            messagingSenderId: "504655373119",
-            appId: "1:504655373119:web:4b964d6e6f0df20ebc698a",
-            measurementId: "G-XL2RBDZHE2"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        
-        window.db = db;
-        window.auth = auth;
-    </script>
     <style>
         * {
             margin: 0;
@@ -137,55 +115,38 @@
             transform: translateY(-2px);
         }
 
-        .btn-secondary {
-            width: 100%;
-            padding: 12px;
-            background: transparent;
-            border: 1px solid #f5b042;
-            border-radius: 16px;
-            color: #f5b042;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-
         .btn-whatsapp {
             width: 100%;
-            padding: 12px;
+            padding: 15px;
             background: #25D366;
             border: none;
             border-radius: 16px;
             color: white;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 16px;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
         }
 
-        .otp-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .otp-group input {
-            flex: 2;
-        }
-
-        .otp-group button {
-            flex: 1;
+        .btn-call {
+            width: 100%;
             padding: 15px;
-            background: #2a2a4a;
-            border: 1px solid #f5b042;
+            background: #1e88e5;
+            border: none;
             border-radius: 16px;
-            color: #f5b042;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
             cursor: pointer;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .forgot-link {
@@ -214,6 +175,22 @@
             font-weight: bold;
         }
 
+        .support-bar {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0 10px;
+        }
+
+        .support-bar button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
         .toast {
             position: fixed;
             bottom: 30px;
@@ -225,7 +202,6 @@
             text-align: center;
             z-index: 1000;
             border-left: 4px solid #f5b042;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
             color: white;
             animation: slideUp 0.3s ease;
         }
@@ -257,26 +233,6 @@
             to { transform: rotate(360deg); }
         }
 
-        .support-bar {
-            display: flex;
-            gap: 10px;
-            margin: 20px 0 10px;
-        }
-
-        .support-bar button {
-            flex: 1;
-            padding: 12px;
-            border-radius: 16px;
-            font-size: 14px;
-        }
-
-        .btn-call {
-            background: #1e88e5;
-            border: none;
-            color: white;
-            cursor: pointer;
-        }
-
         .disclaimer {
             text-align: center;
             margin-top: 30px;
@@ -289,6 +245,26 @@
             text-decoration: none;
         }
         
+        .otp-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .otp-group input {
+            flex: 2;
+        }
+        
+        .otp-group button {
+            flex: 1;
+            padding: 15px;
+            background: #2a2a4a;
+            border: 1px solid #f5b042;
+            border-radius: 16px;
+            color: #f5b042;
+            cursor: pointer;
+        }
+        
         .back-link {
             text-align: center;
             margin-top: 15px;
@@ -296,12 +272,7 @@
         
         .back-link span {
             color: #aaa;
-            font-size: 13px;
             cursor: pointer;
-        }
-        
-        .back-link span:hover {
-            color: #f5b042;
         }
     </style>
 </head>
@@ -322,78 +293,78 @@
 </div>
 
 <script type="module">
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, RecaptchaVerifier, signInWithPhoneNumber, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, updatePassword, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     
-    const db = window.db;
-    const auth = window.auth;
-    let isLoading = false;
+    const firebaseConfig = {
+        apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
+        authDomain: "win777-be203.firebaseapp.com",
+        projectId: "win777-be203",
+        storageBucket: "win777-be203.firebasestorage.app",
+        messagingSenderId: "504655373119",
+        appId: "1:504655373119:web:4b964d6e6f0df20ebc698a",
+        measurementId: "G-XL2RBDZHE2"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    
+    window.db = db;
+    window.auth = auth;
+    
     let confirmationResult = null;
     let resetPhoneNumber = "";
-
     const SUPPORT_NUMBER = "9019941895";
-
-    // Load Logo from Firebase
+    
+    // Load Logo
     async function loadLogo() {
         try {
             const logoDoc = await getDoc(doc(db, "logoSetting", "current"));
             if (logoDoc.exists()) {
-                const logoUrl = logoDoc.data().imageUrl;
-                const logoSize = logoDoc.data().size || "180px";
-                if (logoUrl) {
-                    const logoImg = document.getElementById('logoImage');
-                    logoImg.src = logoUrl;
-                    logoImg.style.maxWidth = logoSize;
-                }
+                const logoImg = document.getElementById('logoImage');
+                logoImg.src = logoDoc.data().imageUrl;
+                logoImg.style.maxWidth = logoDoc.data().size || "180px";
             }
-        } catch (error) {
-            console.error("Error loading logo:", error);
-        }
+        } catch(e) { console.log("Logo error:", e); }
     }
-
-    // Check if user is already logged in
-    onAuthStateChanged(auth, (user) => {
-        if (user && user.email && !user.email.includes('temp')) {
-            window.location.href = 'dashboard.html';
-        }
-    });
-
-    window.openWhatsApp = () => {
-        window.open(`https://wa.me/${SUPPORT_NUMBER}?text=Hello%20WIN777%20Support%2C%20I%20need%20help`, '_blank');
-    };
-
-    window.makeCall = () => {
-        window.location.href = `tel:${SUPPORT_NUMBER}`;
-    };
-
-    // Initialize Recaptcha
+    
+    // Recaptcha
     function initRecaptcha() {
         return new Promise((resolve) => {
-            if (document.getElementById('recaptcha-container')) {
-                resolve();
-                return;
-            }
-            const recaptchaDiv = document.createElement('div');
-            recaptchaDiv.id = 'recaptcha-container';
-            document.body.appendChild(recaptchaDiv);
-            
-            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                'size': 'invisible',
-                'callback': () => resolve()
-            });
+            if (document.getElementById('recaptcha-container')) { resolve(); return; }
+            const div = document.createElement('div');
+            div.id = 'recaptcha-container';
+            document.body.appendChild(div);
+            window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible', 'callback': () => resolve() });
             resolve();
         });
     }
-
-    // --- Show Login Form (Default) ---
+    
+    // Toast
+    function showToast(msg) {
+        const existing = document.querySelector('.toast');
+        if(existing) existing.remove();
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+    
+    // WhatsApp & Call
+    window.openWhatsApp = () => window.open(`https://wa.me/${SUPPORT_NUMBER}?text=Hello%20WIN777%20Support`, '_blank');
+    window.makeCall = () => window.location.href = `tel:${SUPPORT_NUMBER}`;
+    
+    // Show Login Form
     function showLoginForm() {
-        const formContainer = document.getElementById('authForm');
-        formContainer.innerHTML = `
+        document.getElementById('authForm').innerHTML = `
             <div class="input-group">
                 <label>📱 Mobile Number</label>
                 <div class="mobile-input">
                     <span class="country-code">+91</span>
-                    <input type="tel" id="mobileNumber" placeholder="9876543210" maxlength="10" autocomplete="off">
+                    <input type="tel" id="mobileNumber" placeholder="9876543210" maxlength="10">
                 </div>
             </div>
             <div class="input-group">
@@ -403,21 +374,37 @@
             <div class="forgot-link">
                 <span onclick="showForgotPassword()">🔐 Forgot Password? Reset with OTP</span>
             </div>
-            <button class="btn-primary" id="submitBtn" onclick="handleLogin()">Login</button>
+            <button class="btn-primary" onclick="handleLogin()">Login</button>
             <div class="support-bar">
-                <button class="btn-whatsapp" onclick="openWhatsApp()">💬 WhatsApp</button>
-                <button class="btn-call" onclick="makeCall()">📞 Call Support</button>
+                <button style="background:#25D366; color:white;" onclick="openWhatsApp()">💬 WhatsApp</button>
+                <button style="background:#1e88e5; color:white;" onclick="makeCall()">📞 Call Support</button>
             </div>
             <div class="toggle-link">
                 Don't have an account? <span onclick="showOTPRegister()">Register with OTP</span>
             </div>
         `;
     }
-
-    // --- Show OTP Registration Form ---
+    
+    // Login Handler
+    window.handleLogin = async () => {
+        const mobile = document.getElementById('mobileNumber').value.trim();
+        const password = document.getElementById('password').value;
+        if(!mobile || mobile.length !== 10) { showToast("Enter valid mobile number"); return; }
+        if(!password) { showToast("Enter password"); return; }
+        const email = `${mobile}@win777.user`;
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            showToast("Login successful!");
+            setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+        } catch(e) {
+            if(e.code === 'auth/user-not-found') showToast("User not found. Register first.");
+            else if(e.code === 'auth/wrong-password') showToast("Wrong password!");
+            else showToast("Error: " + e.message);
+        }
+    };
+    // Show OTP Register Form
     window.showOTPRegister = () => {
-        const formContainer = document.getElementById('authForm');
-        formContainer.innerHTML = `
+        document.getElementById('authForm').innerHTML = `
             <div class="input-group">
                 <label>📱 Mobile Number</label>
                 <div class="mobile-input">
@@ -429,8 +416,7 @@
                 <label>🔒 Create Password</label>
                 <input type="password" id="regPassword" placeholder="Min 6 characters">
             </div>
-            <div class="input-group" id="otpSection" style="display:none;">
-                <label>📲 Enter OTP</label>
+            <div id="otpSection" style="display:none;">
                 <div class="otp-group">
                     <input type="text" id="otpCode" placeholder="6-digit OTP" maxlength="6">
                     <button onclick="verifyOTP()">Verify OTP</button>
@@ -438,92 +424,50 @@
             </div>
             <button class="btn-primary" id="sendOtpBtn" onclick="sendOTP()">Send OTP</button>
             <div class="support-bar">
-                <button class="btn-whatsapp" onclick="openWhatsApp()">💬 WhatsApp</button>
-                <button class="btn-call" onclick="makeCall()">📞 Call Support</button>
+                <button style="background:#25D366; color:white;" onclick="openWhatsApp()">💬 WhatsApp</button>
+                <button style="background:#1e88e5; color:white;" onclick="makeCall()">📞 Call Support</button>
             </div>
             <div class="toggle-link">
                 Already have an account? <span onclick="showLoginForm()">Login</span>
             </div>
         `;
     };
-
-    // --- Send OTP for Registration ---
+    
     window.sendOTP = async () => {
         const mobile = document.getElementById('regMobile').value;
         const password = document.getElementById('regPassword').value;
-        
-        if (!mobile || mobile.length !== 10) {
-            showToast("Please enter valid 10-digit mobile number");
-            return;
-        }
-        if (!password || password.length < 6) {
-            showToast("Password must be at least 6 characters");
-            return;
-        }
-        
-        const fullPhoneNumber = "+91" + mobile;
-        
-        setLoading(true, 'sendOtpBtn');
+        if(!mobile || mobile.length !== 10) { showToast("Valid mobile required"); return; }
+        if(!password || password.length < 6) { showToast("Password min 6 chars"); return; }
         await initRecaptcha();
-        
         try {
-            confirmationResult = await signInWithPhoneNumber(auth, fullPhoneNumber, window.recaptchaVerifier);
-            showToast("OTP sent successfully!");
+            const result = await signInWithPhoneNumber(auth, "+91"+mobile, window.recaptchaVerifier);
+            confirmationResult = result;
+            showToast("OTP sent!");
             document.getElementById('otpSection').style.display = 'block';
             document.getElementById('sendOtpBtn').innerHTML = "OTP Sent ✓";
             document.getElementById('sendOtpBtn').disabled = true;
-        } catch (error) {
-            showToast("Error sending OTP: " + error.message);
-        } finally {
-            setLoading(false, 'sendOtpBtn');
-        }
+        } catch(e) { showToast("Error: "+e.message); }
     };
-
-    // --- Verify OTP and Create Account ---
+    
     window.verifyOTP = async () => {
         const otp = document.getElementById('otpCode').value;
         const mobile = document.getElementById('regMobile').value;
         const password = document.getElementById('regPassword').value;
-        
-        if (!otp || otp.length !== 6) {
-            showToast("Please enter 6-digit OTP");
-            return;
-        }
-        
-        setLoading(true);
-        
+        if(!otp || otp.length !== 6) { showToast("Enter 6-digit OTP"); return; }
         try {
             const result = await confirmationResult.confirm(otp);
-            const user = result.user;
             const email = `${mobile}@win777.user`;
-            
-            // Store user data
-            await setDoc(doc(db, "users", user.uid), {
-                mobile: mobile,
-                email: email,
-                password: password,
-                balance: 0,
-                totalDeposits: 0,
-                totalWithdrawals: 0,
-                createdAt: new Date(),
-                isActive: true,
-                phoneVerified: true
+            await setDoc(doc(db, "users", result.user.uid), {
+                mobile, email, password, balance: 0, totalDeposits: 0, totalWithdrawals: 0, createdAt: new Date(), isActive: true
             });
-            
-            showToast("✅ Account created successfully! Redirecting...");
-            setTimeout(() => {
-                window.location.href = 'dashboard.html';
-            }, 1000);
-        } catch (error) {
-            showToast("Invalid OTP: " + error.message);
-        } finally {
-            setLoading(false);
-        }
+            showToast("Account created! Redirecting...");
+            setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+        } catch(e) { showToast("Invalid OTP"); }
     };
-    // --- Show Forgot Password (Enter Mobile) ---
+    
+    // Forgot Password
     window.showForgotPassword = () => {
-        const formContainer = document.getElementById('authForm');
-        formContainer.innerHTML = `
+        document.getElementById('authForm').innerHTML = `
             <div class="input-group">
                 <label>📱 Enter Registered Mobile Number</label>
                 <div class="mobile-input">
@@ -531,205 +475,78 @@
                     <input type="tel" id="resetMobile" placeholder="9876543210" maxlength="10">
                 </div>
             </div>
-            <button class="btn-primary" id="sendResetOtpBtn" onclick="sendResetOTP()">Send OTP</button>
-            <div class="back-link">
-                <span onclick="showLoginForm()">← Back to Login</span>
-            </div>
+            <button class="btn-primary" id="sendResetBtn" onclick="sendResetOTP()">Send OTP</button>
+            <div class="back-link"><span onclick="showLoginForm()">← Back to Login</span></div>
         `;
     };
-
-    // --- Send OTP for Password Reset (Check if mobile exists) ---
+    
     window.sendResetOTP = async () => {
         const mobile = document.getElementById('resetMobile').value;
-        
-        if (!mobile || mobile.length !== 10) {
-            showToast("Please enter valid 10-digit mobile number");
-            return;
-        }
-        
-        // Check if user exists in Firestore
+        if(!mobile || mobile.length !== 10) { showToast("Valid mobile required"); return; }
         const usersRef = collection(db, "users");
         const q = query(usersRef, where("mobile", "==", mobile));
-        const querySnapshot = await getDocs(q);
-        
-        if (querySnapshot.empty) {
-            showToast("❌ No account found with this mobile number. Please register first.");
-            return;
-        }
-        
+        const snap = await getDocs(q);
+        if(snap.empty) { showToast("No account found with this number"); return; }
         resetPhoneNumber = mobile;
-        const fullPhoneNumber = "+91" + mobile;
-        
-        setLoading(true, 'sendResetOtpBtn');
         await initRecaptcha();
-        
         try {
-            confirmationResult = await signInWithPhoneNumber(auth, fullPhoneNumber, window.recaptchaVerifier);
+            const result = await signInWithPhoneNumber(auth, "+91"+mobile, window.recaptchaVerifier);
+            confirmationResult = result;
             showToast("OTP sent for password reset!");
-            
-            // Show OTP input and new password fields
-            const formContainer = document.getElementById('authForm');
-            formContainer.innerHTML = `
-                <div class="input-group">
-                    <label>📱 Mobile Number: ${mobile}</label>
+            document.getElementById('authForm').innerHTML = `
+                <div class="input-group"><label>Mobile: ${mobile}</label></div>
+                <div class="otp-group">
+                    <input type="text" id="resetOtp" placeholder="6-digit OTP" maxlength="6">
+                    <button onclick="verifyResetOTP()">Verify OTP</button>
                 </div>
-                <div class="input-group">
-                    <label>📲 Enter OTP</label>
-                    <div class="otp-group">
-                        <input type="text" id="resetOtpCode" placeholder="6-digit OTP" maxlength="6">
-                        <button onclick="verifyResetOTP()">Verify OTP</button>
-                    </div>
+                <div id="newPwdSection" style="display:none;">
+                    <div class="input-group"><input type="password" id="newPassword" placeholder="New Password (min 6 chars)"></div>
+                    <button class="btn-primary" onclick="updateUserPassword()">Reset Password</button>
                 </div>
-                <div class="input-group" id="newPasswordSection" style="display:none;">
-                    <label>🔒 New Password</label>
-                    <input type="password" id="newPassword" placeholder="Enter new password (min 6 chars)">
-                    <button class="btn-primary" style="margin-top:10px;" onclick="updateUserPassword()">Reset Password</button>
-                </div>
-                <div class="back-link">
-                    <span onclick="showForgotPassword()">← Back</span>
-                </div>
+                <div class="back-link"><span onclick="showForgotPassword()">← Back</span></div>
             `;
-        } catch (error) {
-            showToast("Error sending OTP: " + error.message);
-        } finally {
-            setLoading(false, 'sendResetOtpBtn');
-        }
+        } catch(e) { showToast("Error: "+e.message); }
     };
-
-    // --- Verify OTP for Password Reset ---
+    
     window.verifyResetOTP = async () => {
-        const otp = document.getElementById('resetOtpCode').value;
-        
-        if (!otp || otp.length !== 6) {
-            showToast("Please enter 6-digit OTP");
-            return;
-        }
-        
-        setLoading(true);
-        
+        const otp = document.getElementById('resetOtp').value;
+        if(!otp || otp.length !== 6) { showToast("Enter 6-digit OTP"); return; }
         try {
-            const result = await confirmationResult.confirm(otp);
-            showToast("✅ Phone verified! Now set your new password.");
-            document.getElementById('newPasswordSection').style.display = 'block';
-        } catch (error) {
-            showToast("Invalid OTP: " + error.message);
-        } finally {
-            setLoading(false);
-        }
+            await confirmationResult.confirm(otp);
+            showToast("Phone verified! Set new password.");
+            document.getElementById('newPwdSection').style.display = 'block';
+        } catch(e) { showToast("Invalid OTP"); }
     };
-
-    // --- Update Password in Firebase Auth and Firestore ---
+    
     window.updateUserPassword = async () => {
         const newPassword = document.getElementById('newPassword').value;
-        
-        if (!newPassword || newPassword.length < 6) {
-            showToast("Password must be at least 6 characters");
-            return;
-        }
-        
-        setLoading(true);
-        
+        if(!newPassword || newPassword.length < 6) { showToast("Password min 6 chars"); return; }
         try {
-            // Update password in Firebase Auth
             const user = auth.currentUser;
-            if (user) {
-                await updatePassword(user, newPassword);
-            }
-            
-            // Update password in Firestore
+            if(user) await updatePassword(user, newPassword);
             const usersRef = collection(db, "users");
             const q = query(usersRef, where("mobile", "==", resetPhoneNumber));
-            const querySnapshot = await getDocs(q);
-            
-            for (const userDoc of querySnapshot.docs) {
-                await updateDoc(doc(db, "users", userDoc.id), { password: newPassword });
-                break;
+            const snap = await getDocs(q);
+            for(const docSnap of snap.docs) {
+                await updateDoc(doc(db, "users", docSnap.id), { password: newPassword });
             }
-            
-            showToast("✅ Password reset successfully! Please login.");
-            setTimeout(() => {
-                showLoginForm();
-            }, 1500);
-        } catch (error) {
-            showToast("Error: " + error.message);
-        } finally {
-            setLoading(false);
-        }
+            showToast("Password reset successful! Login now.");
+            setTimeout(() => showLoginForm(), 1500);
+        } catch(e) { showToast("Error: "+e.message); }
     };
-
-    // --- Normal Login ---
-    window.handleLogin = async () => {
-        if (isLoading) return;
-        
-        const mobile = document.getElementById('mobileNumber').value.trim();
-        const password = document.getElementById('password').value;
-        
-        if (!mobile || mobile.length !== 10) {
-            showToast("Please enter valid 10-digit mobile number");
-            return;
+    
+    // Check auth state
+    onAuthStateChanged(auth, (user) => {
+        if(user && user.email && !user.email.includes('temp')) {
+            window.location.href = 'dashboard.html';
         }
-        
-        if (!password) {
-            showToast("Please enter password");
-            return;
-        }
-        
-        const email = `${mobile}@win777.user`;
-        
-        setLoading(true);
-        
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-            showToast("✅ Login successful! Redirecting...");
-            setTimeout(() => {
-                window.location.href = 'dashboard.html';
-            }, 1000);
-        } catch (error) {
-            if (error.code === 'auth/user-not-found') {
-                showToast("❌ User not found. Please register first.");
-            } else if (error.code === 'auth/wrong-password') {
-                showToast("❌ Wrong password. Please try again.");
-            } else {
-                showToast("❌ Error: " + error.message);
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    function setLoading(loading, btnId = 'submitBtn') {
-        isLoading = loading;
-        const btn = document.getElementById(btnId);
-        if (btn) {
-            if (loading) {
-                btn.innerHTML = '<span class="loading"></span> Please wait...';
-                btn.disabled = true;
-            } else {
-                if (btnId === 'sendOtpBtn') btn.innerHTML = 'Send OTP';
-                else if (btnId === 'sendResetOtpBtn') btn.innerHTML = 'Send OTP';
-                else btn.innerHTML = 'Login';
-                btn.disabled = false;
-            }
-        }
-    }
-
-    function showToast(message) {
-        const existingToast = document.querySelector('.toast');
-        if (existingToast) existingToast.remove();
-        
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.innerHTML = message;
-        document.body.appendChild(toast);
-        
-        setTimeout(() => toast.remove(), 3000);
-    }
-
-    // Initialize the page
+    });
+    
+    // Load logo and show login form
     loadLogo();
     showLoginForm();
-
-    window.showToast = showToast;
+    
+    // Expose functions globally
     window.showLoginForm = showLoginForm;
     window.showOTPRegister = showOTPRegister;
     window.showForgotPassword = showForgotPassword;
