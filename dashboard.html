@@ -4,445 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>win777 - Dashboard</title>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, onSnapshot, doc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
-            authDomain: "win777-be203.firebaseapp.com",
-            projectId: "win777-be203",
-            storageBucket: "win777-be203.firebasestorage.app",
-            messagingSenderId: "504655373119",
-            appId: "1:504655373119:web:4b964d6e6f0df20ebc698a",
-            measurementId: "G-XL2RBDZHE2"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
-        
-        window.db = db;
-        window.auth = auth;
-    </script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            min-height: 100vh;
-            color: #fff;
-            padding-bottom: 70px;
-        }
-
-        .header {
-            background: rgba(26, 26, 46, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .logo h1 {
-            font-size: 20px;
-            background: linear-gradient(135deg, #f5b042, #ff6b6b);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .logo p {
-            font-size: 9px;
-            color: #aaa;
-        }
-
-        .wallet-card {
-            background: linear-gradient(135deg, #f5b04220, #ff6b6b20);
-            padding: 6px 12px;
-            border-radius: 16px;
-            border: 1px solid #f5b042;
-        }
-
-        .wallet-label {
-            font-size: 10px;
-            color: #aaa;
-        }
-
-        .wallet-amount {
-            font-size: 18px;
-            font-weight: bold;
-            color: #f5b042;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .logout-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            padding: 5px 10px;
-            border-radius: 16px;
-            color: white;
-            cursor: pointer;
-            font-size: 11px;
-        }
-
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 12px;
-        }
-
-        /* Betting Interface Styles */
-        .bet-interface {
-            background: rgba(26, 26, 46, 0.95);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .game-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .game-title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #f5b042;
-        }
-
-        .balance-display {
-            font-size: 14px;
-            color: #aaa;
-            margin-top: 5px;
-        }
-
-        .game-type-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .game-type-label {
-            font-size: 16px;
-            font-weight: bold;
-        }
-
-        .toggle-switch {
-            display: flex;
-            background: #2a2a4a;
-            border-radius: 30px;
-            overflow: hidden;
-        }
-
-        .toggle-option {
-            padding: 8px 20px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .toggle-option.active {
-            background: #f5b042;
-            color: #0f0c29;
-        }
-
-        /* Single Digit Grid */
-        .digit-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .digit-item {
-            text-align: center;
-        }
-
-        .digit-number {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .digit-input {
-            width: 100%;
-            padding: 8px;
-            background: #2a2a4a;
-            border: 1px solid #3a3a6a;
-            border-radius: 8px;
-            color: white;
-            text-align: center;
-            font-size: 12px;
-        }
-
-        /* Bet Items */
-        .bet-item {
-            background: #2a2a4a;
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 12px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .bet-item input {
-            flex: 1;
-            padding: 10px;
-            background: #1a1a3a;
-            border: 1px solid #3a3a6a;
-            border-radius: 8px;
-            color: white;
-        }
-
-        .remove-btn {
-            background: #dc2626;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            color: white;
-            cursor: pointer;
-        }
-
-        .add-more-btn {
-            background: transparent;
-            border: 1px dashed #f5b042;
-            padding: 10px;
-            border-radius: 12px;
-            color: #f5b042;
-            width: 100%;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-
-        /* Triple Pana Grid */
-        .triple-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .triple-item {
-            background: #2a2a4a;
-            border-radius: 12px;
-            padding: 12px;
-            text-align: center;
-        }
-
-        .triple-number {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 8px;
-        }
-
-        .triple-input {
-            width: 100%;
-            padding: 8px;
-            background: #1a1a3a;
-            border: 1px solid #3a3a6a;
-            border-radius: 8px;
-            color: white;
-            text-align: center;
-        }
-
-        /* Summary Row */
-        .summary-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px 0;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            margin-top: 10px;
-        }
-
-        .summary-item {
-            text-align: center;
-        }
-
-        .summary-label {
-            font-size: 12px;
-            color: #aaa;
-        }
-
-        .summary-value {
-            font-size: 20px;
-            font-weight: bold;
-            color: #f5b042;
-        }
-
-        .submit-btn {
-            background: linear-gradient(135deg, #f5b042, #ff6b6b);
-            border: none;
-            padding: 14px;
-            border-radius: 30px;
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
-            width: 100%;
-            cursor: pointer;
-            margin-top: 15px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #f5b042, #ff6b6b);
-            border: none;
-            padding: 12px 20px;
-            border-radius: 30px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #f5b042;
-            padding: 12px 20px;
-            border-radius: 30px;
-            color: #f5b042;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.95);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: linear-gradient(145deg, #1a1a2e, #16213e);
-            border-radius: 28px;
-            padding: 25px;
-            max-width: 400px;
-            width: 100%;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 80px;
-            left: 20px;
-            right: 20px;
-            background: #1a1a2e;
-            padding: 12px;
-            border-radius: 12px;
-            text-align: center;
-            z-index: 3000;
-            border-left: 4px solid #f5b042;
-        }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(26, 26, 46, 0.95);
-            backdrop-filter: blur(20px);
-            display: flex;
-            justify-content: space-around;
-            padding: 8px 12px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            z-index: 100;
-        }
-
-        .nav-item {
-            text-align: center;
-            cursor: pointer;
-            padding: 5px;
-        }
-
-        .nav-icon {
-            font-size: 20px;
-        }
-
-        .nav-label {
-            font-size: 9px;
-            margin-top: 2px;
-        }
-
-        .data-table {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        .data-table table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .data-table th, .data-table td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            font-size: 12px;
-        }
-
-        .input-group {
-            margin-bottom: 15px;
-        }
-        
-        .input-group input {
-            width: 100%;
-            padding: 12px;
-            background: #2a2a4a;
-            border: 1px solid #3a3a6a;
-            border-radius: 12px;
-            color: white;
-        }
-        
-        @media (max-width: 480px) {
-            .container { padding: 10px; }
-            .digit-grid { gap: 8px; }
-            .digit-number { font-size: 18px; }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); min-height: 100vh; color: #fff; padding-bottom: 70px; }
+        .header { background: rgba(26, 26, 46, 0.95); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; }
+        .logo h1 { font-size: 20px; background: linear-gradient(135deg, #f5b042, #ff6b6b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .wallet-card { background: linear-gradient(135deg, #f5b04220, #ff6b6b20); padding: 6px 12px; border-radius: 16px; border: 1px solid #f5b042; }
+        .wallet-label { font-size: 10px; color: #aaa; }
+        .wallet-amount { font-size: 18px; font-weight: bold; color: #f5b042; }
+        .user-info { display: flex; align-items: center; gap: 8px; }
+        .logout-btn { background: rgba(255,255,255,0.1); border: none; padding: 5px 10px; border-radius: 16px; color: white; cursor: pointer; }
+        .container { max-width: 500px; margin: 0 auto; padding: 12px; }
+        .card { background: rgba(26, 26, 46, 0.95); border-radius: 20px; padding: 20px; margin-bottom: 20px; }
+        .card-title { font-size: 18px; font-weight: bold; color: #f5b042; margin-bottom: 15px; border-left: 3px solid #f5b042; padding-left: 12px; }
+        .btn-primary { background: linear-gradient(135deg, #f5b042, #ff6b6b); border: none; padding: 14px; border-radius: 30px; color: white; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; }
+        .btn-outline { background: transparent; border: 1px solid #f5b042; padding: 12px; border-radius: 30px; color: #f5b042; cursor: pointer; width: 100%; margin-top: 10px; }
+        .bet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+        .bet-btn { background: #2a2a4a; border: none; padding: 12px; border-radius: 30px; color: white; font-weight: bold; cursor: pointer; text-align: center; }
+        .bet-btn:hover { background: #f5b042; color: #0f0c29; }
+        .market-item { background: #1a1a2e; padding: 12px; border-radius: 12px; margin-bottom: 10px; border-left: 3px solid #f5b042; }
+        .market-name { font-weight: bold; }
+        .market-time { font-size: 11px; color: #aaa; margin-top: 5px; }
+        .market-status { font-size: 11px; margin-top: 5px; }
+        .status-open { color: #22c55e; }
+        .status-closed { color: #ef4444; }
+        .status-running { color: #f59e0b; }
+        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+        .modal.active { display: flex; }
+        .modal-content { background: #1a1a2e; border-radius: 28px; padding: 25px; max-width: 400px; width: 100%; }
+        .amount-input { width: 100%; padding: 14px; margin: 10px 0; background: #2a2a4a; border: none; border-radius: 12px; color: white; font-size: 16px; }
+        .toast { position: fixed; bottom: 80px; left: 20px; right: 20px; background: #1a1a2e; padding: 12px; border-radius: 12px; text-align: center; z-index: 3000; border-left: 4px solid #f5b042; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(26, 26, 46, 0.95); display: flex; justify-content: space-around; padding: 8px 12px; border-top: 1px solid rgba(255,255,255,0.1); z-index: 100; }
+        .nav-item { text-align: center; cursor: pointer; padding: 5px; }
+        .nav-icon { font-size: 22px; }
+        .nav-label { font-size: 10px; margin-top: 2px; }
+        .data-table { width: 100%; overflow-x: auto; }
+        .data-table table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 12px; }
+        .data-table th { color: #f5b042; }
+        .win { color: #22c55e; }
+        .loss { color: #ef4444; }
+        .pending { color: #f59e0b; }
+        .input-field { width: 100%; padding: 12px; background: #2a2a4a; border: none; border-radius: 12px; color: white; margin-bottom: 12px; }
+        .support-buttons { display: flex; gap: 10px; margin-top: 15px; }
+        .support-buttons button { flex: 1; padding: 12px; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; }
+        .whatsapp-btn { background: #25D366; color: white; }
+        .call-btn { background: #1e88e5; color: white; }
+        .loading { display: inline-block; width: 20px; height: 20px; border: 2px solid white; border-radius: 50%; border-top-color: transparent; animation: spin 0.6s linear infinite; margin-right: 8px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <div class="logo">
-        <h1>WIN777</h1>
-        <p>Play Big · Win Big</p>
-    </div>
-    <div class="wallet-card">
-        <div class="wallet-label">💰 Balance</div>
-        <div class="wallet-amount" id="walletBalance">₹0</div>
-    </div>
-    <div class="user-info">
-        <span id="userNameDisplay"></span>
-        <button class="logout-btn" onclick="logout()">Exit</button>
-    </div>
+    <div class="logo"><h1>WIN777</h1></div>
+    <div class="wallet-card"><div class="wallet-label">💰 Balance</div><div class="wallet-amount" id="walletBalance">₹0</div></div>
+    <div class="user-info"><span id="userNameDisplay"></span><button class="logout-btn" onclick="logout()">Exit</button></div>
 </div>
 
 <div class="container" id="pageContent"></div>
@@ -452,649 +69,94 @@
     <div class="nav-item" onclick="loadPage('deposit')"><div class="nav-icon">💰</div><div class="nav-label">Deposit</div></div>
     <div class="nav-item" onclick="loadPage('bids')"><div class="nav-icon">🎲</div><div class="nav-label">My Bids</div></div>
     <div class="nav-item" onclick="loadPage('passbook')"><div class="nav-icon">📒</div><div class="nav-label">History</div></div>
-    <div class="nav-item" onclick="loadPage('withdraw')"><div class="nav-icon">💸</div><div class="nav-label">Withdraw</div></div>
     <div class="nav-item" onclick="loadPage('profile')"><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
 </div>
 
-<!-- Deposit Modal -->
 <div id="depositModal" class="modal">
     <div class="modal-content">
         <h2>💰 Add Money</h2>
-        <p style="margin:10px 0; font-size:13px;">Select Payment App</p>
-        <div class="payment-methods" id="paymentAppsList" style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;"></div>
-        <input type="number" id="depositAmount" class="amount-input" placeholder="Enter Amount (Min ₹100, Max ₹49000)" style="width:100%; padding:12px; margin:10px 0; background:#2a2a4a; border-radius:8px; color:white;">
-        <button class="btn-primary" onclick="processDirectPayment()" style="width:100%">💸 Pay Now</button>
-        <button class="btn-outline" onclick="closeDepositModal()" style="margin-top:10px; width:100%;">Cancel</button>
+        <input type="number" id="depositAmount" class="amount-input" placeholder="Enter Amount (Min ₹100, Max ₹49000)">
+        <button class="btn-primary" onclick="submitDeposit()">Submit Deposit Request</button>
+        <button class="btn-outline" onclick="closeDepositModal()">Cancel</button>
     </div>
 </div>
 
-<!-- Payment Verification Modal -->
-<div id="verifyModal" class="modal">
-    <div class="modal-content">
-        <h2>⏳ Payment Verification</h2>
-        <p style="margin:15px 0;">Please complete payment in the app</p>
-        <div style="background:#2a2a4a; padding:12px; border-radius:12px; margin:10px 0;">
-            <p>Amount: ₹<span id="verifyAmount"></span></p>
-            <p>App: <span id="verifyApp"></span></p>
-            <p>UPI ID: <span id="upiIdDisplay"></span></p>
-        </div>
-        <input type="text" id="transactionId" placeholder="Enter Transaction ID / Reference No" style="width:100%; padding:12px; margin:10px 0; border-radius:12px; background:#2a2a4a; color:white; border:none;">
-        <button class="btn-primary" onclick="submitPaymentVerification()" style="width:100%">✅ I Have Paid</button>
-        <button class="btn-outline" onclick="closeVerifyModal()" style="margin-top:10px; width:100%;">Cancel</button>
-    </div>
-</div>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
 
-<!-- Withdraw Modal -->
-<div id="withdrawModal" class="modal">
-    <div class="modal-content">
-        <h2>💸 Withdraw Funds</h2>
-        <input type="text" id="bankName" placeholder="Account Holder Name" style="width:100%; padding:12px; margin:10px 0; background:#2a2a4a; border-radius:8px; color:white;">
-        <input type="text" id="accountNumber" placeholder="Account Number" style="width:100%; padding:12px; margin:10px 0; background:#2a2a4a; border-radius:8px; color:white;">
-        <input type="text" id="ifscCode" placeholder="IFSC Code" style="width:100%; padding:12px; margin:10px 0; background:#2a2a4a; border-radius:8px; color:white;">
-        <input type="number" id="withdrawAmount" placeholder="Amount (Min ₹500)" style="width:100%; padding:12px; margin:10px 0; background:#2a2a4a; border-radius:8px; color:white;">
-        <button class="btn-primary" onclick="submitWithdrawRequest()" style="width:100%">Request Withdrawal</button>
-        <button class="btn-outline" onclick="closeWithdrawModal()" style="margin-top:10px; width:100%;">Cancel</button>
-    </div>
-</div>
-<script type="module">
-    import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, onSnapshot, doc, updateDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
+        authDomain: "win777-be203.firebaseapp.com",
+        projectId: "win777-be203",
+        storageBucket: "win777-be203.firebasestorage.app",
+        messagingSenderId: "504655373119",
+        appId: "1:504655373119:web:4b964d6e6f0df20ebc698a"
+    };
     
-    const db = window.db;
-    const auth = window.auth;
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    
     let currentUser = null;
     let currentBalance = 0;
-    let pendingDeposit = { amount: 0, app: '' };
-    let currentUpiId = "win777@okhdfcbank";
+    const SUPPORT_NUMBER = "9019941895";
     
-    // Payment Apps
-    const paymentApps = [
-        { name: "Google Pay", icon: "📱", package: "com.google.android.apps.nbu.pay", url: "gpay://" },
-        { name: "PhonePe", icon: "📱", package: "com.phonepe.app", url: "phonepe://" },
-        { name: "PayTM", icon: "💳", package: "net.one97.paytm", url: "paytm://" }
-    ];
-    
-    // Load UPI ID from Firebase
-    async function loadUpiId() {
-        const upiDoc = await getDoc(doc(db, "settings", "upi"));
-        if(upiDoc.exists()) {
-            currentUpiId = upiDoc.data().upiId;
-        }
+    function showToast(msg) {
+        let toast = document.querySelector('.toast');
+        if(toast) toast.remove();
+        toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerHTML = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
     }
     
-    // Markets with timings
-    const defaultMarkets = [
-        { name: "INDRA MORNING GD", code: "178-61-290", openTime: "09:10", closeTime: "10:10", status: "closed" },
-        { name: "MAYA MORNING GD", code: "146-17-179", openTime: "09:40", closeTime: "10:40", status: "closed" },
-        { name: "SRIDEVI", code: "224-81-669", openTime: "11:35", closeTime: "12:35", status: "closed" },
-        { name: "TIME BAZAR GD", code: "360-97-188", openTime: "12:50", closeTime: "13:50", status: "closed" },
-        { name: "MADHUR DAY", code: "256-37-566", openTime: "13:25", closeTime: "14:25", status: "closed" },
-        { name: "MAYA DAY", code: "237-2*-***", openTime: "14:10", closeTime: "16:10", status: "running" },
-        { name: "MILAN DAY GD", code: "889-5", openTime: "14:55", closeTime: "16:55", status: "running" },
-        { name: "RAJDHANI DAY", code: "Rk _ wR RHE", openTime: "15:05", closeTime: "17:05", status: "running" },
-        { name: "SUPREME DAY GD", code: "RK RR _RRK", openTime: "15:25", closeTime: "17:25", status: "open" },
-        { name: "KALYAN", code: "RK RR _RRK", openTime: "15:30", closeTime: "17:30", status: "open" },
-        { name: "INDRA DAY", code: "RK RR _RRK", openTime: "16:05", closeTime: "18:05", status: "open" },
-        { name: "SRIDEVI NIGHT", code: "RK RR _RRK", openTime: "19:10", closeTime: "20:10", status: "open" },
-        { name: "MAYA NIGHT", code: "RK RR _RRK", openTime: "20:10", closeTime: "22:10", status: "open" },
-        { name: "MADHUR NIGHT", code: "RK RR _RRK", openTime: "20:20", closeTime: "22:20", status: "open" },
-        { name: "SUPREME NIGHT", code: "RK RR _RRK", openTime: "20:35", closeTime: "22:35", status: "open" },
-        { name: "MILAN NIGHT", code: "RK RR _RRK", openTime: "20:55", closeTime: "22:55", status: "open" },
-        { name: "INDRA NIGHT", code: "RK RR _RRK", openTime: "21:05", closeTime: "23:05", status: "open" },
-        { name: "KALYAN NIGHT", code: "RK RR _RRK", openTime: "21:30", closeTime: "23:35", status: "open" },
-        { name: "RAJDHANI NIGHT", code: "RK RR _RRK", openTime: "21:35", closeTime: "23:40", status: "open" },
-        { name: "MAIN BAZAR", code: "BRK 交火", openTime: "21:50", closeTime: "23:55", status: "open" }
-    ];
+    window.logout = async () => { await auth.signOut(); window.location.href = 'index.html'; };
+    window.openWhatsApp = () => window.open(`https://wa.me/${SUPPORT_NUMBER}`, '_blank');
+    window.makeCall = () => window.location.href = `tel:${SUPPORT_NUMBER}`;
     
-    async function initMarkets() {
-        const marketsSnap = await getDocs(collection(db, "markets"));
-        if(marketsSnap.empty) {
-            for(let market of defaultMarkets) {
-                await addDoc(collection(db, "markets"), market);
-            }
-        }
-    }
+    window.showDepositModal = () => document.getElementById('depositModal').classList.add('active');
+    window.closeDepositModal = () => document.getElementById('depositModal').classList.remove('active');
     
-    window.logout = async () => {
-        await signOut(auth);
-        window.location.href = 'index.html';
-    };
-    
-    // Deposit Functions
-    window.showDepositModal = () => {
-        const appsHtml = paymentApps.map(app => `
-            <div class="payment-card" style="background:#2a2a4a; padding:15px; border-radius:12px; text-align:center; cursor:pointer;" onclick="openPaymentApp('${app.name}', '${app.package}', '${app.url}')">
-                <div style="font-size:30px;">${app.icon}</div>
-                <div style="font-weight:bold; font-size:12px;">${app.name}</div>
-            </div>
-        `).join('');
-        document.getElementById('paymentAppsList').innerHTML = appsHtml;
-        document.getElementById('depositModal').classList.add('active');
-    };
-    
-    window.openPaymentApp = async (appName, packageName, appUrl) => {
-        const amount = parseFloat(document.getElementById('depositAmount').value);
-        if(!amount) {
-            showToast("Please enter amount");
-            return;
-        }
-        if(amount < 100) {
-            showToast("Minimum deposit amount is ₹100");
-            return;
-        }
-        if(amount > 49000) {
-            showToast("Maximum deposit amount is ₹49,000");
-            return;
-        }
+    window.submitDeposit = async () => {
+        const amount = document.getElementById('depositAmount').value;
+        if(!amount || amount < 100) { showToast("Minimum deposit ₹100"); return; }
+        if(amount > 49000) { showToast("Maximum deposit ₹49,000"); return; }
         
-        await loadUpiId();
-        pendingDeposit = { amount: amount, app: appName };
-        
-        document.getElementById('verifyAmount').innerHTML = amount;
-        document.getElementById('verifyApp').innerHTML = appName;
-        document.getElementById('upiIdDisplay').innerHTML = currentUpiId;
-        document.getElementById('depositModal').classList.remove('active');
-        document.getElementById('verifyModal').classList.add('active');
-        
-        showToast(`Please pay ₹${amount} to ${currentUpiId} via ${appName}`);
-    };
-    
-    window.submitPaymentVerification = async () => {
-        const transactionId = document.getElementById('transactionId').value;
-        if(!transactionId) {
-            showToast("Please enter Transaction ID");
-            return;
-        }
-        
-        await addDoc(collection(db, "deposits"), {
+        await db.collection("deposits").add({
             userId: currentUser.uid,
-            amount: pendingDeposit.amount,
-            transactionId: transactionId,
-            paymentMethod: pendingDeposit.app,
-            upiId: currentUpiId,
+            amount: parseFloat(amount),
             status: "pending",
             createdAt: new Date(),
             userMobile: currentUser.email?.replace('@win777.user', '')
         });
         
-        showToast(`✅ Deposit request of ₹${pendingDeposit.amount} submitted!`);
-        closeVerifyModal();
+        showToast(`✅ Deposit request of ₹${amount} submitted!`);
+        closeDepositModal();
         document.getElementById('depositAmount').value = '';
-        document.getElementById('transactionId').value = '';
     };
+// Place Bid
+window.placeBid = async (gameType, gameTypeName) => {
+    const market = document.getElementById('bidMarket')?.value;
+    const points = parseInt(document.getElementById('bidPoints')?.value);
+    const numbers = document.getElementById('bidNumbers')?.value;
     
-    // Withdraw Functions
-    window.showWithdrawModal = () => {
-        document.getElementById('withdrawModal').classList.add('active');
-    };
+    if(!market) { showToast("Select market"); return; }
+    if(!points || points < 10) { showToast("Minimum bet ₹10"); return; }
+    if(points > currentBalance) { showToast("Insufficient balance!"); return; }
+    if(!numbers) { showToast("Enter numbers"); return; }
     
-    window.submitWithdrawRequest = async () => {
-        const accountName = document.getElementById('bankName').value;
-        const accountNumber = document.getElementById('accountNumber').value;
-        const ifscCode = document.getElementById('ifscCode').value;
-        const amount = parseFloat(document.getElementById('withdrawAmount').value);
-        
-        if(!accountName || !accountNumber || !ifscCode) {
-            showToast("Please fill all bank details");
-            return;
-        }
-        if(!amount || amount < 500) {
-            showToast("Minimum withdrawal amount is ₹500");
-            return;
-        }
-        if(amount > currentBalance) {
-            showToast("Insufficient balance!");
-            return;
-        }
-        
-        await addDoc(collection(db, "withdrawals"), {
-            userId: currentUser.uid,
-            accountName: accountName,
-            accountNumber: accountNumber,
-            ifscCode: ifscCode,
-            amount: amount,
-            status: "pending",
-            createdAt: new Date()
-        });
-        
-        showToast(`Withdrawal request of ₹${amount} submitted`);
-        closeWithdrawModal();
-        document.getElementById('bankName').value = '';
-        document.getElementById('accountNumber').value = '';
-        document.getElementById('ifscCode').value = '';
-        document.getElementById('withdrawAmount').value = '';
-    };
+    const newBalance = currentBalance - points;
+    await db.collection("users").doc(currentUser.uid).update({ balance: newBalance });
     
-    window.closeDepositModal = () => document.getElementById('depositModal').classList.remove('active');
-    window.closeVerifyModal = () => document.getElementById('verifyModal').classList.remove('active');
-    window.closeWithdrawModal = () => document.getElementById('withdrawModal').classList.remove('active');
-// ============ BETTING INTERFACES ============
-
-function updateTotals(selector) {
-    let totalPoints = 0;
-    let totalBids = 0;
-    document.querySelectorAll(selector).forEach(input => {
-        const points = parseInt(input.value);
-        if(points > 0) {
-            totalPoints += points;
-            totalBids++;
-        }
-    });
-    if(document.getElementById('totalPoints')) document.getElementById('totalPoints').innerHTML = totalPoints;
-    if(document.getElementById('totalBids')) document.getElementById('totalBids').innerHTML = totalBids;
-}
-
-// Render Single Digit Interface
-function renderSingleDigit() {
-    let digitsHtml = '';
-    for(let i = 0; i <= 9; i++) {
-        digitsHtml += `
-            <div class="digit-item">
-                <div class="digit-number">${i}</div>
-                <input type="number" class="digit-points" data-digit="${i}" placeholder="Points" style="width:100%; padding:8px; background:#1a1a3a; border-radius:8px; color:white; text-align:center;" oninput="updateTotals('.digit-points')">
-            </div>
-        `;
-    }
-    return `
-        <div class="bet-interface" id="betInterface">
-            <div class="game-header">
-                <div class="game-title">Single Digit</div>
-                <div class="balance-display">Balance: ₹${currentBalance}</div>
-            </div>
-            <div class="game-type-row">
-                <span class="game-type-label">Game Type</span>
-                <div class="toggle-switch">
-                    <div class="toggle-option active" data-type="open">Open</div>
-                    <div class="toggle-option" data-type="close">Close</div>
-                </div>
-            </div>
-            <div class="digit-grid">${digitsHtml}</div>
-            <div class="summary-row">
-                <div class="summary-item"><div class="summary-label">Bids</div><div class="summary-value" id="totalBids">0</div></div>
-                <div class="summary-item"><div class="summary-label">Points</div><div class="summary-value" id="totalPoints">0</div></div>
-            </div>
-            <button class="submit-btn" onclick="submitBid('single_digit')">Submit</button>
-        </div>
-    `;
-}
-
-// Render Jodi Digit Interface
-function renderJodiDigit() {
-    return `
-        <div class="bet-interface" id="betInterface">
-            <div class="game-header">
-                <div class="game-title">Jodi Digit</div>
-                <div class="balance-display">Balance: ₹${currentBalance}</div>
-            </div>
-            <div class="game-type-row">
-                <span class="game-type-label">Game Type</span>
-                <div class="toggle-switch">
-                    <div class="toggle-option active" data-type="open">Open</div>
-                    <div class="toggle-option" data-type="close">Close</div>
-                </div>
-            </div>
-            <div id="jodiItems">
-                <div class="bet-item">
-                    <input type="text" class="jodi-value" placeholder="Enter Jodi (e.g., 12)">
-                    <input type="number" class="jodi-points" placeholder="Points" oninput="updateJodiTotals()">
-                    <button class="remove-btn" onclick="this.parentElement.remove(); updateJodiTotals()">✕</button>
-                </div>
-            </div>
-            <button class="add-more-btn" onclick="addJodiItem()">+ Add more</button>
-            <div class="summary-row">
-                <div class="summary-item"><div class="summary-label">Bids</div><div class="summary-value" id="totalBids">0</div></div>
-                <div class="summary-item"><div class="summary-label">Points</div><div class="summary-value" id="totalPoints">0</div></div>
-            </div>
-            <button class="submit-btn" onclick="submitBid('jodi_digit')">Submit</button>
-        </div>
-    `;
-}
-
-// Render Single Pana Interface
-function renderSinglePana() {
-    return `
-        <div class="bet-interface" id="betInterface">
-            <div class="game-header">
-                <div class="game-title">Single Pana</div>
-                <div class="balance-display">Balance: ₹${currentBalance}</div>
-            </div>
-            <div class="game-type-row">
-                <span class="game-type-label">Game Type</span>
-                <div class="toggle-switch">
-                    <div class="toggle-option active" data-type="open">Open</div>
-                    <div class="toggle-option" data-type="close">Close</div>
-                </div>
-            </div>
-            <div id="panaItems">
-                <div class="bet-item">
-                    <input type="text" class="pana-value" placeholder="Enter Single Pana (e.g., 123)">
-                    <input type="number" class="pana-points" placeholder="Points" oninput="updatePanaTotals()">
-                    <button class="remove-btn" onclick="this.parentElement.remove(); updatePanaTotals()">✕</button>
-                </div>
-            </div>
-            <button class="add-more-btn" onclick="addPanaItem()">+ Add more</button>
-            <div class="summary-row">
-                <div class="summary-item"><div class="summary-label">Bids</div><div class="summary-value" id="totalBids">0</div></div>
-                <div class="summary-item"><div class="summary-label">Points</div><div class="summary-value" id="totalPoints">0</div></div>
-            </div>
-            <button class="submit-btn" onclick="submitBid('single_pana')">Submit</button>
-        </div>
-    `;
-}
-
-// Render Double Pana Interface
-function renderDoublePana() {
-    return `
-        <div class="bet-interface" id="betInterface">
-            <div class="game-header">
-                <div class="game-title">Double Pana</div>
-                <div class="balance-display">Balance: ₹${currentBalance}</div>
-            </div>
-            <div class="game-type-row">
-                <span class="game-type-label">Game Type</span>
-                <div class="toggle-switch">
-                    <div class="toggle-option active" data-type="open">Open</div>
-                    <div class="toggle-option" data-type="close">Close</div>
-                </div>
-            </div>
-            <div id="doublePanaItems">
-                <div class="bet-item">
-                    <input type="text" class="doublePana-value" placeholder="Enter Double Pana (e.g., 112)">
-                    <input type="number" class="doublePana-points" placeholder="Points" oninput="updateDoublePanaTotals()">
-                    <button class="remove-btn" onclick="this.parentElement.remove(); updateDoublePanaTotals()">✕</button>
-                </div>
-            </div>
-            <button class="add-more-btn" onclick="addDoublePanaItem()">+ Add more</button>
-            <div class="summary-row">
-                <div class="summary-item"><div class="summary-label">Bids</div><div class="summary-value" id="totalBids">0</div></div>
-                <div class="summary-item"><div class="summary-label">Points</div><div class="summary-value" id="totalPoints">0</div></div>
-            </div>
-            <button class="submit-btn" onclick="submitBid('double_pana')">Submit</button>
-        </div>
-    `;
-}
-// Render Triple Pana Interface
-function renderTriplePana() {
-    const triples = ["111", "222", "333", "444", "555", "666", "777", "888", "999", "00"];
-    let tripleHtml = '';
-    triples.forEach(triple => {
-        tripleHtml += `
-            <div class="triple-item">
-                <div class="triple-number">${triple}</div>
-                <input type="number" class="triple-points" data-value="${triple}" placeholder="Points" oninput="updateTripleTotals()">
-            </div>
-        `;
-    });
-    return `
-        <div class="bet-interface" id="betInterface">
-            <div class="game-header">
-                <div class="game-title">Triple Pana</div>
-                <div class="balance-display">Balance: ₹${currentBalance}</div>
-            </div>
-            <div class="game-type-row">
-                <span class="game-type-label">Game Type</span>
-                <div class="toggle-switch">
-                    <div class="toggle-option active" data-type="open">Open</div>
-                    <div class="toggle-option" data-type="close">Close</div>
-                </div>
-            </div>
-            <div class="triple-grid">${tripleHtml}</div>
-            <div class="summary-row">
-                <div class="summary-item"><div class="summary-label">Bids</div><div class="summary-value" id="totalBids">0</div></div>
-                <div class="summary-item"><div class="summary-label">Points</div><div class="summary-value" id="totalPoints">0</div></div>
-            </div>
-            <button class="submit-btn" onclick="submitBid('triple_pana')">Submit</button>
-        </div>
-    `;
-}
-
-// Render Half Sangam Interface
-function renderHalfSangam() {
-    return `
-        <div class="bet-interface" id="betInterface">
-            <div class="game-header">
-                <div class="game-title">Half Sangam A</div>
-                <div class="balance-display">Balance: ₹${currentBalance}</div>
-            </div>
-            <div class="game-type-row">
-                <span class="game-type-label">Game Type</span>
-                <div class="toggle-switch">
-                    <div class="toggle-option active" data-type="open">Open</div>
-                    <div class="toggle-option" data-type="close">Close</div>
-                </div>
-            </div>
-            <div id="halfSangamItems">
-                <div class="bet-item">
-                    <input type="text" class="half-openPana" placeholder="Open Pana">
-                    <input type="text" class="half-closeDigit" placeholder="Close Digit">
-                    <input type="number" class="half-points" placeholder="Points" oninput="updateHalfSangamTotals()">
-                    <button class="remove-btn" onclick="this.parentElement.remove(); updateHalfSangamTotals()">✕</button>
-                </div>
-            </div>
-            <button class="add-more-btn" onclick="addHalfSangamItem()">+ Add more</button>
-            <div class="summary-row">
-                <div class="summary-item"><div class="summary-label">Bids</div><div class="summary-value" id="totalBids">0</div></div>
-                <div class="summary-item"><div class="summary-label">Points</div><div class="summary-value" id="totalPoints">0</div></div>
-            </div>
-            <button class="submit-btn" onclick="submitBid('half_sangam')">Submit</button>
-        </div>
-    `;
-}
-
-// Render Full Sangam Interface
-function renderFullSangam() {
-    return `
-        <div class="bet-interface" id="betInterface">
-            <div class="game-header">
-                <div class="game-title">Full Sangam</div>
-                <div class="balance-display">Balance: ₹${currentBalance}</div>
-            </div>
-            <div class="game-type-row">
-                <span class="game-type-label">Game Type</span>
-                <div class="toggle-switch">
-                    <div class="toggle-option active" data-type="open">Open</div>
-                    <div class="toggle-option" data-type="close">Close</div>
-                </div>
-            </div>
-            <div id="fullSangamItems">
-                <div class="bet-item">
-                    <input type="text" class="full-openPana" placeholder="Open Pana">
-                    <input type="text" class="full-closePana" placeholder="Close Pana">
-                    <input type="number" class="full-points" placeholder="Points" oninput="updateFullSangamTotals()">
-                    <button class="remove-btn" onclick="this.parentElement.remove(); updateFullSangamTotals()">✕</button>
-                </div>
-            </div>
-            <button class="add-more-btn" onclick="addFullSangamItem()">+ Add more</button>
-            <div class="summary-row">
-                <div class="summary-item"><div class="summary-label">Bids</div><div class="summary-value" id="totalBids">0</div></div>
-                <div class="summary-item"><div class="summary-label">Points</div><div class="summary-value" id="totalPoints">0</div></div>
-            </div>
-            <button class="submit-btn" onclick="submitBid('full_sangam')">Submit</button>
-        </div>
-    `;
-}
-
-// Helper functions for adding items
-window.addJodiItem = () => {
-    const container = document.getElementById('jodiItems');
-    const newItem = document.createElement('div');
-    newItem.className = 'bet-item';
-    newItem.innerHTML = `
-        <input type="text" class="jodi-value" placeholder="Enter Jodi">
-        <input type="number" class="jodi-points" placeholder="Points" oninput="updateJodiTotals()">
-        <button class="remove-btn" onclick="this.parentElement.remove(); updateJodiTotals()">✕</button>
-    `;
-    container.appendChild(newItem);
-};
-
-window.addPanaItem = () => {
-    const container = document.getElementById('panaItems');
-    const newItem = document.createElement('div');
-    newItem.className = 'bet-item';
-    newItem.innerHTML = `
-        <input type="text" class="pana-value" placeholder="Enter Single Pana">
-        <input type="number" class="pana-points" placeholder="Points" oninput="updatePanaTotals()">
-        <button class="remove-btn" onclick="this.parentElement.remove(); updatePanaTotals()">✕</button>
-    `;
-    container.appendChild(newItem);
-};
-
-window.addDoublePanaItem = () => {
-    const container = document.getElementById('doublePanaItems');
-    const newItem = document.createElement('div');
-    newItem.className = 'bet-item';
-    newItem.innerHTML = `
-        <input type="text" class="doublePana-value" placeholder="Enter Double Pana">
-        <input type="number" class="doublePana-points" placeholder="Points" oninput="updateDoublePanaTotals()">
-        <button class="remove-btn" onclick="this.parentElement.remove(); updateDoublePanaTotals()">✕</button>
-    `;
-    container.appendChild(newItem);
-};
-
-window.addHalfSangamItem = () => {
-    const container = document.getElementById('halfSangamItems');
-    const newItem = document.createElement('div');
-    newItem.className = 'bet-item';
-    newItem.innerHTML = `
-        <input type="text" class="half-openPana" placeholder="Open Pana">
-        <input type="text" class="half-closeDigit" placeholder="Close Digit">
-        <input type="number" class="half-points" placeholder="Points" oninput="updateHalfSangamTotals()">
-        <button class="remove-btn" onclick="this.parentElement.remove(); updateHalfSangamTotals()">✕</button>
-    `;
-    container.appendChild(newItem);
-};
-
-window.addFullSangamItem = () => {
-    const container = document.getElementById('fullSangamItems');
-    const newItem = document.createElement('div');
-    newItem.className = 'bet-item';
-    newItem.innerHTML = `
-        <input type="text" class="full-openPana" placeholder="Open Pana">
-        <input type="text" class="full-closePana" placeholder="Close Pana">
-        <input type="number" class="full-points" placeholder="Points" oninput="updateFullSangamTotals()">
-        <button class="remove-btn" onclick="this.parentElement.remove(); updateFullSangamTotals()">✕</button>
-    `;
-    container.appendChild(newItem);
-};
-
-// Update totals functions
-window.updateJodiTotals = () => updateTotals('.jodi-points');
-window.updatePanaTotals = () => updateTotals('.pana-points');
-window.updateDoublePanaTotals = () => updateTotals('.doublePana-points');
-window.updateTripleTotals = () => updateTotals('.triple-points');
-window.updateHalfSangamTotals = () => updateTotals('.half-points');
-window.updateFullSangamTotals = () => updateTotals('.full-points');
-
-// Bid Submission
-window.submitBid = async (gameType) => {
-    if(!currentUser) return;
-    
-    const marketSelect = document.getElementById('marketSelect');
-    const selectedMarket = marketSelect ? marketSelect.value : prompt("Enter market name:", "MAYA DAY");
-    
-    if(!selectedMarket) return;
-    
-    let totalPoints = parseInt(document.getElementById('totalPoints')?.innerText) || 0;
-    if(totalPoints <= 0) {
-        showToast("Please enter points to bid");
-        return;
-    }
-    if(totalPoints > currentBalance) {
-        showToast("Insufficient balance!");
-        return;
-    }
-    
-    let bidDetails = {};
-    let gameTypeName = "";
-    
-    if(gameType === 'single_digit') {
-        gameTypeName = "Single Digit";
-        const digits = [];
-        document.querySelectorAll('.digit-points').forEach(input => {
-            const points = parseInt(input.value);
-            if(points > 0) {
-                digits.push({ digit: input.dataset.digit, points: points });
-            }
-        });
-        bidDetails = { digits };
-    } else if(gameType === 'jodi_digit') {
-        gameTypeName = "Jodi Digit";
-        const jodis = [];
-        document.querySelectorAll('.jodi-value').forEach((input, index) => {
-            const value = input.value;
-            const points = parseInt(document.querySelectorAll('.jodi-points')[index]?.value);
-            if(value && points > 0) {
-                jodis.push({ jodi: value, points: points });
-            }
-        });
-        bidDetails = { jodis };
-    } else if(gameType === 'single_pana') {
-        gameTypeName = "Single Pana";
-        const panas = [];
-        document.querySelectorAll('.pana-value').forEach((input, index) => {
-            const value = input.value;
-            const points = parseInt(document.querySelectorAll('.pana-points')[index]?.value);
-            if(value && points > 0) {
-                panas.push({ pana: value, points: points });
-            }
-        });
-        bidDetails = { panas };
-    } else if(gameType === 'double_pana') {
-        gameTypeName = "Double Pana";
-        const doublePanas = [];
-        document.querySelectorAll('.doublePana-value').forEach((input, index) => {
-            const value = input.value;
-            const points = parseInt(document.querySelectorAll('.doublePana-points')[index]?.value);
-            if(value && points > 0) {
-                doublePanas.push({ doublePana: value, points: points });
-            }
-        });
-        bidDetails = { doublePanas };
-    } else if(gameType === 'triple_pana') {
-        gameTypeName = "Triple Pana";
-        const triples = [];
-        document.querySelectorAll('.triple-points').forEach(input => {
-            const points = parseInt(input.value);
-            if(points > 0) {
-                triples.push({ triple: input.dataset.value, points: points });
-            }
-        });
-        bidDetails = { triples };
-    } else if(gameType === 'half_sangam') {
-        gameTypeName = "Half Sangam";
-        const halfSangams = [];
-        document.querySelectorAll('.half-openPana').forEach((input, index) => {
-            const openPana = input.value;
-            const closeDigit = document.querySelectorAll('.half-closeDigit')[index]?.value;
-            const points = parseInt(document.querySelectorAll('.half-points')[index]?.value);
-            if(openPana && closeDigit && points > 0) {
-                halfSangams.push({ openPana, closeDigit, points });
-            }
-        });
-        bidDetails = { halfSangams };
-    } else if(gameType === 'full_sangam') {
-        gameTypeName = "Full Sangam";
-        const fullSangams = [];
-        document.querySelectorAll('.full-openPana').forEach((input, index) => {
-            const openPana = input.value;
-            const closePana = document.querySelectorAll('.full-closePana')[index]?.value;
-            const points = parseInt(document.querySelectorAll('.full-points')[index]?.value);
-            if(openPana && closePana && points > 0) {
-                fullSangams.push({ openPana, closePana, points });
-            }
-        });
-        bidDetails = { fullSangams };
-    }
-    
-    const newBalance = currentBalance - totalPoints;
-    await updateDoc(doc(db, "users", currentUser.uid), { balance: newBalance });
-    
-    await addDoc(collection(db, "bids"), {
+    await db.collection("bids").add({
         userId: currentUser.uid,
         gameType: gameTypeName,
-        market: selectedMarket,
-        bidDetails: bidDetails,
-        totalPoints: totalPoints,
+        market: market,
+        numbers: numbers,
+        totalPoints: points,
         status: "pending",
         result: null,
         winAmount: 0,
@@ -1103,242 +165,223 @@ window.submitBid = async (gameType) => {
     
     currentBalance = newBalance;
     document.getElementById('walletBalance').innerHTML = `₹${currentBalance}`;
-    showToast(`✅ ${gameTypeName} bid placed! Total: ₹${totalPoints}`);
+    showToast(`✅ Bid placed: ${gameTypeName} - ₹${points}`);
+    loadPage('dashboard');
+};
+
+window.loadPage = async (page) => {
+    const content = document.getElementById('pageContent');
     
-    // Reset form
-    if(gameType === 'single_digit') {
-        document.querySelectorAll('.digit-points').forEach(i => i.value = '');
-    } else if(gameType === 'triple_pana') {
-        document.querySelectorAll('.triple-points').forEach(i => i.value = '');
+    if(page === 'dashboard') {
+        // Load markets
+        const markets = await db.collection("markets").get();
+        let marketsHtml = '';
+        markets.forEach(doc => {
+            const m = doc.data();
+            let statusClass = '';
+            if(m.status === 'open') statusClass = 'status-open';
+            else if(m.status === 'closed') statusClass = 'status-closed';
+            else statusClass = 'status-running';
+            marketsHtml += `
+                <div class="market-item">
+                    <div class="market-name">${m.name}</div>
+                    <div class="market-time">🕐 ${m.openTime} - ${m.closeTime}</div>
+                    <div class="market-status ${statusClass}">${m.status === 'open' ? '✅ Open Now' : (m.status === 'running' ? '⏳ Running' : '🔒 Closed')}</div>
+                </div>
+            `;
+        });
+        
+        content.innerHTML = `
+            <div class="card">
+                <div class="card-title">🎲 Place Your Bet</div>
+                <select id="bidMarket" class="input-field">
+                    <option value="">Select Market</option>
+                    ${markets.docs.map(d => `<option value="${d.data().name}">${d.data().name}</option>`).join('')}
+                </select>
+                <input type="number" id="bidPoints" class="input-field" placeholder="Points (Min ₹10)">
+                <input type="text" id="bidNumbers" class="input-field" placeholder="Numbers (e.g., 123 or 1,2,3)">
+                <div class="bet-grid">
+                    <button class="bet-btn" onclick="placeBid('single_digit','Single Digit')">🎲 Single Digit</button>
+                    <button class="bet-btn" onclick="placeBid('jodi','Jodi Digit')">🔢 Jodi Digit</button>
+                    <button class="bet-btn" onclick="placeBid('single_pana','Single Pana')">🎯 Single Pana</button>
+                    <button class="bet-btn" onclick="placeBid('double_pana','Double Pana')">🎰 Double Pana</button>
+                    <button class="bet-btn" onclick="placeBid('triple_pana','Triple Pana')">⭐ Triple Pana</button>
+                    <button class="bet-btn" onclick="placeBid('half_sangam','Half Sangam')">🃏 Half Sangam</button>
+                    <button class="bet-btn" onclick="placeBid('full_sangam','Full Sangam')">🎴 Full Sangam</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">💰 Quick Deposit</div>
+                <button class="btn-primary" onclick="showDepositModal()">Add Money</button>
+                <div class="support-buttons">
+                    <button class="whatsapp-btn" onclick="openWhatsApp()">💬 WhatsApp</button>
+                    <button class="call-btn" onclick="makeCall()">📞 Call Support</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">📊 Today's Markets</div>
+                ${marketsHtml}
+            </div>
+        `;
+    } else if(page === 'deposit') {
+        content.innerHTML = `
+            <div class="card">
+                <div class="card-title">💰 Deposit Money</div>
+                <button class="btn-primary" onclick="showDepositModal()">Deposit Now</button>
+                <p style="margin-top:15px; font-size:12px; color:#aaa;">Min ₹100 | Max ₹49,000</p>
+                <div class="support-buttons">
+                    <button class="whatsapp-btn" onclick="openWhatsApp()">💬 WhatsApp</button>
+                    <button class="call-btn" onclick="makeCall()">📞 Call Support</button>
+                </div>
+            </div>
+        `;
+    } else if(page === 'bids') {
+        const bids = await db.collection("bids").where("userId", "==", currentUser.uid).orderBy("timestamp", "desc").get();
+        let html = '<div class="card"><div class="card-title">📝 My Bids</div><div class="data-table"><table><thead><tr><th>Game</th><th>Market</th><th>Numbers</th><th>Points</th><th>Result</th><th>Status</th></tr></thead><tbody>';
+        if(bids.empty) html += '<tr><td colspan="6" style="text-align:center;">No bids placed</td></tr>';
+        else {
+            bids.forEach(doc => {
+                const b = doc.data();
+                let statusClass = b.status === 'won' ? 'win' : (b.status === 'lost' ? 'loss' : 'pending');
+                let statusText = b.status === 'won' ? `Won ₹${b.winAmount}` : (b.status === 'lost' ? 'Lost' : 'Pending');
+                html += `<tr><td>${b.gameType}</td><td>${b.market}</td><td>${b.numbers}</td><td>₹${b.totalPoints}</td><td class="${statusClass}">${b.result || '-'}</td><td class="${statusClass}">${statusText}</td></tr>`;
+            });
+        }
+        html += '</tbody></table></div></div>';
+        content.innerHTML = html;
+    }
+    else if(page === 'passbook') {
+        const deposits = await db.collection("deposits").where("userId", "==", currentUser.uid).orderBy("createdAt", "desc").get();
+        const withdrawals = await db.collection("withdrawals").where("userId", "==", currentUser.uid).orderBy("createdAt", "desc").get();
+        const bids = await db.collection("bids").where("userId", "==", currentUser.uid).orderBy("timestamp", "desc").get();
+        
+        let html = '<div class="card"><div class="card-title">📒 Transaction History</div><div class="data-table"><table><thead><tr><th>Date</th><th>Type</th><th>Details</th><th>Amount</th><th>Status</th></tr></thead><tbody>';
+        
+        deposits.forEach(d => {
+            const data = d.data();
+            html += `<tr><td>${data.createdAt?.toDate().toLocaleDateString() || 'Today'}</td><td>Deposit</td><td>-</td><td style="color:#22c55e;">+₹${data.amount}</td><td>${data.status}</td></tr>`;
+        });
+        
+        withdrawals.forEach(w => {
+            const data = w.data();
+            html += `<tr><td>${data.createdAt?.toDate().toLocaleDateString() || 'Today'}</td><td>Withdraw</td><td>To Bank</td><td style="color:#ef4444;">-₹${data.amount}</td><td>${data.status}</td></tr>`;
+        });
+        
+        bids.forEach(b => {
+            const data = b.data();
+            let amountClass = data.status === 'won' ? 'win' : 'loss';
+            let amountText = data.status === 'won' ? `+₹${data.winAmount}` : `-₹${data.totalPoints}`;
+            html += `<tr><td>${data.timestamp?.toDate().toLocaleDateString() || 'Today'}</td><td>Bid</td><td>${data.gameType} on ${data.market}</td><td class="${amountClass}">${amountText}</td><td>${data.status || 'Pending'}</td></tr>`;
+        });
+        
+        if(deposits.empty && withdrawals.empty && bids.empty) html += '<tr><td colspan="5" style="text-align:center;">No transactions</td></tr>';
+        html += '</tbody></table></div></div>';
+        content.innerHTML = html;
+    } else if(page === 'profile') {
+        const userDoc = await db.collection("users").doc(currentUser.uid).get();
+        const userData = userDoc.data();
+        content.innerHTML = `
+            <div class="card">
+                <div class="card-title">👤 My Profile</div>
+                <div><label style="color:#aaa;">Name</label><p style="font-size:18px; font-weight:bold;">${userData?.fullName || 'User'}</p></div>
+                <div style="margin-top:15px;"><label style="color:#aaa;">Mobile Number</label><p style="font-size:18px; font-weight:bold;">${userData?.mobile || 'N/A'}</p></div>
+                <div style="margin-top:15px;"><label style="color:#aaa;">Wallet Balance</label><p style="font-size:24px; font-weight:bold; color:#f5b042;">₹${currentBalance}</p></div>
+                <button class="btn-primary" onclick="showChangePassword()" style="margin-top:20px;">🔐 Change Password</button>
+                <div class="support-buttons">
+                    <button class="whatsapp-btn" onclick="openWhatsApp()">💬 WhatsApp</button>
+                    <button class="call-btn" onclick="makeCall()">📞 Call Support</button>
+                </div>
+            </div>
+        `;
     }
 };
-    // Load Dashboard with Market Selection
-    window.loadPage = async (page) => {
-        const content = document.getElementById('pageContent');
-        
-        if(page === 'dashboard') {
-            const marketsSnap = await getDocs(collection(db, "markets"));
-            let marketOptions = '<select id="marketSelect" style="width:100%; padding:12px; margin-bottom:15px; background:#2a2a4a; border-radius:12px; color:white;">';
-            marketsSnap.forEach(doc => {
-                const m = doc.data();
-                marketOptions += `<option value="${m.name}">${m.name} (${m.openTime}-${m.closeTime})</option>`;
-            });
-            marketOptions += '</select>';
-            
-            const gameTypesHtml = `
-                <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:20px;">
-                    <button class="btn-primary" onclick="showBetInterface('single_digit')" style="padding:12px;">🎲 Single Digit</button>
-                    <button class="btn-primary" onclick="showBetInterface('jodi_digit')" style="padding:12px;">🔢 Jodi Digit</button>
-                    <button class="btn-primary" onclick="showBetInterface('single_pana')" style="padding:12px;">🎯 Single Pana</button>
-                    <button class="btn-primary" onclick="showBetInterface('double_pana')" style="padding:12px;">🎰 Double Pana</button>
-                    <button class="btn-primary" onclick="showBetInterface('triple_pana')" style="padding:12px;">⭐ Triple Pana</button>
-                    <button class="btn-primary" onclick="showBetInterface('half_sangam')" style="padding:12px;">🃏 Half Sangam</button>
-                    <button class="btn-primary" onclick="showBetInterface('full_sangam')" style="padding:12px;">🎴 Full Sangam</button>
-                </div>
-                <div id="betInterfaceContainer"></div>
-            `;
-            content.innerHTML = marketOptions + gameTypesHtml;
-        } else if(page === 'deposit') {
-            content.innerHTML = `<div class="bet-interface"><div class="game-header"><div class="game-title">💰 Deposit Money</div></div><button class="btn-primary" onclick="showDepositModal()" style="padding:15px; width:100%;">💳 Deposit Now</button><p style="margin-top:15px; font-size:12px; color:#aaa;">Min ₹100 | Max ₹49,000 | UPI Auto Approval</p></div>`;
-        } else if(page === 'bids') {
-            const bidsSnap = await getDocs(query(collection(db, "bids"), where("userId", "==", currentUser.uid), orderBy("timestamp", "desc")));
-            let html = '<div class="bet-interface"><div class="game-header"><div class="game-title">📝 My Bid History</div></div><div class="data-table"><table><thead><tr><th>Game</th><th>Market</th><th>Points</th><th>Result</th><th>Status</th></tr></thead><tbody>';
-            bidsSnap.forEach(doc => {
-                const b = doc.data();
-                const statusClass = b.status === 'won' ? 'win' : (b.status === 'lost' ? 'loss' : 'pending');
-                const statusText = b.status === 'won' ? `Won ₹${b.winAmount}` : (b.status === 'lost' ? 'Lost' : 'Pending');
-                html += `<tr><td>${b.gameType}</td><td>${b.market}</td><td>₹${b.totalPoints}</td><td>${b.result || '-'}</td><td class="${statusClass}">${statusText}</td></tr>`;
-            });
-            html += '</tbody></table></div></div>';
-            content.innerHTML = html;
-        } else if(page === 'passbook') {
-            const depositsSnap = await getDocs(query(collection(db, "deposits"), where("userId", "==", currentUser.uid), orderBy("createdAt", "desc")));
-            const withdrawalsSnap = await getDocs(query(collection(db, "withdrawals"), where("userId", "==", currentUser.uid), orderBy("createdAt", "desc")));
-            const bidsSnap = await getDocs(query(collection(db, "bids"), where("userId", "==", currentUser.uid), orderBy("timestamp", "desc")));
-            
-            let html = '<div class="bet-interface"><div class="game-header"><div class="game-title">📒 Complete History</div></div><div class="data-table"><table><thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead><tbody>';
-            
-            depositsSnap.forEach(d => {
-                const data = d.data();
-                html += `<tr><td>${data.createdAt?.toDate?.().toLocaleDateString() || 'Today'}</td><td>Deposit</td><td>${data.paymentMethod}</td><td style="color:#22c55e">+₹${data.amount}</td><td>${data.status}</td></tr>`;
-            });
-            
-            withdrawalsSnap.forEach(w => {
-                const data = w.data();
-                html += `<tr><td>${data.createdAt?.toDate?.().toLocaleDateString() || 'Today'}</td><td>Withdraw</td><td>To ${data.accountNumber}</td><td style="color:#ef4444">-₹${data.amount}</td><td>${data.status}</td></tr>`;
-            });
-            
-            bidsSnap.forEach(b => {
-                const data = b.data();
-                const amountClass = data.status === 'won' ? 'win' : (data.status === 'lost' ? 'loss' : 'pending');
-                const amountText = data.status === 'won' ? `+₹${data.winAmount}` : `-₹${data.totalPoints}`;
-                html += `<tr><td>${data.timestamp?.toDate?.().toLocaleDateString() || 'Today'}</td><td>Bid</td><td>${data.gameType} on ${data.market}</td><td class="${amountClass}">${amountText}</td><td>${data.status || 'Pending'}</td></tr>`;
-            });
-            
-            html += '</tbody></table></div></div>';
-            content.innerHTML = html;
-        } else if(page === 'withdraw') {
-            content.innerHTML = `<div class="bet-interface"><div class="game-header"><div class="game-title">💸 Withdraw Funds</div></div><button class="btn-primary" onclick="showWithdrawModal()" style="padding:15px; width:100%;">Request Withdrawal</button><p style="margin-top:15px; font-size:12px; color:#aaa;">Min ₹500 | Bank transfer after approval</p></div>`;
-        } else if(page === 'profile') {
-            content.innerHTML = `
-                <div class="bet-interface">
-                    <div class="game-header">
-                        <div class="game-title">👤 My Profile</div>
-                    </div>
-                    <div style="margin-bottom:15px;">
-                        <label style="color:#aaa;">Mobile Number</label>
-                        <p style="font-size:18px; font-weight:bold;">${currentUser?.email?.replace('@win777.user', '') || 'N/A'}</p>
-                    </div>
-                    <div style="margin-bottom:15px;">
-                        <label style="color:#aaa;">Wallet Balance</label>
-                        <p style="font-size:24px; font-weight:bold; color:#f5b042;">₹${currentBalance}</p>
-                    </div>
-                    <button class="btn-primary" onclick="showChangePassword()" style="margin-bottom:10px;">🔐 Change Password</button>
-                    <button class="btn-outline" onclick="loadPage('dashboard')">Back to Home</button>
-                </div>
-            `;
-        }
-    };
+
+window.showChangePassword = () => {
+    document.getElementById('pageContent').innerHTML = `
+        <div class="card">
+            <div class="card-title">🔐 Change Password</div>
+            <input type="password" id="oldPwd" class="input-field" placeholder="Current Password">
+            <input type="password" id="newPwd" class="input-field" placeholder="New Password (min 6 chars)">
+            <input type="password" id="confirmPwd" class="input-field" placeholder="Confirm New Password">
+            <button class="btn-primary" onclick="changePassword()">Update Password</button>
+            <button class="btn-outline" onclick="loadPage('profile')">Back</button>
+        </div>
+    `;
+};
+
+window.changePassword = async () => {
+    const oldPwd = document.getElementById('oldPwd').value;
+    const newPwd = document.getElementById('newPwd').value;
+    const confirmPwd = document.getElementById('confirmPwd').value;
     
-    // Change Password
-    window.showChangePassword = () => {
-        const content = document.getElementById('pageContent');
-        content.innerHTML = `
-            <div class="bet-interface">
-                <div class="game-header">
-                    <div class="game-title">🔐 Change Password</div>
-                </div>
-                <div class="input-group">
-                    <label>Current Password</label>
-                    <input type="password" id="currentPassword">
-                </div>
-                <div class="input-group">
-                    <label>New Password</label>
-                    <input type="password" id="newPassword">
-                </div>
-                <div class="input-group">
-                    <label>Confirm New Password</label>
-                    <input type="password" id="confirmNewPassword">
-                </div>
-                <button class="btn-primary" onclick="updateUserPasswordProfile()">Update Password</button>
-                <button class="btn-outline" onclick="loadPage('profile')" style="margin-top:10px;">Back</button>
-            </div>
-        `;
-    };
+    if(!oldPwd || !newPwd) { showToast("Fill all fields"); return; }
+    if(newPwd.length < 6) { showToast("Password min 6 chars"); return; }
+    if(newPwd !== confirmPwd) { showToast("Passwords don't match"); return; }
     
-    window.updateUserPasswordProfile = async () => {
-        const currentPassword = document.getElementById('currentPassword').value;
-        const newPassword = document.getElementById('newPassword').value;
-        const confirmPassword = document.getElementById('confirmNewPassword').value;
-        
-        if(!currentPassword || !newPassword) {
-            showToast("Please fill all fields");
-            return;
-        }
-        if(newPassword.length < 6) {
-            showToast("New password must be at least 6 characters");
-            return;
-        }
-        if(newPassword !== confirmPassword) {
-            showToast("New passwords do not match");
-            return;
-        }
-        
-        try {
-            const user = auth.currentUser;
-            const email = user.email;
-            const credential = EmailAuthProvider.credential(email, currentPassword);
-            await reauthenticateWithCredential(user, credential);
-            await updatePassword(user, newPassword);
-            await updateDoc(doc(db, "users", user.uid), { password: newPassword });
-            showToast("✅ Password changed successfully!");
-            loadPage('profile');
-        } catch(error) {
-            showToast("Current password is incorrect: " + error.message);
-        }
-    };
-    
-    window.showBetInterface = (type) => {
-        const container = document.getElementById('betInterfaceContainer');
-        if(type === 'single_digit') container.innerHTML = renderSingleDigit();
-        else if(type === 'jodi_digit') container.innerHTML = renderJodiDigit();
-        else if(type === 'single_pana') container.innerHTML = renderSinglePana();
-        else if(type === 'double_pana') container.innerHTML = renderDoublePana();
-        else if(type === 'triple_pana') container.innerHTML = renderTriplePana();
-        else if(type === 'half_sangam') container.innerHTML = renderHalfSangam();
-        else if(type === 'full_sangam') container.innerHTML = renderFullSangam();
-        
-        setTimeout(() => {
-            if(type === 'single_digit') {
-                document.querySelectorAll('.digit-points').forEach(input => {
-                    input.addEventListener('input', () => updateTotals('.digit-points'));
-                });
-            } else if(type === 'triple_pana') {
-                document.querySelectorAll('.triple-points').forEach(input => {
-                    input.addEventListener('input', () => updateTotals('.triple-points'));
-                });
-            }
-        }, 100);
-    };
-    
-    window.showMultipliers = () => {
-        const content = document.getElementById('pageContent');
-        content.innerHTML = `
-            <div class="bet-interface">
-                <div class="game-header">
-                    <div class="game-title">🏆 Winning Multipliers</div>
-                </div>
-                <div style="padding:10px;">
-                    <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid #333;"><span>Single Digit</span><span style="color:#f5b042;">1 x 10 = ₹10 per point</span></div>
-                    <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid #333;"><span>Jodi Digit</span><span style="color:#f5b042;">1 x 100 = ₹100 per point</span></div>
-                    <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid #333;"><span>Single Pana</span><span style="color:#f5b042;">1 x 160 = ₹160 per point</span></div>
-                    <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid #333;"><span>Double Pana</span><span style="color:#f5b042;">1 x 320 = ₹320 per point</span></div>
-                    <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid #333;"><span>Triple Pana</span><span style="color:#f5b042;">1 x 1000 = ₹1000 per point</span></div>
-                    <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid #333;"><span>Half Sangam</span><span style="color:#f5b042;">1 x 1600 = ₹1600 per point</span></div>
-                    <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid #333;"><span>Full Sangam</span><span style="color:#f5b042;">1 x 25000 = ₹25000 per point</span></div>
-                </div>
-                <div style="margin-top:15px; padding:15px; background:#2a2a4a; border-radius:12px;"><p style="text-align:center;">💰 Deposit Limits</p><p style="text-align:center; color:#f5b042;">Min: ₹100 | Max: ₹49,000</p></div>
-                <button class="btn-primary" onclick="loadPage('dashboard')" style="margin-top:15px;">Back</button>
-            </div>
-        `;
-    };
-    
-    function showToast(msg) {
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.innerHTML = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
-    }
-    
-    onAuthStateChanged(auth, async (user) => {
+    try {
+        const user = auth.currentUser;
+        const credential = firebase.auth.EmailAuthProvider.credential(user.email, oldPwd);
+        await user.reauthenticateWithCredential(credential);
+        await user.updatePassword(newPwd);
+        await db.collection("users").doc(user.uid).update({ password: newPwd });
+        showToast("Password changed!");
+        loadPage('profile');
+    } catch(e) { showToast("Current password is incorrect"); }
+};
+    auth.onAuthStateChanged(async (user) => {
         if(user) {
             currentUser = user;
-            document.getElementById('userNameDisplay').innerHTML = `📱 ${user.email?.replace('@win777.user', '') || 'User'}`;
-            await initMarkets();
-            await loadUpiId();
+            let mobile = user.email?.replace('@win777.user', '');
+            document.getElementById('userNameDisplay').innerHTML = `📱 ${mobile || 'User'}`;
             
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if(userDoc.exists()) {
+            let userDoc = await db.collection("users").doc(user.uid).get();
+            if(userDoc.exists) {
                 currentBalance = userDoc.data().balance || 0;
                 document.getElementById('walletBalance').innerHTML = `₹${currentBalance}`;
             }
             
-            onSnapshot(doc(db, "users", user.uid), (doc) => {
-                if(doc.exists()) {
+            db.collection("users").doc(user.uid).onSnapshot((doc) => {
+                if(doc.exists) {
                     currentBalance = doc.data().balance || 0;
                     document.getElementById('walletBalance').innerHTML = `₹${currentBalance}`;
                 }
             });
+            
+            // Initialize default markets if empty
+            const markets = await db.collection("markets").get();
+            if(markets.empty) {
+                const defaultMarkets = [
+                    { name: "INDRA MORNING GD", code: "178-61-290", openTime: "09:10", closeTime: "10:10", status: "closed" },
+                    { name: "MAYA MORNING GD", code: "146-17-179", openTime: "09:40", closeTime: "10:40", status: "closed" },
+                    { name: "SRIDEVI", code: "224-81-669", openTime: "11:35", closeTime: "12:35", status: "closed" },
+                    { name: "TIME BAZAR GD", code: "360-97-188", openTime: "12:50", closeTime: "13:50", status: "closed" },
+                    { name: "MADHUR DAY", code: "256-37-566", openTime: "13:25", closeTime: "14:25", status: "closed" },
+                    { name: "MAYA DAY", code: "237-2*-***", openTime: "14:10", closeTime: "16:10", status: "running" },
+                    { name: "MILAN DAY GD", code: "889-5", openTime: "14:55", closeTime: "16:55", status: "running" },
+                    { name: "RAJDHANI DAY", code: "Rk _ wR RHE", openTime: "15:05", closeTime: "17:05", status: "running" },
+                    { name: "SUPREME DAY GD", code: "RK RR _RRK", openTime: "15:25", closeTime: "17:25", status: "open" },
+                    { name: "KALYAN", code: "RK RR _RRK", openTime: "15:30", closeTime: "17:30", status: "open" },
+                    { name: "INDRA DAY", code: "RK RR _RRK", openTime: "16:05", closeTime: "18:05", status: "open" },
+                    { name: "SRIDEVI NIGHT", code: "RK RR _RRK", openTime: "19:10", closeTime: "20:10", status: "open" },
+                    { name: "MAYA NIGHT", code: "RK RR _RRK", openTime: "20:10", closeTime: "22:10", status: "open" },
+                    { name: "MADHUR NIGHT", code: "RK RR _RRK", openTime: "20:20", closeTime: "22:20", status: "open" },
+                    { name: "SUPREME NIGHT", code: "RK RR _RRK", openTime: "20:35", closeTime: "22:35", status: "open" },
+                    { name: "MILAN NIGHT", code: "RK RR _RRK", openTime: "20:55", closeTime: "22:55", status: "open" },
+                    { name: "INDRA NIGHT", code: "RK RR _RRK", openTime: "21:05", closeTime: "23:05", status: "open" },
+                    { name: "KALYAN NIGHT", code: "RK RR _RRK", openTime: "21:30", closeTime: "23:35", status: "open" },
+                    { name: "RAJDHANI NIGHT", code: "RK RR _RRK", openTime: "21:35", closeTime: "23:40", status: "open" },
+                    { name: "MAIN BAZAR", code: "BRK 交火", openTime: "21:50", closeTime: "23:55", status: "open" }
+                ];
+                for(const market of defaultMarkets) {
+                    await db.collection("markets").add(market);
+                }
+            }
             
             loadPage('dashboard');
         } else {
             window.location.href = 'index.html';
         }
     });
-    
-    window.showToast = showToast;
-    window.showMultipliers = showMultipliers;
 </script>
 </body>
 </html>
