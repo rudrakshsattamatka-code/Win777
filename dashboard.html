@@ -3,63 +3,307 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>win777 - Dashboard</title>
+    <title>WIN777 - Dashboard</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); min-height: 100vh; color: #fff; padding-bottom: 70px; }
-        .header { background: rgba(26, 26, 46, 0.95); padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; }
-        .logo h1 { font-size: 20px; background: linear-gradient(135deg, #f5b042, #ff6b6b); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .wallet-card { background: linear-gradient(135deg, #f5b04220, #ff6b6b20); padding: 6px 12px; border-radius: 16px; border: 1px solid #f5b042; }
-        .wallet-label { font-size: 10px; color: #aaa; }
-        .wallet-amount { font-size: 18px; font-weight: bold; color: #f5b042; }
-        .user-info { display: flex; align-items: center; gap: 8px; }
-        .logout-btn { background: rgba(255,255,255,0.1); border: none; padding: 5px 10px; border-radius: 16px; color: white; cursor: pointer; }
-        .container { max-width: 500px; margin: 0 auto; padding: 12px; }
-        .card { background: rgba(26, 26, 46, 0.95); border-radius: 20px; padding: 20px; margin-bottom: 20px; }
-        .card-title { font-size: 18px; font-weight: bold; color: #f5b042; margin-bottom: 15px; border-left: 3px solid #f5b042; padding-left: 12px; }
-        .btn-primary { background: linear-gradient(135deg, #f5b042, #ff6b6b); border: none; padding: 14px; border-radius: 30px; color: white; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px; }
-        .btn-outline { background: transparent; border: 1px solid #f5b042; padding: 12px; border-radius: 30px; color: #f5b042; cursor: pointer; width: 100%; margin-top: 10px; }
-        .bet-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
-        .bet-btn { background: #2a2a4a; border: none; padding: 12px; border-radius: 30px; color: white; font-weight: bold; cursor: pointer; text-align: center; }
-        .bet-btn:hover { background: #f5b042; color: #0f0c29; }
-        .market-item { background: #1a1a2e; padding: 12px; border-radius: 12px; margin-bottom: 10px; border-left: 3px solid #f5b042; }
-        .market-name { font-weight: bold; }
-        .market-time { font-size: 11px; color: #aaa; margin-top: 5px; }
-        .market-status { font-size: 11px; margin-top: 5px; }
-        .status-open { color: #22c55e; }
-        .status-closed { color: #ef4444; }
-        .status-running { color: #f59e0b; }
-        .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
-        .modal.active { display: flex; }
-        .modal-content { background: #1a1a2e; border-radius: 28px; padding: 25px; max-width: 400px; width: 100%; }
-        .amount-input { width: 100%; padding: 14px; margin: 10px 0; background: #2a2a4a; border: none; border-radius: 12px; color: white; font-size: 16px; }
-        .toast { position: fixed; bottom: 80px; left: 20px; right: 20px; background: #1a1a2e; padding: 12px; border-radius: 12px; text-align: center; z-index: 3000; border-left: 4px solid #f5b042; }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(26, 26, 46, 0.95); display: flex; justify-content: space-around; padding: 8px 12px; border-top: 1px solid rgba(255,255,255,0.1); z-index: 100; }
-        .nav-item { text-align: center; cursor: pointer; padding: 5px; }
-        .nav-icon { font-size: 22px; }
-        .nav-label { font-size: 10px; margin-top: 2px; }
-        .data-table { width: 100%; overflow-x: auto; }
-        .data-table table { width: 100%; border-collapse: collapse; }
-        .data-table th, .data-table td { padding: 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 12px; }
-        .data-table th { color: #f5b042; }
-        .win { color: #22c55e; }
-        .loss { color: #ef4444; }
-        .pending { color: #f59e0b; }
-        .input-field { width: 100%; padding: 12px; background: #2a2a4a; border: none; border-radius: 12px; color: white; margin-bottom: 12px; }
-        .support-buttons { display: flex; gap: 10px; margin-top: 15px; }
-        .support-buttons button { flex: 1; padding: 12px; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; }
-        .whatsapp-btn { background: #25D366; color: white; }
-        .call-btn { background: #1e88e5; color: white; }
-        .loading { display: inline-block; width: 20px; height: 20px; border: 2px solid white; border-radius: 50%; border-top-color: transparent; animation: spin 0.6s linear infinite; margin-right: 8px; vertical-align: middle; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            color: white;
+            padding-bottom: 70px;
+        }
+        .header {
+            background: rgba(26, 26, 46, 0.95);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo h1 {
+            font-size: 22px;
+            background: linear-gradient(135deg, #f5b042, #ff6b6b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .wallet-card {
+            background: linear-gradient(135deg, #f5b04220, #ff6b6b20);
+            padding: 6px 12px;
+            border-radius: 16px;
+            border: 1px solid #f5b042;
+        }
+        .wallet-label {
+            font-size: 10px;
+            color: #aaa;
+        }
+        .wallet-amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #f5b042;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logout-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 16px;
+            color: white;
+            cursor: pointer;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 12px;
+        }
+        .card {
+            background: rgba(26, 26, 46, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #f5b042;
+            margin-bottom: 15px;
+            border-left: 3px solid #f5b042;
+            padding-left: 12px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #f5b042, #ff6b6b);
+            border: none;
+            padding: 14px;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #f5b042;
+            padding: 12px;
+            border-radius: 30px;
+            color: #f5b042;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        .bet-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .bet-btn {
+            background: #2a2a4a;
+            border: none;
+            padding: 12px;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+        }
+        .bet-btn:hover {
+            background: #f5b042;
+            color: #0f0c29;
+        }
+        .market-item {
+            background: #1a1a2e;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border-left: 3px solid #f5b042;
+        }
+        .market-name {
+            font-weight: bold;
+        }
+        .market-time {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+        .market-status {
+            font-size: 11px;
+            margin-top: 5px;
+        }
+        .status-open {
+            color: #22c55e;
+        }
+        .status-closed {
+            color: #ef4444;
+        }
+        .status-running {
+            color: #f59e0b;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal-content {
+            background: #1a1a2e;
+            border-radius: 28px;
+            padding: 25px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .amount-input {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            background: #2a2a4a;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+        }
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 20px;
+            right: 20px;
+            background: #1a1a2e;
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            z-index: 3000;
+            border-left: 4px solid #f5b042;
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 46, 0.95);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 12px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            z-index: 100;
+        }
+        .nav-item {
+            text-align: center;
+            cursor: pointer;
+            padding: 5px;
+        }
+        .nav-icon {
+            font-size: 22px;
+        }
+        .nav-label {
+            font-size: 10px;
+            margin-top: 2px;
+        }
+        .data-table {
+            width: 100%;
+            overflow-x: auto;
+        }
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th, .data-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            font-size: 12px;
+        }
+        .data-table th {
+            color: #f5b042;
+        }
+        .win {
+            color: #22c55e;
+        }
+        .loss {
+            color: #ef4444;
+        }
+        .pending {
+            color: #f59e0b;
+        }
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            background: #2a2a4a;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            margin-bottom: 12px;
+        }
+        .support-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .support-buttons button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+        .whatsapp-btn {
+            background: #25D366;
+            color: white;
+        }
+        .call-btn {
+            background: #1e88e5;
+            color: white;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
 
 <div class="header">
     <div class="logo"><h1>WIN777</h1></div>
-    <div class="wallet-card"><div class="wallet-label">💰 Balance</div><div class="wallet-amount" id="walletBalance">₹0</div></div>
-    <div class="user-info"><span id="userNameDisplay"></span><button class="logout-btn" onclick="logout()">Exit</button></div>
+    <div class="wallet-card">
+        <div class="wallet-label">💰 Balance</div>
+        <div class="wallet-amount" id="walletBalance">₹0</div>
+    </div>
+    <div class="user-info">
+        <span id="userNameDisplay"></span>
+        <button class="logout-btn" onclick="logout()">Exit</button>
+    </div>
 </div>
 
 <div class="container" id="pageContent"></div>
@@ -113,31 +357,34 @@
         setTimeout(() => toast.remove(), 3000);
     }
     
-    window.logout = async () => { await auth.signOut(); window.location.href = 'index.html'; };
+    window.logout = async () => { 
+        await auth.signOut(); 
+        window.location.href = 'index.html'; 
+    };
+    
     window.openWhatsApp = () => window.open(`https://wa.me/${SUPPORT_NUMBER}`, '_blank');
     window.makeCall = () => window.location.href = `tel:${SUPPORT_NUMBER}`;
     
     window.showDepositModal = () => document.getElementById('depositModal').classList.add('active');
     window.closeDepositModal = () => document.getElementById('depositModal').classList.remove('active');
+window.submitDeposit = async () => {
+    const amount = document.getElementById('depositAmount').value;
+    if(!amount || amount < 100) { showToast("Minimum deposit ₹100"); return; }
+    if(amount > 49000) { showToast("Maximum deposit ₹49,000"); return; }
     
-    window.submitDeposit = async () => {
-        const amount = document.getElementById('depositAmount').value;
-        if(!amount || amount < 100) { showToast("Minimum deposit ₹100"); return; }
-        if(amount > 49000) { showToast("Maximum deposit ₹49,000"); return; }
-        
-        await db.collection("deposits").add({
-            userId: currentUser.uid,
-            amount: parseFloat(amount),
-            status: "pending",
-            createdAt: new Date(),
-            userMobile: currentUser.email?.replace('@win777.user', '')
-        });
-        
-        showToast(`✅ Deposit request of ₹${amount} submitted!`);
-        closeDepositModal();
-        document.getElementById('depositAmount').value = '';
-    };
-// Place Bid
+    await db.collection("deposits").add({
+        userId: currentUser.uid,
+        amount: parseFloat(amount),
+        status: "pending",
+        createdAt: new Date(),
+        userMobile: currentUser.email?.replace('@win777.user', '')
+    });
+    
+    showToast(`✅ Deposit request of ₹${amount} submitted!`);
+    closeDepositModal();
+    document.getElementById('depositAmount').value = '';
+};
+
 window.placeBid = async (gameType, gameTypeName) => {
     const market = document.getElementById('bidMarket')?.value;
     const points = parseInt(document.getElementById('bidPoints')?.value);
@@ -173,20 +420,17 @@ window.loadPage = async (page) => {
     const content = document.getElementById('pageContent');
     
     if(page === 'dashboard') {
-        // Load markets
         const markets = await db.collection("markets").get();
         let marketsHtml = '';
         markets.forEach(doc => {
             const m = doc.data();
-            let statusClass = '';
-            if(m.status === 'open') statusClass = 'status-open';
-            else if(m.status === 'closed') statusClass = 'status-closed';
-            else statusClass = 'status-running';
+            let statusClass = m.status === 'open' ? 'status-open' : (m.status === 'closed' ? 'status-closed' : 'status-running');
+            let statusText = m.status === 'open' ? '✅ Open Now' : (m.status === 'running' ? '⏳ Running' : '🔒 Closed');
             marketsHtml += `
                 <div class="market-item">
                     <div class="market-name">${m.name}</div>
                     <div class="market-time">🕐 ${m.openTime} - ${m.closeTime}</div>
-                    <div class="market-status ${statusClass}">${m.status === 'open' ? '✅ Open Now' : (m.status === 'running' ? '⏳ Running' : '🔒 Closed')}</div>
+                    <div class="market-status ${statusClass}">${statusText}</div>
                 </div>
             `;
         });
@@ -328,11 +572,45 @@ window.changePassword = async () => {
         loadPage('profile');
     } catch(e) { showToast("Current password is incorrect"); }
 };
+    // Initialize default markets
+    async function initMarkets() {
+        const markets = await db.collection("markets").get();
+        if(markets.empty) {
+            const defaultMarkets = [
+                { name: "INDRA MORNING GD", code: "178-61-290", openTime: "09:10", closeTime: "10:10", status: "closed" },
+                { name: "MAYA MORNING GD", code: "146-17-179", openTime: "09:40", closeTime: "10:40", status: "closed" },
+                { name: "SRIDEVI", code: "224-81-669", openTime: "11:35", closeTime: "12:35", status: "closed" },
+                { name: "TIME BAZAR GD", code: "360-97-188", openTime: "12:50", closeTime: "13:50", status: "closed" },
+                { name: "MADHUR DAY", code: "256-37-566", openTime: "13:25", closeTime: "14:25", status: "closed" },
+                { name: "MAYA DAY", code: "237-2*-***", openTime: "14:10", closeTime: "16:10", status: "running" },
+                { name: "MILAN DAY GD", code: "889-5", openTime: "14:55", closeTime: "16:55", status: "running" },
+                { name: "RAJDHANI DAY", code: "Rk _ wR RHE", openTime: "15:05", closeTime: "17:05", status: "running" },
+                { name: "SUPREME DAY GD", code: "RK RR _RRK", openTime: "15:25", closeTime: "17:25", status: "open" },
+                { name: "KALYAN", code: "RK RR _RRK", openTime: "15:30", closeTime: "17:30", status: "open" },
+                { name: "INDRA DAY", code: "RK RR _RRK", openTime: "16:05", closeTime: "18:05", status: "open" },
+                { name: "SRIDEVI NIGHT", code: "RK RR _RRK", openTime: "19:10", closeTime: "20:10", status: "open" },
+                { name: "MAYA NIGHT", code: "RK RR _RRK", openTime: "20:10", closeTime: "22:10", status: "open" },
+                { name: "MADHUR NIGHT", code: "RK RR _RRK", openTime: "20:20", closeTime: "22:20", status: "open" },
+                { name: "SUPREME NIGHT", code: "RK RR _RRK", openTime: "20:35", closeTime: "22:35", status: "open" },
+                { name: "MILAN NIGHT", code: "RK RR _RRK", openTime: "20:55", closeTime: "22:55", status: "open" },
+                { name: "INDRA NIGHT", code: "RK RR _RRK", openTime: "21:05", closeTime: "23:05", status: "open" },
+                { name: "KALYAN NIGHT", code: "RK RR _RRK", openTime: "21:30", closeTime: "23:35", status: "open" },
+                { name: "RAJDHANI NIGHT", code: "RK RR _RRK", openTime: "21:35", closeTime: "23:40", status: "open" },
+                { name: "MAIN BAZAR", code: "BRK 交火", openTime: "21:50", closeTime: "23:55", status: "open" }
+            ];
+            for(const market of defaultMarkets) {
+                await db.collection("markets").add(market);
+            }
+        }
+    }
+    
     auth.onAuthStateChanged(async (user) => {
         if(user) {
             currentUser = user;
             let mobile = user.email?.replace('@win777.user', '');
             document.getElementById('userNameDisplay').innerHTML = `📱 ${mobile || 'User'}`;
+            
+            await initMarkets();
             
             let userDoc = await db.collection("users").doc(user.uid).get();
             if(userDoc.exists) {
@@ -346,36 +624,6 @@ window.changePassword = async () => {
                     document.getElementById('walletBalance').innerHTML = `₹${currentBalance}`;
                 }
             });
-            
-            // Initialize default markets if empty
-            const markets = await db.collection("markets").get();
-            if(markets.empty) {
-                const defaultMarkets = [
-                    { name: "INDRA MORNING GD", code: "178-61-290", openTime: "09:10", closeTime: "10:10", status: "closed" },
-                    { name: "MAYA MORNING GD", code: "146-17-179", openTime: "09:40", closeTime: "10:40", status: "closed" },
-                    { name: "SRIDEVI", code: "224-81-669", openTime: "11:35", closeTime: "12:35", status: "closed" },
-                    { name: "TIME BAZAR GD", code: "360-97-188", openTime: "12:50", closeTime: "13:50", status: "closed" },
-                    { name: "MADHUR DAY", code: "256-37-566", openTime: "13:25", closeTime: "14:25", status: "closed" },
-                    { name: "MAYA DAY", code: "237-2*-***", openTime: "14:10", closeTime: "16:10", status: "running" },
-                    { name: "MILAN DAY GD", code: "889-5", openTime: "14:55", closeTime: "16:55", status: "running" },
-                    { name: "RAJDHANI DAY", code: "Rk _ wR RHE", openTime: "15:05", closeTime: "17:05", status: "running" },
-                    { name: "SUPREME DAY GD", code: "RK RR _RRK", openTime: "15:25", closeTime: "17:25", status: "open" },
-                    { name: "KALYAN", code: "RK RR _RRK", openTime: "15:30", closeTime: "17:30", status: "open" },
-                    { name: "INDRA DAY", code: "RK RR _RRK", openTime: "16:05", closeTime: "18:05", status: "open" },
-                    { name: "SRIDEVI NIGHT", code: "RK RR _RRK", openTime: "19:10", closeTime: "20:10", status: "open" },
-                    { name: "MAYA NIGHT", code: "RK RR _RRK", openTime: "20:10", closeTime: "22:10", status: "open" },
-                    { name: "MADHUR NIGHT", code: "RK RR _RRK", openTime: "20:20", closeTime: "22:20", status: "open" },
-                    { name: "SUPREME NIGHT", code: "RK RR _RRK", openTime: "20:35", closeTime: "22:35", status: "open" },
-                    { name: "MILAN NIGHT", code: "RK RR _RRK", openTime: "20:55", closeTime: "22:55", status: "open" },
-                    { name: "INDRA NIGHT", code: "RK RR _RRK", openTime: "21:05", closeTime: "23:05", status: "open" },
-                    { name: "KALYAN NIGHT", code: "RK RR _RRK", openTime: "21:30", closeTime: "23:35", status: "open" },
-                    { name: "RAJDHANI NIGHT", code: "RK RR _RRK", openTime: "21:35", closeTime: "23:40", status: "open" },
-                    { name: "MAIN BAZAR", code: "BRK 交火", openTime: "21:50", closeTime: "23:55", status: "open" }
-                ];
-                for(const market of defaultMarkets) {
-                    await db.collection("markets").add(market);
-                }
-            }
             
             loadPage('dashboard');
         } else {
