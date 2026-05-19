@@ -418,94 +418,93 @@ window.handleLogin = async () => {
         btn.disabled = false;
     }
 };
-    window.showForgotPassword = () => {
-        document.getElementById('authForm').innerHTML = `
-            <div class="input-group">
-                <label>📱 Registered Mobile Number</label>
-                <div class="mobile-input">
-                    <span class="country-code">+91</span>
-                    <input type="tel" id="resetMobile" placeholder="9876543210" maxlength="10">
-                </div>
+window.showForgotPassword = () => {
+    document.getElementById('authForm').innerHTML = `
+        <div class="input-group">
+            <label>📱 Registered Mobile Number</label>
+            <div class="mobile-input">
+                <span class="country-code">+91</span>
+                <input type="tel" id="resetMobile" placeholder="9876543210" maxlength="10">
             </div>
-            <div id="resetOtpSection" style="display:none;">
-                <div class="otp-group">
-                    <input type="text" id="resetOtp" placeholder="Enter OTP" maxlength="6">
-                    <button onclick="verifyResetOTP()">Verify</button>
-                </div>
-                <div id="newPwdSection" style="display:none; margin-top:15px;">
-                    <input type="password" id="newPassword" placeholder="New Password" style="width:100%; padding:14px; background:#2a2a4a; border-radius:12px; color:white; border:none;">
-                    <button class="btn-primary" onclick="updateUserPassword()" style="margin-top:10px;">Reset Password</button>
-                </div>
+        </div>
+        <div id="resetOtpSection" style="display:none;">
+            <div class="otp-group">
+                <input type="text" id="resetOtp" placeholder="Enter OTP" maxlength="6">
+                <button onclick="verifyResetOTP()">Verify</button>
             </div>
-            <button class="btn-primary" id="resetBtn" onclick="sendResetOTP()">Send OTP</button>
-            <div class="back-link"><span onclick="showLoginForm()">← Back to Login</span></div>
-        `;
-    };
+            <div id="newPwdSection" style="display:none; margin-top:15px;">
+                <input type="password" id="newPassword" placeholder="New Password" style="width:100%; padding:14px; background:#2a2a4a; border-radius:12px; color:white; border:none;">
+                <button class="btn-primary" onclick="updateUserPassword()" style="margin-top:10px;">Reset Password</button>
+            </div>
+        </div>
+        <button class="btn-primary" id="resetBtn" onclick="sendResetOTP()">Send OTP</button>
+        <div class="back-link"><span onclick="showLoginForm()">← Back to Login</span></div>
+    `;
+};
+
+window.sendResetOTP = async () => {
+    const mobile = document.getElementById('resetMobile').value;
+    if(!mobile || mobile.length !== 10) { showToast("Enter valid mobile"); return; }
     
-    window.sendResetOTP = async () => {
-        const mobile = document.getElementById('resetMobile').value;
-        if(!mobile || mobile.length !== 10) { showToast("Enter valid mobile"); return; }
-        
-        const existing = await db.collection("users").where("mobile", "==", mobile).get();
-        if(existing.empty) { showToast("No account found with this number"); return; }
-        
-        pendingUser = { mobile };
-        
-        if(!window.recaptchaVerifier) {
-            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('resetBtn', {
-                'size': 'invisible',
-                'callback': () => {}
-            });
-        }
-        
-        const btn = document.getElementById('resetBtn');
-        btn.innerHTML = '<span class="loading"></span> Sending...';
-        btn.disabled = true;
-        
-        try {
-            const result = await auth.signInWithPhoneNumber("+91" + mobile, window.recaptchaVerifier);
-            confirmationResult = result;
-            showToast("OTP sent!");
-            document.getElementById('resetOtpSection').style.display = 'block';
-            btn.innerHTML = "OTP Sent ✓";
-        } catch(error) {
-            showToast("Error: " + error.message);
-            btn.innerHTML = "Send OTP";
-            btn.disabled = false;
-        }
-    };
+    const existing = await db.collection("users").where("mobile", "==", mobile).get();
+    if(existing.empty) { showToast("No account found with this number"); return; }
     
-    window.verifyResetOTP = async () => {
-        const otp = document.getElementById('resetOtp').value;
-        if(!otp || otp.length !== 6) { showToast("Enter OTP"); return; }
-        
-        try {
-            await confirmationResult.confirm(otp);
-            showToast("Phone verified!");
-            document.getElementById('newPwdSection').style.display = 'block';
-        } catch(error) {
-            showToast("Invalid OTP");
-        }
-    };
+    pendingUser = { mobile };
     
-    window.updateUserPassword = async () => {
-        const newPassword = document.getElementById('newPassword').value;
-        if(!newPassword || newPassword.length < 6) { showToast("Password must be 6+ characters"); return; }
-        
-        try {
-            const user = auth.currentUser;
-            if(user) await user.updatePassword(newPassword);
-            
-            const existing = await db.collection("users").where("mobile", "==", pendingUser.mobile).get();
-            existing.forEach(doc => doc.ref.update({ password: newPassword }));
-            
-            showToast("Password reset successful! Login now.");
-            setTimeout(() => showLoginForm(), 1500);
-        } catch(error) {
-            showToast("Error: " + error.message);
-        }
-    };
+    if(!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('resetBtn', {
+            'size': 'invisible',
+            'callback': () => {}
+        });
+    }
     
+    const btn = document.getElementById('resetBtn');
+    btn.innerHTML = '<span class="loading"></span> Sending...';
+    btn.disabled = true;
+    
+    try {
+        const result = await auth.signInWithPhoneNumber("+91" + mobile, window.recaptchaVerifier);
+        confirmationResult = result;
+        showToast("OTP sent!");
+        document.getElementById('resetOtpSection').style.display = 'block';
+        btn.innerHTML = "OTP Sent ✓";
+    } catch(error) {
+        showToast("Error: " + error.message);
+        btn.innerHTML = "Send OTP";
+        btn.disabled = false;
+    }
+};
+
+window.verifyResetOTP = async () => {
+    const otp = document.getElementById('resetOtp').value;
+    if(!otp || otp.length !== 6) { showToast("Enter OTP"); return; }
+    
+    try {
+        await confirmationResult.confirm(otp);
+        showToast("Phone verified!");
+        document.getElementById('newPwdSection').style.display = 'block';
+    } catch(error) {
+        showToast("Invalid OTP");
+    }
+};
+
+window.updateUserPassword = async () => {
+    const newPassword = document.getElementById('newPassword').value;
+    if(!newPassword || newPassword.length < 6) { showToast("Password must be 6+ characters"); return; }
+    
+    try {
+        const user = auth.currentUser;
+        if(user) await user.updatePassword(newPassword);
+        
+        const existing = await db.collection("users").where("mobile", "==", pendingUser.mobile).get();
+        existing.forEach(doc => doc.ref.update({ password: newPassword }));
+        
+        showToast("Password reset successful! Login now.");
+        setTimeout(() => showLoginForm(), 1500);
+    } catch(error) {
+        showToast("Error: " + error.message);
+    }
+};
     auth.onAuthStateChanged((user) => {
         if(user && user.email && !user.email.includes('temp')) {
             window.location.href = 'dashboard.html';
