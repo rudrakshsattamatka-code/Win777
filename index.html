@@ -4,10 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
   <title>win777 · Login</title>
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <style>
     * {
       margin: 0;
@@ -118,11 +114,6 @@
       transform: scale(0.97);
     }
 
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
     .otp-row {
       display: flex;
       gap: 12px;
@@ -148,11 +139,6 @@
       text-align: center;
     }
 
-    .success-msg {
-      background: rgba(46, 204, 113, 0.12);
-      color: #2ECC71;
-    }
-
     .footer-note {
       text-align: center;
       font-size: 12px;
@@ -163,37 +149,6 @@
     .hidden {
       display: none;
     }
-
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.9);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid #2D3748;
-      border-top-color: #F0B90B;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    .loading-text {
-      color: #F0B90B;
-      font-size: 14px;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -213,7 +168,7 @@
         </div>
         <div class="input-group">
           <label>📱 Mobile Number</label>
-          <input type="tel" id="mobileNumber" class="input-field" placeholder="+919876543210">
+          <input type="tel" id="mobileNumber" class="input-field" placeholder="9876543210">
         </div>
         <div class="otp-row">
           <input type="text" id="otpCode" class="input-field" placeholder="Enter OTP" maxlength="6">
@@ -221,7 +176,7 @@
         </div>
         <div id="loginError" class="error-msg hidden"></div>
         <button id="verifyLogin" class="btn" style="margin-top: 24px;">Verify & Login</button>
-        <div class="footer-note">🔐 Real SMS OTP will be sent to your phone</div>
+        <div class="footer-note">🔐 Demo OTP: 123456</div>
       </div>
 
       <!-- REGISTER SCREEN -->
@@ -251,167 +206,106 @@
   </div>
 </div>
 
-<!-- reCAPTCHA Container -->
-<div id="recaptcha-container"></div>
-
-<div id="loadingOverlay" class="loading-overlay hidden">
-  <div class="spinner"></div>
-  <div class="loading-text">Processing...</div>
-</div>
-
 <script>
-  // ==================== FIREBASE CONFIGURATION ====================
-  const firebaseConfig = {
-    apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
-    authDomain: "win777-ed482.firebaseapp.com",
-    projectId: "win777-ed482",
-    storageBucket: "win777-ed482.firebasestorage.app",
-    messagingSenderId: "843686112399",
-    appId: "1:843686112399:web:9c20a96831e6a94cd814fa",
-    measurementId: "G-YG8V7EJ0PL"
-  };
-
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-
   // ==================== STORAGE ====================
+  const STORAGE_USERS = 'win777_users';
   const STORAGE_CURRENT = 'win777_current_user';
   const STORAGE_SESSION = 'win777_session';
   
-  // ==================== FIREBASE PHONE AUTH ====================
-  let confirmationResult = null;
-  let pendingMobile = null;
-  let recaptchaVerifier = null;
-  
-  function setLoading(show) {
-    const overlay = document.getElementById('loadingOverlay');
-    if (show) overlay.classList.remove('hidden');
-    else overlay.classList.add('hidden');
-  }
-  
-  function showError(elementId, message) {
-    const errDiv = document.getElementById(elementId);
-    errDiv.innerText = message;
-    errDiv.classList.remove('hidden');
-    setTimeout(() => errDiv.classList.add('hidden'), 5000);
-  }
-  
-  // Initialize reCAPTCHA
-  function initRecaptcha() {
-    try {
-      recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-        size: 'invisible',
-        callback: () => {
-          console.log('reCAPTCHA verified');
-        }
-      });
-      console.log('✅ reCAPTCHA initialized');
-    } catch (error) {
-      console.error('reCAPTCHA error:', error);
+  function initStorage() {
+    if (!localStorage.getItem(STORAGE_USERS)) {
+      localStorage.setItem(STORAGE_USERS, JSON.stringify({}));
     }
   }
+  initStorage();
   
-  // Send OTP
-  document.getElementById('sendOtp').onclick = async () => {
+  function getUsers() {
+    return JSON.parse(localStorage.getItem(STORAGE_USERS));
+  }
+  
+  function saveUser(mobile, name, pin) {
+    const users = getUsers();
+    users[mobile] = { name, pin, mobile, balance: 7777, createdAt: new Date().toISOString() };
+    localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
+  }
+  
+  function userExists(mobile) {
+    const users = getUsers();
+    return !!users[mobile];
+  }
+  
+  function getUserData(mobile) {
+    const users = getUsers();
+    return users[mobile];
+  }
+  
+  // ==================== OTP SIMULATION ====================
+  let pendingMobile = null;
+  
+  document.getElementById('sendOtp').onclick = () => {
     const mobile = document.getElementById('mobileNumber').value.trim();
     
-    if (!mobile || mobile.length < 10) {
-      showError('loginError', '❌ Enter valid mobile number with country code (e.g., +919876543210)');
+    if (!mobile || mobile.length < 8) {
+      const err = document.getElementById('loginError');
+      err.innerText = '❌ Enter valid mobile number';
+      err.classList.remove('hidden');
+      setTimeout(() => err.classList.add('hidden'), 3000);
       return;
     }
     
-    setLoading(true);
-    
-    try {
-      if (!recaptchaVerifier) {
-        initRecaptcha();
-      }
-      
-      confirmationResult = await auth.signInWithPhoneNumber(mobile, recaptchaVerifier);
-      pendingMobile = mobile;
-      
-      setLoading(false);
-      alert(`📲 OTP sent to ${mobile}\n🔢 Check your SMS for the verification code`);
-      document.getElementById('otpCode').value = '';
-      document.getElementById('otpCode').focus();
-      
-    } catch (error) {
-      setLoading(false);
-      console.error("OTP Error:", error);
-      
-      let errorMsg = '❌ Failed to send OTP. ';
-      if (error.code === 'auth/invalid-phone-number') {
-        errorMsg = '❌ Invalid phone number. Use format: +919876543210';
-      } else if (error.code === 'auth/too-many-requests') {
-        errorMsg = '❌ Too many requests. Try again later.';
-      } else if (error.code === 'auth/quota-exceeded') {
-        errorMsg = '❌ SMS quota exceeded. Add your number as test number in Firebase Console.';
-      }
-      showError('loginError', errorMsg);
-    }
+    pendingMobile = mobile;
+    alert(`📲 OTP sent to ${mobile}\n🔢 Your OTP: 123456`);
+    document.getElementById('otpCode').value = '';
+    document.getElementById('otpCode').focus();
   };
   
-  // Verify OTP
-  document.getElementById('verifyLogin').onclick = async () => {
+  document.getElementById('verifyLogin').onclick = () => {
     const mobile = document.getElementById('mobileNumber').value.trim();
     const otp = document.getElementById('otpCode').value.trim();
     
-    if (!confirmationResult) {
-      showError('loginError', 'Please request OTP first');
+    if (!pendingMobile || pendingMobile !== mobile) {
+      const err = document.getElementById('loginError');
+      err.innerText = 'Please request OTP first';
+      err.classList.remove('hidden');
+      setTimeout(() => err.classList.add('hidden'), 3000);
       return;
     }
     
-    if (!otp || otp.length !== 6) {
-      showError('loginError', 'Enter 6-digit OTP');
+    if (otp !== '123456') {
+      const err = document.getElementById('loginError');
+      err.innerText = '❌ Invalid OTP. Use 123456';
+      err.classList.remove('hidden');
+      setTimeout(() => err.classList.add('hidden'), 3000);
       return;
     }
     
-    setLoading(true);
-    
-    try {
-      const result = await confirmationResult.confirm(otp);
-      const user = result.user;
-      
-      // Check if user exists in Firestore
-      const userDoc = await db.collection('users').doc(mobile).get();
-      
-      if (userDoc.exists) {
-        // Existing user - login
-        const userData = userDoc.data();
-        localStorage.setItem(STORAGE_CURRENT, JSON.stringify({ 
-          mobile: userData.mobile, 
-          name: userData.name, 
-          pin: userData.pin 
-        }));
-        localStorage.setItem(STORAGE_SESSION, 'active');
-        setLoading(false);
-        window.location.href = 'dashboard.html';
-      } else {
-        // New user - show registration
-        setLoading(false);
-        window.tempMobile = mobile;
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('registerScreen').classList.remove('hidden');
-      }
-      
-    } catch (error) {
-      setLoading(false);
-      console.error("Verification Error:", error);
-      showError('loginError', '❌ Invalid OTP. Please try again.');
+    if (userExists(mobile)) {
+      // Existing user - login
+      const userData = getUserData(mobile);
+      localStorage.setItem(STORAGE_CURRENT, JSON.stringify({ 
+        mobile: userData.mobile, 
+        name: userData.name, 
+        pin: userData.pin 
+      }));
+      localStorage.setItem(STORAGE_SESSION, 'active');
+      window.location.href = 'dashboard.html';
+    } else {
+      // New user - show registration
+      window.tempMobile = mobile;
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('registerScreen').classList.remove('hidden');
     }
   };
   
   // ==================== REGISTRATION ====================
-  document.getElementById('registerUser').onclick = async () => {
+  document.getElementById('registerUser').onclick = () => {
     const name = document.getElementById('fullName').value.trim();
     const pin = document.getElementById('userPin').value.trim();
     const confirm = document.getElementById('confirmPin').value.trim();
     const mobile = window.tempMobile;
     
     if (!mobile) {
-      showRegError('Session expired. Please restart.');
+      alert('Session expired. Please restart.');
       return;
     }
     
@@ -430,28 +324,10 @@
       return;
     }
     
-    setLoading(true);
-    
-    try {
-      // Save to Firestore
-      await db.collection('users').doc(mobile).set({
-        name: name,
-        mobile: mobile,
-        pin: pin,
-        balance: 7777,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      
-      localStorage.setItem(STORAGE_CURRENT, JSON.stringify({ mobile, name, pin }));
-      localStorage.setItem(STORAGE_SESSION, 'active');
-      
-      setLoading(false);
-      window.location.href = 'dashboard.html';
-      
-    } catch (error) {
-      setLoading(false);
-      showRegError('Error creating account. Try again.');
-    }
+    saveUser(mobile, name, pin);
+    localStorage.setItem(STORAGE_CURRENT, JSON.stringify({ mobile, name, pin }));
+    localStorage.setItem(STORAGE_SESSION, 'active');
+    window.location.href = 'dashboard.html';
   };
   
   function showRegError(msg) {
@@ -465,21 +341,17 @@
     document.getElementById('registerScreen').classList.add('hidden');
     document.getElementById('loginScreen').classList.remove('hidden');
     delete window.tempMobile;
-    confirmationResult = null;
   };
   
   // ==================== CHECK EXISTING SESSION ====================
   window.addEventListener('load', () => {
-    initRecaptcha();
-    
     const currentUser = localStorage.getItem(STORAGE_CURRENT);
     const sessionActive = localStorage.getItem(STORAGE_SESSION);
     
     if (currentUser && sessionActive === 'active') {
       window.location.href = 'dashboard.html';
     }
-    
-    console.log('✅ win777 App Loaded - Real OTP Ready');
+    console.log('✅ win777 App Loaded');
   });
   
   // Time display
