@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
   <title>win777 · Login</title>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <style>
     * {
       margin: 0;
@@ -11,7 +15,6 @@
       box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
     }
-
     body {
       background: #0B0F15;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -21,134 +24,30 @@
       min-height: 100vh;
       padding: 16px;
     }
-
-    .app-container {
-      max-width: 420px;
-      width: 100%;
-      margin: 0 auto;
-    }
-
-    .card {
-      background: #11161E;
-      border-radius: 40px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
-      overflow: hidden;
-    }
-
-    .status-bar {
-      padding: 18px 24px 8px 24px;
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
-      font-weight: 500;
-      color: #8E9AAF;
-    }
-
-    .content {
-      padding: 8px 24px 32px 24px;
-    }
-
-    .brand {
-      text-align: center;
-      margin: 12px 0 20px 0;
-    }
-
-    .brand h1 {
-      font-size: 42px;
-      font-weight: 800;
-      background: linear-gradient(135deg, #F0B90B, #FFD966);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .brand p {
-      color: #6E7E9E;
-      font-size: 14px;
-      margin-top: 6px;
-    }
-
-    .input-group {
-      margin-bottom: 20px;
-    }
-
-    label {
-      display: block;
-      font-size: 14px;
-      font-weight: 500;
-      color: #C9D1D9;
-      margin-bottom: 8px;
-    }
-
-    .input-field {
-      width: 100%;
-      background: #1E262F;
-      border: 1px solid #2D3640;
-      border-radius: 28px;
-      padding: 14px 20px;
-      font-size: 16px;
-      color: white;
-      outline: none;
-    }
-
-    .input-field:focus {
-      border-color: #F0B90B;
-      box-shadow: 0 0 0 2px rgba(240, 185, 11, 0.2);
-    }
-
-    .btn {
-      width: 100%;
-      background: #F0B90B;
-      border: none;
-      border-radius: 40px;
-      padding: 14px;
-      font-weight: 700;
-      font-size: 16px;
-      color: #0B0F15;
-      margin-top: 8px;
-      cursor: pointer;
-      transition: transform 0.1s;
-    }
-
-    .btn:active {
-      transform: scale(0.97);
-    }
-
-    .otp-row {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .otp-row .input-field {
-      flex: 2;
-    }
-
-    .otp-row .btn {
-      flex: 1;
-      margin-top: 0;
-    }
-
-    .error-msg {
-      background: rgba(255, 70, 85, 0.12);
-      color: #FF6B6B;
-      font-size: 13px;
-      padding: 8px 14px;
-      border-radius: 28px;
-      margin-top: 12px;
-      text-align: center;
-    }
-
-    .footer-note {
-      text-align: center;
-      font-size: 12px;
-      color: #5E6F8D;
-      margin-top: 24px;
-    }
-
-    .hidden {
-      display: none;
-    }
+    .app-container { max-width: 420px; width: 100%; margin: 0 auto; }
+    .card { background: #11161E; border-radius: 40px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); overflow: hidden; }
+    .status-bar { padding: 18px 24px 8px 24px; display: flex; justify-content: space-between; font-size: 14px; font-weight: 500; color: #8E9AAF; }
+    .content { padding: 8px 24px 32px 24px; }
+    .brand { text-align: center; margin: 12px 0 20px 0; }
+    .brand h1 { font-size: 42px; font-weight: 800; background: linear-gradient(135deg, #F0B90B, #FFD966); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .brand p { color: #6E7E9E; font-size: 14px; margin-top: 6px; }
+    .input-group { margin-bottom: 20px; }
+    label { display: block; font-size: 14px; font-weight: 500; color: #C9D1D9; margin-bottom: 8px; }
+    .input-field { width: 100%; background: #1E262F; border: 1px solid #2D3640; border-radius: 28px; padding: 14px 20px; font-size: 16px; color: white; outline: none; }
+    .input-field:focus { border-color: #F0B90B; box-shadow: 0 0 0 2px rgba(240,185,11,0.2); }
+    .btn { width: 100%; background: #F0B90B; border: none; border-radius: 40px; padding: 14px; font-weight: 700; font-size: 16px; color: #0B0F15; margin-top: 8px; cursor: pointer; transition: transform 0.1s; }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .otp-row { display: flex; gap: 12px; align-items: center; }
+    .otp-row .input-field { flex: 2; }
+    .otp-row .btn { flex: 1; margin-top: 0; }
+    .error-msg { background: rgba(255,70,85,0.12); color: #FF6B6B; font-size: 13px; padding: 8px 14px; border-radius: 28px; margin-top: 12px; text-align: center; }
+    .footer-note { text-align: center; font-size: 12px; color: #5E6F8D; margin-top: 24px; }
+    .hidden { display: none; }
+    .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 1000; flex-direction: column; gap: 16px; }
+    .spinner { width: 50px; height: 50px; border: 4px solid #2D3748; border-top-color: #F0B90B; border-radius: 50%; animation: spin 1s linear infinite; }
+    .loading-text { color: #F0B90B; font-size: 14px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -159,202 +58,178 @@
       <span id="timeStatus">🔋 100%</span>
     </div>
     <div class="content">
-      
-      <!-- LOGIN SCREEN -->
       <div id="loginScreen">
-        <div class="brand">
-          <h1>win777</h1>
-          <p>secure · fast · rewards</p>
-        </div>
-        <div class="input-group">
-          <label>📱 Mobile Number</label>
-          <input type="tel" id="mobileNumber" class="input-field" placeholder="9876543210">
-        </div>
+        <div class="brand"><h1>win777</h1><p>secure · fast · rewards</p></div>
+        <div class="input-group"><label>📱 Mobile Number</label><input type="tel" id="mobileNumber" class="input-field" placeholder="+919876543210"></div>
         <div class="otp-row">
           <input type="text" id="otpCode" class="input-field" placeholder="Enter OTP" maxlength="6">
           <button id="sendOtp" class="btn">Send OTP</button>
         </div>
         <div id="loginError" class="error-msg hidden"></div>
         <button id="verifyLogin" class="btn" style="margin-top: 24px;">Verify & Login</button>
-        <div class="footer-note">🔐 Demo OTP: 123456</div>
+        <div class="footer-note">🔐 Real SMS OTP will be sent to your phone</div>
       </div>
 
-      <!-- REGISTER SCREEN -->
       <div id="registerScreen" class="hidden">
-        <div class="brand">
-          <h1>✨ Welcome</h1>
-          <p>Create your account</p>
-        </div>
-        <div class="input-group">
-          <label>👤 Full Name</label>
-          <input type="text" id="fullName" class="input-field" placeholder="John Doe">
-        </div>
-        <div class="input-group">
-          <label>🔐 4-Digit PIN (Screen Lock)</label>
-          <input type="password" id="userPin" class="input-field" placeholder="****" maxlength="4" inputmode="numeric">
-        </div>
-        <div class="input-group">
-          <label>🔄 Confirm PIN</label>
-          <input type="password" id="confirmPin" class="input-field" placeholder="****" maxlength="4" inputmode="numeric">
-        </div>
+        <div class="brand"><h1>✨ Welcome</h1><p>Create your account</p></div>
+        <div class="input-group"><label>👤 Full Name</label><input type="text" id="fullName" class="input-field" placeholder="John Doe"></div>
+        <div class="input-group"><label>🔐 4-Digit PIN (Screen Lock)</label><input type="password" id="userPin" class="input-field" placeholder="****" maxlength="4" inputmode="numeric"></div>
+        <div class="input-group"><label>🔄 Confirm PIN</label><input type="password" id="confirmPin" class="input-field" placeholder="****" maxlength="4" inputmode="numeric"></div>
         <div id="regError" class="error-msg hidden"></div>
         <button id="registerUser" class="btn">✅ Create Account</button>
         <button id="backToLogin" class="btn" style="background: #2D3748; color:white;">← Back</button>
       </div>
-
     </div>
   </div>
 </div>
+<div id="recaptcha-container"></div>
+<div id="loadingOverlay" class="loading-overlay hidden"><div class="spinner"></div><div class="loading-text">Processing...</div></div>
 
 <script>
-  // ==================== STORAGE ====================
-  const STORAGE_USERS = 'win777_users';
+  // Firebase Config
+  const firebaseConfig = {
+    apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
+    authDomain: "win777-ed482.firebaseapp.com",
+    projectId: "win777-ed482",
+    storageBucket: "win777-ed482.firebasestorage.app",
+    messagingSenderId: "843686112399",
+    appId: "1:843686112399:web:9c20a96831e6a94cd814fa",
+    measurementId: "G-YG8V7EJ0PL"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
   const STORAGE_CURRENT = 'win777_current_user';
   const STORAGE_SESSION = 'win777_session';
-  
-  function initStorage() {
-    if (!localStorage.getItem(STORAGE_USERS)) {
-      localStorage.setItem(STORAGE_USERS, JSON.stringify({}));
-    }
-  }
-  initStorage();
-  
-  function getUsers() {
-    return JSON.parse(localStorage.getItem(STORAGE_USERS));
-  }
-  
-  function saveUser(mobile, name, pin) {
-    const users = getUsers();
-    users[mobile] = { name, pin, mobile, balance: 7777, createdAt: new Date().toISOString() };
-    localStorage.setItem(STORAGE_USERS, JSON.stringify(users));
-  }
-  
-  function userExists(mobile) {
-    const users = getUsers();
-    return !!users[mobile];
-  }
-  
-  function getUserData(mobile) {
-    const users = getUsers();
-    return users[mobile];
-  }
-  
-  // ==================== OTP SIMULATION ====================
+
+  let confirmationResult = null;
   let pendingMobile = null;
-  
-  document.getElementById('sendOtp').onclick = () => {
+  let recaptchaVerifier = null;
+
+  function setLoading(show) {
+    const overlay = document.getElementById('loadingOverlay');
+    if (show) overlay.classList.remove('hidden');
+    else overlay.classList.add('hidden');
+  }
+
+  function showError(msg) {
+    const errDiv = document.getElementById('loginError');
+    errDiv.innerText = msg;
+    errDiv.classList.remove('hidden');
+    setTimeout(() => errDiv.classList.add('hidden'), 5000);
+  }
+
+  function initRecaptcha() {
+    try {
+      recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        size: 'invisible',
+        callback: () => console.log('reCAPTCHA verified')
+      });
+      console.log('✅ reCAPTCHA ready');
+    } catch(e) { console.error('reCAPTCHA error:', e); }
+  }
+
+  // Send OTP
+  document.getElementById('sendOtp').onclick = async () => {
     const mobile = document.getElementById('mobileNumber').value.trim();
-    
-    if (!mobile || mobile.length < 8) {
-      const err = document.getElementById('loginError');
-      err.innerText = '❌ Enter valid mobile number';
-      err.classList.remove('hidden');
-      setTimeout(() => err.classList.add('hidden'), 3000);
+    if (!mobile || mobile.length < 10) {
+      showError('❌ Enter valid mobile number with country code (e.g., +919876543210)');
       return;
     }
-    
-    pendingMobile = mobile;
-    alert(`📲 OTP sent to ${mobile}\n🔢 Your OTP: 123456`);
-    document.getElementById('otpCode').value = '';
-    document.getElementById('otpCode').focus();
+    setLoading(true);
+    try {
+      if (!recaptchaVerifier) initRecaptcha();
+      confirmationResult = await auth.signInWithPhoneNumber(mobile, recaptchaVerifier);
+      pendingMobile = mobile;
+      setLoading(false);
+      alert(`📲 OTP sent to ${mobile}\nCheck your SMS for the code`);
+      document.getElementById('otpCode').focus();
+    } catch (error) {
+      setLoading(false);
+      console.error(error);
+      showError('❌ Failed to send OTP. Make sure phone number is correct.');
+    }
   };
-  
-  document.getElementById('verifyLogin').onclick = () => {
+
+  // Verify OTP
+  document.getElementById('verifyLogin').onclick = async () => {
     const mobile = document.getElementById('mobileNumber').value.trim();
     const otp = document.getElementById('otpCode').value.trim();
     
-    if (!pendingMobile || pendingMobile !== mobile) {
-      const err = document.getElementById('loginError');
-      err.innerText = 'Please request OTP first';
-      err.classList.remove('hidden');
-      setTimeout(() => err.classList.add('hidden'), 3000);
-      return;
-    }
+    if (!confirmationResult) { showError('Please request OTP first'); return; }
+    if (!otp || otp.length !== 6) { showError('Enter 6-digit OTP'); return; }
     
-    if (otp !== '123456') {
-      const err = document.getElementById('loginError');
-      err.innerText = '❌ Invalid OTP. Use 123456';
-      err.classList.remove('hidden');
-      setTimeout(() => err.classList.add('hidden'), 3000);
-      return;
-    }
-    
-    if (userExists(mobile)) {
-      // Existing user - login
-      const userData = getUserData(mobile);
-      localStorage.setItem(STORAGE_CURRENT, JSON.stringify({ 
-        mobile: userData.mobile, 
-        name: userData.name, 
-        pin: userData.pin 
-      }));
-      localStorage.setItem(STORAGE_SESSION, 'active');
-      window.location.href = 'dashboard.html';
-    } else {
-      // New user - show registration
-      window.tempMobile = mobile;
-      document.getElementById('loginScreen').classList.add('hidden');
-      document.getElementById('registerScreen').classList.remove('hidden');
+    setLoading(true);
+    try {
+      await confirmationResult.confirm(otp);
+      const userDoc = await db.collection('users').doc(mobile).get();
+      
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        localStorage.setItem(STORAGE_CURRENT, JSON.stringify({ mobile: userData.mobile, name: userData.name, pin: userData.pin }));
+        localStorage.setItem(STORAGE_SESSION, 'active');
+        setLoading(false);
+        window.location.href = 'dashboard.html';
+      } else {
+        setLoading(false);
+        window.tempMobile = mobile;
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('registerScreen').classList.remove('hidden');
+      }
+    } catch (error) {
+      setLoading(false);
+      showError('❌ Invalid OTP. Please try again.');
     }
   };
-  
-  // ==================== REGISTRATION ====================
-  document.getElementById('registerUser').onclick = () => {
+
+  // Registration
+  document.getElementById('registerUser').onclick = async () => {
     const name = document.getElementById('fullName').value.trim();
     const pin = document.getElementById('userPin').value.trim();
     const confirm = document.getElementById('confirmPin').value.trim();
     const mobile = window.tempMobile;
     
-    if (!mobile) {
-      alert('Session expired. Please restart.');
-      return;
-    }
+    if (!mobile) { alert('Session expired'); return; }
+    if (!name) { showRegError('Please enter your name'); return; }
+    if (!/^\d{4}$/.test(pin)) { showRegError('PIN must be exactly 4 digits'); return; }
+    if (pin !== confirm) { showRegError('PINs do not match'); return; }
     
-    if (!name) {
-      showRegError('Please enter your name');
-      return;
-    }
-    
-    if (!/^\d{4}$/.test(pin)) {
-      showRegError('PIN must be exactly 4 digits');
-      return;
-    }
-    
-    if (pin !== confirm) {
-      showRegError('PINs do not match');
-      return;
-    }
-    
-    saveUser(mobile, name, pin);
-    localStorage.setItem(STORAGE_CURRENT, JSON.stringify({ mobile, name, pin }));
-    localStorage.setItem(STORAGE_SESSION, 'active');
-    window.location.href = 'dashboard.html';
+    setLoading(true);
+    try {
+      await db.collection('users').doc(mobile).set({
+        name, mobile, pin, balance: 7777,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      localStorage.setItem(STORAGE_CURRENT, JSON.stringify({ mobile, name, pin }));
+      localStorage.setItem(STORAGE_SESSION, 'active');
+      setLoading(false);
+      window.location.href = 'dashboard.html';
+    } catch(error) { setLoading(false); showRegError('Error creating account'); }
   };
-  
+
   function showRegError(msg) {
     const err = document.getElementById('regError');
     err.innerText = msg;
     err.classList.remove('hidden');
     setTimeout(() => err.classList.add('hidden'), 3000);
   }
-  
+
   document.getElementById('backToLogin').onclick = () => {
     document.getElementById('registerScreen').classList.add('hidden');
     document.getElementById('loginScreen').classList.remove('hidden');
     delete window.tempMobile;
   };
-  
-  // ==================== CHECK EXISTING SESSION ====================
+
   window.addEventListener('load', () => {
+    initRecaptcha();
     const currentUser = localStorage.getItem(STORAGE_CURRENT);
     const sessionActive = localStorage.getItem(STORAGE_SESSION);
-    
-    if (currentUser && sessionActive === 'active') {
-      window.location.href = 'dashboard.html';
-    }
-    console.log('✅ win777 App Loaded');
+    if (currentUser && sessionActive === 'active') window.location.href = 'dashboard.html';
+    console.log('✅ Firebase Ready - Real OTP Active');
   });
-  
-  // Time display
+
   function updateTime() {
     const now = new Date();
     document.getElementById('timeStatus').innerHTML = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
