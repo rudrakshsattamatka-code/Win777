@@ -3,11 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-  <title>win777 · Secure Vault</title>
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <title>win777 · Secure App</title>
   <style>
     * {
       margin: 0;
@@ -18,7 +14,7 @@
 
     body {
       background: #0B0F15;
-      font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -35,9 +31,8 @@
     .card {
       background: #11161E;
       border-radius: 40px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
       overflow: hidden;
-      transition: all 0.2s ease;
     }
 
     .status-bar {
@@ -47,7 +42,6 @@
       font-size: 14px;
       font-weight: 500;
       color: #8E9AAF;
-      background: #11161E;
     }
 
     .content {
@@ -60,13 +54,12 @@
     }
 
     .brand h1 {
-      font-size: 38px;
+      font-size: 42px;
       font-weight: 800;
       background: linear-gradient(135deg, #F0B90B, #FFD966);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      letter-spacing: -0.5px;
     }
 
     .brand p {
@@ -76,7 +69,7 @@
     }
 
     .screen {
-      transition: opacity 0.25s ease;
+      transition: all 0.3s ease;
     }
 
     .input-group {
@@ -99,9 +92,7 @@
       padding: 14px 20px;
       font-size: 16px;
       color: white;
-      font-family: 'Inter', monospace;
       outline: none;
-      transition: all 0.2s;
     }
 
     .input-field:focus {
@@ -118,29 +109,24 @@
       font-weight: 700;
       font-size: 16px;
       color: #0B0F15;
-      font-family: inherit;
       margin-top: 8px;
-      transition: 0.2s;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(240, 185, 11, 0.2);
     }
 
     .btn-secondary {
       background: #2D3748;
       color: #E2E8F0;
-      box-shadow: none;
     }
 
     .btn-outline {
       background: transparent;
       border: 1px solid #F0B90B;
       color: #F0B90B;
-      box-shadow: none;
     }
 
     .btn-biometric {
-      background: linear-gradient(135deg, #1E2A3A, #16202A);
-      border: 1px solid #F0B90B33;
+      background: #1A2129;
+      border: 1px solid #F0B90B;
       color: #F0B90B;
       display: flex;
       align-items: center;
@@ -149,7 +135,7 @@
     }
 
     .btn:active {
-      transform: scale(0.97);
+      transform: scale(0.98);
     }
 
     .otp-row {
@@ -165,7 +151,6 @@
     .otp-row .btn {
       flex: 1;
       margin-top: 0;
-      padding: 14px 8px;
     }
 
     .error-msg {
@@ -176,32 +161,6 @@
       border-radius: 28px;
       margin-top: 12px;
       text-align: center;
-    }
-
-    .success-msg {
-      background: rgba(46, 204, 113, 0.12);
-      color: #2ECC77;
-    }
-
-    .pin-grid {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-      margin: 20px 0;
-    }
-
-    .pin-dot {
-      width: 55px;
-      height: 55px;
-      background: #1E262F;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 28px;
-      font-weight: 700;
-      color: #F0B90B;
-      border: 1px solid #2D3640;
     }
 
     .dashboard {
@@ -230,6 +189,12 @@
       margin: 24px 0;
     }
 
+    .user-card div {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
     .hidden {
       display: none;
     }
@@ -240,31 +205,6 @@
       color: #5E6F8D;
       margin-top: 24px;
     }
-
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      backdrop-filter: blur(8px);
-    }
-
-    .spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid #2D3748;
-      border-top-color: #F0B90B;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -275,461 +215,358 @@
       <span>🔋 100%</span>
     </div>
     <div class="content">
-      <!-- SCREEN 1: Mobile Number + OTP request -->
-      <div id="screenMobile" class="screen">
+      
+      <!-- SCREEN 1: LOGIN / OTP -->
+      <div id="screenLogin" class="screen">
         <div class="brand">
           <h1>win777</h1>
           <p>secure · fast · rewards</p>
         </div>
         <div class="input-group">
-          <label>📱 Mobile number</label>
-          <input type="tel" id="mobileInput" class="input-field" placeholder="+91 98765 43210" autocomplete="off">
+          <label>📱 Mobile Number</label>
+          <input type="tel" id="mobileNumber" class="input-field" placeholder="9876543210">
         </div>
         <div class="otp-row">
-          <input type="text" id="otpInput" class="input-field" placeholder="6-digit OTP" autocomplete="off" maxlength="6">
-          <button id="sendOtpBtn" class="btn">Send OTP</button>
+          <input type="text" id="otpCode" class="input-field" placeholder="Enter OTP" maxlength="6">
+          <button id="sendOtp" class="btn">Send OTP</button>
         </div>
-        <div id="mobileError" class="error-msg hidden"></div>
-        <button id="verifyOtpBtn" class="btn" style="margin-top: 24px;">Verify & Continue</button>
-        <div class="footer-note">🔐 OTP demo: 123456 (Firebase SMS in production)</div>
+        <div id="loginError" class="error-msg hidden"></div>
+        <button id="verifyLogin" class="btn" style="margin-top: 24px;">Verify & Login</button>
+        <div class="footer-note">🔐 Demo OTP: 123456</div>
       </div>
 
-      <!-- SCREEN 2: New user registration -->
+      <!-- SCREEN 2: REGISTER NEW USER -->
       <div id="screenRegister" class="screen hidden">
-        <div class="brand"><h1>✨ welcome</h1><p>Create win777 account</p></div>
-        <div class="input-group"><label>👤 Full name</label><input type="text" id="regName" class="input-field"></div>
-        <div class="input-group"><label>🔐 4-digit PIN (app lock)</label><input type="password" id="regPin" class="input-field" maxlength="4" inputmode="numeric"></div>
-        <div class="input-group"><label>🔄 Confirm PIN</label><input type="password" id="regConfirmPin" class="input-field" maxlength="4"></div>
+        <div class="brand">
+          <h1>✨ Welcome</h1>
+          <p>Create your account</p>
+        </div>
+        <div class="input-group">
+          <label>👤 Full Name</label>
+          <input type="text" id="fullName" class="input-field" placeholder="John Doe">
+        </div>
+        <div class="input-group">
+          <label>🔐 4-Digit PIN</label>
+          <input type="password" id="userPin" class="input-field" placeholder="****" maxlength="4" inputmode="numeric">
+        </div>
+        <div class="input-group">
+          <label>🔄 Confirm PIN</label>
+          <input type="password" id="confirmPin" class="input-field" placeholder="****" maxlength="4" inputmode="numeric">
+        </div>
         <div id="regError" class="error-msg hidden"></div>
-        <button id="completeRegisterBtn" class="btn">✅ Create & Login</button>
-        <button id="backToMobileFromReg" class="btn btn-outline" style="margin-top:12px;">← Back</button>
+        <button id="registerUser" class="btn">✅ Create Account</button>
+        <button id="backToLogin" class="btn btn-outline" style="margin-top: 12px;">← Back</button>
       </div>
 
-      <!-- SCREEN 3: Dashboard -->
+      <!-- SCREEN 3: DASHBOARD -->
       <div id="screenDashboard" class="screen hidden">
         <div class="dashboard">
           <div class="dashboard-icon">🏆</div>
-          <h2 class="welcome-name" id="dashboardUserName">Player</h2>
-          <p style="color:#8E9AAF; margin-top:6px;">Welcome to win777</p>
+          <h2 class="welcome-name" id="displayName">Player</h2>
+          <p style="color:#8E9AAF; margin-top: 6px;">Welcome to win777</p>
           <div class="user-card">
-            <div style="display:flex; justify-content:space-between; margin-bottom:12px;"><span>🎰 Balance</span><strong style="color:#F0B90B;">7,777 🪙</strong></div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:12px;"><span>⭐ VIP Level</span><span>Gold</span></div>
-            <div style="display:flex; justify-content:space-between;"><span>📱 Mobile</span><span id="dashboardMobile">---</span></div>
+            <div><span>🎰 Balance</span><strong style="color:#F0B90B;">7,777 🪙</strong></div>
+            <div><span>⭐ VIP Level</span><span>Gold</span></div>
+            <div><span>📱 Mobile</span><span id="displayMobile">---</span></div>
           </div>
-          <button id="logoutBtn" class="btn btn-secondary">🚪 Logout</button>
-          <div class="footer-note" style="margin-top:20px;">win777 — play smart, win big</div>
+          <button id="logoutButton" class="btn btn-secondary">🚪 Logout</button>
+          <div class="footer-note">win777 — play smart, win big</div>
         </div>
       </div>
 
-      <!-- SCREEN 4: App Lock (Biometric / PIN) when app reopens or closed -->
+      <!-- SCREEN 4: APP LOCK (when reopened) -->
       <div id="screenAppLock" class="screen hidden">
-        <div class="brand"><h1>🔒 App Lock</h1><p>Verify to access win777</p></div>
+        <div class="brand">
+          <h1>🔒 App Lock</h1>
+          <p>Verify to continue</p>
+        </div>
         <div style="margin: 20px 0;">
-          <button id="biometricUnlockBtn" class="btn btn-biometric">🖐️ Use Fingerprint / Face</button>
-          <div style="text-align:center; margin:16px 0; color:#6E7E9E;">or</div>
-          <div class="input-group"><input type="password" id="appLockPinInput" class="input-field" placeholder="Enter 4-digit PIN" maxlength="4" inputmode="numeric"></div>
-          <button id="pinUnlockBtn" class="btn">Unlock with PIN</button>
-          <div id="lockErrorMsg" class="error-msg hidden"></div>
-          <button id="fullResetBtn" class="btn btn-outline" style="margin-top:16px;">⟳ Start Over (Clear Data)</button>
+          <button id="biometricUnlock" class="btn btn-biometric">🖐️ Fingerprint / Face</button>
+          <div style="text-align:center; margin: 16px 0; color:#6E7E9E;">━━━ or ━━━</div>
+          <div class="input-group">
+            <input type="password" id="pinUnlock" class="input-field" placeholder="Enter 4-digit PIN" maxlength="4" inputmode="numeric">
+          </div>
+          <button id="submitUnlock" class="btn">Unlock</button>
+          <div id="lockError" class="error-msg hidden"></div>
+          <button id="resetApp" class="btn btn-outline" style="margin-top: 16px;">⟳ Start Over</button>
         </div>
       </div>
+
     </div>
   </div>
 </div>
-<div id="loadingOverlay" class="loading-overlay hidden"><div class="spinner"></div></div>
 
 <script>
-  // ==================== FIREBASE CONFIGURATION ====================
-  const firebaseConfig = {
-    apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
-    authDomain: "win777-ed482.firebaseapp.com",
-    projectId: "win777-ed482",
-    storageBucket: "win777-ed482.firebasestorage.app",
-    messagingSenderId: "843686112399",
-    appId: "1:843686112399:web:9c20a96831e6a94cd814fa",
-    measurementId: "G-YG8V7EJ0PL"
-  };
-  
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-  
-  // ==================== STORAGE KEYS ====================
-  const STORAGE_APP_PIN = "win777_app_pin";        // store encrypted pin for demo (local)
-  const STORAGE_USER_DATA = "win777_user_data";    // name, mobile
-  const STORAGE_IS_LOGGED_IN = "win777_logged_in";
-  
-  // DOM Elements
+  // ========== STORAGE KEYS ==========
+  const STORAGE_USER = 'win777_user';
+  const STORAGE_PIN = 'win777_pin';
+  const STORAGE_SESSION = 'win777_session';
+
+  // ========== HELPER FUNCTIONS ==========
+  function saveUser(mobile, name, pin) {
+    localStorage.setItem(STORAGE_USER, JSON.stringify({ mobile, name }));
+    localStorage.setItem(STORAGE_PIN, pin);
+  }
+
+  function getUser() {
+    const data = localStorage.getItem(STORAGE_USER);
+    return data ? JSON.parse(data) : null;
+  }
+
+  function getPin() {
+    return localStorage.getItem(STORAGE_PIN);
+  }
+
+  function setSessionActive(active) {
+    localStorage.setItem(STORAGE_SESSION, active ? 'active' : 'inactive');
+  }
+
+  function isSessionActive() {
+    return localStorage.getItem(STORAGE_SESSION) === 'active';
+  }
+
+  function clearAllData() {
+    localStorage.clear();
+  }
+
+  // ========== SCREEN MANAGEMENT ==========
   const screens = {
-    mobile: document.getElementById('screenMobile'),
+    login: document.getElementById('screenLogin'),
     register: document.getElementById('screenRegister'),
     dashboard: document.getElementById('screenDashboard'),
     appLock: document.getElementById('screenAppLock')
   };
-  
+
   function showScreen(screenName) {
-    Object.values(screens).forEach(s => s.classList.add('hidden'));
+    Object.keys(screens).forEach(key => {
+      screens[key].classList.add('hidden');
+    });
     screens[screenName].classList.remove('hidden');
   }
-  
-  // Loading overlay
-  function setLoading(show) {
-    const overlay = document.getElementById('loadingOverlay');
-    if (show) overlay.classList.remove('hidden');
-    else overlay.classList.add('hidden');
-  }
-  
-  // Helper: Save user session locally
-  function saveUserSession(mobile, name, pin) {
-    localStorage.setItem(STORAGE_USER_DATA, JSON.stringify({ mobile, name }));
-    localStorage.setItem(STORAGE_APP_PIN, pin); // in real app, hash this
-    localStorage.setItem(STORAGE_IS_LOGGED_IN, 'true');
-  }
-  
-  function clearUserSession() {
-    localStorage.removeItem(STORAGE_USER_DATA);
-    localStorage.removeItem(STORAGE_APP_PIN);
-    localStorage.removeItem(STORAGE_IS_LOGGED_IN);
-  }
-  
-  function getStoredUser() {
-    const data = localStorage.getItem(STORAGE_USER_DATA);
-    if (!data) return null;
-    try { return JSON.parse(data); } catch(e) { return null; }
-  }
-  
-  function getStoredPin() {
-    return localStorage.getItem(STORAGE_APP_PIN);
-  }
-  
-  // Check if user has account (Firestore)
-  async function checkUserExists(mobile) {
-    try {
-      const userDoc = await db.collection('users').doc(mobile).get();
-      return userDoc.exists;
-    } catch(e) {
-      console.warn("Firestore error, fallback to local", e);
-      // fallback to local storage for demo if firestore fails
-      const localUser = localStorage.getItem(`user_${mobile}`);
-      return !!localUser;
-    }
-  }
-  
-  async function registerUserInFirestore(mobile, name, pin) {
-    try {
-      await db.collection('users').doc(mobile).set({
-        name: name,
-        mobile: mobile,
-        pin: pin, // NOTE: In production, hash this! Demo only.
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        balance: 7777
-      });
-      localStorage.setItem(`user_${mobile}`, JSON.stringify({ name, pin }));
-      return true;
-    } catch(e) {
-      console.error("Firestore save error", e);
-      // local fallback
-      localStorage.setItem(`user_${mobile}`, JSON.stringify({ name, pin }));
-      return true;
-    }
-  }
-  
-  async function getUserDataFromFirestore(mobile) {
-    try {
-      const doc = await db.collection('users').doc(mobile).get();
-      if (doc.exists) return doc.data();
-    } catch(e) {}
-    const local = localStorage.getItem(`user_${mobile}`);
-    if (local) return JSON.parse(local);
-    return null;
-  }
-  
-  // OTP Simulation (Firebase Phone Auth would be used in production)
-  let currentOtp = null;
+
+  // ========== OTP SIMULATION ==========
+  let sentOtp = null;
   let pendingMobile = null;
-  
-  document.getElementById('sendOtpBtn').addEventListener('click', async () => {
-    const mobile = document.getElementById('mobileInput').value.trim();
-    if (!mobile || mobile.length < 5) {
-      showError('mobileError', '❌ Enter valid mobile number');
+
+  document.getElementById('sendOtp').onclick = () => {
+    const mobile = document.getElementById('mobileNumber').value.trim();
+    if (!mobile || mobile.length < 8) {
+      const err = document.getElementById('loginError');
+      err.innerText = '❌ Enter valid mobile number';
+      err.classList.remove('hidden');
+      setTimeout(() => err.classList.add('hidden'), 3000);
       return;
     }
-    setLoading(true);
-    // Simulate OTP sending (Firebase would send real SMS)
-    setTimeout(() => {
-      currentOtp = '123456'; // Demo OTP
-      pendingMobile = mobile;
-      setLoading(false);
-      alert(`📲 Demo OTP sent to ${mobile}\n🔢 Use OTP: 123456\n(Production: Firebase SMS will be used)`);
-    }, 800);
-  });
-  
-  document.getElementById('verifyOtpBtn').addEventListener('click', async () => {
-    const mobile = document.getElementById('mobileInput').value.trim();
-    const otp = document.getElementById('otpInput').value.trim();
+    pendingMobile = mobile;
+    sentOtp = '123456';
+    alert(`📲 OTP sent to ${mobile}\n🔢 Your OTP: 123456`);
+    document.getElementById('otpCode').value = '';
+  };
+
+  document.getElementById('verifyLogin').onclick = () => {
+    const mobile = document.getElementById('mobileNumber').value.trim();
+    const otp = document.getElementById('otpCode').value.trim();
+
     if (!pendingMobile || pendingMobile !== mobile) {
-      showError('mobileError', 'Request OTP first');
+      alert('Please request OTP first');
       return;
     }
+
     if (otp !== '123456') {
-      showError('mobileError', 'Invalid OTP. Use 123456');
+      const err = document.getElementById('loginError');
+      err.innerText = '❌ Invalid OTP. Use 123456';
+      err.classList.remove('hidden');
+      setTimeout(() => err.classList.add('hidden'), 3000);
       return;
     }
-    setLoading(true);
-    try {
-      const userExists = await checkUserExists(mobile);
-      if (userExists) {
-        // Existing user: load data and ask app lock? Actually after OTP we go to dashboard directly? 
-        // But spec: "user already have account then open direct dashboard"
-        const userData = await getUserDataFromFirestore(mobile);
-        if (userData) {
-          saveUserSession(mobile, userData.name, userData.pin);
-          updateDashboardUI(userData.name, mobile);
-          showScreen('dashboard');
-          setLoading(false);
-        } else {
-          throw new Error("User data missing");
-        }
-      } else {
-        // New user: go to registration
-        window._newUserMobile = mobile;
-        showScreen('register');
-        setLoading(false);
-      }
-    } catch(err) {
-      setLoading(false);
-      showError('mobileError', 'Error verifying user. Try again.');
-    }
-    pendingMobile = null;
-    currentOtp = null;
-  });
-  
-  // Registration
-  document.getElementById('completeRegisterBtn').addEventListener('click', async () => {
-    const name = document.getElementById('regName').value.trim();
-    const pin = document.getElementById('regPin').value.trim();
-    const confirm = document.getElementById('regConfirmPin').value.trim();
-    const mobile = window._newUserMobile;
-    if (!mobile) { showRegError('Session expired'); return; }
-    if (!name) { showRegError('Enter full name'); return; }
-    if (!/^\d{4}$/.test(pin)) { showRegError('PIN must be 4 digits'); return; }
-    if (pin !== confirm) { showRegError('PINs do not match'); return; }
-    setLoading(true);
-    await registerUserInFirestore(mobile, name, pin);
-    saveUserSession(mobile, name, pin);
-    updateDashboardUI(name, mobile);
-    setLoading(false);
-    showScreen('dashboard');
-    delete window._newUserMobile;
-  });
-  
-  function showRegError(msg) {
-    const errDiv = document.getElementById('regError');
-    errDiv.innerText = msg;
-    errDiv.classList.remove('hidden');
-    setTimeout(() => errDiv.classList.add('hidden'), 3000);
-  }
-  
-  function showError(elementId, msg) {
-    const errDiv = document.getElementById(elementId);
-    errDiv.innerText = msg;
-    errDiv.classList.remove('hidden');
-    setTimeout(() => errDiv.classList.add('hidden'), 3000);
-  }
-  
-  function updateDashboardUI(name, mobile) {
-    document.getElementById('dashboardUserName').innerText = name;
-    document.getElementById('dashboardMobile').innerText = mobile;
-  }
-  
-  // ========== APP CLOSE / RE-OPEN: BIOMETRIC + PIN LOCK ==========
-  // Detect page visibility / app close (when user switches tab or closes)
-  let isAppActive = true;
-  let pendingLockCheck = false;
-  
-  function showAppLockScreen() {
-    if (getStoredUser() && !pendingLockCheck) {
-      pendingLockCheck = true;
-      clearUserSession(); // don't keep auto-login, force lock
-      showScreen('appLock');
-      document.getElementById('appLockPinInput').value = '';
-      document.getElementById('lockErrorMsg').classList.add('hidden');
-    }
-  }
-  
-  // Simulate "app closed" behavior: when page loads, check if we need app lock
-  window.addEventListener('load', () => {
-    // Check if user was previously logged in but app was closed
-    const storedUser = getStoredUser();
-    const wasLoggedIn = localStorage.getItem(STORAGE_IS_LOGGED_IN);
-    if (storedUser && wasLoggedIn === 'true') {
-      // App was closed, now reopened -> ask biometric/pin
-      showScreen('appLock');
-    } else if (storedUser && wasLoggedIn !== 'true') {
-      showScreen('mobile');
-    } else {
-      showScreen('mobile');
-    }
-  });
-  
-  // Biometric API (WebAuthn / Fingerprint)
-  async function attemptBiometric() {
-    if (!window.PublicKeyCredential) {
-      alert("🔐 Biometric not supported on this device/browser. Use PIN instead.");
-      return false;
-    }
-    try {
-      // Simple Biometric check using Credential Management API
-      const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-      if (!available) {
-        alert("👆 Fingerprint/Face not enrolled or device doesn't support it. Use PIN.");
-        return false;
-      }
-      // Trigger platform authenticator
-      const credential = await navigator.credentials.get({
-        publicKey: {
-          challenge: new Uint8Array(32),
-          rpId: window.location.hostname,
-          userVerification: "required",
-          timeout: 60000,
-        }
-      });
-      if (credential) {
-        return true;
-      }
-      return false;
-    } catch (err) {
-      console.error("Biometric error", err);
-      alert("❌ Biometric verification failed. Use PIN.");
-      return false;
-    }
-  }
-  
-  // Unlock with Biometric
-  document.getElementById('biometricUnlockBtn').addEventListener('click', async () => {
-    setLoading(true);
-    const success = await attemptBiometric();
-    setLoading(false);
-    if (success) {
-      const user = getStoredUser();
-      if (user) {
-        localStorage.setItem(STORAGE_IS_LOGGED_IN, 'true');
-        updateDashboardUI(user.name, user.mobile);
-        showScreen('dashboard');
-        pendingLockCheck = false;
-      } else {
-        showLockError("Session corrupted. Reset app.");
-      }
-    } else {
-      showLockError("Biometric not recognized");
-    }
-  });
-  
-  // Unlock with PIN
-  document.getElementById('pinUnlockBtn').addEventListener('click', () => {
-    const enteredPin = document.getElementById('appLockPinInput').value.trim();
-    const storedPin = getStoredPin();
-    const user = getStoredUser();
-    if (!user || !storedPin) {
-      showLockError("No account found. Please restart.");
-      return;
-    }
-    if (enteredPin === storedPin) {
-      localStorage.setItem(STORAGE_IS_LOGGED_IN, 'true');
-      updateDashboardUI(user.name, user.mobile);
+
+    // Check if user exists
+    const existingUser = getUser();
+    
+    if (existingUser && existingUser.mobile === mobile) {
+      // Existing user - login directly
+      setSessionActive(true);
+      document.getElementById('displayName').innerText = existingUser.name;
+      document.getElementById('displayMobile').innerText = existingUser.mobile;
       showScreen('dashboard');
-      pendingLockCheck = false;
     } else {
-      showLockError("❌ Incorrect PIN");
+      // New user - go to registration
+      window.tempMobile = mobile;
+      showScreen('register');
     }
-  });
-  
-  function showLockError(msg) {
-    const errDiv = document.getElementById('lockErrorMsg');
-    errDiv.innerText = msg;
-    errDiv.classList.remove('hidden');
-    setTimeout(() => errDiv.classList.add('hidden'), 3000);
+    
+    // Reset OTP
+    sentOtp = null;
+    pendingMobile = null;
+  };
+
+  // ========== REGISTRATION ==========
+  document.getElementById('registerUser').onclick = () => {
+    const name = document.getElementById('fullName').value.trim();
+    const pin = document.getElementById('userPin').value.trim();
+    const confirm = document.getElementById('confirmPin').value.trim();
+    const mobile = window.tempMobile;
+
+    if (!mobile) {
+      showRegError('Session expired, please restart');
+      return;
+    }
+
+    if (!name) {
+      showRegError('Please enter your name');
+      return;
+    }
+
+    if (!/^\d{4}$/.test(pin)) {
+      showRegError('PIN must be exactly 4 digits');
+      return;
+    }
+
+    if (pin !== confirm) {
+      showRegError('PINs do not match');
+      return;
+    }
+
+    // Save user
+    saveUser(mobile, name, pin);
+    setSessionActive(true);
+    
+    document.getElementById('displayName').innerText = name;
+    document.getElementById('displayMobile').innerText = mobile;
+    showScreen('dashboard');
+    
+    delete window.tempMobile;
+  };
+
+  function showRegError(msg) {
+    const err = document.getElementById('regError');
+    err.innerText = msg;
+    err.classList.remove('hidden');
+    setTimeout(() => err.classList.add('hidden'), 3000);
   }
-  
-  // Full reset (clear all data)
-  document.getElementById('fullResetBtn').addEventListener('click', () => {
-    if (confirm("⚠️ Clear all app data? You'll need to re-register.")) {
-      localStorage.clear();
-      // Also clear Firestore local? but we keep remote
-      showScreen('mobile');
-      document.getElementById('mobileInput').value = '';
-      document.getElementById('otpInput').value = '';
-      pendingLockCheck = false;
+
+  document.getElementById('backToLogin').onclick = () => {
+    showScreen('login');
+    delete window.tempMobile;
+  };
+
+  // ========== LOGOUT ==========
+  document.getElementById('logoutButton').onclick = () => {
+    setSessionActive(false);
+    showScreen('login');
+    document.getElementById('mobileNumber').value = '';
+    document.getElementById('otpCode').value = '';
+  };
+
+  // ========== APP LOCK (BIOMETRIC + PIN) ==========
+  async function tryBiometric() {
+    // Check if biometric is available
+    if (window.PublicKeyCredential) {
+      try {
+        const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+        if (available) {
+          // For demo, we'll simulate success
+          // In real HTTPS environment, this would trigger actual biometric
+          return confirm('🎯 Simulate Fingerprint Unlock?\n(Click OK to unlock)');
+        }
+      } catch(e) {}
+    }
+    
+    // Fallback for devices without biometric
+    alert('🔐 Biometric not available on this device.\nPlease use PIN instead.');
+    return false;
+  }
+
+  document.getElementById('biometricUnlock').onclick = async () => {
+    const success = await tryBiometric();
+    if (success) {
+      const user = getUser();
+      if (user) {
+        setSessionActive(true);
+        document.getElementById('displayName').innerText = user.name;
+        document.getElementById('displayMobile').innerText = user.mobile;
+        showScreen('dashboard');
+      }
+    }
+  };
+
+  document.getElementById('submitUnlock').onclick = () => {
+    const enteredPin = document.getElementById('pinUnlock').value.trim();
+    const storedPin = getPin();
+    const user = getUser();
+
+    if (!user) {
+      showLockError('No account found. Please restart.');
+      return;
+    }
+
+    if (enteredPin === storedPin) {
+      setSessionActive(true);
+      document.getElementById('displayName').innerText = user.name;
+      document.getElementById('displayMobile').innerText = user.mobile;
+      showScreen('dashboard');
+    } else {
+      showLockError('❌ Incorrect PIN. Try again.');
+    }
+  };
+
+  function showLockError(msg) {
+    const err = document.getElementById('lockError');
+    err.innerText = msg;
+    err.classList.remove('hidden');
+    setTimeout(() => err.classList.add('hidden'), 3000);
+  }
+
+  document.getElementById('resetApp').onclick = () => {
+    if (confirm('⚠️ This will delete all app data!\nContinue?')) {
+      clearAllData();
+      showScreen('login');
+    }
+  };
+
+  // ========== HANDLE PAGE RELOAD & CLOSE ==========
+  // When page loads, check if user was logged in
+  window.addEventListener('load', () => {
+    const user = getUser();
+    const sessionActive = isSessionActive();
+
+    if (user && sessionActive) {
+      // User was active, go to dashboard
+      document.getElementById('displayName').innerText = user.name;
+      document.getElementById('displayMobile').innerText = user.mobile;
+      showScreen('dashboard');
+    } else if (user) {
+      // User exists but session inactive (app was closed)
+      showScreen('appLock');
+      document.getElementById('pinUnlock').value = '';
+    } else {
+      // No user, show login
+      showScreen('login');
     }
   });
-  
-  // Logout: clear session + show mobile screen
-  document.getElementById('logoutBtn').addEventListener('click', () => {
-    clearUserSession();
-    showScreen('mobile');
-    document.getElementById('mobileInput').value = '';
-    document.getElementById('otpInput').value = '';
+
+  // When page/tab is closed, mark session inactive
+  window.addEventListener('beforeunload', () => {
+    const user = getUser();
+    if (user && !screens.dashboard.classList.contains('hidden')) {
+      setSessionActive(false);
+    }
   });
-  
-  document.getElementById('backToMobileFromReg').addEventListener('click', () => {
-    showScreen('mobile');
-    delete window._newUserMobile;
-  });
-  
-  // Page visibility API: when user closes/minimizes app (tab), we simulate app lock
+
+  // Handle visibility change (tab switch)
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-      // App went to background / user closed it
-      if (getStoredUser() && screens.dashboard && !screens.dashboard.classList.contains('hidden')) {
-        // Only trigger lock if dashboard was visible (user was inside app)
-        isAppActive = false;
-        // Clear session flag so that on next load lock appears
-        localStorage.setItem(STORAGE_IS_LOGGED_IN, 'false');
-      }
-    } else {
-      // App reopened from background
-      if (!isAppActive) {
-        const storedUser = getStoredUser();
-        if (storedUser && localStorage.getItem(STORAGE_IS_LOGGED_IN) === 'false') {
-          showScreen('appLock');
-          isAppActive = true;
-        }
+      // Tab hidden, mark session inactive
+      const user = getUser();
+      if (user && !screens.dashboard.classList.contains('hidden')) {
+        setSessionActive(false);
       }
     }
   });
-  
-  // Before page unload (actual close)
-  window.addEventListener('beforeunload', () => {
-    if (getStoredUser() && screens.dashboard && !screens.dashboard.classList.contains('hidden')) {
-      localStorage.setItem(STORAGE_IS_LOGGED_IN, 'false');
-    }
-  });
-  
-  // Helper functions for UI
-  function showLockError(msg) {
-    const errDiv = document.getElementById('lockErrorMsg');
-    errDiv.innerText = msg;
-    errDiv.classList.remove('hidden');
-    setTimeout(() => errDiv.classList.add('hidden'), 3000);
-  }
-  
-  // Firebase Auth phone verification is ready for production
-  console.log("✅ win777 with Firebase + Biometric + App Lock ready");
-  console.log("📱 Firebase Setup Complete: Auth & Firestore are connected");
-  console.log("🔐 App Lock triggers on tab close/reopen");
-</script>
 
-<!-- FIREBASE SETUP INSTRUCTIONS (visible as console & comment) -->
-<script>
-  (function showSetupGuide() {
-    console.log("%c🔥 FIREBASE SETUP COMPLETE ✅", "color: #F0B90B; font-size: 14px");
-    console.log("%c📌 Your Firebase project 'win777-ed482' is ready.", "color: #8E9AAF");
-    console.log("%c📱 To enable REAL OTP SMS: go to Firebase Console → Authentication → Sign-in method → Phone → Enable.", "color: #FFD966");
-    console.log("%c🔐 For Biometric (WebAuthn) to work permanently, serve over HTTPS (localhost or GitHub Pages).", "color: #FFA500");
-    console.log("%c🗄️ Firestore Rules: allow read, write if request.auth != null; (update for production)", "color: #2ECC71");
-    console.log("%c📦 To convert to Android App: Use WebView + Capacitor or Cordova, then use Native Biometric plugin.", "color: #FFFFFF");
-  })();
+  console.log('✅ win777 App Ready!');
+  console.log('📱 Demo OTP: 123456');
+  console.log('🔐 Set your 4-digit PIN during registration');
 </script>
 </body>
 </html>
