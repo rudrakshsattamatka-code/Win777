@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-  <title>win777 · Secure App</title>
+  <title>win777 · Login</title>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <style>
     * {
       margin: 0;
@@ -31,7 +35,7 @@
     .card {
       background: #11161E;
       border-radius: 40px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
       overflow: hidden;
     }
 
@@ -66,10 +70,6 @@
       color: #6E7E9E;
       font-size: 14px;
       margin-top: 6px;
-    }
-
-    .screen {
-      transition: all 0.3s ease;
     }
 
     .input-group {
@@ -111,31 +111,16 @@
       color: #0B0F15;
       margin-top: 8px;
       cursor: pointer;
-    }
-
-    .btn-secondary {
-      background: #2D3748;
-      color: #E2E8F0;
-    }
-
-    .btn-outline {
-      background: transparent;
-      border: 1px solid #F0B90B;
-      color: #F0B90B;
-    }
-
-    .btn-biometric {
-      background: #1A2129;
-      border: 1px solid #F0B90B;
-      color: #F0B90B;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+      transition: transform 0.1s;
     }
 
     .btn:active {
-      transform: scale(0.98);
+      transform: scale(0.97);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
     }
 
     .otp-row {
@@ -163,40 +148,9 @@
       text-align: center;
     }
 
-    .dashboard {
-      text-align: center;
-      padding: 20px 0;
-    }
-
-    .dashboard-icon {
-      font-size: 70px;
-      margin-bottom: 16px;
-    }
-
-    .welcome-name {
-      font-size: 26px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #FFF, #F0B90B);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .user-card {
-      background: #1A2129;
-      border-radius: 32px;
-      padding: 20px;
-      margin: 24px 0;
-    }
-
-    .user-card div {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-
-    .hidden {
-      display: none;
+    .success-msg {
+      background: rgba(46, 204, 113, 0.12);
+      color: #2ECC71;
     }
 
     .footer-note {
@@ -205,6 +159,41 @@
       color: #5E6F8D;
       margin-top: 24px;
     }
+
+    .hidden {
+      display: none;
+    }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #2D3748;
+      border-top-color: #F0B90B;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .loading-text {
+      color: #F0B90B;
+      font-size: 14px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -212,19 +201,19 @@
   <div class="card">
     <div class="status-bar">
       <span>📶 win777</span>
-      <span>🔋 100%</span>
+      <span id="timeStatus">🔋 100%</span>
     </div>
     <div class="content">
       
-      <!-- SCREEN 1: LOGIN / OTP -->
-      <div id="screenLogin" class="screen">
+      <!-- LOGIN SCREEN -->
+      <div id="loginScreen">
         <div class="brand">
           <h1>win777</h1>
           <p>secure · fast · rewards</p>
         </div>
         <div class="input-group">
           <label>📱 Mobile Number</label>
-          <input type="tel" id="mobileNumber" class="input-field" placeholder="9876543210">
+          <input type="tel" id="mobileNumber" class="input-field" placeholder="+919876543210">
         </div>
         <div class="otp-row">
           <input type="text" id="otpCode" class="input-field" placeholder="Enter OTP" maxlength="6">
@@ -232,11 +221,11 @@
         </div>
         <div id="loginError" class="error-msg hidden"></div>
         <button id="verifyLogin" class="btn" style="margin-top: 24px;">Verify & Login</button>
-        <div class="footer-note">🔐 Demo OTP: 123456</div>
+        <div class="footer-note">🔐 Real SMS OTP will be sent to your phone</div>
       </div>
 
-      <!-- SCREEN 2: REGISTER NEW USER -->
-      <div id="screenRegister" class="screen hidden">
+      <!-- REGISTER SCREEN -->
+      <div id="registerScreen" class="hidden">
         <div class="brand">
           <h1>✨ Welcome</h1>
           <p>Create your account</p>
@@ -246,7 +235,7 @@
           <input type="text" id="fullName" class="input-field" placeholder="John Doe">
         </div>
         <div class="input-group">
-          <label>🔐 4-Digit PIN</label>
+          <label>🔐 4-Digit PIN (Screen Lock)</label>
           <input type="password" id="userPin" class="input-field" placeholder="****" maxlength="4" inputmode="numeric">
         </div>
         <div class="input-group">
@@ -255,318 +244,251 @@
         </div>
         <div id="regError" class="error-msg hidden"></div>
         <button id="registerUser" class="btn">✅ Create Account</button>
-        <button id="backToLogin" class="btn btn-outline" style="margin-top: 12px;">← Back</button>
-      </div>
-
-      <!-- SCREEN 3: DASHBOARD -->
-      <div id="screenDashboard" class="screen hidden">
-        <div class="dashboard">
-          <div class="dashboard-icon">🏆</div>
-          <h2 class="welcome-name" id="displayName">Player</h2>
-          <p style="color:#8E9AAF; margin-top: 6px;">Welcome to win777</p>
-          <div class="user-card">
-            <div><span>🎰 Balance</span><strong style="color:#F0B90B;">7,777 🪙</strong></div>
-            <div><span>⭐ VIP Level</span><span>Gold</span></div>
-            <div><span>📱 Mobile</span><span id="displayMobile">---</span></div>
-          </div>
-          <button id="logoutButton" class="btn btn-secondary">🚪 Logout</button>
-          <div class="footer-note">win777 — play smart, win big</div>
-        </div>
-      </div>
-
-      <!-- SCREEN 4: APP LOCK (when reopened) -->
-      <div id="screenAppLock" class="screen hidden">
-        <div class="brand">
-          <h1>🔒 App Lock</h1>
-          <p>Verify to continue</p>
-        </div>
-        <div style="margin: 20px 0;">
-          <button id="biometricUnlock" class="btn btn-biometric">🖐️ Fingerprint / Face</button>
-          <div style="text-align:center; margin: 16px 0; color:#6E7E9E;">━━━ or ━━━</div>
-          <div class="input-group">
-            <input type="password" id="pinUnlock" class="input-field" placeholder="Enter 4-digit PIN" maxlength="4" inputmode="numeric">
-          </div>
-          <button id="submitUnlock" class="btn">Unlock</button>
-          <div id="lockError" class="error-msg hidden"></div>
-          <button id="resetApp" class="btn btn-outline" style="margin-top: 16px;">⟳ Start Over</button>
-        </div>
+        <button id="backToLogin" class="btn" style="background: #2D3748; color:white;">← Back</button>
       </div>
 
     </div>
   </div>
 </div>
 
+<!-- reCAPTCHA Container -->
+<div id="recaptcha-container"></div>
+
+<div id="loadingOverlay" class="loading-overlay hidden">
+  <div class="spinner"></div>
+  <div class="loading-text">Processing...</div>
+</div>
+
 <script>
-  // ========== STORAGE KEYS ==========
-  const STORAGE_USER = 'win777_user';
-  const STORAGE_PIN = 'win777_pin';
-  const STORAGE_SESSION = 'win777_session';
-
-  // ========== HELPER FUNCTIONS ==========
-  function saveUser(mobile, name, pin) {
-    localStorage.setItem(STORAGE_USER, JSON.stringify({ mobile, name }));
-    localStorage.setItem(STORAGE_PIN, pin);
-  }
-
-  function getUser() {
-    const data = localStorage.getItem(STORAGE_USER);
-    return data ? JSON.parse(data) : null;
-  }
-
-  function getPin() {
-    return localStorage.getItem(STORAGE_PIN);
-  }
-
-  function setSessionActive(active) {
-    localStorage.setItem(STORAGE_SESSION, active ? 'active' : 'inactive');
-  }
-
-  function isSessionActive() {
-    return localStorage.getItem(STORAGE_SESSION) === 'active';
-  }
-
-  function clearAllData() {
-    localStorage.clear();
-  }
-
-  // ========== SCREEN MANAGEMENT ==========
-  const screens = {
-    login: document.getElementById('screenLogin'),
-    register: document.getElementById('screenRegister'),
-    dashboard: document.getElementById('screenDashboard'),
-    appLock: document.getElementById('screenAppLock')
+  // ==================== FIREBASE CONFIGURATION ====================
+  const firebaseConfig = {
+    apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
+    authDomain: "win777-ed482.firebaseapp.com",
+    projectId: "win777-ed482",
+    storageBucket: "win777-ed482.firebasestorage.app",
+    messagingSenderId: "843686112399",
+    appId: "1:843686112399:web:9c20a96831e6a94cd814fa",
+    measurementId: "G-YG8V7EJ0PL"
   };
 
-  function showScreen(screenName) {
-    Object.keys(screens).forEach(key => {
-      screens[key].classList.add('hidden');
-    });
-    screens[screenName].classList.remove('hidden');
-  }
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-  // ========== OTP SIMULATION ==========
-  let sentOtp = null;
+  // ==================== STORAGE ====================
+  const STORAGE_CURRENT = 'win777_current_user';
+  const STORAGE_SESSION = 'win777_session';
+  
+  // ==================== FIREBASE PHONE AUTH ====================
+  let confirmationResult = null;
   let pendingMobile = null;
-
-  document.getElementById('sendOtp').onclick = () => {
+  let recaptchaVerifier = null;
+  
+  function setLoading(show) {
+    const overlay = document.getElementById('loadingOverlay');
+    if (show) overlay.classList.remove('hidden');
+    else overlay.classList.add('hidden');
+  }
+  
+  function showError(elementId, message) {
+    const errDiv = document.getElementById(elementId);
+    errDiv.innerText = message;
+    errDiv.classList.remove('hidden');
+    setTimeout(() => errDiv.classList.add('hidden'), 5000);
+  }
+  
+  // Initialize reCAPTCHA
+  function initRecaptcha() {
+    try {
+      recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+        size: 'invisible',
+        callback: () => {
+          console.log('reCAPTCHA verified');
+        }
+      });
+      console.log('✅ reCAPTCHA initialized');
+    } catch (error) {
+      console.error('reCAPTCHA error:', error);
+    }
+  }
+  
+  // Send OTP
+  document.getElementById('sendOtp').onclick = async () => {
     const mobile = document.getElementById('mobileNumber').value.trim();
-    if (!mobile || mobile.length < 8) {
-      const err = document.getElementById('loginError');
-      err.innerText = '❌ Enter valid mobile number';
-      err.classList.remove('hidden');
-      setTimeout(() => err.classList.add('hidden'), 3000);
+    
+    if (!mobile || mobile.length < 10) {
+      showError('loginError', '❌ Enter valid mobile number with country code (e.g., +919876543210)');
       return;
     }
-    pendingMobile = mobile;
-    sentOtp = '123456';
-    alert(`📲 OTP sent to ${mobile}\n🔢 Your OTP: 123456`);
-    document.getElementById('otpCode').value = '';
+    
+    setLoading(true);
+    
+    try {
+      if (!recaptchaVerifier) {
+        initRecaptcha();
+      }
+      
+      confirmationResult = await auth.signInWithPhoneNumber(mobile, recaptchaVerifier);
+      pendingMobile = mobile;
+      
+      setLoading(false);
+      alert(`📲 OTP sent to ${mobile}\n🔢 Check your SMS for the verification code`);
+      document.getElementById('otpCode').value = '';
+      document.getElementById('otpCode').focus();
+      
+    } catch (error) {
+      setLoading(false);
+      console.error("OTP Error:", error);
+      
+      let errorMsg = '❌ Failed to send OTP. ';
+      if (error.code === 'auth/invalid-phone-number') {
+        errorMsg = '❌ Invalid phone number. Use format: +919876543210';
+      } else if (error.code === 'auth/too-many-requests') {
+        errorMsg = '❌ Too many requests. Try again later.';
+      } else if (error.code === 'auth/quota-exceeded') {
+        errorMsg = '❌ SMS quota exceeded. Add your number as test number in Firebase Console.';
+      }
+      showError('loginError', errorMsg);
+    }
   };
-
-  document.getElementById('verifyLogin').onclick = () => {
+  
+  // Verify OTP
+  document.getElementById('verifyLogin').onclick = async () => {
     const mobile = document.getElementById('mobileNumber').value.trim();
     const otp = document.getElementById('otpCode').value.trim();
-
-    if (!pendingMobile || pendingMobile !== mobile) {
-      alert('Please request OTP first');
+    
+    if (!confirmationResult) {
+      showError('loginError', 'Please request OTP first');
       return;
     }
-
-    if (otp !== '123456') {
-      const err = document.getElementById('loginError');
-      err.innerText = '❌ Invalid OTP. Use 123456';
-      err.classList.remove('hidden');
-      setTimeout(() => err.classList.add('hidden'), 3000);
+    
+    if (!otp || otp.length !== 6) {
+      showError('loginError', 'Enter 6-digit OTP');
       return;
     }
-
-    // Check if user exists
-    const existingUser = getUser();
     
-    if (existingUser && existingUser.mobile === mobile) {
-      // Existing user - login directly
-      setSessionActive(true);
-      document.getElementById('displayName').innerText = existingUser.name;
-      document.getElementById('displayMobile').innerText = existingUser.mobile;
-      showScreen('dashboard');
-    } else {
-      // New user - go to registration
-      window.tempMobile = mobile;
-      showScreen('register');
+    setLoading(true);
+    
+    try {
+      const result = await confirmationResult.confirm(otp);
+      const user = result.user;
+      
+      // Check if user exists in Firestore
+      const userDoc = await db.collection('users').doc(mobile).get();
+      
+      if (userDoc.exists) {
+        // Existing user - login
+        const userData = userDoc.data();
+        localStorage.setItem(STORAGE_CURRENT, JSON.stringify({ 
+          mobile: userData.mobile, 
+          name: userData.name, 
+          pin: userData.pin 
+        }));
+        localStorage.setItem(STORAGE_SESSION, 'active');
+        setLoading(false);
+        window.location.href = 'dashboard.html';
+      } else {
+        // New user - show registration
+        setLoading(false);
+        window.tempMobile = mobile;
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('registerScreen').classList.remove('hidden');
+      }
+      
+    } catch (error) {
+      setLoading(false);
+      console.error("Verification Error:", error);
+      showError('loginError', '❌ Invalid OTP. Please try again.');
     }
-    
-    // Reset OTP
-    sentOtp = null;
-    pendingMobile = null;
   };
-
-  // ========== REGISTRATION ==========
-  document.getElementById('registerUser').onclick = () => {
+  
+  // ==================== REGISTRATION ====================
+  document.getElementById('registerUser').onclick = async () => {
     const name = document.getElementById('fullName').value.trim();
     const pin = document.getElementById('userPin').value.trim();
     const confirm = document.getElementById('confirmPin').value.trim();
     const mobile = window.tempMobile;
-
+    
     if (!mobile) {
-      showRegError('Session expired, please restart');
+      showRegError('Session expired. Please restart.');
       return;
     }
-
+    
     if (!name) {
       showRegError('Please enter your name');
       return;
     }
-
+    
     if (!/^\d{4}$/.test(pin)) {
       showRegError('PIN must be exactly 4 digits');
       return;
     }
-
+    
     if (pin !== confirm) {
       showRegError('PINs do not match');
       return;
     }
-
-    // Save user
-    saveUser(mobile, name, pin);
-    setSessionActive(true);
     
-    document.getElementById('displayName').innerText = name;
-    document.getElementById('displayMobile').innerText = mobile;
-    showScreen('dashboard');
+    setLoading(true);
     
-    delete window.tempMobile;
+    try {
+      // Save to Firestore
+      await db.collection('users').doc(mobile).set({
+        name: name,
+        mobile: mobile,
+        pin: pin,
+        balance: 7777,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      
+      localStorage.setItem(STORAGE_CURRENT, JSON.stringify({ mobile, name, pin }));
+      localStorage.setItem(STORAGE_SESSION, 'active');
+      
+      setLoading(false);
+      window.location.href = 'dashboard.html';
+      
+    } catch (error) {
+      setLoading(false);
+      showRegError('Error creating account. Try again.');
+    }
   };
-
+  
   function showRegError(msg) {
     const err = document.getElementById('regError');
     err.innerText = msg;
     err.classList.remove('hidden');
     setTimeout(() => err.classList.add('hidden'), 3000);
   }
-
+  
   document.getElementById('backToLogin').onclick = () => {
-    showScreen('login');
+    document.getElementById('registerScreen').classList.add('hidden');
+    document.getElementById('loginScreen').classList.remove('hidden');
     delete window.tempMobile;
+    confirmationResult = null;
   };
-
-  // ========== LOGOUT ==========
-  document.getElementById('logoutButton').onclick = () => {
-    setSessionActive(false);
-    showScreen('login');
-    document.getElementById('mobileNumber').value = '';
-    document.getElementById('otpCode').value = '';
-  };
-
-  // ========== APP LOCK (BIOMETRIC + PIN) ==========
-  async function tryBiometric() {
-    // Check if biometric is available
-    if (window.PublicKeyCredential) {
-      try {
-        const available = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-        if (available) {
-          // For demo, we'll simulate success
-          // In real HTTPS environment, this would trigger actual biometric
-          return confirm('🎯 Simulate Fingerprint Unlock?\n(Click OK to unlock)');
-        }
-      } catch(e) {}
+  
+  // ==================== CHECK EXISTING SESSION ====================
+  window.addEventListener('load', () => {
+    initRecaptcha();
+    
+    const currentUser = localStorage.getItem(STORAGE_CURRENT);
+    const sessionActive = localStorage.getItem(STORAGE_SESSION);
+    
+    if (currentUser && sessionActive === 'active') {
+      window.location.href = 'dashboard.html';
     }
     
-    // Fallback for devices without biometric
-    alert('🔐 Biometric not available on this device.\nPlease use PIN instead.');
-    return false;
+    console.log('✅ win777 App Loaded - Real OTP Ready');
+  });
+  
+  // Time display
+  function updateTime() {
+    const now = new Date();
+    document.getElementById('timeStatus').innerHTML = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
   }
-
-  document.getElementById('biometricUnlock').onclick = async () => {
-    const success = await tryBiometric();
-    if (success) {
-      const user = getUser();
-      if (user) {
-        setSessionActive(true);
-        document.getElementById('displayName').innerText = user.name;
-        document.getElementById('displayMobile').innerText = user.mobile;
-        showScreen('dashboard');
-      }
-    }
-  };
-
-  document.getElementById('submitUnlock').onclick = () => {
-    const enteredPin = document.getElementById('pinUnlock').value.trim();
-    const storedPin = getPin();
-    const user = getUser();
-
-    if (!user) {
-      showLockError('No account found. Please restart.');
-      return;
-    }
-
-    if (enteredPin === storedPin) {
-      setSessionActive(true);
-      document.getElementById('displayName').innerText = user.name;
-      document.getElementById('displayMobile').innerText = user.mobile;
-      showScreen('dashboard');
-    } else {
-      showLockError('❌ Incorrect PIN. Try again.');
-    }
-  };
-
-  function showLockError(msg) {
-    const err = document.getElementById('lockError');
-    err.innerText = msg;
-    err.classList.remove('hidden');
-    setTimeout(() => err.classList.add('hidden'), 3000);
-  }
-
-  document.getElementById('resetApp').onclick = () => {
-    if (confirm('⚠️ This will delete all app data!\nContinue?')) {
-      clearAllData();
-      showScreen('login');
-    }
-  };
-
-  // ========== HANDLE PAGE RELOAD & CLOSE ==========
-  // When page loads, check if user was logged in
-  window.addEventListener('load', () => {
-    const user = getUser();
-    const sessionActive = isSessionActive();
-
-    if (user && sessionActive) {
-      // User was active, go to dashboard
-      document.getElementById('displayName').innerText = user.name;
-      document.getElementById('displayMobile').innerText = user.mobile;
-      showScreen('dashboard');
-    } else if (user) {
-      // User exists but session inactive (app was closed)
-      showScreen('appLock');
-      document.getElementById('pinUnlock').value = '';
-    } else {
-      // No user, show login
-      showScreen('login');
-    }
-  });
-
-  // When page/tab is closed, mark session inactive
-  window.addEventListener('beforeunload', () => {
-    const user = getUser();
-    if (user && !screens.dashboard.classList.contains('hidden')) {
-      setSessionActive(false);
-    }
-  });
-
-  // Handle visibility change (tab switch)
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      // Tab hidden, mark session inactive
-      const user = getUser();
-      if (user && !screens.dashboard.classList.contains('hidden')) {
-        setSessionActive(false);
-      }
-    }
-  });
-
-  console.log('✅ win777 App Ready!');
-  console.log('📱 Demo OTP: 123456');
-  console.log('🔐 Set your 4-digit PIN during registration');
+  updateTime();
+  setInterval(updateTime, 1000);
 </script>
 </body>
 </html>
