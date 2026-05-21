@@ -1,635 +1,267 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>WIN777 - Dashboard</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-        body {
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            min-height: 100vh;
-            color: white;
-            padding-bottom: 70px;
-        }
-        .header {
-            background: rgba(26, 26, 46, 0.95);
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .logo h1 {
-            font-size: 22px;
-            background: linear-gradient(135deg, #f5b042, #ff6b6b);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .wallet-card {
-            background: linear-gradient(135deg, #f5b04220, #ff6b6b20);
-            padding: 6px 12px;
-            border-radius: 16px;
-            border: 1px solid #f5b042;
-        }
-        .wallet-label {
-            font-size: 10px;
-            color: #aaa;
-        }
-        .wallet-amount {
-            font-size: 18px;
-            font-weight: bold;
-            color: #f5b042;
-        }
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .logout-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            padding: 5px 10px;
-            border-radius: 16px;
-            color: white;
-            cursor: pointer;
-        }
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 12px;
-        }
-        .card {
-            background: rgba(26, 26, 46, 0.95);
-            border-radius: 20px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .card-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #f5b042;
-            margin-bottom: 15px;
-            border-left: 3px solid #f5b042;
-            padding-left: 12px;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #f5b042, #ff6b6b);
-            border: none;
-            padding: 14px;
-            border-radius: 30px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            font-size: 16px;
-        }
-        .btn-outline {
-            background: transparent;
-            border: 1px solid #f5b042;
-            padding: 12px;
-            border-radius: 30px;
-            color: #f5b042;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 10px;
-        }
-        .bet-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .bet-btn {
-            background: #2a2a4a;
-            border: none;
-            padding: 12px;
-            border-radius: 30px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            text-align: center;
-        }
-        .bet-btn:hover {
-            background: #f5b042;
-            color: #0f0c29;
-        }
-        .market-item {
-            background: #1a1a2e;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            border-left: 3px solid #f5b042;
-        }
-        .market-name {
-            font-weight: bold;
-        }
-        .market-time {
-            font-size: 11px;
-            color: #aaa;
-            margin-top: 5px;
-        }
-        .market-status {
-            font-size: 11px;
-            margin-top: 5px;
-        }
-        .status-open {
-            color: #22c55e;
-        }
-        .status-closed {
-            color: #ef4444;
-        }
-        .status-running {
-            color: #f59e0b;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.95);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .modal.active {
-            display: flex;
-        }
-        .modal-content {
-            background: #1a1a2e;
-            border-radius: 28px;
-            padding: 25px;
-            max-width: 400px;
-            width: 100%;
-        }
-        .amount-input {
-            width: 100%;
-            padding: 14px;
-            margin: 10px 0;
-            background: #2a2a4a;
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 16px;
-        }
-        .toast {
-            position: fixed;
-            bottom: 80px;
-            left: 20px;
-            right: 20px;
-            background: #1a1a2e;
-            padding: 12px;
-            border-radius: 12px;
-            text-align: center;
-            z-index: 3000;
-            border-left: 4px solid #f5b042;
-        }
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(26, 26, 46, 0.95);
-            display: flex;
-            justify-content: space-around;
-            padding: 8px 12px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            z-index: 100;
-        }
-        .nav-item {
-            text-align: center;
-            cursor: pointer;
-            padding: 5px;
-        }
-        .nav-icon {
-            font-size: 22px;
-        }
-        .nav-label {
-            font-size: 10px;
-            margin-top: 2px;
-        }
-        .data-table {
-            width: 100%;
-            overflow-x: auto;
-        }
-        .data-table table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .data-table th, .data-table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            font-size: 12px;
-        }
-        .data-table th {
-            color: #f5b042;
-        }
-        .win {
-            color: #22c55e;
-        }
-        .loss {
-            color: #ef4444;
-        }
-        .pending {
-            color: #f59e0b;
-        }
-        .input-field {
-            width: 100%;
-            padding: 12px;
-            background: #2a2a4a;
-            border: none;
-            border-radius: 12px;
-            color: white;
-            margin-bottom: 12px;
-        }
-        .support-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .support-buttons button {
-            flex: 1;
-            padding: 12px;
-            border-radius: 12px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-        }
-        .whatsapp-btn {
-            background: #25D366;
-            color: white;
-        }
-        .call-btn {
-            background: #1e88e5;
-            color: white;
-        }
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid white;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 0.6s linear infinite;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>win777 · Dashboard</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0B0F15;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .app-container {
+      max-width: 420px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: #11161E;
+      border-radius: 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    .status-bar {
+      padding: 18px 24px 8px 24px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      font-weight: 500;
+      color: #8E9AAF;
+    }
+
+    .content {
+      padding: 8px 24px 32px 24px;
+    }
+
+    .dashboard-icon {
+      font-size: 70px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .welcome-name {
+      font-size: 26px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #FFF, #F0B90B);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-align: center;
+    }
+
+    .user-card {
+      background: #1A2129;
+      border-radius: 32px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+
+    .user-card div {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .btn {
+      width: 100%;
+      background: #F0B90B;
+      border: none;
+      border-radius: 40px;
+      padding: 14px;
+      font-weight: 700;
+      font-size: 16px;
+      color: #0B0F15;
+      margin-top: 8px;
+      cursor: pointer;
+    }
+
+    .btn-secondary {
+      background: #2D3748;
+      color: #E2E8F0;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 12px;
+      color: #5E6F8D;
+      margin-top: 24px;
+    }
+
+    .lock-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #0B0F15;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .lock-card {
+      background: #11161E;
+      border-radius: 40px;
+      padding: 32px;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .brand h1 {
+      font-size: 32px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #F0B90B, #FFD966);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .error-msg {
+      background: rgba(255, 70, 85, 0.12);
+      color: #FF6B6B;
+      font-size: 13px;
+      padding: 8px 14px;
+      border-radius: 28px;
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    .input-field {
+      width: 100%;
+      background: #1E262F;
+      border: 1px solid #2D3640;
+      border-radius: 28px;
+      padding: 14px 20px;
+      font-size: 16px;
+      color: white;
+      outline: none;
+    }
+    .input-field:focus {
+      border-color: #F0B90B;
+    }
+  </style>
 </head>
 <body>
-
-<div class="header">
-    <div class="logo"><h1>WIN777</h1></div>
-    <div class="wallet-card">
-        <div class="wallet-label">💰 Balance</div>
-        <div class="wallet-amount" id="walletBalance">₹0</div>
+<div id="mainContent">
+  <div class="app-container">
+    <div class="card">
+      <div class="status-bar">
+        <span>📶 win777</span>
+        <span id="timeStatus">🔋 100%</span>
+      </div>
+      <div class="content">
+        <div class="dashboard-icon">🏆</div>
+        <h2 class="welcome-name" id="userName">Player</h2>
+        <p style="color:#8E9AAF; text-align:center; margin-top:6px;">Welcome to win777</p>
+        <div class="user-card">
+          <div><span>🎰 Balance</span><strong style="color:#F0B90B;">7,777 🪙</strong></div>
+          <div><span>⭐ VIP Level</span><span>Gold</span></div>
+          <div><span>📱 Mobile</span><span id="userMobile">---</span></div>
+        </div>
+        <button id="logoutBtn" class="btn btn-secondary">🚪 Logout</button>
+        <div class="footer-note">win777 — play smart, win big</div>
+      </div>
     </div>
-    <div class="user-info">
-        <span id="userNameDisplay"></span>
-        <button class="logout-btn" onclick="logout()">Exit</button>
-    </div>
+  </div>
 </div>
 
-<div class="container" id="pageContent"></div>
-
-<div class="bottom-nav">
-    <div class="nav-item" onclick="loadPage('dashboard')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
-    <div class="nav-item" onclick="loadPage('deposit')"><div class="nav-icon">💰</div><div class="nav-label">Deposit</div></div>
-    <div class="nav-item" onclick="loadPage('bids')"><div class="nav-icon">🎲</div><div class="nav-label">My Bids</div></div>
-    <div class="nav-item" onclick="loadPage('passbook')"><div class="nav-icon">📒</div><div class="nav-label">History</div></div>
-    <div class="nav-item" onclick="loadPage('profile')"><div class="nav-icon">👤</div><div class="nav-label">Profile</div></div>
-</div>
-
-<div id="depositModal" class="modal">
-    <div class="modal-content">
-        <h2>💰 Add Money</h2>
-        <input type="number" id="depositAmount" class="amount-input" placeholder="Enter Amount (Min ₹100, Max ₹49000)">
-        <button class="btn-primary" onclick="submitDeposit()">Submit Deposit Request</button>
-        <button class="btn-outline" onclick="closeDepositModal()">Cancel</button>
+<div id="lockScreen" class="lock-screen hidden">
+  <div class="lock-card">
+    <div class="brand">
+      <h1>🔒 Screen Lock</h1>
     </div>
+    <input type="password" id="lockPin" class="input-field" placeholder="4-digit PIN" maxlength="4" inputmode="numeric">
+    <button id="unlockBtn" class="btn" style="margin-top:20px;">Unlock 🔓</button>
+    <div id="lockError" class="error-msg hidden"></div>
+  </div>
 </div>
-
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyAWS32_eD7Mj0R7_YlLy5kgkskkcwbSGQY",
-        authDomain: "win777-be203.firebaseapp.com",
-        projectId: "win777-be203",
-        storageBucket: "win777-be203.firebasestorage.app",
-        messagingSenderId: "504655373119",
-        appId: "1:504655373119:web:4b964d6e6f0df20ebc698a"
-    };
-    
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-    
-    let currentUser = null;
-    let currentBalance = 0;
-    const SUPPORT_NUMBER = "9019941895";
-    
-    function showToast(msg) {
-        let toast = document.querySelector('.toast');
-        if(toast) toast.remove();
-        toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.innerHTML = msg;
-        document.body.appendChild(toast);
-        setTimeout(() => toast.remove(), 3000);
+  const STORAGE_CURRENT = 'win777_current_user';
+  const STORAGE_SESSION = 'win777_session';
+  
+  function getCurrentUser() {
+    const data = localStorage.getItem(STORAGE_CURRENT);
+    return data ? JSON.parse(data) : null;
+  }
+  
+  function updateDashboard() {
+    const user = getCurrentUser();
+    if (user) {
+      document.getElementById('userName').innerText = user.name;
+      document.getElementById('userMobile').innerText = user.mobile;
     }
+  }
+  
+  const sessionActive = localStorage.getItem(STORAGE_SESSION);
+  const user = getCurrentUser();
+  
+  if (!user) {
+    window.location.href = 'index.html';
+  } else if (sessionActive !== 'active') {
+    document.getElementById('mainContent').classList.add('hidden');
+    document.getElementById('lockScreen').classList.remove('hidden');
+  } else {
+    updateDashboard();
+  }
+  
+  document.getElementById('unlockBtn').onclick = () => {
+    const enteredPin = document.getElementById('lockPin').value.trim();
+    const user = getCurrentUser();
     
-    window.logout = async () => { 
-        await auth.signOut(); 
-        window.location.href = 'index.html'; 
-    };
-    
-    window.openWhatsApp = () => window.open(`https://wa.me/${SUPPORT_NUMBER}`, '_blank');
-    window.makeCall = () => window.location.href = `tel:${SUPPORT_NUMBER}`;
-    
-    window.showDepositModal = () => document.getElementById('depositModal').classList.add('active');
-    window.closeDepositModal = () => document.getElementById('depositModal').classList.remove('active');
-window.submitDeposit = async () => {
-    const amount = document.getElementById('depositAmount').value;
-    if(!amount || amount < 100) { showToast("Minimum deposit ₹100"); return; }
-    if(amount > 49000) { showToast("Maximum deposit ₹49,000"); return; }
-    
-    await db.collection("deposits").add({
-        userId: currentUser.uid,
-        amount: parseFloat(amount),
-        status: "pending",
-        createdAt: new Date(),
-        userMobile: currentUser.email?.replace('@win777.user', '')
-    });
-    
-    showToast(`✅ Deposit request of ₹${amount} submitted!`);
-    closeDepositModal();
-    document.getElementById('depositAmount').value = '';
-};
-
-window.placeBid = async (gameType, gameTypeName) => {
-    const market = document.getElementById('bidMarket')?.value;
-    const points = parseInt(document.getElementById('bidPoints')?.value);
-    const numbers = document.getElementById('bidNumbers')?.value;
-    
-    if(!market) { showToast("Select market"); return; }
-    if(!points || points < 10) { showToast("Minimum bet ₹10"); return; }
-    if(points > currentBalance) { showToast("Insufficient balance!"); return; }
-    if(!numbers) { showToast("Enter numbers"); return; }
-    
-    const newBalance = currentBalance - points;
-    await db.collection("users").doc(currentUser.uid).update({ balance: newBalance });
-    
-    await db.collection("bids").add({
-        userId: currentUser.uid,
-        gameType: gameTypeName,
-        market: market,
-        numbers: numbers,
-        totalPoints: points,
-        status: "pending",
-        result: null,
-        winAmount: 0,
-        timestamp: new Date()
-    });
-    
-    currentBalance = newBalance;
-    document.getElementById('walletBalance').innerHTML = `₹${currentBalance}`;
-    showToast(`✅ Bid placed: ${gameTypeName} - ₹${points}`);
-    loadPage('dashboard');
-};
-
-window.loadPage = async (page) => {
-    const content = document.getElementById('pageContent');
-    
-    if(page === 'dashboard') {
-        const markets = await db.collection("markets").get();
-        let marketsHtml = '';
-        markets.forEach(doc => {
-            const m = doc.data();
-            let statusClass = m.status === 'open' ? 'status-open' : (m.status === 'closed' ? 'status-closed' : 'status-running');
-            let statusText = m.status === 'open' ? '✅ Open Now' : (m.status === 'running' ? '⏳ Running' : '🔒 Closed');
-            marketsHtml += `
-                <div class="market-item">
-                    <div class="market-name">${m.name}</div>
-                    <div class="market-time">🕐 ${m.openTime} - ${m.closeTime}</div>
-                    <div class="market-status ${statusClass}">${statusText}</div>
-                </div>
-            `;
-        });
-        
-        content.innerHTML = `
-            <div class="card">
-                <div class="card-title">🎲 Place Your Bet</div>
-                <select id="bidMarket" class="input-field">
-                    <option value="">Select Market</option>
-                    ${markets.docs.map(d => `<option value="${d.data().name}">${d.data().name}</option>`).join('')}
-                </select>
-                <input type="number" id="bidPoints" class="input-field" placeholder="Points (Min ₹10)">
-                <input type="text" id="bidNumbers" class="input-field" placeholder="Numbers (e.g., 123 or 1,2,3)">
-                <div class="bet-grid">
-                    <button class="bet-btn" onclick="placeBid('single_digit','Single Digit')">🎲 Single Digit</button>
-                    <button class="bet-btn" onclick="placeBid('jodi','Jodi Digit')">🔢 Jodi Digit</button>
-                    <button class="bet-btn" onclick="placeBid('single_pana','Single Pana')">🎯 Single Pana</button>
-                    <button class="bet-btn" onclick="placeBid('double_pana','Double Pana')">🎰 Double Pana</button>
-                    <button class="bet-btn" onclick="placeBid('triple_pana','Triple Pana')">⭐ Triple Pana</button>
-                    <button class="bet-btn" onclick="placeBid('half_sangam','Half Sangam')">🃏 Half Sangam</button>
-                    <button class="bet-btn" onclick="placeBid('full_sangam','Full Sangam')">🎴 Full Sangam</button>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-title">💰 Quick Deposit</div>
-                <button class="btn-primary" onclick="showDepositModal()">Add Money</button>
-                <div class="support-buttons">
-                    <button class="whatsapp-btn" onclick="openWhatsApp()">💬 WhatsApp</button>
-                    <button class="call-btn" onclick="makeCall()">📞 Call Support</button>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-title">📊 Today's Markets</div>
-                ${marketsHtml}
-            </div>
-        `;
-    } else if(page === 'deposit') {
-        content.innerHTML = `
-            <div class="card">
-                <div class="card-title">💰 Deposit Money</div>
-                <button class="btn-primary" onclick="showDepositModal()">Deposit Now</button>
-                <p style="margin-top:15px; font-size:12px; color:#aaa;">Min ₹100 | Max ₹49,000</p>
-                <div class="support-buttons">
-                    <button class="whatsapp-btn" onclick="openWhatsApp()">💬 WhatsApp</button>
-                    <button class="call-btn" onclick="makeCall()">📞 Call Support</button>
-                </div>
-            </div>
-        `;
-    } else if(page === 'bids') {
-        const bids = await db.collection("bids").where("userId", "==", currentUser.uid).orderBy("timestamp", "desc").get();
-        let html = '<div class="card"><div class="card-title">📝 My Bids</div><div class="data-table"><table><thead><tr><th>Game</th><th>Market</th><th>Numbers</th><th>Points</th><th>Result</th><th>Status</th></tr></thead><tbody>';
-        if(bids.empty) html += '<tr><td colspan="6" style="text-align:center;">No bids placed</td></tr>';
-        else {
-            bids.forEach(doc => {
-                const b = doc.data();
-                let statusClass = b.status === 'won' ? 'win' : (b.status === 'lost' ? 'loss' : 'pending');
-                let statusText = b.status === 'won' ? `Won ₹${b.winAmount}` : (b.status === 'lost' ? 'Lost' : 'Pending');
-                html += `<tr><td>${b.gameType}</td><td>${b.market}</td><td>${b.numbers}</td><td>₹${b.totalPoints}</td><td class="${statusClass}">${b.result || '-'}</td><td class="${statusClass}">${statusText}</td></tr>`;
-            });
-        }
-        html += '</tbody></table></div></div>';
-        content.innerHTML = html;
+    if (user && user.pin === enteredPin) {
+      localStorage.setItem(STORAGE_SESSION, 'active');
+      document.getElementById('lockScreen').classList.add('hidden');
+      document.getElementById('mainContent').classList.remove('hidden');
+      updateDashboard();
+    } else {
+      const err = document.getElementById('lockError');
+      err.innerText = '❌ Incorrect PIN';
+      err.classList.remove('hidden');
+      setTimeout(() => err.classList.add('hidden'), 3000);
     }
-    else if(page === 'passbook') {
-        const deposits = await db.collection("deposits").where("userId", "==", currentUser.uid).orderBy("createdAt", "desc").get();
-        const withdrawals = await db.collection("withdrawals").where("userId", "==", currentUser.uid).orderBy("createdAt", "desc").get();
-        const bids = await db.collection("bids").where("userId", "==", currentUser.uid).orderBy("timestamp", "desc").get();
-        
-        let html = '<div class="card"><div class="card-title">📒 Transaction History</div><div class="data-table"><table><thead><tr><th>Date</th><th>Type</th><th>Details</th><th>Amount</th><th>Status</th></tr></thead><tbody>';
-        
-        deposits.forEach(d => {
-            const data = d.data();
-            html += `<tr><td>${data.createdAt?.toDate().toLocaleDateString() || 'Today'}</td><td>Deposit</td><td>-</td><td style="color:#22c55e;">+₹${data.amount}</td><td>${data.status}</td></tr>`;
-        });
-        
-        withdrawals.forEach(w => {
-            const data = w.data();
-            html += `<tr><td>${data.createdAt?.toDate().toLocaleDateString() || 'Today'}</td><td>Withdraw</td><td>To Bank</td><td style="color:#ef4444;">-₹${data.amount}</td><td>${data.status}</td></tr>`;
-        });
-        
-        bids.forEach(b => {
-            const data = b.data();
-            let amountClass = data.status === 'won' ? 'win' : 'loss';
-            let amountText = data.status === 'won' ? `+₹${data.winAmount}` : `-₹${data.totalPoints}`;
-            html += `<tr><td>${data.timestamp?.toDate().toLocaleDateString() || 'Today'}</td><td>Bid</td><td>${data.gameType} on ${data.market}</td><td class="${amountClass}">${amountText}</td><td>${data.status || 'Pending'}</td></tr>`;
-        });
-        
-        if(deposits.empty && withdrawals.empty && bids.empty) html += '<tr><td colspan="5" style="text-align:center;">No transactions</td></tr>';
-        html += '</tbody></table></div></div>';
-        content.innerHTML = html;
-    } else if(page === 'profile') {
-        const userDoc = await db.collection("users").doc(currentUser.uid).get();
-        const userData = userDoc.data();
-        content.innerHTML = `
-            <div class="card">
-                <div class="card-title">👤 My Profile</div>
-                <div><label style="color:#aaa;">Name</label><p style="font-size:18px; font-weight:bold;">${userData?.fullName || 'User'}</p></div>
-                <div style="margin-top:15px;"><label style="color:#aaa;">Mobile Number</label><p style="font-size:18px; font-weight:bold;">${userData?.mobile || 'N/A'}</p></div>
-                <div style="margin-top:15px;"><label style="color:#aaa;">Wallet Balance</label><p style="font-size:24px; font-weight:bold; color:#f5b042;">₹${currentBalance}</p></div>
-                <button class="btn-primary" onclick="showChangePassword()" style="margin-top:20px;">🔐 Change Password</button>
-                <div class="support-buttons">
-                    <button class="whatsapp-btn" onclick="openWhatsApp()">💬 WhatsApp</button>
-                    <button class="call-btn" onclick="makeCall()">📞 Call Support</button>
-                </div>
-            </div>
-        `;
+  };
+  
+  document.getElementById('logoutBtn').onclick = () => {
+    localStorage.removeItem(STORAGE_CURRENT);
+    localStorage.removeItem(STORAGE_SESSION);
+    window.location.href = 'index.html';
+  };
+  
+  window.addEventListener('beforeunload', () => {
+    if (getCurrentUser()) {
+      localStorage.setItem(STORAGE_SESSION, 'inactive');
     }
-};
-
-window.showChangePassword = () => {
-    document.getElementById('pageContent').innerHTML = `
-        <div class="card">
-            <div class="card-title">🔐 Change Password</div>
-            <input type="password" id="oldPwd" class="input-field" placeholder="Current Password">
-            <input type="password" id="newPwd" class="input-field" placeholder="New Password (min 6 chars)">
-            <input type="password" id="confirmPwd" class="input-field" placeholder="Confirm New Password">
-            <button class="btn-primary" onclick="changePassword()">Update Password</button>
-            <button class="btn-outline" onclick="loadPage('profile')">Back</button>
-        </div>
-    `;
-};
-
-window.changePassword = async () => {
-    const oldPwd = document.getElementById('oldPwd').value;
-    const newPwd = document.getElementById('newPwd').value;
-    const confirmPwd = document.getElementById('confirmPwd').value;
-    
-    if(!oldPwd || !newPwd) { showToast("Fill all fields"); return; }
-    if(newPwd.length < 6) { showToast("Password min 6 chars"); return; }
-    if(newPwd !== confirmPwd) { showToast("Passwords don't match"); return; }
-    
-    try {
-        const user = auth.currentUser;
-        const credential = firebase.auth.EmailAuthProvider.credential(user.email, oldPwd);
-        await user.reauthenticateWithCredential(credential);
-        await user.updatePassword(newPwd);
-        await db.collection("users").doc(user.uid).update({ password: newPwd });
-        showToast("Password changed!");
-        loadPage('profile');
-    } catch(e) { showToast("Current password is incorrect"); }
-};
-    // Initialize default markets
-    async function initMarkets() {
-        const markets = await db.collection("markets").get();
-        if(markets.empty) {
-            const defaultMarkets = [
-                { name: "INDRA MORNING GD", code: "178-61-290", openTime: "09:10", closeTime: "10:10", status: "closed" },
-                { name: "MAYA MORNING GD", code: "146-17-179", openTime: "09:40", closeTime: "10:40", status: "closed" },
-                { name: "SRIDEVI", code: "224-81-669", openTime: "11:35", closeTime: "12:35", status: "closed" },
-                { name: "TIME BAZAR GD", code: "360-97-188", openTime: "12:50", closeTime: "13:50", status: "closed" },
-                { name: "MADHUR DAY", code: "256-37-566", openTime: "13:25", closeTime: "14:25", status: "closed" },
-                { name: "MAYA DAY", code: "237-2*-***", openTime: "14:10", closeTime: "16:10", status: "running" },
-                { name: "MILAN DAY GD", code: "889-5", openTime: "14:55", closeTime: "16:55", status: "running" },
-                { name: "RAJDHANI DAY", code: "Rk _ wR RHE", openTime: "15:05", closeTime: "17:05", status: "running" },
-                { name: "SUPREME DAY GD", code: "RK RR _RRK", openTime: "15:25", closeTime: "17:25", status: "open" },
-                { name: "KALYAN", code: "RK RR _RRK", openTime: "15:30", closeTime: "17:30", status: "open" },
-                { name: "INDRA DAY", code: "RK RR _RRK", openTime: "16:05", closeTime: "18:05", status: "open" },
-                { name: "SRIDEVI NIGHT", code: "RK RR _RRK", openTime: "19:10", closeTime: "20:10", status: "open" },
-                { name: "MAYA NIGHT", code: "RK RR _RRK", openTime: "20:10", closeTime: "22:10", status: "open" },
-                { name: "MADHUR NIGHT", code: "RK RR _RRK", openTime: "20:20", closeTime: "22:20", status: "open" },
-                { name: "SUPREME NIGHT", code: "RK RR _RRK", openTime: "20:35", closeTime: "22:35", status: "open" },
-                { name: "MILAN NIGHT", code: "RK RR _RRK", openTime: "20:55", closeTime: "22:55", status: "open" },
-                { name: "INDRA NIGHT", code: "RK RR _RRK", openTime: "21:05", closeTime: "23:05", status: "open" },
-                { name: "KALYAN NIGHT", code: "RK RR _RRK", openTime: "21:30", closeTime: "23:35", status: "open" },
-                { name: "RAJDHANI NIGHT", code: "RK RR _RRK", openTime: "21:35", closeTime: "23:40", status: "open" },
-                { name: "MAIN BAZAR", code: "BRK 交火", openTime: "21:50", closeTime: "23:55", status: "open" }
-            ];
-            for(const market of defaultMarkets) {
-                await db.collection("markets").add(market);
-            }
-        }
-    }
-    
-    auth.onAuthStateChanged(async (user) => {
-        if(user) {
-            currentUser = user;
-            let mobile = user.email?.replace('@win777.user', '');
-            document.getElementById('userNameDisplay').innerHTML = `📱 ${mobile || 'User'}`;
-            
-            await initMarkets();
-            
-            let userDoc = await db.collection("users").doc(user.uid).get();
-            if(userDoc.exists) {
-                currentBalance = userDoc.data().balance || 0;
-                document.getElementById('walletBalance').innerHTML = `₹${currentBalance}`;
-            }
-            
-            db.collection("users").doc(user.uid).onSnapshot((doc) => {
-                if(doc.exists) {
-                    currentBalance = doc.data().balance || 0;
-                    document.getElementById('walletBalance').innerHTML = `₹${currentBalance}`;
-                }
-            });
-            
-            loadPage('dashboard');
-        } else {
-            window.location.href = 'index.html';
-        }
-    });
+  });
+  
+  function updateTime() {
+    const now = new Date();
+    document.getElementById('timeStatus').innerHTML = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  }
+  updateTime();
+  setInterval(updateTime, 1000);
 </script>
 </body>
 </html>
