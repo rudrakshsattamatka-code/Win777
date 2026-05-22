@@ -153,6 +153,47 @@
             accent-color: #ff9800;
         }
 
+        /* Manual Entry Section */
+        .manual-entry {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+        }
+
+        .manual-label {
+            color: #ff9800;
+            font-size: 13px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .manual-input {
+            width: 100%;
+            padding: 12px;
+            background: #0a0a0f;
+            border: 1px solid #333;
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .manual-input::placeholder {
+            color: #555;
+        }
+
+        .add-manual-btn {
+            background: rgba(255,152,0,0.2);
+            border: 1px solid #ff9800;
+            padding: 10px;
+            border-radius: 12px;
+            color: #ff9800;
+            width: 100%;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
         .points-row {
             text-align: center;
             margin-bottom: 20px;
@@ -177,12 +218,43 @@
             display: block;
         }
 
+        /* Selection Mode Toggle */
+        .selection-mode {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .mode-btn {
+            background: #1a1a2e;
+            border: 1px solid #333;
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: #aaa;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #ff9800, #ff5722);
+            color: white;
+            border-color: transparent;
+        }
+
+        .selected-count {
+            text-align: center;
+            color: #ff9800;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
         .pana-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
             gap: 10px;
             margin-bottom: 25px;
-            max-height: 300px;
+            max-height: 350px;
             overflow-y: auto;
             padding: 5px;
         }
@@ -203,6 +275,19 @@
         .pana-btn.selected {
             background: linear-gradient(135deg, #ff9800, #ff5722);
             border-color: transparent;
+            color: white;
+        }
+
+        .add-selected-btn {
+            background: linear-gradient(135deg, #ff9800, #ff5722);
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            margin-bottom: 20px;
         }
 
         .add-more-btn {
@@ -291,11 +376,6 @@
             cursor: pointer;
         }
 
-        .submit-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
         .message {
             text-align: center;
             margin-top: 15px;
@@ -307,16 +387,14 @@
         .error { background: rgba(244,67,54,0.2); color: #f44336; }
         .success { background: rgba(76,175,80,0.2); color: #4caf50; }
 
-        .hidden {
-            display: none;
-        }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <div class="header">
         <button class="back-btn" onclick="goBack()">←</button>
         <h1 id="marketName">MAIN BAZAR</h1>
-        <p id="gameTypeDisplay">Select game type to place bet</p>
+        <p id="gameTypeDisplay">Select numbers to place bet</p>
     </div>
 
     <div class="balance-bar">
@@ -339,7 +417,7 @@
             </div>
         </div>
 
-        <button class="submit-btn" id="submitBtn" onclick="submitBids()">Place Bets</button>
+        <button class="submit-btn" onclick="submitBids()">Place Bets</button>
         <div id="message" class="message hidden"></div>
     </div>
 
@@ -363,19 +441,15 @@
         let currentGameType = 'Single Pana';
         let bids = [];
         let selectedGameOption = 'Open';
-        let selectedValue = null;
+        let selectedNumbers = new Set(); // For multiple selection
+        let selectionMode = 'multiple'; // 'single' or 'multiple'
 
         const gameTypes = [
             'Single Pana', 'Single Pana Bulk', 'Double Pana', 'Double Pana Bulk', 'Triple Pana',
-            'Triple Pana Bulk', 'All In One', 'Single Digit', 'Single Digit Bulk', 'Jodi Digit',
-            'Jodi Digit Bulk', 'Two Digit Panel', 'SP Motor', 'DP Motor', 'Red Brackets',
-            'Odd Even', 'Group Jodi', 'Digit Based Jodi', 'SP DP TP', 'Choice Pana SP',
-            'Penal Group', 'Half Sangam A', 'Half Sangam B', 'Full Sangam'
+            'Triple Pana Bulk'
         ];
 
-        // ========== YOUR EXACT PANDA LISTS ==========
-        
-        // Single Pana List (100 numbers)
+        // Pana Lists
         const singlePanaList = [
             '127', '136', '145', '190', '235', '280', '370', '389', '460', '479', '569', '578',
             '128', '137', '146', '236', '245', '290', '380', '470', '489', '560', '579', '678',
@@ -389,7 +463,6 @@
             '126', '135', '180', '234', '270', '289', '360', '379', '450', '469', '478', '568'
         ];
 
-        // Double Pana List (80 numbers)
         const doublePanaList = [
             '100', '119', '155', '227', '335', '344', '399', '588', '669',
             '110', '200', '228', '255', '366', '499', '660', '688', '778',
@@ -403,7 +476,6 @@
             '118', '226', '244', '299', '334', '488', '550', '668', '677'
         ];
 
-        // Triple Pana List
         const triplePanaList = ['111', '222', '333', '444', '555', '666', '777', '888', '999', '000'];
 
         function renderGameTypeSelector() {
@@ -417,162 +489,87 @@
 
         function selectGameType(type) {
             currentGameType = type;
-            selectedValue = null;
+            selectedNumbers.clear();
             bids = [];
             updateSummary();
             renderGameTypeSelector();
             renderGamePanel();
         }
 
-        function renderGamePanel() {
-            const panel = document.getElementById('gamePanel');
-            
-            if (currentGameType === 'Single Pana' || currentGameType === 'Single Pana Bulk') {
-                panel.innerHTML = `
-                    <div class="game-panel">
-                        <div class="game-title">${currentMarket} - ${currentGameType}</div>
-                        <div class="game-subtitle">₹ 0.00</div>
-                        <div class="game-type-row">
-                            <label class="game-type-option"><input type="radio" name="gameType" value="Open" ${selectedGameOption === 'Open' ? 'checked' : ''} onchange="setGameOption('Open')"> Open</label>
-                            <label class="game-type-option"><input type="radio" name="gameType" value="Close" ${selectedGameOption === 'Close' ? 'checked' : ''} onchange="setGameOption('Close')"> Close</label>
-                        </div>
-                        <div class="points-row">
-                            <div class="points-label">Points</div>
-                            <input type="number" id="pointsInput" class="points-input" placeholder="Enter points" value="10">
-                        </div>
-                        <div class="pana-grid" id="singlePanaGrid"></div>
-                        <button class="add-more-btn" onclick="addSinglePanaBid()">+ Add more</button>
-                        ${renderBidItems()}
-                    </div>
-                `;
-                renderPanaGrid(singlePanaList, 'single');
-            }
-            else if (currentGameType === 'Double Pana' || currentGameType === 'Double Pana Bulk') {
-                panel.innerHTML = `
-                    <div class="game-panel">
-                        <div class="game-title">${currentMarket} - ${currentGameType}</div>
-                        <div class="game-subtitle">₹ 0.00</div>
-                        <div class="game-type-row">
-                            <label class="game-type-option"><input type="radio" name="gameType" value="Open" ${selectedGameOption === 'Open' ? 'checked' : ''} onchange="setGameOption('Open')"> Open</label>
-                            <label class="game-type-option"><input type="radio" name="gameType" value="Close" ${selectedGameOption === 'Close' ? 'checked' : ''} onchange="setGameOption('Close')"> Close</label>
-                        </div>
-                        <div class="points-row">
-                            <div class="points-label">Points</div>
-                            <input type="number" id="pointsInput" class="points-input" placeholder="Enter points" value="10">
-                        </div>
-                        <div class="pana-grid" id="doublePanaGrid"></div>
-                        <button class="add-more-btn" onclick="addDoublePanaBid()">+ Add more</button>
-                        ${renderBidItems()}
-                    </div>
-                `;
-                renderPanaGrid(doublePanaList, 'double');
-            }
-            else if (currentGameType === 'Triple Pana' || currentGameType === 'Triple Pana Bulk') {
-                panel.innerHTML = `
-                    <div class="game-panel">
-                        <div class="game-title">${currentMarket} - ${currentGameType}</div>
-                        <div class="game-subtitle">₹ 0.00</div>
-                        <div class="game-type-row">
-                            <label class="game-type-option"><input type="radio" name="gameType" value="Open" ${selectedGameOption === 'Open' ? 'checked' : ''} onchange="setGameOption('Open')"> Open</label>
-                            <label class="game-type-option"><input type="radio" name="gameType" value="Close" ${selectedGameOption === 'Close' ? 'checked' : ''} onchange="setGameOption('Close')"> Close</label>
-                        </div>
-                        <div class="points-row">
-                            <div class="points-label">Points</div>
-                            <input type="number" id="pointsInput" class="points-input" placeholder="Enter points" value="10">
-                        </div>
-                        <div class="pana-grid" id="triplePanaGrid"></div>
-                        <button class="add-more-btn" onclick="addTriplePanaBid()">+ Add more</button>
-                        ${renderBidItems()}
-                    </div>
-                `;
-                renderPanaGrid(triplePanaList, 'triple');
-            }
-            else {
-                panel.innerHTML = `
-                    <div class="game-panel">
-                        <div class="game-title">${currentMarket} - ${currentGameType}</div>
-                        <div class="game-subtitle">Coming soon</div>
-                        <div class="input-group">
-                            <label>Enter Value</label>
-                            <input type="text" id="betValue" placeholder="Enter value">
-                        </div>
-                        <div class="input-group">
-                            <label>Points</label>
-                            <input type="number" id="betPoints" placeholder="Enter points">
-                        </div>
-                        <button class="add-more-btn" onclick="addGenericBid()">+ Add more</button>
-                        ${renderBidItems()}
-                    </div>
-                `;
-            }
+        function getPanaList() {
+            if (currentGameType.includes('Single Pana')) return singlePanaList;
+            if (currentGameType.includes('Double Pana')) return doublePanaList;
+            if (currentGameType.includes('Triple Pana')) return triplePanaList;
+            return [];
         }
 
-        function renderPanaGrid(panaList, type) {
-            const gridId = type === 'single' ? 'singlePanaGrid' : (type === 'double' ? 'doublePanaGrid' : 'triplePanaGrid');
-            const grid = document.getElementById(gridId);
-            if (!grid) return;
-            
-            grid.innerHTML = '';
-            panaList.forEach(pana => {
-                grid.innerHTML += `<div class="pana-btn" onclick="selectPana('${pana}')">${pana}</div>`;
-            });
+        function toggleSelectionMode() {
+            selectionMode = selectionMode === 'multiple' ? 'single' : 'multiple';
+            selectedNumbers.clear();
+            renderGamePanel();
         }
 
-        function selectPana(pana) {
-            selectedValue = pana;
-            document.querySelectorAll('.pana-btn').forEach(btn => {
-                btn.classList.remove('selected');
-                if(btn.innerText === pana) btn.classList.add('selected');
-            });
+        function toggleNumber(number) {
+            if (selectionMode === 'single') {
+                selectedNumbers.clear();
+                selectedNumbers.add(number);
+            } else {
+                if (selectedNumbers.has(number)) {
+                    selectedNumbers.delete(number);
+                } else {
+                    selectedNumbers.add(number);
+                }
+            }
+            renderGamePanel();
+        }
+
+        function addManualNumber() {
+            const manualValue = document.getElementById('manualValue')?.value.trim();
+            if (!manualValue) {
+                showMessage('Please enter a number', true);
+                return;
+            }
+            if (selectedNumbers.has(manualValue)) {
+                showMessage('Number already selected', true);
+                return;
+            }
+            selectedNumbers.add(manualValue);
+            document.getElementById('manualValue').value = '';
+            renderGamePanel();
+            showMessage(`Added ${manualValue} to selection`, false);
+        }
+
+        function addSelectedToBids() {
+            if (selectedNumbers.size === 0) {
+                showMessage('Please select at least one number', true);
+                return;
+            }
+            
+            const points = document.getElementById('pointsInput')?.value || 10;
+            if (!points || points <= 0) {
+                showMessage('Enter valid points', true);
+                return;
+            }
+
+            const numbersArray = Array.from(selectedNumbers);
+            for (const number of numbersArray) {
+                bids.push({
+                    type: currentGameType,
+                    option: selectedGameOption,
+                    value: number,
+                    points: parseInt(points),
+                    market: currentMarket
+                });
+            }
+            
+            selectedNumbers.clear();
+            updateSummary();
+            renderGamePanel();
+            showMessage(`Added ${numbersArray.length} numbers with ${points} points each`, false);
         }
 
         function setGameOption(option) {
             selectedGameOption = option;
-            renderGamePanel();
-        }
-
-        function addSinglePanaBid() {
-            if (!selectedValue) { showMessage('Please select a Pana', true); return; }
-            const points = document.getElementById('pointsInput')?.value || 10;
-            if (!points || points <= 0) { showMessage('Enter valid points', true); return; }
-            bids.push({ type: currentGameType, option: selectedGameOption, value: selectedValue, points: parseInt(points), market: currentMarket });
-            selectedValue = null;
-            updateSummary();
-            renderGamePanel();
-            showMessage(`Added ${selectedValue} with ${points} points`, false);
-        }
-
-        function addDoublePanaBid() {
-            if (!selectedValue) { showMessage('Please select a Double Pana', true); return; }
-            const points = document.getElementById('pointsInput')?.value || 10;
-            if (!points || points <= 0) { showMessage('Enter valid points', true); return; }
-            bids.push({ type: currentGameType, option: selectedGameOption, value: selectedValue, points: parseInt(points), market: currentMarket });
-            selectedValue = null;
-            updateSummary();
-            renderGamePanel();
-            showMessage(`Added ${selectedValue} with ${points} points`, false);
-        }
-
-        function addTriplePanaBid() {
-            if (!selectedValue) { showMessage('Please select a Triple Pana', true); return; }
-            const points = document.getElementById('pointsInput')?.value || 10;
-            if (!points || points <= 0) { showMessage('Enter valid points', true); return; }
-            bids.push({ type: currentGameType, option: selectedGameOption, value: selectedValue, points: parseInt(points), market: currentMarket });
-            selectedValue = null;
-            updateSummary();
-            renderGamePanel();
-            showMessage(`Added ${selectedValue} with ${points} points`, false);
-        }
-
-        function addGenericBid() {
-            const value = document.getElementById('betValue')?.value;
-            const points = document.getElementById('betPoints')?.value;
-            if (!value) { showMessage('Enter value', true); return; }
-            if (!points || points <= 0) { showMessage('Enter points', true); return; }
-            bids.push({ type: currentGameType, value: value, points: parseInt(points), market: currentMarket });
-            document.getElementById('betValue').value = '';
-            document.getElementById('betPoints').value = '';
-            updateSummary();
             renderGamePanel();
         }
 
@@ -582,11 +579,97 @@
             renderGamePanel();
         }
 
+        function renderGamePanel() {
+            const panel = document.getElementById('gamePanel');
+            const panaList = getPanaList();
+            
+            panel.innerHTML = `
+                <div class="game-panel">
+                    <div class="game-title">${currentMarket} - ${currentGameType}</div>
+                    <div class="game-subtitle">₹ 0.00</div>
+                    
+                    <div class="game-type-row">
+                        <label class="game-type-option">
+                            <input type="radio" name="gameType" value="Open" ${selectedGameOption === 'Open' ? 'checked' : ''} onchange="setGameOption('Open')"> Open
+                        </label>
+                        <label class="game-type-option">
+                            <input type="radio" name="gameType" value="Close" ${selectedGameOption === 'Close' ? 'checked' : ''} onchange="setGameOption('Close')"> Close
+                        </label>
+                    </div>
+                    
+                    <div class="points-row">
+                        <div class="points-label">Points per bet</div>
+                        <input type="number" id="pointsInput" class="points-input" placeholder="Enter points" value="10">
+                    </div>
+                    
+                    <!-- Manual Entry -->
+                    <div class="manual-entry">
+                        <label class="manual-label">✏️ Manual Entry</label>
+                        <input type="text" id="manualValue" class="manual-input" placeholder="Enter number manually (e.g., 127)">
+                        <button class="add-manual-btn" onclick="addManualNumber()">+ Add Manual Number</button>
+                    </div>
+                    
+                    <!-- Selection Mode Toggle -->
+                    <div class="selection-mode">
+                        <button class="mode-btn ${selectionMode === 'multiple' ? 'active' : ''}" onclick="toggleSelectionMode()">🔘 Multiple Select</button>
+                        <button class="mode-btn ${selectionMode === 'single' ? 'active' : ''}" onclick="toggleSelectionMode()">⚫ Single Select</button>
+                    </div>
+                    
+                    <div class="selected-count">
+                        📌 Selected: ${selectedNumbers.size} number${selectedNumbers.size !== 1 ? 's' : ''}
+                        ${selectionMode === 'multiple' ? '(Tap to select multiple)' : '(Tap to select one)'}
+                    </div>
+                    
+                    <!-- Numbers Grid -->
+                    <div class="pana-grid" id="numbersGrid"></div>
+                    
+                    <!-- Add Selected Button -->
+                    <button class="add-selected-btn" onclick="addSelectedToBids()">
+                        📦 Add ${selectedNumbers.size} Selected Number${selectedNumbers.size !== 1 ? 's' : ''} to Bids
+                    </button>
+                    
+                    ${renderBidItems()}
+                </div>
+            `;
+            
+            renderNumbersGrid(panaList);
+        }
+
+        function renderNumbersGrid(panaList) {
+            const grid = document.getElementById('numbersGrid');
+            if (!grid) return;
+            
+            grid.innerHTML = '';
+            panaList.forEach(number => {
+                const isSelected = selectedNumbers.has(number);
+                grid.innerHTML += `
+                    <div class="pana-btn ${isSelected ? 'selected' : ''}" onclick="toggleNumber('${number}')">
+                        ${number}
+                    </div>
+                `;
+            });
+        }
+
         function renderBidItems() {
-            if (bids.length === 0) return '<div style="color:#666; text-align:center; padding:20px;">No bids added yet</div>';
+            if (bids.length === 0) {
+                return '<div style="color:#666; text-align:center; padding:20px;">No bids added yet</div>';
+            }
+            
+            // Group bids by value for display
+            const bidMap = new Map();
+            for (const bid of bids) {
+                const key = `${bid.value}`;
+                if (bidMap.has(key)) {
+                    bidMap.get(key).points += bid.points;
+                } else {
+                    bidMap.set(key, { ...bid });
+                }
+            }
+            
             return `
                 <div class="bid-items">
-                    ${bids.map((bid, i) => `
+                    <div style="color:#ff9800; font-size:12px; margin-bottom:8px;">📋 Current Bids (${bids.length} items)</div>
+                    ${Array.from(bidMap.values()).map((bid, i) => `
                         <div class="bid-item">
                             <div class="bid-item-info">
                                 <div><strong>${bid.type}</strong>: ${bid.value} ${bid.option ? `(${bid.option})` : ''}</div>
@@ -614,7 +697,10 @@
         }
 
         async function submitBids() {
-            if (bids.length === 0) { showMessage('No bids to place', true); return; }
+            if (bids.length === 0) {
+                showMessage('No bids to place', true);
+                return;
+            }
             if (!currentUser) return;
             
             const totalPoints = bids.reduce((sum, bid) => sum + bid.points, 0);
@@ -652,6 +738,7 @@
                 await loadUserData();
                 showMessage(`✅ ₹${totalPoints} bids placed successfully!`, false);
                 bids = [];
+                selectedNumbers.clear();
                 updateSummary();
                 renderGamePanel();
                 
