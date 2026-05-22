@@ -12,17 +12,17 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', 'Poppins', sans-serif;
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
         }
 
         body {
             background: #0a0a0f;
             min-height: 100vh;
-            overflow-x: hidden;
+            position: relative;
         }
 
         /* Animated Background */
-        .bg-animation {
+        .bg-particles {
             position: fixed;
             top: 0;
             left: 0;
@@ -32,271 +32,253 @@
             overflow: hidden;
         }
 
-        .bg-circle {
+        .particle {
             position: absolute;
             background: radial-gradient(circle, rgba(255,152,0,0.15), transparent);
             border-radius: 50%;
-            animation: floatBg 20s infinite ease-in-out;
+            animation: floatParticle 20s infinite ease-in-out;
         }
 
-        @keyframes floatBg {
-            0%, 100% { transform: translateY(0) translateX(0); }
-            25% { transform: translateY(-50px) translateX(50px); }
-            50% { transform: translateY(-100px) translateX(-50px); }
-            75% { transform: translateY(-50px) translateX(50px); }
+        @keyframes floatParticle {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+            25% { transform: translateY(-80px) translateX(40px); opacity: 0.6; }
+            50% { transform: translateY(-160px) translateX(-40px); opacity: 0.3; }
+            75% { transform: translateY(-80px) translateX(40px); opacity: 0.6; }
         }
 
-        /* Mobile Menu Button */
-        .menu-btn {
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            z-index: 1001;
-            background: #1e1e2e;
-            border: none;
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
-            color: #ff9800;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 15px;
+            padding-bottom: 30px;
         }
 
-        /* Sidebar */
-        .sidebar {
-            position: fixed;
-            left: -280px;
-            top: 0;
-            width: 280px;
-            height: 100%;
-            background: linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%);
-            z-index: 1000;
-            transition: 0.3s;
-            box-shadow: 2px 0 20px rgba(0,0,0,0.5);
-            overflow-y: auto;
-        }
-
-        .sidebar.open {
-            left: 0;
-        }
-
-        .sidebar-header {
-            padding: 30px 20px;
+        /* Top Header */
+        .top-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
+            border-radius: 25px;
+            padding: 20px;
+            margin-bottom: 20px;
             text-align: center;
-            border-bottom: 1px solid rgba(255,152,0,0.3);
-            background: linear-gradient(135deg, rgba(255,152,0,0.1), transparent);
+            border: 1px solid rgba(255,152,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
 
-        .sidebar-header h2 {
+        .top-header h1 {
             color: #ff9800;
-            font-size: 28px;
+            font-size: 32px;
+            letter-spacing: 3px;
         }
 
-        .sidebar-header p {
-            color: #888;
-            font-size: 11px;
+        .top-header h1 span {
+            color: #ff5722;
+        }
+
+        .top-header p {
+            color: #aaa;
+            font-size: 12px;
             margin-top: 5px;
         }
 
-        .sidebar-menu {
-            padding: 20px 0;
-        }
-
-        .sidebar-item {
-            padding: 14px 25px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #aaa;
-            cursor: pointer;
-            transition: 0.2s;
-            border-left: 3px solid transparent;
-        }
-
-        .sidebar-item:hover, .sidebar-item.active {
-            background: rgba(255,152,0,0.1);
-            color: #ff9800;
-            border-left-color: #ff9800;
-        }
-
-        /* Overlay */
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 999;
-            display: none;
-        }
-
-        .overlay.active {
-            display: block;
-        }
-
-        /* Main Content */
-        .main-content {
-            padding: 70px 15px 20px 15px;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Top Bar */
-        .top-bar {
+        /* User Bar */
+        .user-bar {
             background: rgba(26,26,46,0.95);
             backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 12px 20px;
+            padding: 12px 18px;
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border: 1px solid rgba(255,152,0,0.2);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
         .user-info {
             display: flex;
             align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
+            gap: 10px;
         }
 
-        .balance-card {
+        .user-avatar {
+            width: 40px;
+            height: 40px;
             background: linear-gradient(135deg, #ff9800, #ff5722);
-            padding: 8px 16px;
-            border-radius: 30px;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
         }
 
         .user-name {
             color: white;
             font-size: 14px;
+            font-weight: bold;
+        }
+
+        .user-balance {
+            color: #ff9800;
+            font-size: 12px;
         }
 
         .logout-btn {
             background: rgba(244,67,54,0.2);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
             color: #ff6b6b;
-            padding: 8px 16px;
-            border-radius: 30px;
-            border: 1px solid #f44336;
-            cursor: pointer;
             font-size: 12px;
+            cursor: pointer;
         }
 
-        /* Cards */
-        .card {
-            background: rgba(26,26,46,0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,152,0,0.15);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        /* Menu Buttons */
+        .menu-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
         }
 
-        .card-title {
-            font-size: 18px;
-            font-weight: bold;
+        .menu-btn {
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
+            border: 1px solid rgba(255,152,0,0.3);
+            border-radius: 16px;
+            padding: 12px 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .menu-btn span {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .menu-btn p {
             color: #ff9800;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .menu-btn:active {
+            transform: scale(0.95);
+        }
+
+        .menu-btn.whatsapp {
+            background: linear-gradient(135deg, #075e54, #128c7e);
+            border-color: #25D366;
+        }
+
+        .menu-btn.call {
+            background: linear-gradient(135deg, #1a5d1a, #2e7d32);
+            border-color: #4caf50;
+        }
+
+        /* Section Title */
+        .section-title {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
             margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .section-title h2 {
+            color: white;
+            font-size: 18px;
+        }
+
+        .section-title h3 {
+            color: #ff9800;
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        .new-badge {
+            background: #ff5722;
+            color: white;
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+
+        /* Market Card */
+        .market-card {
+            background: linear-gradient(135deg, #1a1a2e, #12121f);
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255,152,0,0.15);
+            position: relative;
+            overflow: hidden;
+            transition: 0.2s;
+        }
+
+        .market-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #ff9800, #ff5722);
+        }
+
+        .market-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 3px solid #ff9800;
-            padding-left: 12px;
-        }
-
-        /* Market Grid */
-        .market-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .market-card {
-            background: rgba(0,0,0,0.4);
-            border-radius: 20px;
-            padding: 18px;
-            transition: 0.2s;
-            border: 1px solid rgba(255,152,0,0.2);
-        }
-
-        .market-card.open {
-            border-left: 5px solid #4caf50;
-        }
-
-        .market-card.closed {
-            border-left: 5px solid #f44336;
-            opacity: 0.7;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; text-shadow: 0 0 5px #ff9800; }
-            50% { opacity: 0.7; text-shadow: 0 0 15px #ff9800; }
+            margin-bottom: 10px;
         }
 
         .market-name {
             font-size: 18px;
             font-weight: bold;
-            color: white;
-            margin-bottom: 10px;
-            animation: blink 1.5s infinite;
+            color: #ff9800;
         }
 
-        .market-time {
+        .market-numbers {
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            letter-spacing: 2px;
+        }
+
+        .market-timing {
             color: #aaa;
             font-size: 12px;
             margin-bottom: 10px;
+            display: flex;
+            gap: 15px;
         }
 
         .market-status {
-            font-size: 12px;
-            margin-bottom: 15px;
-        }
-
-        .status-open {
-            color: #4caf50;
-            font-weight: bold;
-        }
-
-        .status-closed {
-            color: #f44336;
-            font-weight: bold;
-        }
-
-        /* Rates Grid */
-        .rates-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+            display: inline-block;
+            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 20px;
             margin-top: 10px;
         }
 
-        .rate-item {
-            background: rgba(0,0,0,0.3);
-            padding: 10px;
-            border-radius: 12px;
-            text-align: center;
+        .status-open {
+            background: rgba(76,175,80,0.2);
+            color: #4caf50;
+            border: 1px solid #4caf50;
         }
 
-        .rate-name {
-            color: #ff9800;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .rate-value {
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
+        .status-closed {
+            background: rgba(244,67,54,0.2);
+            color: #f44336;
+            border: 1px solid #f44336;
         }
 
         /* Bid Section */
@@ -304,29 +286,6 @@
             margin-top: 15px;
             padding-top: 15px;
             border-top: 1px solid rgba(255,152,0,0.2);
-        }
-
-        .bid-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .bid-type-btn {
-            background: #1e1e2e;
-            border: 1px solid #ff9800;
-            padding: 8px;
-            border-radius: 10px;
-            color: #ff9800;
-            font-size: 11px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .bid-type-btn.active {
-            background: #ff9800;
-            color: #1a1a2e;
         }
 
         .bid-input-group {
@@ -338,7 +297,7 @@
         .bid-input {
             flex: 1;
             padding: 12px;
-            background: #1a1a2e;
+            background: #0a0a0f;
             border: 1px solid #333;
             border-radius: 12px;
             color: white;
@@ -354,11 +313,7 @@
             color: white;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .bid-btn:active {
-            transform: scale(0.98);
+            font-size: 14px;
         }
 
         .bid-btn:disabled {
@@ -366,257 +321,194 @@
             cursor: not-allowed;
         }
 
-        /* Form Styles */
-        .form-group {
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            border-radius: 30px;
+            padding: 25px;
+            width: 90%;
+            max-width: 350px;
+            border: 1px solid #ff9800;
+        }
+
+        .modal-content h3 {
+            color: #ff9800;
             margin-bottom: 15px;
         }
 
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #aaa;
-            font-size: 13px;
-        }
-
-        .form-group input {
+        .modal-content input {
             width: 100%;
             padding: 12px;
-            background: #1a1a2e;
+            background: #0a0a0f;
             border: 1px solid #333;
             border-radius: 12px;
             color: white;
+            margin-bottom: 15px;
         }
 
-        .save-btn {
-            background: linear-gradient(135deg, #ff9800, #ff5722);
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
             padding: 12px;
             border: none;
             border-radius: 12px;
-            color: white;
-            font-weight: bold;
             cursor: pointer;
-            width: 100%;
         }
 
-        /* Tables */
-        .data-table {
-            width: 100%;
-            overflow-x: auto;
-        }
-
-        .data-table table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .data-table th, .data-table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            color: #ddd;
-            font-size: 13px;
-        }
-
-        .data-table th {
-            color: #ff9800;
-        }
-
-        .whatsapp-btn {
-            display: inline-block;
-            background: #25D366;
-            padding: 12px 20px;
-            border-radius: 30px;
+        .close-modal {
+            background: #f44336;
             color: white;
-            text-decoration: none;
-            text-align: center;
+        }
+
+        .confirm-modal {
+            background: #ff9800;
+            color: #1a1a2e;
             font-weight: bold;
-            margin-top: 10px;
+        }
+
+        /* CDIDEVI Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .footer p {
+            color: #ff9800;
+            font-size: 12px;
+            letter-spacing: 2px;
         }
 
         .hidden {
             display: none;
         }
 
-        .error-msg {
-            color: #f44336;
-            font-size: 12px;
-            margin-top: 10px;
-            text-align: center;
+        /* Transaction Modal */
+        .transaction-list {
+            max-height: 300px;
+            overflow-y: auto;
         }
 
-        /* Profile Section */
-        .profile-info {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .profile-avatar {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #ff9800, #ff5722);
-            border-radius: 50%;
+        .transaction-item {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            font-size: 40px;
-        }
-
-        @media (max-width: 480px) {
-            .rates-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .bid-options {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            .card-title {
-                font-size: 16px;
-            }
-            .market-name {
-                font-size: 16px;
-            }
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: #ddd;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
-    <div class="bg-animation" id="bgAnimation"></div>
-    
-    <button class="menu-btn" id="menuBtn">☰</button>
-    
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h2>WIN777</h2>
-            <p>Gaming Platform</p>
+    <div class="bg-particles" id="bgParticles"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="top-header">
+            <h1>WIN<span>777</span></h1>
+            <p>Matka Live Now on WIN777!</p>
         </div>
-        <div class="sidebar-menu">
-            <div class="sidebar-item active" data-page="markets">🎮 Markets</div>
-            <div class="sidebar-item" data-page="deposit">💰 Deposit</div>
-            <div class="sidebar-item" data-page="withdraw">💸 Withdraw</div>
-            <div class="sidebar-item" data-page="bank">🏦 Bank Details</div>
-            <div class="sidebar-item" data-page="bid-history">📋 Bid History</div>
-            <div class="sidebar-item" data-page="transactions">📊 Transactions</div>
-            <div class="sidebar-item" data-page="profile">👤 Profile</div>
-            <div class="sidebar-item" data-page="contact">📞 Contact Us</div>
+
+        <!-- User Bar -->
+        <div class="user-bar">
+            <div class="user-info">
+                <div class="user-avatar">👤</div>
+                <div class="user-details">
+                    <span class="user-name" id="userName">Loading...</span>
+                    <span class="user-balance">💰 ₹<span id="userBalance">0</span></span>
+                </div>
+            </div>
+            <button class="logout-btn" id="logoutBtn">Logout</button>
+        </div>
+
+        <!-- Menu Buttons -->
+        <div class="menu-buttons">
+            <div class="menu-btn" onclick="openDeposit()">
+                <span>💰</span>
+                <p>Deposit</p>
+            </div>
+            <div class="menu-btn" onclick="openWithdraw()">
+                <span>💸</span>
+                <p>Withdraw</p>
+            </div>
+            <div class="menu-btn whatsapp" onclick="openWhatsApp()">
+                <span>📱</span>
+                <p>WhatsApp</p>
+            </div>
+            <div class="menu-btn call" onclick="openCall()">
+                <span>📞</span>
+                <p>Call Us</p>
+            </div>
+        </div>
+
+        <!-- Main Markets Section -->
+        <div class="section-title">
+            <h2>Main Markets</h2>
+            <div class="new-badge">NEW</div>
+        </div>
+
+        <!-- Markets List -->
+        <div id="marketsList"></div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>WIN777</p>
         </div>
     </div>
-    
-    <div class="overlay" id="overlay"></div>
-    
-    <div class="main-content">
-        <div class="top-bar">
-            <div class="user-info">
-                <div class="balance-card">💰 ₹<span id="userBalance">0</span></div>
-                <span class="user-name" id="userName">User</span>
+
+    <!-- Deposit Modal -->
+    <div id="depositModal" class="modal">
+        <div class="modal-content">
+            <h3>💰 Deposit Money</h3>
+            <input type="number" id="depositAmount" placeholder="Enter amount (₹)">
+            <div class="modal-buttons">
+                <button class="close-modal" onclick="closeDeposit()">Cancel</button>
+                <button class="confirm-modal" onclick="confirmDeposit()">Deposit</button>
             </div>
-            <button class="logout-btn" id="logoutBtn">🚪 Logout</button>
+            <div id="depositMsg" style="color:#f44336; font-size:12px; margin-top:10px;"></div>
         </div>
-        
-        <!-- Markets Page -->
-        <div id="marketsPage">
-            <div class="card">
-                <div class="card-title">📈 Market Rates</div>
-                <div class="rates-grid">
-                    <div class="rate-item"><div class="rate-name">OPEN</div><div class="rate-value">1:10</div></div>
-                    <div class="rate-item"><div class="rate-name">Jodi</div><div class="rate-value">1:100</div></div>
-                    <div class="rate-item"><div class="rate-name">Single Pannel</div><div class="rate-value">1:160</div></div>
-                    <div class="rate-item"><div class="rate-name">Double Pannel</div><div class="rate-value">1:320</div></div>
-                    <div class="rate-item"><div class="rate-name">Half Sangam</div><div class="rate-value">1:1440</div></div>
-                    <div class="rate-item"><div class="rate-name">Full Sangam</div><div class="rate-value">1:25000</div></div>
-                </div>
+    </div>
+
+    <!-- Withdraw Modal -->
+    <div id="withdrawModal" class="modal">
+        <div class="modal-content">
+            <h3>💸 Withdraw Money</h3>
+            <input type="number" id="withdrawAmount" placeholder="Enter amount (₹)">
+            <div class="modal-buttons">
+                <button class="close-modal" onclick="closeWithdraw()">Cancel</button>
+                <button class="confirm-modal" onclick="confirmWithdraw()">Withdraw</button>
             </div>
-            
-            <div class="card">
-                <div class="card-title">🎯 Active Markets</div>
-                <div id="marketsList" class="market-grid"></div>
-            </div>
+            <div id="withdrawMsg" style="color:#f44336; font-size:12px; margin-top:10px;"></div>
         </div>
-        
-        <!-- Deposit Page -->
-        <div id="depositPage" class="hidden">
-            <div class="card">
-                <div class="card-title">💰 Deposit Money</div>
-                <div class="form-group">
-                    <label>Amount (₹)</label>
-                    <input type="number" id="depositAmount" placeholder="Enter amount">
-                </div>
-                <button class="save-btn" id="depositBtn">Proceed to Deposit</button>
-                <div id="depositMsg" class="error-msg"></div>
+    </div>
+
+    <!-- Bid Modal -->
+    <div id="bidModal" class="modal">
+        <div class="modal-content">
+            <h3 id="bidModalTitle">Place Bid</h3>
+            <input type="number" id="bidAmount" placeholder="Enter bid amount (₹)">
+            <div class="modal-buttons">
+                <button class="close-modal" onclick="closeBidModal()">Cancel</button>
+                <button class="confirm-modal" onclick="confirmBid()">Place Bid</button>
             </div>
-        </div>
-        
-        <!-- Withdraw Page -->
-        <div id="withdrawPage" class="hidden">
-            <div class="card">
-                <div class="card-title">💸 Withdraw Money</div>
-                <div class="form-group">
-                    <label>Amount (₹)</label>
-                    <input type="number" id="withdrawAmount" placeholder="Enter amount">
-                </div>
-                <button class="save-btn" id="withdrawBtn">Request Withdrawal</button>
-                <div id="withdrawMsg" class="error-msg"></div>
-            </div>
-        </div>
-        
-        <!-- Bank Details Page -->
-        <div id="bankPage" class="hidden">
-            <div class="card">
-                <div class="card-title">🏦 Bank Account Details</div>
-                <div class="form-group">
-                    <label>Account Holder Name</label>
-                    <input type="text" id="accountName" placeholder="Full name as in bank">
-                </div>
-                <div class="form-group">
-                    <label>Account Number</label>
-                    <input type="text" id="accountNumber" placeholder="Bank account number">
-                </div>
-                <div class="form-group">
-                    <label>IFSC Code</label>
-                    <input type="text" id="ifscCode" placeholder="IFSC code">
-                </div>
-                <button class="save-btn" id="saveBankBtn">Save Bank Details</button>
-                <div id="bankMsg" class="error-msg"></div>
-            </div>
-        </div>
-        
-        <!-- Bid History Page -->
-        <div id="bidHistoryPage" class="hidden">
-            <div class="card">
-                <div class="card-title">📋 Your Bid History</div>
-                <div class="data-table" id="bidHistoryTable"></div>
-            </div>
-        </div>
-        
-        <!-- Transactions Page -->
-        <div id="transactionsPage" class="hidden">
-            <div class="card">
-                <div class="card-title">📊 Transaction History</div>
-                <div class="data-table" id="transactionsTable"></div>
-            </div>
-        </div>
-        
-        <!-- Profile Page -->
-        <div id="profilePage" class="hidden">
-            <div class="card">
-                <div class="card-title">👤 My Profile</div>
-                <div class="profile-info">
-                    <div class="profile-avatar">👤</div>
-                    <h3 style="color:white;" id="profileName">Loading...</h3>
-                    <p style="color:#888;" id="profilePhone">Loading...</p>
-                    <p style="color:#ff9800;" id="profileBalance">Balance: ₹0</p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Contact Us Page -->
-        <div id="contactPage" class="hidden">
-            <div class="card">
-                <div class="card-title">📞 Contact Us</div>
-                <p style="color:#ddd; margin-bottom:15px;">Have questions? Reach out to us on WhatsApp for quick support!</p>
-                <a href="https://wa.me/919876543210" class="whatsapp-btn" target="_blank">
-                    💬 Chat on WhatsApp
-                </a>
-                <p style="color:#888; margin-top:15px; font-size:12px;">Support available 24/7</p>
-            </div>
+            <div id="bidMsg" style="color:#f44336; font-size:12px; margin-top:10px;"></div>
         </div>
     </div>
 
@@ -636,114 +528,212 @@
         
         let currentUser = null;
         let userData = null;
-        let selectedBidType = 'open';
+        let selectedMarket = null;
         
-        // Create animated background
-        for (let i = 0; i < 20; i++) {
-            const circle = document.createElement('div');
-            circle.className = 'bg-circle';
-            circle.style.width = Math.random() * 300 + 100 + 'px';
-            circle.style.height = circle.style.width;
-            circle.style.left = Math.random() * 100 + '%';
-            circle.style.top = Math.random() * 100 + '%';
-            circle.style.animationDelay = Math.random() * 20 + 's';
-            circle.style.animationDuration = Math.random() * 25 + 15 + 's';
-            document.getElementById('bgAnimation').appendChild(circle);
+        // Create animated background particles
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.width = Math.random() * 200 + 50 + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = Math.random() * 25 + 15 + 's';
+            document.getElementById('bgParticles').appendChild(particle);
         }
         
         // Market data
         let markets = [
-            { id: 'm1', name: 'CRICKET: IND vs AUS 🏏', openTime: '10:00', closeTime: '18:00', status: 'open' },
-            { id: 'm2', name: 'FOOTBALL: RM vs BARCA ⚽', openTime: '20:00', closeTime: '22:00', status: 'open' },
-            { id: 'm3', name: 'TENNIS: US OPEN FINAL 🎾', openTime: '14:00', closeTime: '16:00', status: 'open' }
+            { 
+                id: 'm1', 
+                name: 'SHREE GANESH', 
+                numbers: '340-76-349',
+                openTime: '09:00 AM', 
+                closeTime: '10:00 AM', 
+                status: 'closed' 
+            },
+            { 
+                id: 'm2', 
+                name: 'OMKAR MORNING', 
+                numbers: '126-92-570',
+                openTime: '09:40 AM', 
+                closeTime: '10:40 AM', 
+                status: 'closed' 
+            },
+            { 
+                id: 'm3', 
+                name: 'GOA MORNING', 
+                numbers: '244-01-678',
+                openTime: '10:15 AM', 
+                closeTime: '12:15 PM', 
+                status: 'closed' 
+            },
+            { 
+                id: 'm4', 
+                name: 'KALYAN MORNING', 
+                numbers: '123-45-678',
+                openTime: '11:00 AM', 
+                closeTime: '01:00 PM', 
+                status: 'open' 
+            },
+            { 
+                id: 'm5', 
+                name: 'RAJDHANI DAY', 
+                numbers: '234-56-789',
+                openTime: '12:00 PM', 
+                closeTime: '02:00 PM', 
+                status: 'open' 
+            },
+            { 
+                id: 'm6', 
+                name: 'MAIN BAZAR', 
+                numbers: '345-67-890',
+                openTime: '03:00 PM', 
+                closeTime: '05:00 PM', 
+                status: 'open' 
+            }
         ];
-        
-        // Rate multipliers
-        const rates = {
-            open: 10,
-            jodi: 100,
-            single_pannel: 160,
-            double_pannel: 320,
-            half_sangam: 1440,
-            full_sangam: 25000
-        };
-        
-        function checkMarketStatus(market) {
-            const now = new Date();
-            const closeHour = parseInt(market.closeTime.split(':')[0]);
-            const closeMin = parseInt(market.closeTime.split(':')[1]);
-            const closeTime = new Date();
-            closeTime.setHours(closeHour, closeMin, 0);
-            return now > closeTime ? 'closed' : 'open';
-        }
         
         function renderMarkets() {
             const container = document.getElementById('marketsList');
             if (!container) return;
             
-            container.innerHTML = markets.map(market => {
-                const status = checkMarketStatus(market);
-                const isOpen = status === 'open';
-                return `
-                    <div class="market-card ${isOpen ? 'open' : 'closed'}">
-                        <div class="market-name">${market.name}</div>
-                        <div class="market-time">⏰ ${market.openTime} - ${market.closeTime}</div>
-                        <div class="market-status">
-                            Status: ${isOpen ? '<span class="status-open">🟢 OPEN</span>' : '<span class="status-closed">🔴 CLOSED</span>'}
-                        </div>
-                        ${isOpen ? `
-                            <div class="bid-section">
-                                <div class="bid-options">
-                                    <button class="bid-type-btn ${selectedBidType === 'open' ? 'active' : ''}" onclick="selectBidType('open')">OPEN (1:10)</button>
-                                    <button class="bid-type-btn ${selectedBidType === 'jodi' ? 'active' : ''}" onclick="selectBidType('jodi')">JODI (1:100)</button>
-                                    <button class="bid-type-btn ${selectedBidType === 'single_pannel' ? 'active' : ''}" onclick="selectBidType('single_pannel')">SINGLE (1:160)</button>
-                                    <button class="bid-type-btn ${selectedBidType === 'double_pannel' ? 'active' : ''}" onclick="selectBidType('double_pannel')">DOUBLE (1:320)</button>
-                                    <button class="bid-type-btn ${selectedBidType === 'half_sangam' ? 'active' : ''}" onclick="selectBidType('half_sangam')">HALF (1:1440)</button>
-                                    <button class="bid-type-btn ${selectedBidType === 'full_sangam' ? 'active' : ''}" onclick="selectBidType('full_sangam')">FULL (1:25000)</button>
-                                </div>
-                                <div class="bid-input-group">
-                                    <input type="number" id="bid-${market.id}" class="bid-input" placeholder="Enter bid amount (₹)">
-                                </div>
-                                <button class="bid-btn" onclick="placeBid('${market.id}')">💰 Place Bid</button>
-                            </div>
-                        ` : '<button class="bid-btn" disabled>🔴 Market Closed</button>'}
+            container.innerHTML = markets.map(market => `
+                <div class="market-card">
+                    <div class="market-header">
+                        <span class="market-name">${market.name}</span>
+                        <span class="market-numbers">${market.numbers}</span>
                     </div>
-                `;
-            }).join('');
+                    <div class="market-timing">
+                        <span>🕐 Open Bids: ${market.openTime}</span>
+                        <span>⏰ Close Bids: ${market.closeTime}</span>
+                    </div>
+                    <div>
+                        <span class="market-status ${market.status === 'open' ? 'status-open' : 'status-closed'}">
+                            ${market.status === 'open' ? '🟢 Open Now' : '🔴 Closed for Today'}
+                        </span>
+                    </div>
+                    ${market.status === 'open' ? `
+                        <div class="bid-section">
+                            <div class="bid-input-group">
+                                <input type="number" id="bid-${market.id}" class="bid-input" placeholder="Enter bid amount (₹)">
+                            </div>
+                            <button class="bid-btn" onclick="openBidModal('${market.id}', '${market.name}')">Place Bid</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
         }
         
-        window.selectBidType = function(type) {
-            selectedBidType = type;
-            renderMarkets();
-        };
+        function openBidModal(marketId, marketName) {
+            selectedMarket = { id: marketId, name: marketName };
+            document.getElementById('bidModalTitle').innerHTML = `🎲 ${marketName}`;
+            document.getElementById('bidAmount').value = '';
+            document.getElementById('bidMsg').innerHTML = '';
+            document.getElementById('bidModal').style.display = 'flex';
+        }
         
-        window.placeBid = async function(marketId) {
-            const amount = parseInt(document.getElementById(`bid-${marketId}`).value);
-            const market = markets.find(m => m.id === marketId);
+        function closeBidModal() {
+            document.getElementById('bidModal').style.display = 'none';
+            selectedMarket = null;
+        }
+        
+        async function confirmBid() {
+            const amount = parseInt(document.getElementById('bidAmount').value);
             
-            if (!amount || amount <= 0) { alert('Enter valid amount'); return; }
+            if (!amount || amount <= 0) {
+                document.getElementById('bidMsg').innerHTML = 'Enter valid amount';
+                return;
+            }
             if (!currentUser) return;
-            if (userData.balance < amount) { alert('Insufficient balance!'); return; }
+            if (userData.balance < amount) {
+                document.getElementById('bidMsg').innerHTML = 'Insufficient balance!';
+                return;
+            }
             
             const newBalance = userData.balance - amount;
-            const potentialWin = amount * rates[selectedBidType];
             
             await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
             await db.collection('bids').add({
                 userId: currentUser.uid,
-                marketId: marketId,
-                marketName: market.name,
-                bidType: selectedBidType,
+                marketId: selectedMarket.id,
+                marketName: selectedMarket.name,
                 amount: amount,
-                potentialWin: potentialWin,
                 status: 'pending',
                 createdAt: new Date()
             });
-            await addTransaction('debit', amount, `Bid on ${market.name} (${selectedBidType})`);
+            await addTransaction('debit', amount, `Bid on ${selectedMarket.name}`);
             await loadUserData();
-            alert(`✅ Bid placed! Potential win: ₹${potentialWin}`);
-            document.getElementById(`bid-${marketId}`).value = '';
-        };
+            
+            alert(`✅ Bid placed successfully!\nAmount: ₹${amount}\nMarket: ${selectedMarket.name}`);
+            closeBidModal();
+            document.getElementById(`bid-${selectedMarket.id}`).value = '';
+        }
+        
+        function openDeposit() {
+            document.getElementById('depositAmount').value = '';
+            document.getElementById('depositMsg').innerHTML = '';
+            document.getElementById('depositModal').style.display = 'flex';
+        }
+        
+        function closeDeposit() {
+            document.getElementById('depositModal').style.display = 'none';
+        }
+        
+        async function confirmDeposit() {
+            const amount = parseInt(document.getElementById('depositAmount').value);
+            if (!amount || amount <= 0) {
+                document.getElementById('depositMsg').innerHTML = 'Enter valid amount';
+                return;
+            }
+            
+            const newBalance = (userData.balance || 0) + amount;
+            await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
+            await addTransaction('credit', amount, 'Deposit');
+            await loadUserData();
+            
+            document.getElementById('depositMsg').innerHTML = '<span style="color:#4caf50;">✅ Deposit successful!</span>';
+            setTimeout(() => closeDeposit(), 1500);
+        }
+        
+        function openWithdraw() {
+            document.getElementById('withdrawAmount').value = '';
+            document.getElementById('withdrawMsg').innerHTML = '';
+            document.getElementById('withdrawModal').style.display = 'flex';
+        }
+        
+        function closeWithdraw() {
+            document.getElementById('withdrawModal').style.display = 'none';
+        }
+        
+        async function confirmWithdraw() {
+            const amount = parseInt(document.getElementById('withdrawAmount').value);
+            if (!amount || amount <= 0) {
+                document.getElementById('withdrawMsg').innerHTML = 'Enter valid amount';
+                return;
+            }
+            if (userData.balance < amount) {
+                document.getElementById('withdrawMsg').innerHTML = 'Insufficient balance';
+                return;
+            }
+            
+            const newBalance = userData.balance - amount;
+            await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
+            await addTransaction('debit', amount, 'Withdrawal Request');
+            await loadUserData();
+            
+            document.getElementById('withdrawMsg').innerHTML = '<span style="color:#4caf50;">✅ Withdrawal request submitted!</span>';
+            setTimeout(() => closeWithdraw(), 1500);
+        }
+        
+        function openWhatsApp() {
+            window.open('https://wa.me/919876543210', '_blank');
+        }
+        
+        function openCall() {
+            window.location.href = 'tel:+919876543210';
+        }
         
         async function loadUserData() {
             const user = auth.currentUser;
@@ -752,19 +742,7 @@
             const userDoc = await db.collection('users').doc(user.uid).get();
             userData = userDoc.data();
             document.getElementById('userBalance').innerText = userData?.balance || 0;
-            document.getElementById('userName').innerHTML = `👤 ${userData?.name || 'User'}`;
-            
-            if (document.getElementById('profileName')) {
-                document.getElementById('profileName').innerHTML = userData?.name || 'User';
-                document.getElementById('profilePhone').innerHTML = userData?.phone || 'No phone';
-                document.getElementById('profileBalance').innerHTML = `Balance: ₹${userData?.balance || 0}`;
-            }
-            
-            if (userData?.bankDetails) {
-                document.getElementById('accountName').value = userData.bankDetails.accountName || '';
-                document.getElementById('accountNumber').value = userData.bankDetails.accountNumber || '';
-                document.getElementById('ifscCode').value = userData.bankDetails.ifscCode || '';
-            }
+            document.getElementById('userName').innerHTML = userData?.name || 'User';
         }
         
         async function addTransaction(type, amount, description) {
@@ -777,126 +755,6 @@
             });
         }
         
-        async function loadBidHistory() {
-            const bids = await db.collection('bids').where('userId', '==', currentUser.uid).orderBy('createdAt', 'desc').get();
-            const table = document.getElementById('bidHistoryTable');
-            if (bids.empty) { table.innerHTML = '<p style="color:#888;">No bids placed yet</p>'; return; }
-            table.innerHTML = `
-                <table>
-                    <tr><th>Market</th><th>Type</th><th>Amount</th><th>Potential</th><th>Status</th><th>Date</th></tr>
-                    ${bids.docs.map(doc => `
-                        <tr>
-                            <td>${doc.data().marketName}</td>
-                            <td>${doc.data().bidType}</td>
-                            <td>₹${doc.data().amount}</td>
-                            <td>₹${doc.data().potentialWin}</td>
-                            <td style="color:${doc.data().status === 'won' ? '#4caf50' : doc.data().status === 'lost' ? '#f44336' : '#ff9800'}">${doc.data().status}</td>
-                            <td>${doc.data().createdAt?.toDate().toLocaleString() || 'Pending'}</td>
-                        </tr>
-                    `).join('')}
-                </table>
-            `;
-        }
-        
-        async function loadTransactions() {
-            const transactions = await db.collection('transactions').where('userId', '==', currentUser.uid).orderBy('date', 'desc').get();
-            const table = document.getElementById('transactionsTable');
-            if (transactions.empty) { table.innerHTML = '<p style="color:#888;">No transactions yet</p>'; return; }
-            table.innerHTML = `
-                <table>
-                    <tr><th>Type</th><th>Amount</th><th>Description</th><th>Date</th></tr>
-                    ${transactions.docs.map(doc => `
-                        <tr>
-                            <td style="color:${doc.data().type === 'credit' ? '#4caf50' : '#f44336'}">${doc.data().type === 'credit' ? '+' : '-'}</td>
-                            <td>₹${doc.data().amount}</td>
-                            <td>${doc.data().description}</td>
-                            <td>${doc.data().date?.toDate().toLocaleString() || 'Pending'}</td>
-                        </tr>
-                    `).join('')}
-                </table>
-            `;
-        }
-        
-        // Navigation
-        document.querySelectorAll('.sidebar-item').forEach(item => {
-            item.addEventListener('click', () => {
-                document.querySelectorAll('.sidebar-item').forEach(nav => nav.classList.remove('active'));
-                item.classList.add('active');
-                const page = item.dataset.page;
-                document.getElementById('marketsPage').classList.add('hidden');
-                document.getElementById('depositPage').classList.add('hidden');
-                document.getElementById('withdrawPage').classList.add('hidden');
-                document.getElementById('bankPage').classList.add('hidden');
-                document.getElementById('bidHistoryPage').classList.add('hidden');
-                document.getElementById('transactionsPage').classList.add('hidden');
-                document.getElementById('profilePage').classList.add('hidden');
-                document.getElementById('contactPage').classList.add('hidden');
-                document.getElementById(`${page}Page`).classList.remove('hidden');
-                
-                if (page === 'bid-history') loadBidHistory();
-                if (page === 'transactions') loadTransactions();
-                if (page === 'markets') renderMarkets();
-                
-                document.getElementById('sidebar').classList.remove('open');
-                document.getElementById('overlay').classList.remove('active');
-            });
-        });
-        
-        // Menu toggle
-        document.getElementById('menuBtn').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('overlay').classList.toggle('active');
-        });
-        
-        document.getElementById('overlay').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.remove('open');
-            document.getElementById('overlay').classList.remove('active');
-        });
-        
-        // Deposit
-        document.getElementById('depositBtn')?.addEventListener('click', async () => {
-            const amount = parseInt(document.getElementById('depositAmount').value);
-            if (!amount || amount <= 0) { document.getElementById('depositMsg').innerText = 'Enter valid amount'; return; }
-            const newBalance = (userData.balance || 0) + amount;
-            await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
-            await addTransaction('credit', amount, 'Deposit');
-            await loadUserData();
-            document.getElementById('depositMsg').innerHTML = '<span style="color:#4caf50;">✅ Deposit successful!</span>';
-            document.getElementById('depositAmount').value = '';
-            setTimeout(() => document.getElementById('depositMsg').innerHTML = '', 3000);
-        });
-        
-        // Withdraw
-        document.getElementById('withdrawBtn')?.addEventListener('click', async () => {
-            const amount = parseInt(document.getElementById('withdrawAmount').value);
-            if (!amount || amount <= 0) { document.getElementById('withdrawMsg').innerText = 'Enter valid amount'; return; }
-            if (!userData.bankDetails) { document.getElementById('withdrawMsg').innerHTML = '<span style="color:#f44336;">❌ Please add bank details first</span>'; return; }
-            if (userData.balance < amount) { document.getElementById('withdrawMsg').innerHTML = '<span style="color:#f44336;">❌ Insufficient balance</span>'; return; }
-            const newBalance = userData.balance - amount;
-            await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
-            await addTransaction('debit', amount, 'Withdrawal Request');
-            await loadUserData();
-            document.getElementById('withdrawMsg').innerHTML = '<span style="color:#4caf50;">✅ Withdrawal request submitted!</span>';
-            document.getElementById('withdrawAmount').value = '';
-            setTimeout(() => document.getElementById('withdrawMsg').innerHTML = '', 3000);
-        });
-        
-        // Save Bank Details
-        document.getElementById('saveBankBtn')?.addEventListener('click', async () => {
-            const bankDetails = {
-                accountName: document.getElementById('accountName').value,
-                accountNumber: document.getElementById('accountNumber').value,
-                ifscCode: document.getElementById('ifscCode').value
-            };
-            if (!bankDetails.accountName || !bankDetails.accountNumber || !bankDetails.ifscCode) {
-                document.getElementById('bankMsg').innerHTML = '<span style="color:#f44336;">❌ Please fill all fields</span>';
-                return;
-            }
-            await db.collection('users').doc(currentUser.uid).update({ bankDetails: bankDetails });
-            document.getElementById('bankMsg').innerHTML = '<span style="color:#4caf50;">✅ Bank details saved!</span>';
-            setTimeout(() => document.getElementById('bankMsg').innerHTML = '', 3000);
-        });
-        
         document.getElementById('logoutBtn')?.addEventListener('click', async () => {
             await auth.signOut();
             window.location.href = 'index.html';
@@ -904,7 +762,7 @@
         
         auth.onAuthStateChanged(async (user) => {
             if (!user) window.location.href = 'index.html';
-            else { await loadUserData(); renderMarkets(); setInterval(() => renderMarkets(), 60000); }
+            else { await loadUserData(); renderMarkets(); }
         });
     </script>
 </body>
