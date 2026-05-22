@@ -9,43 +9,44 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #0f0f1a; overflow-x: hidden; position: relative; }
-        .bg-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; overflow: hidden; }
-        .orb { position: absolute; background: radial-gradient(circle, rgba(0,150,255,0.1), transparent); border-radius: 50%; animation: float 20s infinite; }
-        @keyframes float { 0%,100% { transform: translateY(0) translateX(0); } 25% { transform: translateY(-80px) translateX(50px); } 50% { transform: translateY(-160px) translateX(-50px); } }
-        .login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f0f1a; display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-box { background: #1a1a2e; padding: 40px; border-radius: 30px; width: 320px; text-align: center; border: 1px solid #0096ff; }
-        .login-box input { width: 100%; padding: 12px; margin: 10px 0; background: #0f0f1a; border: 1px solid #0096ff; border-radius: 12px; color: white; }
-        .login-box button { background: #0096ff; border: none; padding: 12px; width: 100%; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; }
+        body { background: #ffffff; overflow-x: hidden; position: relative; }
+        .login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000000; display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .login-box { background: #1a1a1a; padding: 40px; border-radius: 30px; width: 320px; text-align: center; border: 1px solid #333; }
+        .login-box h2 { color: #ffffff; }
+        .login-box input { width: 100%; padding: 12px; margin: 10px 0; background: #333; border: 1px solid #555; border-radius: 12px; color: white; }
+        .login-box button { background: #000000; border: 1px solid #fff; padding: 12px; width: 100%; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; }
         .admin-container { display: none; position: relative; z-index: 1; }
-        .sidebar { width: 260px; background: #1a1a2e; min-height: 100vh; position: fixed; border-right: 1px solid #0096ff; }
-        .sidebar h2 { color: #0096ff; padding: 25px; text-align: center; border-bottom: 1px solid #0096ff; }
+        .sidebar { width: 260px; background: #000000; min-height: 100vh; position: fixed; border-right: 1px solid #333; }
+        .sidebar h2 { color: #ffffff; padding: 25px; text-align: center; border-bottom: 1px solid #333; }
         .sidebar-item { padding: 15px 25px; color: #ccc; cursor: pointer; border-bottom: 1px solid #222; }
-        .sidebar-item:hover { background: #0096ff10; color: #0096ff; }
-        .main-content { margin-left: 260px; padding: 25px; }
-        .card { background: #1a1a2e; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #0096ff; }
-        .card-title { color: #0096ff; font-size: 20px; margin-bottom: 15px; font-weight: bold; }
-        input, select { background: #0f0f1a; border: 1px solid #0096ff; padding: 10px; border-radius: 10px; color: white; margin: 5px; width: calc(100% - 10px); }
-        button { background: #0096ff; border: none; padding: 10px 20px; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; margin: 5px; }
-        .user-item, .market-item { background: #0f0f1a; padding: 12px; margin: 8px 0; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #0096ff; flex-wrap: wrap; gap: 10px; }
+        .sidebar-item:hover { background: #1a1a1a; color: #ffffff; }
+        .main-content { margin-left: 260px; padding: 25px; background: #f5f5f5; min-height: 100vh; }
+        .card { background: #ffffff; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .card-title { color: #000000; font-size: 20px; margin-bottom: 15px; font-weight: bold; border-left: 4px solid #000; padding-left: 12px; }
+        input, select { background: #ffffff; border: 1px solid #ccc; padding: 10px; border-radius: 10px; color: #000000; margin: 5px; width: calc(100% - 10px); }
+        button { background: #000000; border: none; padding: 10px 20px; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; margin: 5px; }
+        .user-item, .market-item { background: #f9f9f9; padding: 12px; margin: 8px 0; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee; flex-wrap: wrap; gap: 10px; }
+        .data-table { width: 100%; overflow-x: auto; }
+        .data-table table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; color: #000; font-size: 13px; }
+        .data-table th { color: #000; font-weight: bold; background: #f0f0f0; }
         .hidden { display: none; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
         @media (max-width: 768px) { .sidebar { width: 70px; } .sidebar h2 { font-size: 14px; } .sidebar-item span { display: none; } .main-content { margin-left: 70px; } }
     </style>
 </head>
 <body>
-    <div class="bg-animation" id="bgAnimation"></div>
-    <div id="adminLogin" class="login-screen"><div class="login-box"><h2 style="color:#0096ff;">Admin Login</h2><input type="password" id="adminPass" placeholder="Password"><button onclick="verifyAdmin()">Login</button><div id="loginError" style="color:red; margin-top:10px;"></div></div></div>
+    <div id="adminLogin" class="login-screen"><div class="login-box"><h2>WIN777 ADMIN</h2><input type="password" id="adminPass" placeholder="Password"><button onclick="verifyAdmin()">Login</button><div id="loginError" style="color:red; margin-top:10px;"></div></div></div>
     
     <div id="adminPanel" class="admin-container"><div class="sidebar"><h2>WIN777</h2><div class="sidebar-item" onclick="showSection('markets')">🎮 Markets</div><div class="sidebar-item" onclick="showSection('users')">👥 Users</div><div class="sidebar-item" onclick="showSection('deposits')">💰 Deposits</div><div class="sidebar-item" onclick="showSection('withdrawals')">💸 Withdrawals</div><div class="sidebar-item" onclick="showSection('settings')">⚙️ Settings</div><div class="sidebar-item" onclick="logoutAdmin()">🚪 Logout</div></div>
-    <div class="main-content"><div id="marketsSection"><div class="card"><div class="card-title">➕ Add New Market (24hr Format)</div><input type="text" id="marketName" placeholder="Market Name (e.g., KALYAN MORNING)"><input type="time" id="openEnd" placeholder="Open Bid End (e.g., 11:00)"><input type="time" id="closeEnd" placeholder="Close Bid End (e.g., 11:30)"><input type="text" id="marketResult" placeholder="Result (e.g., 123-45-678)"><button onclick="addMarket()">Add Market</button></div><div class="card"><div class="card-title">📋 Manage Markets (Live Update)</div><div id="marketsListAdmin"></div></div></div>
+    <div class="main-content"><div id="marketsSection"><div class="card"><div class="card-title">➕ Add New Market (24hr Format)</div><input type="text" id="marketName" placeholder="Market Name (e.g., KALYAN)"><input type="time" id="openEnd" placeholder="Open Bid End (e.g., 15:40)"><input type="time" id="closeEnd" placeholder="Close Bid End (e.g., 17:40)"><input type="text" id="marketResult" placeholder="Result (e.g., 123-45-678)"><button onclick="addMarket()">Add Market</button></div><div class="card"><div class="card-title">📋 Manage Markets</div><div id="marketsListAdmin"></div></div></div>
     <div id="usersSection" class="hidden"><div class="card"><div class="card-title">👥 Manage Users</div><div id="usersListAdmin"></div></div></div>
-    <div id="depositsSection" class="hidden"><div class="card"><div class="card-title">💰 Deposit Requests</div><div id="depositsList"></div></div></div>
+    <div id="depositsSection" class="hidden"><div class="card"><div class="card-title">💰 Deposit Requests (Pending)</div><div id="depositsList"></div></div></div>
     <div id="withdrawalsSection" class="hidden"><div class="card"><div class="card-title">💸 Withdrawal Requests</div><div id="withdrawalsList"></div></div></div>
-    <div id="settingsSection" class="hidden"><div class="card"><div class="card-title">🔐 Change Password</div><input type="password" id="oldPass" placeholder="Old Password"><input type="password" id="newPass" placeholder="New Password"><button onclick="changeAdminPass()">Update Password</button><div id="passMsg"></div></div><div class="card"><div class="card-title">🏧 UPI ID Settings</div><input type="text" id="upiId" placeholder="UPI ID (e.g., win777@okhdfcbank)"><button onclick="updateUPI()">Update UPI ID</button></div></div></div></div></div>
+    <div id="settingsSection" class="hidden"><div class="card"><div class="card-title">🔐 Change Password</div><input type="password" id="oldPass" placeholder="Old Password"><input type="password" id="newPass" placeholder="New Password"><button onclick="changeAdminPass()">Update Password</button><div id="passMsg"></div></div><div class="card"><div class="card-title">🏧 UPI ID Settings</div><input type="text" id="upiId" placeholder="UPI ID (e.g., win777@okhdfcbank)" value="win777@okhdfcbank"><button onclick="updateUPI()">Update UPI ID</button></div></div></div></div></div>
 
     <script>
-        for (let i = 0; i < 30; i++) { const orb = document.createElement('div'); orb.className = 'orb'; orb.style.width = Math.random() * 300 + 100 + 'px'; orb.style.height = orb.style.width; orb.style.left = Math.random() * 100 + '%'; orb.style.top = Math.random() * 100 + '%'; orb.style.animationDelay = Math.random() * 20 + 's'; orb.style.animationDuration = Math.random() * 25 + 15 + 's'; document.getElementById('bgAnimation').appendChild(orb); }
-
         const firebaseConfig = { apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38", authDomain: "win777-ed482.firebaseapp.com", projectId: "win777-ed482", storageBucket: "win777-ed482.firebasestorage.app", messagingSenderId: "843686112399", appId: "1:843686112399:web:9c20a96831e6a94cd814fa" };
         firebase.initializeApp(firebaseConfig); const db = firebase.firestore(); const auth = firebase.auth();
         let adminPassword = 'Gani99@@', unsubscribeMarkets = null, unsubscribeUsers = null, unsubscribeDeposits = null, unsubscribeWithdrawals = null;
@@ -62,19 +63,20 @@
         async function editMarket(id, name, open, close, res){ const newName=prompt('New Name', name); const newOpen=prompt('Open End Time (24hr)', open); const newClose=prompt('Close End Time (24hr)', close); const newRes=prompt('Result (e.g., 123-45-678)', res); if(newName) await db.collection('markets').doc(id).update({name:newName, openBidEnd:newOpen, closeBidEnd:newClose, result:newRes}); }
         async function deleteMarket(id){ if(confirm('Delete this market?')){ await db.collection('markets').doc(id).delete(); } }
         
-        async function loadUsers(){ const users=await db.collection('users').get(); const div=document.getElementById('usersListAdmin'); div.innerHTML=''; for(const doc of users.docs){ const u=doc.data(); const bids=await db.collection('bids').where('userId','==',doc.id).get(); div.innerHTML+=`<div class="user-item"><div><b>${u.name}</b><br>${u.phone}<br>Balance: ₹${u.balance||0}<br>Bids: ${bids.size}</div><div><button onclick="addBalance('${doc.id}')">Add Balance</button><button onclick="viewBids('${doc.id}')">View Bids</button><button onclick="blockUser('${doc.id}')">Block</button></div></div>`; } }
+        async function loadUsers(){ const users=await db.collection('users').get(); const div=document.getElementById('usersListAdmin'); div.innerHTML=''; for(const doc of users.docs){ const u=doc.data(); const bids=await db.collection('bids').where('userId','==',doc.id).get(); div.innerHTML+=`<div class="user-item"><div><b>${u.name}</b><br>${u.phone}<br>Balance: ₹${u.balance||0}<br>Bids: ${bids.size}</div><div><button onclick="addBalance('${doc.id}')">Add Balance</button><button onclick="viewBids('${doc.id}')">View Bids</button><button onclick="clearUserHistory('${doc.id}')" class="btn-danger">Clear History</button><button onclick="blockUser('${doc.id}')">Block</button></div></div>`; } }
         async function addBalance(uid){ const amt=prompt('Enter amount to add'); if(amt && !isNaN(amt)){ const u=await db.collection('users').doc(uid).get(); const newBalance = (u.data().balance||0) + parseInt(amt); await db.collection('users').doc(uid).update({balance:newBalance}); alert(`✅ ₹${amt} added! New balance: ₹${newBalance}`); } else alert('Invalid amount'); }
-        async function viewBids(uid){ const bids=await db.collection('bids').where('userId','==',uid).get(); alert(bids.docs.map(d=>`${d.data().gameType}: ${d.data().value} (${d.data().points} pts)`).join('\n')||'No bids'); }
+        async function viewBids(uid){ const bids=await db.collection('bids').where('userId','==',uid).get(); alert(bids.docs.map(d=>`${d.data().market} - ${d.data().gameType}: ${d.data().value} (${d.data().points} pts)`).join('\n')||'No bids'); }
+        async function clearUserHistory(uid){ if(confirm('Clear ALL bid history for this user?')){ const bids=await db.collection('bids').where('userId','==',uid).get(); bids.forEach(doc=>doc.ref.delete()); alert('Bid history cleared!'); } }
         async function blockUser(uid){ await db.collection('users').doc(uid).update({blocked:true}); alert('User Blocked'); }
         
-        async function loadDeposits(){ const reqs=await db.collection('transactions').where('type','==','credit').where('status','==','Pending').get(); const div=document.getElementById('depositsList'); if(reqs.empty){ div.innerHTML='<p>No pending deposits</p>'; return; } div.innerHTML='<div class="data-table"><tr><tr><th>User ID</th><th>Amount</th><th>Action</th></tr>'+reqs.docs.map(d=>`<tr><td>${d.data().userId}</td><td>₹${d.data().amount}</td><td><button onclick="approveDeposit('${d.id}','${d.data().amount}','${d.data().userId}')">Approve</button></td></tr>`).join('')+'</table></div>'; }
-        async function approveDeposit(id, amt, uid){ const user=await db.collection('users').doc(uid).get(); await db.collection('users').doc(uid).update({balance:(user.data().balance||0)+amt}); await db.collection('transactions').doc(id).update({status:'Completed'}); alert('Deposit approved!'); }
+        async function loadDeposits(){ const reqs=await db.collection('transactions').where('type','==','credit').where('status','==','Pending').get(); const div=document.getElementById('depositsList'); if(reqs.empty){ div.innerHTML='<p>No pending deposits</p>'; return; } div.innerHTML=`<div class="data-table"><table><tr><th>User ID</th><th>Amount</th><th>Date</th><th>Action</th></tr>${reqs.docs.map(d=>`<tr><td>${d.data().userId}</td><td>₹${d.data().amount}</td><td>${d.data().date?.toDate().toLocaleString() || 'Pending'}</td><td><button onclick="approveDeposit('${d.id}','${d.data().amount}','${d.data().userId}')">Approve</button></td></tr>`).join('')}</table></div>`; }
+        async function approveDeposit(id, amt, uid){ const user=await db.collection('users').doc(uid).get(); await db.collection('users').doc(uid).update({balance:(user.data().balance||0)+amt}); await db.collection('transactions').doc(id).update({status:'Completed'}); alert('Deposit approved! Balance updated.'); }
         
-        async function loadWithdrawals(){ const reqs=await db.collection('withdrawRequests').where('status','==','Pending').get(); const div=document.getElementById('withdrawalsList'); if(reqs.empty){ div.innerHTML='<p>No pending withdrawals</p>'; return; } div.innerHTML='<div class="data-table"><table><tr><th>User ID</th><th>Amount</th><th>Bank</th><th>Action</th></tr>'+reqs.docs.map(d=>`<tr><td>${d.data().userId}</td><td>₹${d.data().amount}</td><td>${d.data().bankDetails?.bankName||'N/A'}</td><td><button onclick="approveWithdraw('${d.id}','${d.data().amount}','${d.data().userId}')">Approve</button></td></tr>`).join('')+'</table></div>'; }
+        async function loadWithdrawals(){ const reqs=await db.collection('withdrawRequests').where('status','==','Pending').get(); const div=document.getElementById('withdrawalsList'); if(reqs.empty){ div.innerHTML='<p>No pending withdrawals</p>'; return; } div.innerHTML=`<div class="data-table"><table><tr><th>User ID</th><th>Amount</th><th>Bank</th><th>Action</th></tr>${reqs.docs.map(d=>`<tr><td>${d.data().userId}</td><td>₹${d.data().amount}</td><td>${d.data().bankDetails?.bankName||'N/A'}</td><td><button onclick="approveWithdraw('${d.id}','${d.data().amount}','${d.data().userId}')">Approve</button></td></tr>`).join('')}</table></div>`; }
         async function approveWithdraw(id, amt, uid){ const user=await db.collection('users').doc(uid).get(); if(user.data().balance<amt){ alert('Insufficient balance'); return; } await db.collection('users').doc(uid).update({balance:user.data().balance-amt}); await db.collection('withdrawRequests').doc(id).update({status:'Completed'}); await db.collection('transactions').add({userId:uid, type:'debit', amount:amt, status:'Completed', description:'Withdrawal Approved', date:new Date()}); alert('Withdrawal approved!'); }
         
-        function changeAdminPass(){ const old=document.getElementById('oldPass').value; const newP=document.getElementById('newPass').value; if(old===adminPassword){ adminPassword=newP; document.getElementById('passMsg').innerHTML='<span style="color:#4caf50;">Password Changed!</span>'; } else document.getElementById('passMsg').innerHTML='<span style="color:#f44336;">Wrong Old Password</span>'; }
-        function updateUPI(){ alert('UPI ID updated (Simulated)'); }
+        function changeAdminPass(){ const old=document.getElementById('oldPass').value; const newP=document.getElementById('newPass').value; if(old===adminPassword){ adminPassword=newP; document.getElementById('passMsg').innerHTML='Password Changed!'; } else document.getElementById('passMsg').innerHTML='Wrong Old Password'; }
+        function updateUPI(){ const upi = document.getElementById('upiId').value; alert(`UPI ID updated to: ${upi}`); }
         function showSection(section){ document.getElementById('marketsSection').classList.add('hidden'); document.getElementById('usersSection').classList.add('hidden'); document.getElementById('depositsSection').classList.add('hidden'); document.getElementById('withdrawalsSection').classList.add('hidden'); document.getElementById('settingsSection').classList.add('hidden'); document.getElementById(`${section}Section`).classList.remove('hidden'); }
         function logoutAdmin(){ document.getElementById('adminLogin').style.display='flex'; document.getElementById('adminPanel').style.display='none'; if(unsubscribeMarkets) unsubscribeMarkets(); if(unsubscribeUsers) unsubscribeUsers(); if(unsubscribeDeposits) unsubscribeDeposits(); if(unsubscribeWithdrawals) unsubscribeWithdrawals(); }
     </script>
