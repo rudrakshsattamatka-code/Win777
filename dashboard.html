@@ -2,128 +2,237 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WIN777 - Dashboard</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #0f0f1a; min-height: 100vh; padding-bottom: 70px; }
-        .header { background: #1a1a2e; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; border-bottom: 1px solid #0096ff; }
-        .logo-small { font-size: 22px; font-weight: bold; color: #0096ff; }
-        .balance-card { background: #0096ff; padding: 6px 16px; border-radius: 30px; color: white; font-weight: bold; }
-        .menu-btn { background: none; border: none; font-size: 24px; color: #0096ff; cursor: pointer; }
-        .sidebar { position: fixed; left: -260px; top: 0; width: 260px; height: 100%; background: #1a1a2e; z-index: 1000; transition: 0.3s; border-right: 1px solid #0096ff; overflow-y: auto; }
-        .sidebar.open { left: 0; }
-        .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid #0096ff; }
-        .sidebar-header h2 { color: #0096ff; }
-        .sidebar-item { padding: 15px 20px; display: flex; align-items: center; gap: 12px; color: #ccc; cursor: pointer; border-bottom: 1px solid #222; }
-        .sidebar-item:hover { background: #0096ff10; color: #0096ff; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 999; display: none; }
-        .overlay.active { display: block; }
-        .container { max-width: 500px; margin: 0 auto; padding: 15px; }
-        .market-card { background: #1a1a2e; border-radius: 16px; padding: 15px; margin-bottom: 12px; border: 1px solid #0096ff; }
-        .market-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-        .market-name { font-size: 16px; font-weight: bold; color: #0096ff; }
-        .market-result { font-size: 11px; color: #ff9800; background: #0a0a0f; padding: 2px 8px; border-radius: 20px; }
-        .market-status { font-size: 11px; padding: 3px 10px; border-radius: 20px; display: inline-block; }
-        .status-open { background: #0096ff20; color: #00ffaa; border: 1px solid #00ffaa; }
-        .status-close { background: #ff980020; color: #ffaa00; border: 1px solid #ffaa00; }
-        .status-closed { background: #f4433620; color: #ff8888; border: 1px solid #ff8888; }
-        .play-btn { width: 100%; padding: 10px; background: #0096ff; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .play-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #555; }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #1a1a2e; display: flex; justify-content: space-around; padding: 10px; border-top: 1px solid #0096ff; z-index: 100; }
-        .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 11px; }
-        .nav-item.active { color: #0096ff; }
-        .nav-item span { font-size: 22px; display: block; }
-        .card { background: #1a1a2e; border-radius: 16px; padding: 15px; margin-bottom: 15px; border: 1px solid #0096ff; }
-        .card-title { font-size: 16px; font-weight: bold; color: #0096ff; margin-bottom: 12px; border-left: 3px solid #0096ff; padding-left: 10px; }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { color: #ccc; font-size: 12px; margin-bottom: 4px; display: block; }
-        .form-group input { width: 100%; padding: 10px; background: #0a0a0f; border: 1px solid #0096ff; border-radius: 10px; color: white; }
-        .save-btn { background: #0096ff; padding: 10px; border: none; border-radius: 10px; color: white; font-weight: bold; width: 100%; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #0096ff; color: #ddd; font-size: 12px; }
-        th { color: #0096ff; }
-        .rates-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .rate-item { background: #0a0a0f; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #0096ff30; }
-        .rate-name { color: #0096ff; font-size: 13px; font-weight: bold; }
-        .rate-value { color: white; font-size: 14px; }
-        .hidden { display: none; }
-        .amount-options { display: flex; gap: 8px; flex-wrap: wrap; margin: 15px 0; }
-        .amount-chip { background: #0a0a0f; border: 1px solid #0096ff; padding: 6px 12px; border-radius: 30px; cursor: pointer; color: white; font-size: 13px; }
-        .amount-chip.active { background: #0096ff; color: white; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-content { background: #1a1a2e; border-radius: 24px; padding: 20px; width: 90%; max-width: 350px; border: 1px solid #0096ff; }
-        .modal-content h3 { color: #0096ff; margin-bottom: 15px; }
-        @media (max-width: 480px) { .market-name { font-size: 14px; } }
+        *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+        body{background:#0a0a0f;padding-bottom:70px}
+        .header{background:#1a1a2e;padding:15px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #0096ff}
+        .logo{color:#0096ff;font-size:20px;font-weight:bold}
+        .balance{background:#0096ff;padding:5px 15px;border-radius:20px;color:white}
+        .menu-btn{background:none;border:none;color:#0096ff;font-size:24px;cursor:pointer}
+        .sidebar{position:fixed;left:-250px;top:0;width:250px;height:100%;background:#1a1a2e;transition:0.3s;z-index:1000;border-right:1px solid #0096ff}
+        .sidebar.open{left:0}
+        .sidebar-item{padding:15px 20px;color:#ccc;cursor:pointer;border-bottom:1px solid #222}
+        .sidebar-item:hover{background:#0096ff20;color:#0096ff}
+        .overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:999;display:none}
+        .overlay.active{display:block}
+        .container{max-width:500px;margin:0 auto;padding:15px}
+        .market-card{background:#1a1a2e;border-radius:12px;padding:15px;margin-bottom:12px;border:1px solid #0096ff}
+        .market-name{color:#0096ff;font-weight:bold;font-size:16px}
+        .market-result{color:#ff9800;font-size:12px;margin-top:5px}
+        .market-status{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;margin:10px 0}
+        .status-open{background:#4caf5020;color:#4caf50;border:1px solid #4caf50}
+        .status-close{background:#ff980020;color:#ff9800;border:1px solid #ff9800}
+        .status-closed{background:#f4433620;color:#f44336;border:1px solid #f44336}
+        .play-btn{width:100%;padding:10px;background:#0096ff;border:none;border-radius:10px;color:white;cursor:pointer;margin-top:10px}
+        .play-btn:disabled{opacity:0.5;cursor:not-allowed}
+        .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#1a1a2e;display:flex;justify-content:space-around;padding:10px;border-top:1px solid #0096ff}
+        .nav-item{text-align:center;color:#aaa;cursor:pointer;font-size:11px}
+        .nav-item.active{color:#0096ff}
+        .nav-item span{font-size:22px;display:block}
+        .card{background:#1a1a2e;border-radius:12px;padding:15px;margin-bottom:15px;border:1px solid #0096ff}
+        .card-title{color:#0096ff;margin-bottom:10px;font-weight:bold}
+        input,select{width:100%;padding:10px;margin:5px 0;background:#0a0a0f;border:1px solid #0096ff;border-radius:8px;color:white}
+        button{background:#0096ff;padding:10px;border:none;border-radius:8px;color:white;cursor:pointer}
+        table{width:100%;border-collapse:collapse}
+        th,td{padding:8px;text-align:left;border-bottom:1px solid #0096ff;color:#ddd;font-size:12px}
+        th{color:#0096ff}
+        .hidden{display:none}
+        .amount-options{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+        .amount-chip{background:#0a0a0f;border:1px solid #0096ff;padding:8px 15px;border-radius:30px;cursor:pointer;color:white}
+        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:2000;justify-content:center;align-items:center}
+        .modal-content{background:#1a1a2e;border-radius:20px;padding:20px;width:90%;max-width:350px}
     </style>
 </head>
 <body>
-    <div class="header"><button class="menu-btn" id="menuBtn">☰</button><div class="logo-small">WIN777</div><div class="balance-card">💰 ₹<span id="userBalance">0</span></div></div>
-    <div class="sidebar" id="sidebar"><div class="sidebar-header"><h2>WIN777</h2></div><div class="sidebar-item" onclick="showPage('markets')">🎮 Markets</div><div class="sidebar-item" onclick="showPage('gamerates')">🎯 Game Rates</div><div class="sidebar-item" onclick="showPage('profile')">👤 Profile</div><div class="sidebar-item" onclick="showPage('bank')">🏦 Bank Details</div><div class="sidebar-item" onclick="showPage('history')">📋 Bid History</div><div class="sidebar-item" onclick="showPage('transactions')">📊 Transactions</div><div class="sidebar-item" id="logoutBtn" style="color:#f44336;">🚪 Logout</div></div>
-    <div class="overlay" id="overlay"></div>
-    <div class="container">
-        <div id="marketsList"></div>
-        <div id="gameRatesPage" class="hidden"><div class="card"><div class="card-title">Game Win Ratios</div><div class="rates-grid"><div class="rate-item"><div class="rate-name">OPEN</div><div class="rate-value">1:10</div></div><div class="rate-item"><div class="rate-name">JODI</div><div class="rate-value">1:100</div></div><div class="rate-item"><div class="rate-name">SINGLE PANA</div><div class="rate-value">1:160</div></div><div class="rate-item"><div class="rate-name">DOUBLE PANA</div><div class="rate-value">1:320</div></div><div class="rate-item"><div class="rate-name">TRIPLE PANA</div><div class="rate-value">1:1000</div></div><div class="rate-item"><div class="rate-name">HALF SANGAM A</div><div class="rate-value">1:1600</div></div><div class="rate-item"><div class="rate-name">HALF SANGAM B</div><div class="rate-value">1:1600</div></div><div class="rate-item"><div class="rate-name">FULL SANGAM</div><div class="rate-value">1:25000</div></div></div></div></div>
-        <div id="profilePage" class="hidden"><div class="card"><div class="card-title">My Profile</div><p id="profileName" style="color:white;"></p><p id="profilePhone" style="color:#aaa;"></p><p id="profileBalance" style="color:#0096ff; font-size:18px; font-weight:bold;"></p></div></div>
-        <div id="bankPage" class="hidden"><div class="card"><div class="card-title">Bank Details</div><div class="form-group"><label>Account Holder</label><input type="text" id="accName" placeholder="Full Name"></div><div class="form-group"><label>Bank Name</label><input type="text" id="bankName" placeholder="Bank Name"></div><div class="form-group"><label>Account Number</label><input type="text" id="accNumber" placeholder="Account Number"></div><div class="form-group"><label>IFSC Code</label><input type="text" id="ifsc" placeholder="IFSC Code"></div><button class="save-btn" id="saveBankBtn">Save</button><div id="bankMsg" style="color:#4caf50; margin-top:8px;"></div></div></div>
-        <div id="historyPage" class="hidden"><div class="card"><div class="card-title">Bid History</div><div id="bidHistoryList" style="overflow-x:auto;"></div></div></div>
-        <div id="transactionsPage" class="hidden"><div class="card"><div class="card-title">Transaction History</div><div id="transactionsList" style="overflow-x:auto;"></div></div></div>
-    </div>
-    <div class="bottom-nav"><div class="nav-item active" onclick="showPage('markets')"><span>🏠</span><p>Home</p></div><div class="nav-item" onclick="showDeposit()"><span>💰</span><p>Deposit</p></div><div class="nav-item" onclick="showWithdraw()"><span>💸</span><p>Withdraw</p></div><div class="nav-item" onclick="showPage('profile')"><span>👤</span><p>Profile</p></div></div>
+<div class="header"><button class="menu-btn" id="menuBtn">☰</button><div class="logo">WIN777</div><div class="balance">💰 ₹<span id="userBalance">0</span></div></div>
+<div class="sidebar" id="sidebar"><div class="sidebar-item" onclick="showPage('markets')">🎮 Markets</div><div class="sidebar-item" onclick="showPage('profile')">👤 Profile</div><div class="sidebar-item" onclick="showPage('bank')">🏦 Bank Details</div><div class="sidebar-item" onclick="showPage('history')">📋 Bid History</div><div class="sidebar-item" onclick="showPage('transactions')">📊 Transactions</div><div class="sidebar-item" id="logoutBtn">🚪 Logout</div></div>
+<div class="overlay" id="overlay"></div>
+<div class="container">
+    <div id="marketsPage"></div>
+    <div id="profilePage" class="hidden"><div class="card"><div class="card-title">My Profile</div><p id="profileName"></p><p id="profilePhone"></p><p id="profileBalance"></p></div></div>
+    <div id="bankPage" class="hidden"><div class="card"><div class="card-title">Bank Details</div><input type="text" id="accName" placeholder="Account Holder"><input type="text" id="bankName" placeholder="Bank Name"><input type="text" id="accNumber" placeholder="Account Number"><input type="text" id="ifsc" placeholder="IFSC Code"><button id="saveBankBtn">Save</button><div id="bankMsg"></div></div></div>
+    <div id="historyPage" class="hidden"><div class="card"><div class="card-title">Bid History</div><div id="bidList"></div></div></div>
+    <div id="transactionsPage" class="hidden"><div class="card"><div class="card-title">Transactions</div><div id="transList"></div></div></div>
+</div>
+<div class="bottom-nav"><div class="nav-item active" onclick="showPage('markets')"><span>🏠</span><p>Home</p></div><div class="nav-item" onclick="showDeposit()"><span>💰</span><p>Deposit</p></div><div class="nav-item" onclick="showWithdraw()"><span>💸</span><p>Withdraw</p></div><div class="nav-item" onclick="showPage('profile')"><span>👤</span><p>Profile</p></div></div>
 
-    <div id="depositModal" class="modal"><div class="modal-content"><h3>💰 Deposit</h3><div class="amount-options"><div class="amount-chip" onclick="setAmount(200)">₹200</div><div class="amount-chip" onclick="setAmount(500)">₹500</div><div class="amount-chip" onclick="setAmount(1000)">₹1000</div><div class="amount-chip" onclick="setAmount(5000)">₹5000</div></div><input type="number" id="customAmount" placeholder="Enter Amount" style="width:100%; padding:10px; background:#0a0a0f; border:1px solid #0096ff; border-radius:10px; color:white; margin:10px 0;"><button class="save-btn" id="payBtn">Pay with UPI</button><div id="depositMsg" style="margin-top:10px; color:#ff9800; font-size:12px;"></div><button class="save-btn" style="background:#333; margin-top:10px;" onclick="closeDeposit()">Cancel</button></div></div>
-    <div id="withdrawModal" class="modal"><div class="modal-content"><h3>💸 Withdraw</h3><select id="bankSelect" style="width:100%; padding:10px; background:#0a0a0f; border:1px solid #0096ff; border-radius:10px; color:white; margin-bottom:15px;"></select><input type="number" id="withdrawAmount" placeholder="Amount (Min ₹500)" style="width:100%; padding:10px; background:#0a0a0f; border:1px solid #0096ff; border-radius:10px; color:white;"><button class="save-btn" id="withdrawBtn" style="margin-top:15px;">Request</button><button class="save-btn" style="background:#333; margin-top:10px;" onclick="closeWithdraw()">Cancel</button><div id="withdrawMsg"></div></div></div>
+<div id="depositModal" class="modal"><div class="modal-content"><h3 style="color:#0096ff">Deposit</h3><div class="amount-options"><div class="amount-chip" onclick="setAmount(200)">₹200</div><div class="amount-chip" onclick="setAmount(500)">₹500</div><div class="amount-chip" onclick="setAmount(1000)">₹1000</div><div class="amount-chip" onclick="setAmount(5000)">₹5000</div></div><input type="number" id="customAmount" placeholder="Enter Amount"><button id="payBtn">Pay with UPI</button><div id="depositMsg"></div><button style="background:#333;margin-top:10px" onclick="closeDeposit()">Cancel</button></div></div>
+<div id="withdrawModal" class="modal"><div class="modal-content"><h3 style="color:#0096ff">Withdraw</h3><select id="bankSelect"></select><input type="number" id="withdrawAmount" placeholder="Amount (Min 500)"><button id="withdrawBtn">Request</button><button style="background:#333;margin-top:10px" onclick="closeWithdraw()">Cancel</button><div id="withdrawMsg"></div></div></div>
 
-    <script>
-        const firebaseConfig = { apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38", authDomain: "win777-ed482.firebaseapp.com", projectId: "win777-ed482", storageBucket: "win777-ed482.firebasestorage.app", messagingSenderId: "843686112399", appId: "1:843686112399:web:9c20a96831e6a94cd814fa" };
-        firebase.initializeApp(firebaseConfig); const auth = firebase.auth(); const db = firebase.firestore();
-        let currentUser = null, userData = null, marketsData = [], currentAmount = 200;
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
+        authDomain: "win777-ed482.firebaseapp.com",
+        projectId: "win777-ed482",
+        storageBucket: "win777-ed482.firebasestorage.app",
+        messagingSenderId: "843686112399",
+        appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    let currentUser = null;
+    let userData = null;
+    let markets = [];
+    let currentAmount = 200;
 
-        async function loadMarkets() { const snap = await db.collection('markets').get(); marketsData = []; snap.forEach(doc => marketsData.push({id:doc.id, ...doc.data()})); renderMarkets(); }
-        function renderMarkets(){ const c=document.getElementById('marketsList'); if(!c) return; if(marketsData.length === 0){ c.innerHTML='<div class="market-card"><p style="color:#aaa; text-align:center;">No markets available</p></div>'; return; }
-        c.innerHTML=''; marketsData.forEach(m=>{ 
-            let statusClass='', statusText='', btnText='', disabled=false;
-            if(m.status === 'open'){ statusClass='status-open'; statusText='🟢 OPEN BIDDING - All Bets'; btnText='PLAY NOW'; disabled=false; }
-            else if(m.status === 'close'){ statusClass='status-close'; statusText='🟡 CLOSE BIDDING - Close Bets Only'; btnText='PLAY (CLOSE)'; disabled=false; }
-            else{ statusClass='status-closed'; statusText='🔴 MARKET CLOSED'; btnText='CLOSED'; disabled=true; }
-            c.innerHTML+=`<div class="market-card"><div class="market-header"><span class="market-name">${m.name}</span><span class="market-result">🎲 ${m.result||'***-**-***'}</span></div><span class="market-status ${statusClass}">${statusText}</span><button class="play-btn" ${disabled?'disabled':''} onclick="playMarket('${m.name}','${m.status}')">${btnText}</button></div>`; }); }
-        function playMarket(name,status){ window.location.href = `betting.html?market=${encodeURIComponent(name)}&status=${status}`; }
-        
-        async function loadUserData(){ const u=auth.currentUser; if(!u) return; currentUser=u; const doc=await db.collection('users').doc(u.uid).get(); if(doc.exists){ userData=doc.data(); document.getElementById('userBalance').innerText=userData?.balance||0; document.getElementById('profileName').innerHTML=`👤 ${userData?.name||'User'}`; document.getElementById('profilePhone').innerHTML=`📞 ${userData?.phone||''}`; document.getElementById('profileBalance').innerHTML=`💰 Balance: ₹${userData?.balance||0}`; if(userData?.bankDetails){ document.getElementById('accName').value=userData.bankDetails.accName||''; document.getElementById('bankName').value=userData.bankDetails.bankName||''; document.getElementById('accNumber').value=userData.bankDetails.accNumber||''; document.getElementById('ifsc').value=userData.bankDetails.ifsc||''; } } loadBidHistory(); loadTransactions(); }
-        
-        async function loadBidHistory(){ const bids=await db.collection('bids').where('userId','==',currentUser.uid).orderBy('createdAt','desc').get(); const div=document.getElementById('bidHistoryList'); if(bids.empty){ div.innerHTML='<p style="color:#888;">No bids yet</p>'; return; } let html='<table><tr><th>Market</th><th>Type</th><th>Value</th><th>Points</th><th>Status</th></tr>'; bids.forEach(d=>{ html+=`<tr><td>${d.data().market}</td><td>${d.data().gameType}</td><td>${d.data().value}</td><td>${d.data().points}</td><td>${d.data().status||'Pending'}</td></tr>`; }); html+='</table>'; div.innerHTML=html; }
-        
-        async function loadTransactions(){ const trans=await db.collection('transactions').where('userId','==',currentUser.uid).orderBy('date','desc').get(); const div=document.getElementById('transactionsList'); if(trans.empty){ div.innerHTML='<p style="color:#888;">No transactions</p>'; return; } let html='ables\n <tr>\n <th>Type</th>\n <th>Amount</th>\n <th>Status</th>\n <th>Date</th>\n </tr>'; trans.forEach(d=>{ let color='#ff9800'; if(d.data().status==='Completed') color='#4caf50'; if(d.data().status==='Failed') color='#f44336'; html+=`<tr>\n <td>${d.data().type==='credit'?'Deposit':'Withdraw'}</td>\n <td>₹${d.data().amount}</td>\n <td style="color:${color}">${d.data().status||'Pending'}</td>\n <td>${d.data().date?.toDate().toLocaleString()||'Pending'}</td>\n </tr>`; }); html+='</table>'; div.innerHTML=html; }
-        
-        document.getElementById('saveBankBtn').onclick=async()=>{ const bank={accName:document.getElementById('accName').value, bankName:document.getElementById('bankName').value, accNumber:document.getElementById('accNumber').value, ifsc:document.getElementById('ifsc').value}; if(!bank.accName || !bank.bankName || !bank.accNumber || !bank.ifsc){ alert('Fill all fields'); return; } await db.collection('users').doc(currentUser.uid).update({bankDetails:bank}); document.getElementById('bankMsg').innerHTML='✅ Saved!'; setTimeout(()=>document.getElementById('bankMsg').innerHTML='',2000); };
-        
-        function showPage(page){ document.querySelectorAll('#marketsList, #gameRatesPage, #profilePage, #bankPage, #historyPage, #transactionsPage').forEach(el=>el.classList.add('hidden')); if(page==='markets') document.getElementById('marketsList').classList.remove('hidden'); else if(page==='gamerates') document.getElementById('gameRatesPage').classList.remove('hidden'); else if(page==='profile') document.getElementById('profilePage').classList.remove('hidden'); else if(page==='bank') document.getElementById('bankPage').classList.remove('hidden'); else if(page==='history') { document.getElementById('historyPage').classList.remove('hidden'); loadBidHistory(); } else if(page==='transactions') { document.getElementById('transactionsPage').classList.remove('hidden'); loadTransactions(); } closeSidebar(); }
-        function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('active'); }
-        document.getElementById('menuBtn').onclick=()=>{ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('active'); };
-        document.getElementById('overlay').onclick=closeSidebar;
-        document.getElementById('logoutBtn').onclick=async()=>{ await auth.signOut(); window.location.href='index.html'; };
-        
-        function setAmount(amt){ currentAmount=amt; document.getElementById('customAmount').value=''; }
-        function showDeposit(){ document.getElementById('depositModal').style.display='flex'; document.getElementById('depositMsg').innerHTML=''; }
-        function closeDeposit(){ document.getElementById('depositModal').style.display='none'; }
-        
-        document.getElementById('payBtn').onclick=async()=>{ let amt=currentAmount; const custom=parseInt(document.getElementById('customAmount').value); if(custom>=200 && custom<=49000) amt=custom; if(amt<200){ alert('Minimum ₹200'); return; }
-            document.getElementById('depositMsg').innerHTML = '⏳ Creating transaction...';
-            await db.collection('transactions').add({ userId: currentUser.uid, type: 'credit', amount: amt, status: 'Pending', date: new Date() });
-            document.getElementById('depositMsg').innerHTML = '✅ Transaction created! Admin will approve after payment.';
-            const upiIntent = `upi://pay?pa=win777@okhdfcbank&pn=WIN777&am=${amt}&cu=INR`;
-            window.open(upiIntent, '_blank');
-            setTimeout(() => { closeDeposit(); loadTransactions(); }, 3000);
+    async function loadMarkets(){
+        let snap = await db.collection('markets').get();
+        markets = [];
+        snap.forEach(doc => markets.push({id:doc.id, ...doc.data()}));
+        renderMarkets();
+    }
+    
+    function renderMarkets(){
+        let html = '';
+        for(let m of markets){
+            let statusClass = '', statusText = '', disabled = false;
+            if(m.status === 'open'){ statusClass = 'status-open'; statusText = '🟢 OPEN - All Bets'; disabled = false; }
+            else if(m.status === 'close'){ statusClass = 'status-close'; statusText = '🟡 CLOSE - Close Bets Only'; disabled = false; }
+            else{ statusClass = 'status-closed'; statusText = '🔴 CLOSED'; disabled = true; }
+            html += `<div class="market-card">
+                <div class="market-name">${m.name}</div>
+                <div class="market-result">Result: ${m.result || '***-**-***'}</div>
+                <div><span class="market-status ${statusClass}">${statusText}</span></div>
+                <button class="play-btn" ${disabled ? 'disabled' : ''} onclick="playMarket('${m.name}','${m.status}')">${disabled ? 'CLOSED' : 'PLAY NOW'}</button>
+            </div>`;
+        }
+        document.getElementById('marketsPage').innerHTML = html;
+    }
+    
+    function playMarket(name, status){
+        window.location.href = `betting.html?market=${encodeURIComponent(name)}&status=${status}`;
+    }
+    
+    async function loadUser(){
+        let user = auth.currentUser;
+        if(!user) return;
+        currentUser = user;
+        let doc = await db.collection('users').doc(user.uid).get();
+        userData = doc.data();
+        document.getElementById('userBalance').innerText = userData?.balance || 0;
+        document.getElementById('profileName').innerHTML = `👤 ${userData?.name || 'User'}`;
+        document.getElementById('profilePhone').innerHTML = `📞 ${userData?.phone || ''}`;
+        document.getElementById('profileBalance').innerHTML = `💰 Balance: ₹${userData?.balance || 0}`;
+        if(userData?.bankDetails){
+            document.getElementById('accName').value = userData.bankDetails.accName || '';
+            document.getElementById('bankName').value = userData.bankDetails.bankName || '';
+            document.getElementById('accNumber').value = userData.bankDetails.accNumber || '';
+            document.getElementById('ifsc').value = userData.bankDetails.ifsc || '';
+        }
+        loadBids();
+        loadTransactions();
+    }
+    
+    async function loadBids(){
+        let bids = await db.collection('bids').where('userId','==',currentUser.uid).orderBy('createdAt','desc').get();
+        let html = '<table><tr><th>Market</th><th>Type</th><th>Value</th><th>Points</th></tr>';
+        bids.forEach(d => {
+            html += `<tr><td>${d.data().market}</td><td>${d.data().gameType}</td><td>${d.data().value}</td><td>${d.data().points}</td></tr>`;
+        });
+        html += '</table>';
+        document.getElementById('bidList').innerHTML = html || '<p>No bids yet</p>';
+    }
+    
+    async function loadTransactions(){
+        let trans = await db.collection('transactions').where('userId','==',currentUser.uid).orderBy('date','desc').get();
+        let html = '<table><tr><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr>';
+        trans.forEach(d => {
+            html += `<tr><td>${d.data().type === 'credit' ? 'Deposit' : 'Withdraw'}</td><td>₹${d.data().amount}</td><td>${d.data().status || 'Pending'}</td><td>${d.data().date?.toDate().toLocaleString() || 'Pending'}</td></tr>`;
+        });
+        html += '</table>';
+        document.getElementById('transList').innerHTML = html || '<p>No transactions</p>';
+    }
+    
+    document.getElementById('saveBankBtn').onclick = async () => {
+        let bank = {
+            accName: document.getElementById('accName').value,
+            bankName: document.getElementById('bankName').value,
+            accNumber: document.getElementById('accNumber').value,
+            ifsc: document.getElementById('ifsc').value
         };
-        
-        async function showWithdraw(){ const bank=userData?.bankDetails; const select=document.getElementById('bankSelect'); select.innerHTML=''; if(bank) select.innerHTML+=`<option value="saved">${bank.bankName} - ${bank.accNumber}</option>`; select.innerHTML+=`<option value="new">+ Add New Bank</option>`; document.getElementById('withdrawModal').style.display='flex'; }
-        function closeWithdraw(){ document.getElementById('withdrawModal').style.display='none'; }
-        document.getElementById('withdrawBtn').onclick=async()=>{ const amount=parseInt(document.getElementById('withdrawAmount').value); if(amount<500){ alert('Minimum ₹500'); return; } if(amount>userData.balance){ alert('Insufficient balance'); return; } let bankDetails = userData.bankDetails; if(document.getElementById('bankSelect').value === 'new'){ bankDetails={accName:prompt('Account Name'), bankName:prompt('Bank Name'), accNumber:prompt('Account Number'), ifsc:prompt('IFSC')}; if(!bankDetails.accName) return; } await db.collection('withdrawRequests').add({userId:currentUser.uid, amount, bankDetails, status:'Pending', date:new Date()}); await db.collection('transactions').add({userId:currentUser.uid, type:'debit', amount, status:'Pending', description:'Withdrawal Request', date:new Date()}); alert('Withdrawal request sent for approval!'); closeWithdraw(); loadTransactions(); };
-        
-        auth.onAuthStateChanged(async (user)=>{ if(!user) window.location.href='index.html'; else { await loadUserData(); await loadMarkets(); setInterval(loadMarkets, 30000); } });
-    </script>
+        await db.collection('users').doc(currentUser.uid).update({bankDetails: bank});
+        document.getElementById('bankMsg').innerHTML = '✅ Saved!';
+        setTimeout(()=>document.getElementById('bankMsg').innerHTML='',2000);
+    };
+    
+    function showPage(page){
+        document.getElementById('marketsPage').classList.add('hidden');
+        document.getElementById('profilePage').classList.add('hidden');
+        document.getElementById('bankPage').classList.add('hidden');
+        document.getElementById('historyPage').classList.add('hidden');
+        document.getElementById('transactionsPage').classList.add('hidden');
+        document.getElementById(page + 'Page').classList.remove('hidden');
+        closeSidebar();
+    }
+    
+    function closeSidebar(){
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('overlay').classList.remove('active');
+    }
+    
+    document.getElementById('menuBtn').onclick = () => {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlay').classList.toggle('active');
+    };
+    document.getElementById('overlay').onclick = closeSidebar;
+    document.getElementById('logoutBtn').onclick = async () => {
+        await auth.signOut();
+        window.location.href = 'index.html';
+    };
+    
+    function setAmount(amt){ currentAmount = amt; document.getElementById('customAmount').value = ''; }
+    function showDeposit(){ document.getElementById('depositModal').style.display = 'flex'; }
+    function closeDeposit(){ document.getElementById('depositModal').style.display = 'none'; }
+    function showWithdraw(){ document.getElementById('withdrawModal').style.display = 'flex'; }
+    function closeWithdraw(){ document.getElementById('withdrawModal').style.display = 'none'; }
+    
+    document.getElementById('payBtn').onclick = async () => {
+        let amt = currentAmount;
+        let custom = parseInt(document.getElementById('customAmount').value);
+        if(custom >= 200) amt = custom;
+        if(amt < 200){ alert('Minimum ₹200'); return; }
+        await db.collection('transactions').add({
+            userId: currentUser.uid, type: 'credit', amount: amt, status: 'Pending', date: new Date()
+        });
+        alert(`Deposit request of ₹${amt} created. Admin will approve after payment.`);
+        closeDeposit();
+        loadTransactions();
+    };
+    
+    document.getElementById('withdrawBtn').onclick = async () => {
+        let amount = parseInt(document.getElementById('withdrawAmount').value);
+        if(amount < 500){ alert('Minimum ₹500'); return; }
+        if(amount > userData.balance){ alert('Insufficient balance'); return; }
+        let bankDetails = userData.bankDetails;
+        if(document.getElementById('bankSelect').value === 'new'){
+            bankDetails = {
+                accName: prompt('Account Name'),
+                bankName: prompt('Bank Name'),
+                accNumber: prompt('Account Number'),
+                ifsc: prompt('IFSC Code')
+            };
+        }
+        await db.collection('withdrawRequests').add({
+            userId: currentUser.uid, amount: amount, bankDetails: bankDetails, status: 'Pending', date: new Date()
+        });
+        await db.collection('transactions').add({
+            userId: currentUser.uid, type: 'debit', amount: amount, status: 'Pending', date: new Date()
+        });
+        alert('Withdrawal request sent! Admin will approve.');
+        closeWithdraw();
+        loadTransactions();
+    };
+    
+    auth.onAuthStateChanged(async (user) => {
+        if(!user) window.location.href = 'index.html';
+        else { await loadUser(); await loadMarkets(); }
+    });
+</script>
 </body>
 </html>
