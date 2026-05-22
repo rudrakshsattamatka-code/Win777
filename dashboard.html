@@ -219,8 +219,8 @@
         /* Menu Buttons Row */
         .menu-row {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
             margin-bottom: 25px;
         }
 
@@ -228,7 +228,7 @@
             background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
             border: 1px solid rgba(255,152,0,0.3);
             border-radius: 16px;
-            padding: 12px 5px;
+            padding: 10px 5px;
             text-align: center;
             cursor: pointer;
             transition: 0.2s;
@@ -239,14 +239,14 @@
         }
 
         .menu-item span {
-            font-size: 24px;
+            font-size: 20px;
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
 
         .menu-item p {
             color: #ff9800;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: bold;
         }
 
@@ -326,11 +326,11 @@
         }
 
         .market-numbers {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: bold;
             color: white;
             background: rgba(0,0,0,0.3);
-            padding: 4px 10px;
+            padding: 4px 8px;
             border-radius: 20px;
         }
 
@@ -673,7 +673,7 @@
             document.getElementById('bgParticles').appendChild(particle);
         }
         
-        // Market Timings
+        // Market Timings - Individual close times
         const marketTimings = {
             'SHREE GANESH': { open: '09:00 AM', close: '10:00 AM', numbers: '340-76-349' },
             'OMKAR MORNING': { open: '09:40 AM', close: '10:40 AM', numbers: '126-92-570' },
@@ -718,14 +718,7 @@
             const closeTime = parseTime(timing.close);
             const openTime = parseTime(timing.open);
             
-            // Midnight reset at 12:30 AM
-            const midnightReset = new Date();
-            midnightReset.setHours(0, 30, 0, 0);
-            
-            if (now >= midnightReset && now < openTime) {
-                return 'closed';
-            }
-            
+            // Market is open only between open time and close time
             if (now >= openTime && now <= closeTime) {
                 return 'open';
             }
@@ -747,8 +740,9 @@
         }
 
         function placeBid(marketName) {
-            if (checkMarketStatus(marketName) === 'closed') {
-                alert('Market is closed! Come back tomorrow at 12:30 AM');
+            const status = checkMarketStatus(marketName);
+            if (status === 'closed') {
+                alert(`⏰ ${marketName} is closed! Come back tomorrow at ${marketTimings[marketName].open}`);
                 return;
             }
             window.location.href = `betting.html?market=${encodeURIComponent(marketName)}`;
@@ -809,7 +803,6 @@
         async function loadFundsData() {
             if (!currentUser) return;
             
-            // Get total deposits
             const deposits = await db.collection('transactions')
                 .where('userId', '==', currentUser.uid)
                 .where('type', '==', 'credit')
@@ -817,7 +810,6 @@
             let totalDeposited = 0;
             deposits.forEach(doc => totalDeposited += doc.data().amount);
             
-            // Get total withdrawals
             const withdrawals = await db.collection('transactions')
                 .where('userId', '==', currentUser.uid)
                 .where('type', '==', 'debit')
@@ -826,7 +818,6 @@
             let totalWithdrawn = 0;
             withdrawals.forEach(doc => totalWithdrawn += doc.data().amount);
             
-            // Get total bids
             const bids = await db.collection('transactions')
                 .where('userId', '==', currentUser.uid)
                 .where('type', '==', 'debit')
@@ -942,10 +933,10 @@
             window.location.href = 'index.html';
         });
 
-        // Auto refresh market status every minute
+        // Auto refresh market status every 30 seconds
         setInterval(() => {
             renderMarkets();
-        }, 60000);
+        }, 30000);
 
         auth.onAuthStateChanged(async (user) => {
             if (!user) window.location.href = 'index.html';
