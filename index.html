@@ -2,214 +2,185 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>win777 - Login</title>
-    <!-- Firebase SDKs -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>win777 - Secure Login</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            font-family: 'Segoe UI', Roboto, sans-serif;
         }
-
         body {
-            background: #121212;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 16px;
         }
-
-        /* Android App-like Card */
         .app-container {
             max-width: 450px;
             width: 100%;
-            background: #1e1e2f;
+            background: rgba(30, 30, 47, 0.95);
+            backdrop-filter: blur(10px);
             border-radius: 36px;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
             overflow: hidden;
-            transition: all 0.2s ease;
         }
-
-        .status-bar {
-            padding: 14px 20px 6px;
-            color: #aaa;
-            font-size: 14px;
-            display: flex;
-            justify-content: space-between;
-            background: #1e1e2f;
+        .header {
+            background: linear-gradient(135deg, #ff9800, #ff5722);
+            padding: 30px 20px;
+            text-align: center;
+            color: white;
         }
-
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+        }
+        .header p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
         .screen {
-            padding: 24px 22px 32px;
+            padding: 30px 24px;
         }
-
-        h2 {
-            font-size: 26px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: #ffd966;
-        }
-
-        .sub {
-            color: #aaa;
-            margin-bottom: 28px;
-            font-size: 14px;
-        }
-
         .input-group {
             margin-bottom: 20px;
         }
-
         .input-group label {
             display: block;
             margin-bottom: 8px;
-            font-size: 13px;
             color: #ccc;
             font-weight: 500;
+            font-size: 13px;
         }
-
-        input {
+        input, select {
             width: 100%;
             padding: 14px 16px;
             background: #2a2a3a;
             border: 1px solid #3a3a4a;
-            border-radius: 28px;
+            border-radius: 16px;
             color: white;
             font-size: 16px;
-            outline: none;
             transition: 0.2s;
         }
-
-        input:focus {
-            border-color: #ffb347;
+        input:focus, select:focus {
+            border-color: #ff9800;
+            outline: none;
             background: #2f2f41;
         }
-
         button {
             width: 100%;
             padding: 14px;
-            background: #ff9800;
+            background: linear-gradient(135deg, #ff9800, #ff5722);
             border: none;
-            border-radius: 40px;
+            border-radius: 16px;
             font-weight: bold;
             font-size: 16px;
-            color: #1e1e2f;
+            color: white;
             cursor: pointer;
             margin-top: 12px;
             transition: 0.2s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
-
-        button:active {
-            transform: scale(0.97);
-            background: #e68900;
-        }
-
+        button:active { transform: scale(0.98); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
         .secondary-btn {
             background: transparent;
             border: 1px solid #ff9800;
             color: #ff9800;
-            box-shadow: none;
         }
-
-        .secondary-btn:active {
-            background: rgba(255,152,0,0.1);
-            transform: scale(0.97);
-        }
-
-        .timer-text {
-            text-align: center;
-            margin-top: 12px;
-            font-size: 13px;
-            color: #ffaa55;
-        }
-
         .error-msg {
             color: #ff6b6b;
-            font-size: 13px;
+            font-size: 12px;
             margin-top: 10px;
             text-align: center;
+            padding: 8px;
+            border-radius: 10px;
+            background: rgba(255,107,107,0.1);
         }
-
         .success-msg {
             color: #8bc34a;
-            font-size: 13px;
+            font-size: 12px;
             margin-top: 10px;
             text-align: center;
+            padding: 8px;
+            border-radius: 10px;
+            background: rgba(139,195,74,0.1);
         }
-
-        .pin-dots {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin: 20px 0;
+        .info-box {
+            background: rgba(33,150,243,0.1);
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
         }
-
-        .pin-dot {
-            width: 55px;
-            height: 55px;
-            background: #2a2a3a;
-            border-radius: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            font-weight: bold;
-            color: white;
-            border-bottom: 3px solid #ff9800;
-        }
-
-        footer {
-            text-align: center;
+        .info-box p {
+            color: #90caf9;
             font-size: 12px;
-            color: #555;
-            padding: 20px;
         }
-
-        /* Loading spinner */
+        .country-selector {
+            display: flex;
+            gap: 10px;
+        }
+        .country-selector select { width: 35%; }
+        .country-selector input { width: 65%; }
         .loading {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #1e1e2f;
-            border-top-color: #ff9800;
+            width: 18px;
+            height: 18px;
+            border: 2px solid white;
+            border-top-color: transparent;
             border-radius: 50%;
             animation: spin 0.6s linear infinite;
             margin-right: 8px;
             vertical-align: middle;
         }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .pin-dots {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 20px 0;
         }
-
-        button:disabled {
-            opacity: 0.6;
-            transform: none;
-            cursor: not-allowed;
+        .pin-dot {
+            width: 50px;
+            height: 50px;
+            background: #2a2a3a;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            border-bottom: 3px solid #ff9800;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            color: #666;
+            font-size: 11px;
         }
     </style>
 </head>
 <body>
-<div class="app-container" id="appRoot">
-    <div class="status-bar">
-        <span>win777</span>
-        <span><i class="fas fa-signal"></i>  <i class="fas fa-battery-full"></i></span>
+<div class="app-container">
+    <div class="header">
+        <h1>WIN777</h1>
+        <p>Secure Authentication System</p>
     </div>
     <div id="dynamicScreen"></div>
-    <footer>secure • instant</footer>
+    <footer>Protected by advanced security</footer>
 </div>
 
 <script>
-    // ------------------- FIREBASE INIT -------------------
+    // Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
         authDomain: "win777-ed482.firebaseapp.com",
@@ -219,46 +190,297 @@
         appId: "1:843686112399:web:9c20a96831e6a94cd814fa",
         measurementId: "G-YG8V7EJ0PL"
     };
+    
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-
-    // Set persistence to LOCAL so user stays logged in after tab close
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
-    // ---------- App State ----------
-    let currentPhone = null;          // phone number during OTP
-    let confirmationResult = null;    // firebase confirmation result
-    let timerInterval = null;
+    
+    // App State
+    let confirmationResult = null;
+    let currentPhone = null;
     let countdown = 0;
-    let appState = 'login';           // login, otp-verify, register-pin
-
-    // DOM element
+    let timerInterval = null;
+    let appState = 'login';
+    let recaptchaVerifier = null;
+    let retryCount = 0;
+    let lastPhoneRequest = null;
+    
     const dynamicScreen = document.getElementById('dynamicScreen');
-
-    // Helper render
-    function renderScreen() {
-        if (appState === 'login') renderLoginScreen();
-        else if (appState === 'otp-verify') renderOtpScreen();
-        else if (appState === 'register-pin') renderRegisterPinScreen();
+    
+    // Initialize reCAPTCHA once - crucial fix
+    function initRecaptcha() {
+        if (!recaptchaVerifier && document.getElementById('recaptcha-container')) {
+            try {
+                recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                    size: 'invisible',
+                    'callback': () => {}
+                });
+            } catch (e) {
+                console.log('reCAPTCHA already exists');
+            }
+        }
+        return recaptchaVerifier;
     }
-
-    // Utility: stop timer
-    function stopTimer() {
-        if (timerInterval) {
-            clearInterval(timerInterval);
-            timerInterval = null;
+    
+    function renderScreen() {
+        if (appState === 'login') renderLogin();
+        else if (appState === 'otp-verify') renderOtp();
+        else if (appState === 'register-pin') renderRegister();
+        else if (appState === 'pin-login') renderPinLogin();
+        else if (appState === 'dashboard') renderDashboard();
+    }
+    
+    function showMessage(msg, isError = true) {
+        const msgDiv = document.querySelector('#dynamicScreen .error-msg, #dynamicScreen .success-msg');
+        if (msgDiv) {
+            msgDiv.innerText = msg;
+            msgDiv.className = isError ? 'error-msg' : 'success-msg';
+            setTimeout(() => {
+                if (msgDiv.innerText === msg) msgDiv.innerText = '';
+            }, 5000);
         }
     }
-
-    function startResendTimer(seconds = 60) {
+    
+    // Send OTP with retry logic and rate limiting protection
+    async function sendOTP(phoneNumber) {
+        if (!phoneNumber || phoneNumber.length < 10) {
+            showMessage('📱 Please enter a valid 10-digit mobile number');
+            return false;
+        }
+        
+        // Rate limiting - prevent too many requests
+        const now = Date.now();
+        if (lastPhoneRequest && (now - lastPhoneRequest) < 30000) {
+            showMessage('⏱️ Please wait 30 seconds before trying again');
+            return false;
+        }
+        lastPhoneRequest = now;
+        
+        const fullPhone = phoneNumber.startsWith('+') ? phoneNumber : '+91' + phoneNumber;
+        currentPhone = fullPhone;
+        
+        const btn = document.getElementById('sendOtpBtn');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading"></span> Sending OTP...';
+        
+        try {
+            const verifier = initRecaptcha();
+            if (!verifier) {
+                setTimeout(() => initRecaptcha(), 100);
+            }
+            
+            const confirmation = await auth.signInWithPhoneNumber(fullPhone, verifier);
+            confirmationResult = confirmation;
+            appState = 'otp-verify';
+            startTimer(60);
+            renderScreen();
+            showMessage('✅ OTP sent successfully! Check your phone', false);
+            retryCount = 0;
+            return true;
+        } catch (error) {
+            console.error('OTP Error:', error);
+            
+            let userFriendlyMessage = '';
+            
+            switch(error.code) {
+                case 'auth/too-many-requests':
+                    userFriendlyMessage = '⚠️ Too many attempts. Please wait 1 hour before trying again.';
+                    break;
+                case 'auth/invalid-phone-number':
+                    userFriendlyMessage = '❌ Invalid phone number. Please check and try again.';
+                    break;
+                case 'auth/quota-exceeded':
+                    userFriendlyMessage = '📞 Daily SMS limit reached. Please try again tomorrow.';
+                    break;
+                case 'auth/billing-not-enabled':
+                    userFriendlyMessage = '💳 Billing setup in progress. Please wait 5 minutes and refresh.';
+                    break;
+                default:
+                    userFriendlyMessage = `❌ ${error.message}`;
+            }
+            
+            showMessage(userFriendlyMessage);
+            retryCount++;
+            
+            if (retryCount >= 3) {
+                showMessage('⚠️ Multiple failed attempts. Please wait 10 minutes before trying again.');
+            }
+            
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            return false;
+        }
+    }
+    
+    async function verifyOTP(otpCode) {
+        if (!confirmationResult) {
+            showMessage('Session expired. Please request OTP again.');
+            appState = 'login';
+            renderScreen();
+            return;
+        }
+        
+        if (!otpCode || otpCode.length !== 6) {
+            showMessage('Please enter the 6-digit OTP');
+            return;
+        }
+        
+        const btn = document.getElementById('verifyOtpBtn');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading"></span> Verifying...';
+        
+        try {
+            const result = await confirmationResult.confirm(otpCode);
+            const user = result.user;
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            
+            if (userDoc.exists && userDoc.data().pin) {
+                // Existing user - store session and go to dashboard
+                localStorage.setItem('win777_user', JSON.stringify({
+                    uid: user.uid,
+                    name: userDoc.data().name,
+                    role: userDoc.data().role
+                }));
+                window.location.href = 'dashboard.html';
+            } else {
+                // New user - set up PIN
+                appState = 'register-pin';
+                renderScreen();
+            }
+        } catch (error) {
+            showMessage('❌ Invalid OTP. Please try again.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    }
+    
+    async function resendOTP() {
+        if (countdown > 0) {
+            showMessage(`Please wait ${countdown} seconds before resending`);
+            return;
+        }
+        
+        const btn = document.getElementById('resendOtpBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading"></span> Resending...';
+        
+        try {
+            const verifier = initRecaptcha();
+            const confirmation = await auth.signInWithPhoneNumber(currentPhone, verifier);
+            confirmationResult = confirmation;
+            startTimer(60);
+            showMessage('✅ OTP resent successfully!', false);
+            renderScreen();
+        } catch (error) {
+            showMessage('Failed to resend OTP. Please try again.');
+        } finally {
+            btn.disabled = false;
+        }
+    }
+    
+    async function registerUser(name, pin, confirmPin) {
+        if (!name || name.trim().length < 2) {
+            showMessage('Please enter your full name');
+            return;
+        }
+        if (!/^\d{4}$/.test(pin)) {
+            showMessage('PIN must be exactly 4 digits (0-9)');
+            return;
+        }
+        if (pin !== confirmPin) {
+            showMessage('PINs do not match');
+            return;
+        }
+        
+        const user = auth.currentUser;
+        if (!user) {
+            showMessage('Session expired. Please login again.');
+            appState = 'login';
+            renderScreen();
+            return;
+        }
+        
+        const btn = document.getElementById('registerBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading"></span> Creating Account...';
+        
+        try {
+            await db.collection('users').doc(user.uid).set({
+                uid: user.uid,
+                phone: user.phoneNumber,
+                name: name.trim(),
+                pin: pin,
+                role: 'user',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            localStorage.setItem('win777_user', JSON.stringify({
+                uid: user.uid,
+                name: name.trim(),
+                role: 'user'
+            }));
+            
+            showMessage('✅ Account created successfully! Redirecting...', false);
+            setTimeout(() => {
+                window.location.href = 'dashboard.html';
+            }, 1500);
+        } catch (error) {
+            showMessage('Error: ' + error.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Create Account';
+        }
+    }
+    
+    async function verifyPinLogin(pin) {
+        const user = auth.currentUser;
+        if (!user) {
+            appState = 'login';
+            renderScreen();
+            return;
+        }
+        
+        try {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (userDoc.exists && userDoc.data().pin === pin) {
+                localStorage.setItem('win777_user', JSON.stringify({
+                    uid: user.uid,
+                    name: userDoc.data().name,
+                    role: userDoc.data().role
+                }));
+                
+                if (userDoc.data().role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
+            } else {
+                showMessage('❌ Incorrect PIN. Please try again.');
+            }
+        } catch (error) {
+            showMessage('Error verifying PIN. Please try again.');
+        }
+    }
+    
+    async function logout() {
+        await auth.signOut();
+        localStorage.removeItem('win777_user');
+        appState = 'login';
+        renderScreen();
+    }
+    
+    function startTimer(seconds) {
         countdown = seconds;
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
             if (countdown <= 1) {
                 clearInterval(timerInterval);
                 timerInterval = null;
-                renderScreen(); // refresh to show resend button enabled
+                renderScreen();
             } else {
                 countdown--;
                 const timerSpan = document.getElementById('resendTimer');
@@ -266,352 +488,162 @@
             }
         }, 1000);
     }
-
-    function showError(message) {
-        const errorDiv = document.querySelector('#dynamicScreen .error-msg');
-        if (errorDiv) {
-            errorDiv.innerText = message;
-            errorDiv.style.color = '#ff6b6b';
-            setTimeout(() => {
-                if (errorDiv) errorDiv.innerText = '';
-            }, 4000);
-        } else {
-            alert(message);
-        }
-    }
-
-    function showSuccess(message) {
-        const errorDiv = document.querySelector('#dynamicScreen .error-msg');
-        if (errorDiv) {
-            errorDiv.innerText = message;
-            errorDiv.style.color = '#8bc34a';
-            setTimeout(() => {
-                if (errorDiv && errorDiv.innerText === message) errorDiv.innerText = '';
-            }, 3000);
-        }
-    }
-
-    // Set loading state on button
-    function setButtonLoading(buttonId, isLoading, originalText) {
-        const btn = document.getElementById(buttonId);
-        if (!btn) return;
-        if (isLoading) {
-            btn.disabled = true;
-            btn.innerHTML = '<span class="loading"></span> Please wait...';
-        } else {
-            btn.disabled = false;
-            btn.innerHTML = originalText;
-        }
-    }
-
-    // ---------------------- 1. LOGIN (Mobile Number) ----------------------
-    async function sendOtp(phoneNumber) {
-        if (!phoneNumber || phoneNumber.length < 10) {
-            showError('📱 Enter valid 10-digit mobile number');
-            return false;
-        }
-        let fullPhone = phoneNumber.startsWith('+') ? phoneNumber : '+91' + phoneNumber;
-        setButtonLoading('sendOtpBtn', true, '<i class="fas fa-paper-plane"></i> Send OTP');
-        try {
-            const recaptcha = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-                size: 'invisible',
-            });
-            const confirmation = await auth.signInWithPhoneNumber(fullPhone, recaptcha);
-            confirmationResult = confirmation;
-            currentPhone = fullPhone;
-            appState = 'otp-verify';
-            startResendTimer(60);
-            renderScreen();
-            setButtonLoading('sendOtpBtn', false, '<i class="fas fa-paper-plane"></i> Send OTP');
-            return true;
-        } catch (err) {
-            console.error(err);
-            let errorMsg = 'OTP sending failed. ';
-            if (err.code === 'auth/invalid-phone-number') errorMsg += 'Invalid phone number.';
-            else if (err.code === 'auth/too-many-requests') errorMsg += 'Too many requests. Try later.';
-            else errorMsg += err.message;
-            showError(errorMsg);
-            setButtonLoading('sendOtpBtn', false, '<i class="fas fa-paper-plane"></i> Send OTP');
-            return false;
-        }
-    }
-
-    async function verifyOtp(otpCode) {
-        if (!confirmationResult) {
-            showError('Session expired. Please request OTP again.');
-            return;
-        }
-        if (!otpCode || otpCode.length !== 6) {
-            showError('Enter 6-digit OTP');
-            return;
-        }
-        setButtonLoading('verifyOtpBtn', true, '<i class="fas fa-check-circle"></i> Verifying...');
-        try {
-            const result = await confirmationResult.confirm(otpCode);
-            const user = result.user;
-            // Check if user exists in Firestore (profile complete)
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (userDoc.exists && userDoc.data().pin && userDoc.data().name) {
-                // Already registered -> redirect to dashboard
-                showSuccess('✅ Login successful! Redirecting...');
-                setTimeout(() => {
-                    window.location.href = 'dashboard.html';
-                }, 1000);
-            } else {
-                // First time: ask name + 4-digit pin
-                appState = 'register-pin';
-                renderScreen();
-            }
-            setButtonLoading('verifyOtpBtn', false, '<i class="fas fa-check-circle"></i> Verify & Login');
-        } catch (err) {
-            console.error(err);
-            let errorMsg = 'Invalid OTP. Please try again.';
-            if (err.code === 'auth/invalid-verification-code') errorMsg = 'Wrong OTP. Check and try again.';
-            showError(errorMsg);
-            setButtonLoading('verifyOtpBtn', false, '<i class="fas fa-check-circle"></i> Verify & Login');
-        }
-    }
-
-    async function resendOtp() {
-        if (countdown > 0) {
-            showError(`⏱️ Wait ${countdown} seconds before resending`);
-            return;
-        }
-        if (!currentPhone) {
-            showError('Phone number missing. Go back to login.');
-            return;
-        }
-        setButtonLoading('resendOtpBtn', true, 'Resending...');
-        try {
-            const recaptcha = new firebase.auth.RecaptchaVerifier('recaptcha-container', { size: 'invisible' });
-            const confirmation = await auth.signInWithPhoneNumber(currentPhone, recaptcha);
-            confirmationResult = confirmation;
-            startResendTimer(60);
-            showSuccess('✅ OTP resent successfully!');
-            renderScreen();
-            setButtonLoading('resendOtpBtn', false, 'Resend OTP');
-        } catch (err) {
-            console.error(err);
-            showError('Failed to resend OTP. Try again.');
-            setButtonLoading('resendOtpBtn', false, 'Resend OTP');
-        }
-    }
-
-    // Register Name + Pin
-    async function registerUser(name, pin, confirmPin) {
-        if (!name || name.trim().length < 2) {
-            showError('👤 Enter your full name (min 2 characters)');
-            return false;
-        }
-        if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
-            showError('🔐 PIN must be exactly 4 digits (0-9)');
-            return false;
-        }
-        if (pin !== confirmPin) {
-            showError('❌ PINs do not match');
-            return false;
-        }
-        const user = auth.currentUser;
-        if (!user) {
-            showError('Session expired. Please login again.');
-            appState = 'login';
-            renderScreen();
-            return false;
-        }
-        setButtonLoading('registerBtn', true, 'Creating Account...');
-        try {
-            await db.collection('users').doc(user.uid).set({
-                uid: user.uid,
-                phone: user.phoneNumber,
-                name: name.trim(),
-                pin: pin,
-                role: 'user',          // default role, admin must be set manually in firebase
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            showSuccess('🎉 Account created! Redirecting to dashboard...');
-            setTimeout(() => {
-                window.location.href = 'dashboard.html';
-            }, 1200);
-            return true;
-        } catch (err) {
-            console.error(err);
-            showError('Registration error: ' + err.message);
-            setButtonLoading('registerBtn', false, 'Create Account');
-            return false;
-        }
-    }
-
-    // Go back to login (from any screen)
-    function backToLogin() {
-        stopTimer();
-        appState = 'login';
-        confirmationResult = null;
-        currentPhone = null;
-        renderScreen();
-    }
-
-    // ------------------- RENDER UI COMPONENTS (Android style) -------------------
-    function renderLoginScreen() {
+    
+    // UI Rendering Functions
+    function renderLogin() {
         dynamicScreen.innerHTML = `
             <div class="screen">
                 <div id="recaptcha-container"></div>
-                <h2>win777</h2>
-                <div class="sub">Enter your mobile number to continue</div>
-                <div class="input-group">
-                    <label><i class="fas fa-phone-alt"></i> Mobile Number</label>
-                    <input type="tel" id="mobileInput" placeholder="9876543210" maxlength="10" autocomplete="off" inputmode="numeric">
+                <div class="info-box">
+                    <p>🔐 Secure OTP verification. Real SMS will be sent to your phone.</p>
                 </div>
-                <button id="sendOtpBtn"><i class="fas fa-paper-plane"></i> Send OTP</button>
-                <div id="loginError" class="error-msg"></div>
+                <div class="input-group">
+                    <label>📱 Mobile Number</label>
+                    <div class="country-selector">
+                        <select id="countryCode">
+                            <option value="+91">🇮🇳 +91</option>
+                            <option value="+1">🇺🇸 +1</option>
+                            <option value="+44">🇬🇧 +44</option>
+                            <option value="+61">🇦🇺 +61</option>
+                            <option value="+971">🇦🇪 +971</option>
+                        </select>
+                        <input type="tel" id="phoneNumber" placeholder="9876543210" maxlength="10" inputmode="numeric">
+                    </div>
+                </div>
+                <button id="sendOtpBtn">📨 Send OTP</button>
+                <div class="error-msg"></div>
             </div>
         `;
-        const sendBtn = document.getElementById('sendOtpBtn');
-        const mobileInput = document.getElementById('mobileInput');
         
-        // Allow enter key to trigger send
-        mobileInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendOtp(mobileInput.value.trim());
+        document.getElementById('sendOtpBtn').addEventListener('click', () => {
+            const code = document.getElementById('countryCode').value;
+            const phone = document.getElementById('phoneNumber').value.replace(/\D/g, '');
+            sendOTP(code + phone);
         });
         
-        sendBtn.addEventListener('click', () => {
-            const phone = mobileInput.value.trim();
-            sendOtp(phone);
-        });
-        
-        // Initialize invisible recaptcha
-        if (document.getElementById('recaptcha-container')) {
-            window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { size: 'invisible' });
-        }
+        setTimeout(() => initRecaptcha(), 100);
     }
-
-    function renderOtpScreen() {
+    
+    function renderOtp() {
         dynamicScreen.innerHTML = `
             <div class="screen">
                 <div id="recaptcha-container"></div>
-                <h2>Verify OTP</h2>
-                <div class="sub">Enter 6-digit code sent to <strong>${maskPhone(currentPhone)}</strong></div>
+                <div class="info-box">
+                    <p>📨 OTP sent to ${currentPhone}</p>
+                    <p style="font-size:11px; margin-top:5px;">Enter the 6-digit code received via SMS</p>
+                </div>
                 <div class="input-group">
+                    <label>🔐 Enter OTP</label>
                     <input type="text" id="otpInput" placeholder="123456" maxlength="6" autocomplete="off" inputmode="numeric">
                 </div>
-                <button id="verifyOtpBtn"><i class="fas fa-check-circle"></i> Verify & Login</button>
-                <button id="resendOtpBtn" class="secondary-btn">${countdown > 0 ? `Resend in <span id="resendTimer">${countdown}s</span>` : 'Resend OTP'}</button>
-                <button id="backToLoginBtn" class="secondary-btn" style="margin-top: 8px;"><i class="fas fa-arrow-left"></i> Back</button>
-                <div id="otpError" class="error-msg"></div>
+                <button id="verifyOtpBtn">✓ Verify & Continue</button>
+                <button id="resendOtpBtn" class="secondary-btn">${countdown > 0 ? `⏱️ Resend in <span id="resendTimer">${countdown}s</span>` : '⟳ Resend OTP'}</button>
+                <button id="backBtn" class="secondary-btn">← Change Number</button>
+                <div class="error-msg"></div>
             </div>
         `;
-        const verifyBtn = document.getElementById('verifyOtpBtn');
-        const resendBtn = document.getElementById('resendOtpBtn');
-        const backBtn = document.getElementById('backToLoginBtn');
-        const otpInput = document.getElementById('otpInput');
         
-        verifyBtn.addEventListener('click', () => verifyOtp(otpInput.value.trim()));
-        resendBtn.addEventListener('click', () => resendOtp());
-        backBtn.addEventListener('click', () => backToLogin());
-        
-        otpInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') verifyOtp(otpInput.value.trim());
+        document.getElementById('verifyOtpBtn').addEventListener('click', () => {
+            verifyOTP(document.getElementById('otpInput').value);
         });
-        
-        if (countdown > 0 && document.getElementById('resendTimer')) {
-            const timerSpan = document.getElementById('resendTimer');
-            timerSpan.innerText = `${countdown}s`;
-        }
-    }
-
-    function renderRegisterPinScreen() {
-        dynamicScreen.innerHTML = `
-            <div class="screen">
-                <h2>Complete Profile</h2>
-                <div class="sub">Set your name and 4-digit PIN for quick access</div>
-                <div class="input-group">
-                    <label><i class="fas fa-user"></i> Full Name</label>
-                    <input type="text" id="regName" placeholder="John Doe" autocomplete="off">
-                </div>
-                <div class="input-group">
-                    <label><i class="fas fa-key"></i> 4-Digit PIN</label>
-                    <input type="password" id="regPin" maxlength="4" pattern="\\d*" inputmode="numeric" placeholder="••••">
-                </div>
-                <div class="input-group">
-                    <label><i class="fas fa-check-circle"></i> Confirm PIN</label>
-                    <input type="password" id="regConfirmPin" maxlength="4" pattern="\\d*" inputmode="numeric" placeholder="••••">
-                </div>
-                <button id="registerBtn">Create Account</button>
-                <button id="cancelRegBtn" class="secondary-btn">Cancel</button>
-                <div id="regError" class="error-msg"></div>
-            </div>
-        `;
-        document.getElementById('registerBtn').addEventListener('click', () => {
-            const name = document.getElementById('regName').value;
-            const pin = document.getElementById('regPin').value;
-            const cpin = document.getElementById('regConfirmPin').value;
-            registerUser(name, pin, cpin);
-        });
-        document.getElementById('cancelRegBtn').addEventListener('click', async () => {
-            // Sign out and go to login
-            await auth.signOut();
-            confirmationResult = null;
-            currentPhone = null;
+        document.getElementById('resendOtpBtn').addEventListener('click', () => resendOTP());
+        document.getElementById('backBtn').addEventListener('click', () => {
             appState = 'login';
             renderScreen();
         });
-        
-        // Auto-focus and input restrictions
-        const pinInput = document.getElementById('regPin');
-        const confirmInput = document.getElementById('regConfirmPin');
-        pinInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0,4);
-        });
-        confirmInput.addEventListener('input', (e) => {
-            e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0,4);
-        });
     }
-
-    function maskPhone(phone) {
-        if (!phone) return 'your number';
-        let last4 = phone.slice(-4);
-        return 'xxxxxx' + last4;
-    }
-
-    // ---------- On Load: Check if user is already logged in with valid PIN ----------
-    async function checkExistingSession() {
-        const user = auth.currentUser;
-        if (user) {
-            try {
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                if (userDoc.exists && userDoc.data().pin) {
-                    // Already has PIN and name -> redirect to dashboard
-                    window.location.href = 'dashboard.html';
-                    return;
-                } else if (userDoc.exists && !userDoc.data().pin) {
-                    // User exists but no PIN (should not happen normally) -> register
-                    appState = 'register-pin';
-                    renderScreen();
-                    return;
-                }
-            } catch (err) {
-                console.error('Session check error:', err);
-            }
-        }
-        // No valid session, show login
-        appState = 'login';
-        renderScreen();
-    }
-
-    // Initialize app
-    checkExistingSession();
     
-    // Listen to auth state changes
+    function renderRegister() {
+        dynamicScreen.innerHTML = `
+            <div class="screen">
+                <h3 style="margin-bottom: 20px; color: #ff9800;">✨ Complete Profile</h3>
+                <div class="input-group">
+                    <label>👤 Full Name</label>
+                    <input type="text" id="fullName" placeholder="John Doe" autocomplete="off">
+                </div>
+                <div class="input-group">
+                    <label>🔐 Create 4-Digit PIN</label>
+                    <input type="password" id="pin" maxlength="4" placeholder="****" inputmode="numeric">
+                </div>
+                <div class="input-group">
+                    <label>✓ Confirm PIN</label>
+                    <input type="password" id="confirmPin" maxlength="4" placeholder="****" inputmode="numeric">
+                </div>
+                <button id="registerBtn">🚀 Create Account</button>
+                <div class="error-msg"></div>
+            </div>
+        `;
+        
+        document.getElementById('registerBtn').addEventListener('click', () => {
+            const name = document.getElementById('fullName').value;
+            const pin = document.getElementById('pin').value;
+            const confirm = document.getElementById('confirmPin').value;
+            registerUser(name, pin, confirm);
+        });
+    }
+    
+    function renderPinLogin() {
+        dynamicScreen.innerHTML = `
+            <div class="screen">
+                <h3 style="margin-bottom: 20px; color: #ff9800;">🔐 Enter PIN</h3>
+                <div class="info-box">
+                    <p>Welcome back! Enter your 4-digit PIN to login</p>
+                </div>
+                <div class="input-group">
+                    <label>4-Digit PIN</label>
+                    <input type="password" id="pinInput" maxlength="4" placeholder="****" inputmode="numeric">
+                </div>
+                <button id="pinLoginBtn">🔓 Unlock Dashboard</button>
+                <button id="logoutPinBtn" class="secondary-btn">Use different account</button>
+                <div class="error-msg"></div>
+            </div>
+        `;
+        
+        document.getElementById('pinLoginBtn').addEventListener('click', () => {
+            verifyPinLogin(document.getElementById('pinInput').value);
+        });
+        document.getElementById('logoutPinBtn').addEventListener('click', async () => {
+            await auth.signOut();
+            appState = 'login';
+            renderScreen();
+        });
+    }
+    
+    function renderDashboard() {
+        const userData = JSON.parse(localStorage.getItem('win777_user') || '{}');
+        dynamicScreen.innerHTML = `
+            <div class="screen">
+                <div class="info-box">
+                    <p>👋 Welcome back, ${userData.name || 'User'}!</p>
+                </div>
+                <button id="logoutBtn">🚪 Logout</button>
+                <div class="error-msg"></div>
+            </div>
+        `;
+        
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+    }
+    
+    // Check existing session on load
     auth.onAuthStateChanged(async (user) => {
-        if (user && (appState === 'login' || appState === 'otp-verify')) {
+        if (user && !window.location.pathname.includes('dashboard.html')) {
             const userDoc = await db.collection('users').doc(user.uid).get();
             if (userDoc.exists && userDoc.data().pin) {
-                window.location.href = 'dashboard.html';
+                if (userDoc.data().role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
             } else if (userDoc.exists && !userDoc.data().pin) {
                 appState = 'register-pin';
                 renderScreen();
             }
+        } else if (!user) {
+            renderScreen();
         }
     });
+    
+    renderScreen();
 </script>
 </body>
 </html>
