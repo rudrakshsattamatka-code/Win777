@@ -2,431 +2,62 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>WIN777 - Admin Panel</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: #0a0a0f; min-height: 100vh; }
-        
-        .admin-container {
-            display: flex;
-        }
-        
-        .sidebar {
-            width: 260px;
-            background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%);
-            min-height: 100vh;
-            position: fixed;
-        }
-        
-        .sidebar .logo {
-            padding: 25px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .sidebar .logo h2 { color: #ff9800; }
-        
-        .nav-item {
-            padding: 12px 25px;
-            color: #aaa;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        
-        .nav-item:hover, .nav-item.active {
-            background: rgba(255,152,0,0.1);
-            color: #ff9800;
-            border-left: 3px solid #ff9800;
-        }
-        
-        .main-content {
-            margin-left: 260px;
-            padding: 20px;
-            width: calc(100% - 260px);
-        }
-        
-        .top-bar {
-            background: rgba(26,26,46,0.95);
-            border-radius: 20px;
-            padding: 15px 25px;
-            margin-bottom: 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .card {
-            background: rgba(26,26,46,0.95);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 25px;
-        }
-        
-        .card-title {
-            font-size: 20px;
-            color: #ff9800;
-            margin-bottom: 20px;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .stat-card {
-            background: rgba(255,255,255,0.05);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .stat-card h3 { font-size: 32px; color: #ff9800; }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            color: #ddd;
-        }
-        
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #0a0a0f; }
+        .login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a0f; display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .login-box { background: #1a1a2e; padding: 40px; border-radius: 30px; width: 300px; text-align: center; }
+        .login-box input { width: 100%; padding: 12px; margin: 10px 0; background: #0a0a0f; border: 1px solid #333; border-radius: 12px; color: white; }
+        .login-box button { background: #ff9800; border: none; padding: 12px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        .admin-container { display: none; }
+        .sidebar { width: 250px; background: #1a1a2e; min-height: 100vh; position: fixed; }
+        .sidebar h2 { color: #ff9800; padding: 20px; text-align: center; }
+        .sidebar-item { padding: 15px 20px; color: #aaa; cursor: pointer; border-bottom: 1px solid #222; }
+        .sidebar-item:hover { background: #ff980015; color: #ff9800; }
+        .main-content { margin-left: 250px; padding: 20px; }
+        .card { background: #1a1a2e; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #ff980020; }
+        .card-title { color: #ff9800; font-size: 20px; margin-bottom: 15px; }
+        input, select { background: #0a0a0f; border: 1px solid #333; padding: 10px; border-radius: 10px; color: white; margin: 5px; }
+        button { background: #ff9800; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; margin: 5px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #333; color: #ddd; }
         th { color: #ff9800; }
-        
-        input, select {
-            padding: 10px;
-            background: #1a1a2e;
-            border: 1px solid #333;
-            border-radius: 8px;
-            color: white;
-            margin: 5px;
-        }
-        
-        button {
-            background: linear-gradient(135deg, #ff9800, #ff5722);
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            color: white;
-            cursor: pointer;
-        }
-        
-        .btn-danger { background: #f44336; }
-        .btn-success { background: #4caf50; }
-        
         .hidden { display: none; }
-        
-        .user-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .market-item {
-            background: rgba(255,255,255,0.05);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 10px;
-        }
+        .user-item, .market-item { background: #0a0a0f; padding: 10px; margin: 5px 0; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
-    <div class="admin-container">
-        <div class="sidebar">
-            <div class="logo">
-                <h2>WIN777<br><span style="font-size:12px;">Admin Panel</span></h2>
-            </div>
-            <div class="nav-item active" data-page="dashboard">📊 Dashboard</div>
-            <div class="nav-item" data-page="markets">🎮 Manage Markets</div>
-            <div class="nav-item" data-page="users">👥 Users</div>
-            <div class="nav-item" data-page="bids">📋 Bids History</div>
-            <div class="nav-item" data-page="settings">⚙️ Settings</div>
-        </div>
-        
-        <div class="main-content">
-            <div class="top-bar">
-                <h2 style="color:white;" id="pageTitle">Dashboard</h2>
-                <div>
-                    <span style="color:white; margin-right:15px;" id="adminName">Admin</span>
-                    <button id="logoutBtn" style="background:#f44336;">Logout</button>
-                </div>
-            </div>
-            
-            <!-- Dashboard Page -->
-            <div id="dashboardPage">
-                <div class="stats-grid" id="statsGrid"></div>
-                <div class="card">
-                    <div class="card-title">📊 Recent Activity</div>
-                    <div id="recentActivity"></div>
-                </div>
-            </div>
-            
-            <!-- Markets Page -->
-            <div id="marketsPage" class="hidden">
-                <div class="card">
-                    <div class="card-title">➕ Add New Market</div>
-                    <input type="text" id="marketName" placeholder="Market Name">
-                    <input type="time" id="openTime" placeholder="Open Time">
-                    <input type="time" id="closeTime" placeholder="Close Time">
-                    <button id="addMarketBtn">Add Market</button>
-                </div>
-                <div class="card">
-                    <div class="card-title">📈 Active Markets</div>
-                    <div id="marketsList"></div>
-                </div>
-            </div>
-            
-            <!-- Users Page -->
-            <div id="usersPage" class="hidden">
-                <div class="card">
-                    <div class="card-title">👥 All Users</div>
-                    <div id="usersList"></div>
-                </div>
-            </div>
-            
-            <!-- Bids Page -->
-            <div id="bidsPage" class="hidden">
-                <div class="card">
-                    <div class="card-title">📋 All Bids</div>
-                    <div id="allBidsList"></div>
-                </div>
-            </div>
-            
-            <!-- Settings Page -->
-            <div id="settingsPage" class="hidden">
-                <div class="card">
-                    <div class="card-title">🔐 Change Admin Password</div>
-                    <input type="password" id="currentPassword" placeholder="Current Password">
-                    <input type="password" id="newPassword" placeholder="New Password">
-                    <input type="password" id="confirmPassword" placeholder="Confirm Password">
-                    <button id="changePasswordBtn">Change Password</button>
-                    <div id="passwordMsg" style="margin-top:10px;"></div>
-                </div>
-                <div class="card">
-                    <div class="card-title">🎨 Site Settings</div>
-                    <div class="form-group">
-                        <label>Site Logo Text</label>
-                        <input type="text" id="siteLogo" placeholder="WIN777">
-                    </div>
-                    <div class="form-group">
-                        <label>Primary Color</label>
-                        <input type="color" id="primaryColor" value="#ff9800">
-                    </div>
-                    <button id="saveSettingsBtn">Save Settings</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
+    <div id="adminLogin" class="login-screen"><div class="login-box"><h2 style="color:#ff9800;">Admin Login</h2><input type="password" id="adminPass" placeholder="Password"><button onclick="verifyAdmin()">Login</button><div id="loginError" style="color:red; margin-top:10px;"></div></div></div>
+    <div id="adminPanel" class="admin-container"><div class="sidebar"><h2>WIN777 ADMIN</h2><div class="sidebar-item" onclick="showSection('markets')">🎮 Manage Markets</div><div class="sidebar-item" onclick="showSection('users')">👥 Users</div><div class="sidebar-item" onclick="showSection('deposits')">💰 Deposit Requests</div><div class="sidebar-item" onclick="showSection('withdrawals')">💸 Withdrawal Requests</div><div class="sidebar-item" onclick="showSection('settings')">⚙️ Settings</div><div class="sidebar-item" onclick="logoutAdmin()">🚪 Logout</div></div><div class="main-content"><div id="marketsSection"><div class="card"><div class="card-title">➕ Add/Edit Market</div><input type="text" id="marketName" placeholder="Market Name"><input type="time" id="openEnd" placeholder="Open Bid End"><input type="time" id="closeEnd" placeholder="Close Bid End"><input type="text" id="marketResult" placeholder="Result (e.g., 123-45-678)"><button onclick="addMarket()">Add Market</button></div><div class="card"><div class="card-title">📋 Markets List</div><div id="marketsListAdmin"></div></div></div><div id="usersSection" class="hidden"><div class="card"><div class="card-title">👥 All Users</div><div id="usersListAdmin"></div></div></div><div id="depositsSection" class="hidden"><div class="card"><div class="card-title">💰 Deposit Requests</div><div id="depositsList"></div></div></div><div id="withdrawalsSection" class="hidden"><div class="card"><div class="card-title">💸 Withdrawal Requests</div><div id="withdrawalsList"></div></div></div><div id="settingsSection" class="hidden"><div class="card"><div class="card-title">🔐 Change Password</div><input type="password" id="oldPass" placeholder="Old Password"><input type="password" id="newPass" placeholder="New Password"><button onclick="changeAdminPass()">Update Password</button><div id="passMsg"></div></div><div class="card"><div class="card-title">🏧 UPI Settings</div><input type="text" id="upiId" placeholder="UPI ID (e.g., win777@okhdfcbank)"><button onclick="updateUPI()">Update UPI ID</button></div><div class="card"><div class="card-title">🎨 Logo Settings</div><input type="text" id="logoUrl" placeholder="Logo Image URL"><button onclick="updateLogo()">Update Logo</button></div></div></div></div>
     <script>
-        const ADMIN_PASSWORD = "Gani99@@";
-        const firebaseConfig = {
-            apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
-            authDomain: "win777-ed482.firebaseapp.com",
-            projectId: "win777-ed482",
-            storageBucket: "win777-ed482.firebasestorage.app",
-            messagingSenderId: "843686112399",
-            appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
-        };
-        
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        
-        let markets = [
-            { id: 'm1', name: 'Cricket Match IND vs AUS', openTime: '10:00', closeTime: '18:00', status: 'open' },
-            { id: 'm2', name: 'Football: Real Madrid vs Barcelona', openTime: '20:00', closeTime: '22:00', status: 'open' },
-            { id: 'm3', name: 'Tennis: US Open Final', openTime: '14:00', closeTime: '16:00', status: 'closed' }
-        ];
-        
-        function loadStats() {
-            document.getElementById('statsGrid').innerHTML = `
-                <div class="stat-card"><h3 id="totalUsers">0</h3><p>Total Users</p></div>
-                <div class="stat-card"><h3 id="totalBids">0</h3><p>Total Bids</p></div>
-                <div class="stat-card"><h3 id="totalVolume">0</h3><p>Total Volume (₹)</p></div>
-            `;
-            db.collection('users').get().then(snapshot => {
-                document.getElementById('totalUsers').innerText = snapshot.size;
-            });
-            db.collection('bids').get().then(snapshot => {
-                document.getElementById('totalBids').innerText = snapshot.size;
-                let total = 0;
-                snapshot.forEach(doc => total += doc.data().amount || 0);
-                document.getElementById('totalVolume').innerText = total;
-            });
-        }
-        
-        function loadMarkets() {
-            const container = document.getElementById('marketsList');
-            container.innerHTML = markets.map((market, index) => `
-                <div class="market-item">
-                    <strong>${market.name}</strong><br>
-                    Time: ${market.openTime} - ${market.closeTime}<br>
-                    Status: ${market.status}
-                    <button onclick="deleteMarket('${market.id}')" class="btn-danger" style="margin-left:10px;">Delete</button>
-                </div>
-            `).join('');
-        }
-        
-        window.deleteMarket = function(id) {
-            markets = markets.filter(m => m.id !== id);
-            loadMarkets();
-        };
-        
-        function loadUsers() {
-            db.collection('users').get().then(snapshot => {
-                const container = document.getElementById('usersList');
-                container.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const user = doc.data();
-                    container.innerHTML += `
-                        <div class="user-item">
-                            <div>
-                                <strong>${user.name || 'Unknown'}</strong><br>
-                                <small>${user.phone || 'No phone'} | Balance: ₹${user.balance || 0}</small>
-                            </div>
-                            <div>
-                                <button onclick="toggleBlockUser('${doc.id}')" class="${user.blocked ? 'btn-success' : 'btn-danger'}">
-                                    ${user.blocked ? 'Unblock' : 'Block'}
-                                </button>
-                                <button onclick="clearUserHistory('${doc.id}')" class="btn-danger">Clear History</button>
-                            </div>
-                        </div>
-                    `;
-                });
-            });
-        }
-        
-        window.toggleBlockUser = async function(userId) {
-            const userDoc = await db.collection('users').doc(userId).get();
-            const blocked = userDoc.data().blocked || false;
-            await db.collection('users').doc(userId).update({ blocked: !blocked });
-            loadUsers();
-        };
-        
-        window.clearUserHistory = async function(userId) {
-            const bids = await db.collection('bids').where('userId', '==', userId).get();
-            bids.forEach(doc => doc.ref.delete());
-            const transactions = await db.collection('transactions').where('userId', '==', userId).get();
-            transactions.forEach(doc => doc.ref.delete());
-            alert('History cleared!');
-        };
-        
-        function loadAllBids() {
-            db.collection('bids').orderBy('createdAt', 'desc').get().then(snapshot => {
-                const container = document.getElementById('allBidsList');
-                if (snapshot.empty) { container.innerHTML = '<p>No bids yet</p>'; return; }
-                container.innerHTML = `
-                    <table>
-                        <tr><th>User</th><th>Market</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr>
-                        ${snapshot.docs.map(async doc => {
-                            const user = await db.collection('users').doc(doc.data().userId).get();
-                            return `
-                                <tr>
-                                    <td>${user.data()?.name || 'Unknown'}</td>
-                                    <td>${doc.data().marketName}</td>
-                                    <td>₹${doc.data().amount}</td>
-                                    <td>
-                                        <select onchange="updateBidStatus('${doc.id}', this.value)">
-                                            <option ${doc.data().status === 'pending' ? 'selected' : ''}>pending</option>
-                                            <option ${doc.data().status === 'won' ? 'selected' : ''}>won</option>
-                                            <option ${doc.data().status === 'lost' ? 'selected' : ''}>lost</option>
-                                        </select>
-                                    </td>
-                                    <td>${doc.data().createdAt?.toDate().toLocaleString() || 'Pending'}</td>
-                                    <td><button onclick="deleteBid('${doc.id}')" class="btn-danger">Delete</button></td>
-                                </tr>
-                            `;
-                        }).join('')}
-                    </table>
-                `;
-            });
-        }
-        
-        window.updateBidStatus = async function(bidId, status) {
-            await db.collection('bids').doc(bidId).update({ status: status });
-            if (status === 'won') {
-                const bid = await db.collection('bids').doc(bidId).get();
-                const user = await db.collection('users').doc(bid.data().userId).get();
-                const newBalance = (user.data().balance || 0) + (bid.data().amount * 2);
-                await db.collection('users').doc(bid.data().userId).update({ balance: newBalance });
-            }
-            loadAllBids();
-        };
-        
-        window.deleteBid = async function(bidId) {
-            await db.collection('bids').doc(bidId).delete();
-            loadAllBids();
-        };
-        
-        document.getElementById('addMarketBtn')?.addEventListener('click', () => {
-            const name = document.getElementById('marketName').value;
-            const openTime = document.getElementById('openTime').value;
-            const closeTime = document.getElementById('closeTime').value;
-            if (!name || !openTime || !closeTime) { alert('Fill all fields'); return; }
-            markets.push({ id: 'm' + Date.now(), name, openTime, closeTime, status: 'open' });
-            loadMarkets();
-            document.getElementById('marketName').value = '';
-            document.getElementById('openTime').value = '';
-            document.getElementById('closeTime').value = '';
-            alert('Market added!');
-        });
-        
-        document.getElementById('changePasswordBtn')?.addEventListener('click', () => {
-            const current = document.getElementById('currentPassword').value;
-            const newPass = document.getElementById('newPassword').value;
-            const confirm = document.getElementById('confirmPassword').value;
-            if (current !== ADMIN_PASSWORD) { document.getElementById('passwordMsg').innerHTML = '<span style="color:#f44336;">Current password incorrect</span>'; return; }
-            if (newPass !== confirm) { document.getElementById('passwordMsg').innerHTML = '<span style="color:#f44336;">Passwords do not match</span>'; return; }
-            if (newPass.length < 6) { document.getElementById('passwordMsg').innerHTML = '<span style="color:#f44336;">Password must be at least 6 characters</span>'; return; }
-            document.getElementById('passwordMsg').innerHTML = '<span style="color:#4caf50;">Password changed! (Note: Store this password safely)</span>';
-            alert('Password changed successfully! New password: ' + newPass);
-        });
-        
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', () => {
-                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-                item.classList.add('active');
-                const page = item.dataset.page;
-                document.getElementById('pageTitle').innerText = item.innerText;
-                document.getElementById('dashboardPage').classList.add('hidden');
-                document.getElementById('marketsPage').classList.add('hidden');
-                document.getElementById('usersPage').classList.add('hidden');
-                document.getElementById('bidsPage').classList.add('hidden');
-                document.getElementById('settingsPage').classList.add('hidden');
-                document.getElementById(`${page}Page`).classList.remove('hidden');
-                if (page === 'dashboard') loadStats();
-                if (page === 'markets') loadMarkets();
-                if (page === 'users') loadUsers();
-                if (page === 'bids') loadAllBids();
-            });
-        });
-        
-        document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-            await auth.signOut();
-            window.location.href = 'index.html';
-        });
-        
-        auth.onAuthStateChanged(async (user) => {
-            if (!user) window.location.href = 'index.html';
-            else {
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                if (userDoc.data()?.role !== 'admin') window.location.href = 'dashboard.html';
-                document.getElementById('adminName').innerHTML = `👑 ${userDoc.data()?.name || 'Admin'}`;
-                loadStats();
-            }
-        });
+        const firebaseConfig = { apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38", authDomain: "win777-ed482.firebaseapp.com", projectId: "win777-ed482", storageBucket: "win777-ed482.firebasestorage.app", messagingSenderId: "843686112399", appId: "1:843686112399:web:9c20a96831e6a94cd814fa" };
+        firebase.initializeApp(firebaseConfig); const auth = firebase.auth(); const db = firebase.firestore();
+        let adminPassword = 'Gani99@@', marketsData = [];
+        async function verifyAdmin(){ const pwd = document.getElementById('adminPass').value; if(pwd === adminPassword){ document.getElementById('adminLogin').style.display='none'; document.getElementById('adminPanel').style.display='flex'; await loadData(); } else document.getElementById('loginError').innerText='Wrong Password'; }
+        async function loadData(){ await loadMarkets(); await loadUsers(); await loadDeposits(); await loadWithdrawals(); }
+        async function loadMarkets(){ const snap = await db.collection('markets').get(); if(snap.empty){ marketsData = [{name:'KALYAN MORNING', openBidEnd:'11:00', closeBidEnd:'11:30', result:'***-**-***'}]; renderMarketsList(); } else { marketsData = snap.docs.map(d=>d.data()); renderMarketsList(); } }
+        function renderMarketsList(){ const div=document.getElementById('marketsListAdmin'); div.innerHTML=marketsData.map((m,i)=>`<div class="user-item"><span><b>${m.name}</b><br>Open End: ${m.openBidEnd} | Close End: ${m.closeBidEnd}<br>Result: ${m.result}</span><div><button onclick="editMarket(${i})">Edit</button><button onclick="deleteMarket(${i})">Delete</button></div></div>`).join(''); }
+        async function addMarket(){ const name=document.getElementById('marketName').value; const open=document.getElementById('openEnd').value; const close=document.getElementById('closeEnd').value; const res=document.getElementById('marketResult').value||'***-**-***'; if(!name||!open||!close) return; await db.collection('markets').add({name, openBidEnd:open, closeBidEnd:close, result:res}); await loadMarkets(); document.getElementById('marketName').value=''; }
+        async function editMarket(i){ const m=marketsData[i]; const newName=prompt('New Name', m.name); const newOpen=prompt('Open Bid End', m.openBidEnd); const newClose=prompt('Close Bid End', m.closeBidEnd); const newRes=prompt('Result', m.result); if(newName) await db.collection('markets').add({name:newName, openBidEnd:newOpen, closeBidEnd:newClose, result:newRes}); await loadMarkets(); }
+        async function deleteMarket(i){ if(confirm('Delete?')){ const m=marketsData[i]; const snap=await db.collection('markets').where('name','==',m.name).get(); snap.forEach(d=>d.ref.delete()); await loadMarkets(); } }
+        async function loadUsers(){ const users=await db.collection('users').get(); const div=document.getElementById('usersListAdmin'); div.innerHTML=''; for(const doc of users.docs){ const u=doc.data(); const bids=await db.collection('bids').where('userId','==',doc.id).get(); div.innerHTML+=`<div class="user-item"><div><b>${u.name}</b> | ${u.phone}<br>Balance: ₹${u.balance} | Bids: ${bids.size}<br>Bank: ${u.bankDetails?.bankName||'N/A'}</div><div><button onclick="addBalance('${doc.id}')">Add ₹</button><button onclick="viewUserBids('${doc.id}')">Bids</button><button onclick="blockUser('${doc.id}')">Block</button></div></div>`; } }
+        async function addBalance(uid){ const amt=prompt('Add Amount'); if(amt){ const u=await db.collection('users').doc(uid).get(); const newBal=(u.data().balance||0)+parseInt(amt); await db.collection('users').doc(uid).update({balance:newBal}); await loadUsers(); } }
+        async function viewUserBids(uid){ const bids=await db.collection('bids').where('userId','==',uid).get(); alert(bids.docs.map(d=>`${d.data().gameType}: ${d.data().value} (${d.data().points})`).join('\n')); }
+        async function blockUser(uid){ await db.collection('users').doc(uid).update({blocked:true}); alert('User Blocked'); await loadUsers(); }
+        async function loadDeposits(){ const reqs=await db.collection('transactions').where('type','==','credit').where('status','==','Pending').get(); const div=document.getElementById('depositsList'); if(reqs.empty){ div.innerHTML='<p>No pending deposits</p>'; return; } div.innerHTML='<div class="data-table"><table><tr><th>User</th><th>Amount</th><th>Action</th></tr>'+reqs.docs.map(d=>`<tr><td>${d.data().userId}</td><td>₹${d.data().amount}</td><td><button onclick="approveDeposit('${d.id}')">Approve</button></td></tr>`).join('')+'</table></div>'; }
+        async function approveDeposit(id){ const req=await db.collection('transactions').doc(id).get(); const uid=req.data().userId; const user=await db.collection('users').doc(uid).get(); const newBal=(user.data().balance||0)+req.data().amount; await db.collection('users').doc(uid).update({balance:newBal}); await db.collection('transactions').doc(id).update({status:'Completed'}); await loadDeposits(); await loadUsers(); }
+        async function loadWithdrawals(){ const reqs=await db.collection('withdrawRequests').where('status','==','Pending').get(); const div=document.getElementById('withdrawalsList'); if(reqs.empty){ div.innerHTML='<p>No pending withdrawals</p>'; return; } div.innerHTML='<div class="data-table"><table><tr><th>User</th><th>Amount</th><th>Bank</th><th>Action</th></tr>'+reqs.docs.map(d=>`<tr><td>${d.data().userId}</td><td>₹${d.data().amount}</td><td>${d.data().bankDetails?.bankName}</td><td><button onclick="approveWithdraw('${d.id}', ${d.data().amount}, '${d.data().userId}')">Approve</button></td></tr>`).join('')+'</table></div>'; }
+        async function approveWithdraw(id, amount, uid){ const user=await db.collection('users').doc(uid).get(); if(user.data().balance<amount){ alert('Insufficient balance'); return; } const newBal=user.data().balance-amount; await db.collection('users').doc(uid).update({balance:newBal}); await db.collection('withdrawRequests').doc(id).update({status:'Completed'}); await db.collection('transactions').add({userId:uid, type:'debit', amount:amount, status:'Completed', description:'Withdrawal Approved', date:new Date()}); await loadWithdrawals(); await loadUsers(); }
+        function changeAdminPass(){ const old=document.getElementById('oldPass').value; const newP=document.getElementById('newPass').value; if(old===adminPassword){ adminPassword=newP; document.getElementById('passMsg').innerText='Password Changed!'; } else document.getElementById('passMsg').innerText='Wrong Old Password'; }
+        function updateUPI(){ alert('UPI ID Updated (Simulated)'); }
+        function updateLogo(){ alert('Logo URL Updated (Simulated)'); }
+        function showSection(section){ document.getElementById('marketsSection').classList.add('hidden'); document.getElementById('usersSection').classList.add('hidden'); document.getElementById('depositsSection').classList.add('hidden'); document.getElementById('withdrawalsSection').classList.add('hidden'); document.getElementById('settingsSection').classList.add('hidden'); document.getElementById(`${section}Section`).classList.remove('hidden'); }
+        function logoutAdmin(){ document.getElementById('adminLogin').style.display='flex'; document.getElementById('adminPanel').style.display='none'; }
     </script>
 </body>
 </html>
