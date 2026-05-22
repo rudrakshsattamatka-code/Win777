@@ -111,9 +111,20 @@
 
         .bid-phase {
             font-size: 12px;
-            color: #667eea;
+            padding: 6px 10px;
+            border-radius: 12px;
             margin-bottom: 12px;
             font-weight: 500;
+        }
+
+        .bid-phase-open {
+            background: #e3f2fd;
+            color: #2196f3;
+        }
+
+        .bid-phase-close {
+            background: #fff3e0;
+            color: #ff9800;
         }
 
         .play-btn {
@@ -213,7 +224,22 @@
         }
 
         .overlay.active { display: block; }
-        .hidden { display: none; }
+        
+        .current-time {
+            background: white;
+            margin: 10px 16px;
+            padding: 10px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #333;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .current-time span {
+            color: #667eea;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -235,6 +261,10 @@
     </div>
 
     <div class="overlay" id="overlay"></div>
+
+    <div class="current-time" id="currentTimeDisplay">
+        🕐 Current Server Time: <span id="currentTime">--:-- --</span>
+    </div>
 
     <div class="container">
         <div id="marketsList"></div>
@@ -264,15 +294,20 @@
         let currentUser = null;
         let userData = null;
 
-        // Markets with Open and Close Bid Times
         const markets = [
-            { name: 'Kalyan Morning', openBidTime: '10:00 AM', closeBidTime: '11:00 AM', marketCloseTime: '11:00 AM' },
-            { name: 'Milan Morning', openBidTime: '11:00 AM', closeBidTime: '11:30 AM', marketCloseTime: '11:30 AM' },
-            { name: 'Sridevi', openBidTime: '11:35 AM', closeBidTime: '12:35 PM', marketCloseTime: '12:35 PM' },
-            { name: 'Time Bazar', openBidTime: '01:00 PM', closeBidTime: '02:00 PM', marketCloseTime: '02:00 PM' },
-            { name: 'Milan Day', openBidTime: '03:00 PM', closeBidTime: '05:00 PM', marketCloseTime: '05:00 PM' },
-            { name: 'Kalyan', openBidTime: '03:40 PM', closeBidTime: '05:40 PM', marketCloseTime: '05:40 PM' }
+            { name: 'Kalyan Morning', openBidEnd: '11:00 AM', closeBidEnd: '11:30 AM' },
+            { name: 'Milan Morning', openBidEnd: '11:30 AM', closeBidEnd: '12:00 PM' },
+            { name: 'Sridevi', openBidEnd: '12:35 PM', closeBidEnd: '01:05 PM' },
+            { name: 'Time Bazar', openBidEnd: '02:00 PM', closeBidEnd: '02:30 PM' },
+            { name: 'Milan Day', openBidEnd: '05:00 PM', closeBidEnd: '05:30 PM' },
+            { name: 'Kalyan', openBidEnd: '05:40 PM', closeBidEnd: '06:10 PM' }
         ];
+
+        function updateCurrentTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('currentTime').innerText = timeStr;
+        }
 
         function parseTime(timeStr) {
             const date = new Date();
@@ -293,26 +328,17 @@
             const midnightReset = new Date();
             midnightReset.setHours(0, 30, 0, 0);
             
-            const openBidTime = parseTime(market.openBidTime);
-            const closeBidTime = parseTime(market.closeBidTime);
-            const marketCloseTime = parseTime(market.marketCloseTime);
+            const openBidEnd = parseTime(market.openBidEnd);
+            const closeBidEnd = parseTime(market.closeBidEnd);
             
-            // After midnight 12:30 AM, all markets reset and are ready for next day's open bidding
-            if (now >= midnightReset && now < openBidTime) {
-                return 'waiting';
-            }
-            
-            // Open Bidding Period
-            if (now >= openBidTime && now < closeBidTime) {
+            if (now >= midnightReset && now < openBidEnd) {
                 return 'open_bid';
             }
             
-            // Close Bidding Period (between close bid time and market close time)
-            if (now >= closeBidTime && now < marketCloseTime) {
+            if (now >= openBidEnd && now < closeBidEnd) {
                 return 'close_bid';
             }
             
-            // Market Fully Closed
             return 'closed';
         }
 
@@ -321,7 +347,6 @@
                 case 'open_bid': return '🎲 Open Bidding Active';
                 case 'close_bid': return '🔒 Close Bidding Active';
                 case 'closed': return '🔴 Market Closed for Today';
-                case 'waiting': return '⏳ Waiting for Open Bid';
                 default: return 'Closed';
             }
         }
@@ -331,6 +356,22 @@
                 case 'open_bid': return 'status-open-bid';
                 case 'close_bid': return 'status-close-bid';
                 default: return 'status-closed';
+            }
+        }
+
+        function getBidPhaseText(phase) {
+            switch(phase) {
+                case 'open_bid': return '📈 ALL BETS AVAILABLE: Single Digit (Open/Close), Jodi, Pana (Open/Close), Half Sangam A/B, Full Sangam';
+                case 'close_bid': return '📉 CLOSE BETS ONLY: Single Digit (Close), Single Pana (Close), Double Pana (Close), Triple Pana (Close)';
+                default: return '';
+            }
+        }
+
+        function getBidPhaseClass(phase) {
+            switch(phase) {
+                case 'open_bid': return 'bid-phase-open';
+                case 'close_bid': return 'bid-phase-close';
+                default: return '';
             }
         }
 
@@ -344,8 +385,12 @@
             return null;
         }
 
-        function playMarket(marketName, bidType) {
-            window.location.href = `betting.html?market=${encodeURIComponent(marketName)}&bidType=${bidType}`;
+        function playMarket(marketName, bidType, phase) {
+            if (!isPlayable(phase)) {
+                alert(`${marketName} is closed! Come back tomorrow at 12:30 AM`);
+                return;
+            }
+            window.location.href = `betting.html?market=${encodeURIComponent(marketName)}&bidType=${bidType}&phase=${phase}`;
         }
 
         function renderMarkets() {
@@ -356,22 +401,25 @@
                 const phase = getMarketPhase(market);
                 const playable = isPlayable(phase);
                 const bidType = getBidType(phase);
+                const phaseText = getPhaseText(phase);
+                const phaseClass = getPhaseClass(phase);
+                const bidPhaseText = getBidPhaseText(phase);
+                const bidPhaseClass = getBidPhaseClass(phase);
                 
                 container.innerHTML += `
                     <div class="market-card">
                         <div class="market-header">
                             <span class="market-name">${market.name}</span>
-                            <span class="market-status ${getPhaseClass(phase)}">
-                                ${getPhaseText(phase)}
+                            <span class="market-status ${phaseClass}">
+                                ${phaseText}
                             </span>
                         </div>
                         <div class="market-time">
-                            ⏰ Open Bid: ${market.openBidTime} | Close Bid: ${market.closeBidTime}
+                            ⏰ Open Bid Ends: ${market.openBidEnd} | Close Bid Ends: ${market.closeBidEnd}
                         </div>
-                        ${phase === 'open_bid' ? '<div class="bid-phase">📈 You can place OPEN bids now (Single Digit, Single Pana, Double Pana, Triple Pana)</div>' : ''}
-                        ${phase === 'close_bid' ? '<div class="bid-phase">📉 You can place CLOSE bids now (Single Digit, Single Pana, Double Pana, Triple Pana)</div>' : ''}
-                        <button class="play-btn" ${!playable ? 'disabled' : ''} onclick="playMarket('${market.name}', '${bidType}')">
-                            ${playable ? (phase === 'open_bid' ? '🎲 Place Open Bid' : '🔒 Place Close Bid') : '🔴 Market Closed'}
+                        ${bidPhaseText ? `<div class="bid-phase ${bidPhaseClass}">${bidPhaseText}</div>` : ''}
+                        <button class="play-btn" ${!playable ? 'disabled' : ''} onclick="playMarket('${market.name}', '${bidType}', '${phase}')">
+                            ${playable ? (phase === 'open_bid' ? '🎲 Place Bets (All Types)' : '🔒 Place Close Bets Only') : '🔴 Market Closed'}
                         </button>
                     </div>
                 `;
@@ -417,12 +465,16 @@
             window.location.href = 'index.html';
         });
 
-        // Auto refresh market status every 30 seconds
+        setInterval(updateCurrentTime, 1000);
         setInterval(() => renderMarkets(), 30000);
 
         auth.onAuthStateChanged(async (user) => {
             if (!user) window.location.href = 'index.html';
-            else { await loadUserData(); renderMarkets(); }
+            else { 
+                await loadUserData(); 
+                renderMarkets();
+                updateCurrentTime();
+            }
         });
     </script>
 </body>
