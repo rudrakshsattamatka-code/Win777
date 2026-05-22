@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WIN777 - Dashboard</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: #0a0a0f; min-height: 100vh; }
+        
+        /* Sidebar Navigation */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100%;
+            background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1a 100%);
+            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+            z-index: 100;
+            transition: 0.3s;
+        }
+        
+        .sidebar .logo {
+            padding: 25px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar .logo h2 { color: #ff9800; font-size: 28px; }
+        .sidebar .logo p { color: #888; font-size: 11px; }
+        
+        .nav-menu {
+            padding: 20px 0;
+        }
+        
+        .nav-item {
+            padding: 12px 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #aaa;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,152,0,0.1);
+            color: #ff9800;
+            border-left: 3px solid #ff9800;
+        }
+        
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            padding: 20px;
+        }
+        
+        /* Top Bar */
+        .top-bar {
+            background: rgba(26,26,46,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 15px 25px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .balance-card {
+            background: linear-gradient(135deg, #ff9800, #ff5722);
+            padding: 10px 20px;
+            border-radius: 40px;
+            color: white;
+        }
+        
+        .logout-btn {
+            background: rgba(255,107,107,0.2);
+            color: #ff6b6b;
+            padding: 8px 20px;
+            border-radius: 30px;
+            border: 1px solid #ff6b6b;
+            cursor: pointer;
+        }
+        
+        /* Cards */
+        .card {
+            background: rgba(26,26,46,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .card-title {
+            font-size: 20px;
+            color: #ff9800;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* Market Grid */
+        .market-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .market-card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 20px;
+            transition: 0.2s;
+        }
+        
+        .market-card.open { border-left: 4px solid #4caf50; }
+        .market-card.closed { border-left: 4px solid #f44336; opacity: 0.7; }
+        
+        .market-name { font-size: 18px; font-weight: bold; color: white; margin-bottom: 10px; }
+        .market-time { color: #aaa; font-size: 12px; margin-bottom: 15px; }
+        .market-status { font-size: 12px; margin-bottom: 15px; }
+        .status-open { color: #4caf50; }
+        .status-closed { color: #f44336; }
+        
+        .bid-input {
+            width: 100%;
+            padding: 10px;
+            background: #1a1a2e;
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: white;
+            margin-bottom: 10px;
+        }
+        
+        .bid-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #ff9800, #ff5722);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+        }
+        
+        .bid-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Tables */
+        .data-table {
+            width: 100%;
+            overflow-x: auto;
+        }
+        
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th, .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: #ddd;
+        }
+        
+        .data-table th { color: #ff9800; }
+        
+        /* Form Inputs */
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #aaa;
+            font-size: 13px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            background: #1a1a2e;
+            border: 1px solid #333;
+            border-radius: 10px;
+            color: white;
+        }
+        
+        .save-btn {
+            background: linear-gradient(135deg, #ff9800, #ff5722);
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .hidden { display: none; }
+        
+        @media (max-width: 768px) {
+            .sidebar { width: 70px; }
+            .sidebar .logo h2 { font-size: 20px; }
+            .sidebar .logo p, .nav-item span:last-child { display: none; }
+            .main-content { margin-left: 70px; }
+            .nav-item { justify-content: center; padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <h2>WIN777</h2>
+            <p>Gaming Platform</p>
+        </div>
+        <div class="nav-menu">
+            <div class="nav-item active" data-page="markets">
+                <span>🎮</span> <span>Markets</span>
+            </div>
+            <div class="nav-item" data-page="deposit">
+                <span>💰</span> <span>Deposit</span>
+            </div>
+            <div class="nav-item" data-page="withdraw">
+                <span>💸</span> <span>Withdraw</span>
+            </div>
+            <div class="nav-item" data-page="bank">
+                <span>🏦</span> <span>Bank Details</span>
+            </div>
+            <div class="nav-item" data-page="bid-history">
+                <span>📋</span> <span>Bid History</span>
+            </div>
+            <div class="nav-item" data-page="transactions">
+                <span>📊</span> <span>Transactions</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="top-bar">
+            <h2 style="color:white;" id="pageTitle">Markets</h2>
+            <div class="user-info">
+                <div class="balance-card">
+                    <span>💰 Balance: ₹<span id="userBalance">0</span></span>
+                </div>
+                <span style="color:white;" id="userName">User</span>
+                <button class="logout-btn" id="logoutBtn">🚪 Logout</button>
+            </div>
+        </div>
+        
+        <!-- Markets Page -->
+        <div id="marketsPage">
+            <div class="card">
+                <div class="card-title">📈 Active Markets</div>
+                <div id="marketsList" class="market-grid"></div>
+            </div>
+        </div>
+        
+        <!-- Deposit Page -->
+        <div id="depositPage" class="hidden">
+            <div class="card">
+                <div class="card-title">💰 Deposit Money</div>
+                <div class="form-group">
+                    <label>Amount (₹)</label>
+                    <input type="number" id="depositAmount" placeholder="Enter amount">
+                </div>
+                <button class="save-btn" id="depositBtn">Proceed to Deposit</button>
+                <div id="depositMsg" class="error-msg" style="margin-top:10px;"></div>
+            </div>
+        </div>
+        
+        <!-- Withdraw Page -->
+        <div id="withdrawPage" class="hidden">
+            <div class="card">
+                <div class="card-title">💸 Withdraw Money</div>
+                <div class="form-group">
+                    <label>Amount (₹)</label>
+                    <input type="number" id="withdrawAmount" placeholder="Enter amount">
+                </div>
+                <button class="save-btn" id="withdrawBtn">Request Withdrawal</button>
+                <div id="withdrawMsg" class="error-msg" style="margin-top:10px;"></div>
+            </div>
+        </div>
+        
+        <!-- Bank Details Page -->
+        <div id="bankPage" class="hidden">
+            <div class="card">
+                <div class="card-title">🏦 Bank Account Details</div>
+                <div class="form-group">
+                    <label>Account Holder Name</label>
+                    <input type="text" id="accountName" placeholder="Full name as in bank">
+                </div>
+                <div class="form-group">
+                    <label>Account Number</label>
+                    <input type="text" id="accountNumber" placeholder="Bank account number">
+                </div>
+                <div class="form-group">
+                    <label>IFSC Code</label>
+                    <input type="text" id="ifscCode" placeholder="IFSC code">
+                </div>
+                <button class="save-btn" id="saveBankBtn">Save Bank Details</button>
+                <div id="bankMsg" class="error-msg" style="margin-top:10px;"></div>
+            </div>
+        </div>
+        
+        <!-- Bid History Page -->
+        <div id="bidHistoryPage" class="hidden">
+            <div class="card">
+                <div class="card-title">📋 Your Bid History</div>
+                <div class="data-table" id="bidHistoryTable"></div>
+            </div>
+        </div>
+        
+        <!-- Transactions Page -->
+        <div id="transactionsPage" class="hidden">
+            <div class="card">
+                <div class="card-title">📊 Transaction History</div>
+                <div class="data-table" id="transactionsTable"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
+            authDomain: "win777-ed482.firebaseapp.com",
+            projectId: "win777-ed482",
+            storageBucket: "win777-ed482.firebasestorage.app",
+            messagingSenderId: "843686112399",
+            appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        let currentUser = null;
+        let userData = null;
+        
+        // Sample markets data (will be managed by admin)
+        let markets = [
+            { id: 'm1', name: 'Cricket Match IND vs AUS', openTime: '10:00', closeTime: '18:00', status: 'open', result: null },
+            { id: 'm2', name: 'Football: Real Madrid vs Barcelona', openTime: '20:00', closeTime: '22:00', status: 'open', result: null },
+            { id: 'm3', name: 'Tennis: US Open Final', openTime: '14:00', closeTime: '16:00', status: 'closed', result: 'Player A wins' }
+        ];
+        
+        function checkMarketStatus(market) {
+            const now = new Date();
+            const closeHour = parseInt(market.closeTime.split(':')[0]);
+            const closeMin = parseInt(market.closeTime.split(':')[1]);
+            const closeTime = new Date();
+            closeTime.setHours(closeHour, closeMin, 0);
+            return now > closeTime ? 'closed' : 'open';
+        }
+        
+        function renderMarkets() {
+            const container = document.getElementById('marketsList');
+            if (!container) return;
+            
+            container.innerHTML = markets.map(market => {
+                const status = checkMarketStatus(market);
+                const isOpen = status === 'open';
+                return `
+                    <div class="market-card ${isOpen ? 'open' : 'closed'}">
+                        <div class="market-name">${market.name}</div>
+                        <div class="market-time">⏰ ${market.openTime} - ${market.closeTime}</div>
+                        <div class="market-status">
+                            Status: ${isOpen ? '<span class="status-open">🟢 OPEN</span>' : '<span class="status-closed">🔴 CLOSED</span>'}
+                            ${!isOpen && market.result ? `<br>Result: ${market.result}` : ''}
+                        </div>
+                        ${isOpen ? `
+                            <input type="number" id="bid-${market.id}" class="bid-input" placeholder="Enter bid amount (₹)">
+                            <button class="bid-btn" onclick="placeBid('${market.id}')">Place Bid</button>
+                        ` : '<button class="bid-btn" disabled>Market Closed</button>'}
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        window.placeBid = async function(marketId) {
+            const amount = document.getElementById(`bid-${marketId}`).value;
+            if (!amount || amount <= 0) { alert('Enter valid amount'); return; }
+            if (!currentUser) return;
+            if (userData.balance < amount) { alert('Insufficient balance'); return; }
+            
+            const newBalance = userData.balance - parseInt(amount);
+            await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
+            await db.collection('bids').add({
+                userId: currentUser.uid,
+                marketId: marketId,
+                marketName: markets.find(m => m.id === marketId)?.name,
+                amount: parseInt(amount),
+                status: 'pending',
+                createdAt: new Date()
+            });
+            await addTransaction('debit', parseInt(amount), `Bid placed on ${markets.find(m => m.id === marketId)?.name}`);
+            loadUserData();
+            alert('Bid placed successfully!');
+            document.getElementById(`bid-${marketId}`).value = '';
+        };
+        
+        async function loadUserData() {
+            const user = auth.currentUser;
+            if (!user) return;
+            currentUser = user;
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            userData = userDoc.data();
+            document.getElementById('userBalance').innerText = userData?.balance || 0;
+            document.getElementById('userName').innerHTML = `👤 ${userData?.name || 'User'}`;
+            
+            // Load bank details
+            if (userData?.bankDetails) {
+                document.getElementById('accountName').value = userData.bankDetails.accountName || '';
+                document.getElementById('accountNumber').value = userData.bankDetails.accountNumber || '';
+                document.getElementById('ifscCode').value = userData.bankDetails.ifscCode || '';
+            }
+        }
+        
+        async function addTransaction(type, amount, description) {
+            await db.collection('transactions').add({
+                userId: currentUser.uid,
+                type: type,
+                amount: amount,
+                description: description,
+                date: new Date()
+            });
+        }
+        
+        async function loadBidHistory() {
+            const bids = await db.collection('bids').where('userId', '==', currentUser.uid).orderBy('createdAt', 'desc').get();
+            const table = document.getElementById('bidHistoryTable');
+            if (bids.empty) { table.innerHTML = '<p style="color:#888;">No bids placed yet</p>'; return; }
+            table.innerHTML = `
+                <table>
+                    <tr><th>Market</th><th>Amount</th><th>Status</th><th>Date</th></tr>
+                    ${bids.docs.map(doc => `
+                        <tr>
+                            <td>${doc.data().marketName}</td>
+                            <td>₹${doc.data().amount}</td>
+                            <td>${doc.data().status}</td>
+                            <td>${doc.data().createdAt?.toDate().toLocaleString() || 'Pending'}</td>
+                        </tr>
+                    `).join('')}
+                </table>
+            `;
+        }
+        
+        async function loadTransactions() {
+            const transactions = await db.collection('transactions').where('userId', '==', currentUser.uid).orderBy('date', 'desc').get();
+            const table = document.getElementById('transactionsTable');
+            if (transactions.empty) { table.innerHTML = '<p style="color:#888;">No transactions yet</p>'; return; }
+            table.innerHTML = `
+                <table>
+                    <tr><th>Type</th><th>Amount</th><th>Description</th><th>Date</th></tr>
+                    ${transactions.docs.map(doc => `
+                        <tr>
+                            <td style="color:${doc.data().type === 'credit' ? '#4caf50' : '#f44336'}">${doc.data().type === 'credit' ? '+' : '-'}</td>
+                            <td>₹${doc.data().amount}</td>
+                            <td>${doc.data().description}</td>
+                            <td>${doc.data().date?.toDate().toLocaleString() || 'Pending'}</td>
+                        </tr>
+                    `).join('')}
+                </table>
+            `;
+        }
+        
+        // Navigation
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+                const page = item.dataset.page;
+                document.getElementById('pageTitle').innerText = item.querySelector('span:last-child')?.innerText || page;
+                document.getElementById('marketsPage').classList.add('hidden');
+                document.getElementById('depositPage').classList.add('hidden');
+                document.getElementById('withdrawPage').classList.add('hidden');
+                document.getElementById('bankPage').classList.add('hidden');
+                document.getElementById('bidHistoryPage').classList.add('hidden');
+                document.getElementById('transactionsPage').classList.add('hidden');
+                document.getElementById(`${page}Page`).classList.remove('hidden');
+                if (page === 'bid-history') loadBidHistory();
+                if (page === 'transactions') loadTransactions();
+                if (page === 'markets') renderMarkets();
+            });
+        });
+        
+        // Deposit
+        document.getElementById('depositBtn')?.addEventListener('click', async () => {
+            const amount = parseInt(document.getElementById('depositAmount').value);
+            if (!amount || amount <= 0) { document.getElementById('depositMsg').innerText = 'Enter valid amount'; return; }
+            const newBalance = (userData.balance || 0) + amount;
+            await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
+            await addTransaction('credit', amount, 'Deposit');
+            await loadUserData();
+            document.getElementById('depositMsg').innerHTML = '<span style="color:#4caf50;">✅ Deposit successful!</span>';
+            document.getElementById('depositAmount').value = '';
+            setTimeout(() => document.getElementById('depositMsg').innerHTML = '', 3000);
+        });
+        
+        // Withdraw
+        document.getElementById('withdrawBtn')?.addEventListener('click', async () => {
+            const amount = parseInt(document.getElementById('withdrawAmount').value);
+            if (!amount || amount <= 0) { document.getElementById('withdrawMsg').innerText = 'Enter valid amount'; return; }
+            if (!userData.bankDetails) { document.getElementById('withdrawMsg').innerHTML = '<span style="color:#f44336;">❌ Please add bank details first</span>'; return; }
+            if (userData.balance < amount) { document.getElementById('withdrawMsg').innerHTML = '<span style="color:#f44336;">❌ Insufficient balance</span>'; return; }
+            const newBalance = userData.balance - amount;
+            await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
+            await addTransaction('debit', amount, 'Withdrawal Request');
+            await loadUserData();
+            document.getElementById('withdrawMsg').innerHTML = '<span style="color:#4caf50;">✅ Withdrawal request submitted!</span>';
+            document.getElementById('withdrawAmount').value = '';
+            setTimeout(() => document.getElementById('withdrawMsg').innerHTML = '', 3000);
+        });
+        
+        // Save Bank Details
+        document.getElementById('saveBankBtn')?.addEventListener('click', async () => {
+            const bankDetails = {
+                accountName: document.getElementById('accountName').value,
+                accountNumber: document.getElementById('accountNumber').value,
+                ifscCode: document.getElementById('ifscCode').value
+            };
+            if (!bankDetails.accountName || !bankDetails.accountNumber || !bankDetails.ifscCode) {
+                document.getElementById('bankMsg').innerHTML = '<span style="color:#f44336;">❌ Please fill all fields</span>';
+                return;
+            }
+            await db.collection('users').doc(currentUser.uid).update({ bankDetails: bankDetails });
+            document.getElementById('bankMsg').innerHTML = '<span style="color:#4caf50;">✅ Bank details saved!</span>';
+            setTimeout(() => document.getElementById('bankMsg').innerHTML = '', 3000);
+        });
+        
+        document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+            await auth.signOut();
+            window.location.href = 'index.html';
+        });
+        
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) window.location.href = 'index.html';
+            else { await loadUserData(); renderMarkets(); setInterval(() => renderMarkets(), 60000); }
+        });
+    </script>
+</body>
+</html>
