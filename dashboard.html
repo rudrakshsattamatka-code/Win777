@@ -12,79 +12,157 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', 'Poppins', sans-serif;
         }
 
         body {
             background: #0a0a0f;
             min-height: 100vh;
-            position: relative;
+            overflow-x: hidden;
         }
 
-        /* Animated Background */
-        .bg-particles {
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: -280px;
+            top: 0;
+            width: 280px;
+            height: 100%;
+            background: linear-gradient(180deg, #0f0f1a 0%, #1a1a2e 100%);
+            z-index: 1000;
+            transition: 0.3s;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.5);
+            overflow-y: auto;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,152,0,0.3);
+            background: linear-gradient(135deg, rgba(255,152,0,0.1), transparent);
+        }
+
+        .sidebar-header h2 {
+            color: #ff9800;
+            font-size: 28px;
+        }
+
+        .sidebar-header p {
+            color: #888;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+
+        .user-info-sidebar {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .user-avatar-large {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ff9800, #ff5722);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 28px;
+        }
+
+        .user-name-sidebar {
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-phone-sidebar {
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        .sidebar-menu {
+            padding: 10px 0;
+        }
+
+        .sidebar-item {
+            padding: 14px 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #aaa;
+            cursor: pointer;
+            transition: 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background: rgba(255,152,0,0.1);
+            color: #ff9800;
+            border-left-color: #ff9800;
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 20px;
+        }
+
+        .app-version {
+            color: #666;
+            font-size: 11px;
+            text-align: center;
+        }
+
+        /* Overlay */
+        .overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 0;
-            overflow: hidden;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+            display: none;
         }
 
-        .particle {
-            position: absolute;
-            background: radial-gradient(circle, rgba(255,152,0,0.15), transparent);
-            border-radius: 50%;
-            animation: floatParticle 20s infinite ease-in-out;
+        .overlay.active {
+            display: block;
         }
 
-        @keyframes floatParticle {
-            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
-            25% { transform: translateY(-80px) translateX(40px); opacity: 0.6; }
-            50% { transform: translateY(-160px) translateX(-40px); opacity: 0.3; }
-            75% { transform: translateY(-80px) translateX(40px); opacity: 0.6; }
+        /* Menu Button */
+        .menu-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 100;
+            background: #1e1e2e;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            color: #ff9800;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Main Container */
-        .container {
-            position: relative;
-            z-index: 1;
+        /* Main Content */
+        .main-content {
+            padding: 70px 15px 20px 15px;
             max-width: 500px;
             margin: 0 auto;
-            padding: 15px;
-            padding-bottom: 30px;
         }
 
-        /* Top Header */
-        .top-header {
-            background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
-            border-radius: 25px;
-            padding: 20px;
-            margin-bottom: 20px;
-            text-align: center;
-            border: 1px solid rgba(255,152,0,0.2);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-
-        .top-header h1 {
-            color: #ff9800;
-            font-size: 32px;
-            letter-spacing: 3px;
-        }
-
-        .top-header h1 span {
-            color: #ff5722;
-        }
-
-        .top-header p {
-            color: #aaa;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-
-        /* User Bar */
-        .user-bar {
+        /* Top Bar */
+        .top-bar {
             background: rgba(26,26,46,0.95);
             backdrop-filter: blur(10px);
             border-radius: 20px;
@@ -96,119 +174,60 @@
             border: 1px solid rgba(255,152,0,0.2);
         }
 
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
+        .balance-card {
             background: linear-gradient(135deg, #ff9800, #ff5722);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        .user-details {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .user-name {
+            padding: 8px 16px;
+            border-radius: 30px;
             color: white;
-            font-size: 14px;
             font-weight: bold;
+            font-size: 14px;
         }
 
-        .user-balance {
-            color: #ff9800;
-            font-size: 12px;
-        }
-
-        .logout-btn {
-            background: rgba(244,67,54,0.2);
-            border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            color: #ff6b6b;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        /* Menu Buttons */
-        .menu-buttons {
+        /* Menu Buttons Row */
+        .menu-row {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
             margin-bottom: 25px;
         }
 
-        .menu-btn {
+        .menu-item {
             background: linear-gradient(135deg, #1a1a2e, #0f0f1a);
             border: 1px solid rgba(255,152,0,0.3);
             border-radius: 16px;
             padding: 12px 5px;
             text-align: center;
             cursor: pointer;
-            transition: 0.2s;
         }
 
-        .menu-btn span {
+        .menu-item span {
             font-size: 24px;
             display: block;
             margin-bottom: 5px;
         }
 
-        .menu-btn p {
+        .menu-item p {
             color: #ff9800;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
         }
 
-        .menu-btn:active {
-            transform: scale(0.95);
-        }
-
-        .menu-btn.whatsapp {
+        .menu-item.whatsapp {
             background: linear-gradient(135deg, #075e54, #128c7e);
-            border-color: #25D366;
         }
 
-        .menu-btn.call {
+        .menu-item.call {
             background: linear-gradient(135deg, #1a5d1a, #2e7d32);
-            border-color: #4caf50;
         }
 
         /* Section Title */
         .section-title {
-            display: flex;
-            align-items: baseline;
-            gap: 10px;
             margin-bottom: 15px;
-            flex-wrap: wrap;
         }
 
         .section-title h2 {
             color: white;
             font-size: 18px;
-        }
-
-        .section-title h3 {
-            color: #ff9800;
-            font-size: 14px;
-            font-weight: normal;
-        }
-
-        .new-badge {
-            background: #ff5722;
-            color: white;
-            font-size: 10px;
-            padding: 3px 8px;
-            border-radius: 20px;
         }
 
         /* Market Card */
@@ -220,7 +239,6 @@
             border: 1px solid rgba(255,152,0,0.15);
             position: relative;
             overflow: hidden;
-            transition: 0.2s;
         }
 
         .market-card::before {
@@ -238,35 +256,35 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
+            flex-wrap: wrap;
         }
 
         .market-name {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #ff9800;
         }
 
         .market-numbers {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: bold;
             color: white;
-            letter-spacing: 2px;
         }
 
         .market-timing {
             color: #aaa;
-            font-size: 12px;
+            font-size: 11px;
             margin-bottom: 10px;
             display: flex;
             gap: 15px;
+            flex-wrap: wrap;
         }
 
         .market-status {
             display: inline-block;
-            font-size: 11px;
-            padding: 4px 12px;
+            font-size: 10px;
+            padding: 3px 10px;
             border-radius: 20px;
-            margin-top: 10px;
         }
 
         .status-open {
@@ -281,44 +299,52 @@
             border: 1px solid #f44336;
         }
 
-        /* Bid Section */
-        .bid-section {
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid rgba(255,152,0,0.2);
-        }
-
-        .bid-input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .bid-input {
-            flex: 1;
-            padding: 12px;
-            background: #0a0a0f;
-            border: 1px solid #333;
-            border-radius: 12px;
-            color: white;
-            font-size: 14px;
-        }
-
-        .bid-btn {
-            width: 100%;
-            padding: 12px;
+        .play-btn {
+            margin-top: 12px;
             background: linear-gradient(135deg, #ff9800, #ff5722);
             border: none;
+            padding: 10px;
             border-radius: 12px;
             color: white;
             font-weight: bold;
             cursor: pointer;
-            font-size: 14px;
+            width: 100%;
+            font-size: 12px;
         }
 
-        .bid-btn:disabled {
+        .play-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+
+        /* Footer */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1a1a2e;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px;
+            border-top: 1px solid rgba(255,152,0,0.2);
+            z-index: 100;
+        }
+
+        .nav-item {
+            text-align: center;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .nav-item.active {
+            color: #ff9800;
+        }
+
+        .nav-item span {
+            font-size: 22px;
+            display: block;
         }
 
         /* Modal */
@@ -329,8 +355,8 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
+            background: rgba(0,0,0,0.9);
+            z-index: 2000;
             justify-content: center;
             align-items: center;
         }
@@ -383,100 +409,77 @@
             font-weight: bold;
         }
 
-        /* CDIDEVI Footer */
-        .footer {
-            text-align: center;
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        .footer p {
-            color: #ff9800;
-            font-size: 12px;
-            letter-spacing: 2px;
-        }
-
         .hidden {
             display: none;
-        }
-
-        /* Transaction Modal */
-        .transaction-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .transaction-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            color: #ddd;
-            font-size: 12px;
         }
     </style>
 </head>
 <body>
-    <div class="bg-particles" id="bgParticles"></div>
+    <button class="menu-btn" id="menuBtn">☰</button>
 
-    <div class="container">
-        <!-- Header -->
-        <div class="top-header">
-            <h1>WIN<span>777</span></h1>
-            <p>Matka Live Now on WIN777!</p>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>WIN777</h2>
+            <p>Matka Platform</p>
+        </div>
+        <div class="user-info-sidebar" id="sidebarUserInfo">
+            <div class="user-avatar-large">👤</div>
+            <div class="user-name-sidebar" id="sidebarUserName">Loading...</div>
+            <div class="user-phone-sidebar" id="sidebarUserPhone">Loading...</div>
+        </div>
+        <div class="sidebar-menu">
+            <div class="sidebar-item" onclick="navigateTo('profile')">👤 My Profile</div>
+            <div class="sidebar-item" onclick="navigateTo('mpin')">🔐 Change MPIN</div>
+            <div class="sidebar-item" onclick="navigateTo('charts')">📊 Charts</div>
+            <div class="sidebar-item" onclick="navigateTo('notifications')">🔔 Notifications</div>
+            <div class="sidebar-item" onclick="navigateTo('howtoplay')">📖 How to Play</div>
+            <div class="sidebar-item" onclick="navigateTo('ideas')">💡 User's Idea</div>
+            <div class="sidebar-item" onclick="navigateTo('gamerates')">🎮 Games Rates</div>
+            <div class="sidebar-item" onclick="navigateTo('privacy')">🔒 Privacy Policy</div>
+            <div class="sidebar-item" onclick="navigateTo('terms')">📜 Terms & Conditions</div>
+            <div class="sidebar-item" onclick="navigateTo('settings')">⚙️ Setting</div>
+            <div class="sidebar-item" onclick="shareApp()">📤 Share Application</div>
+            <div class="sidebar-item" onclick="toggleDarkMode()">🌙 Dark Mode</div>
+            <div class="sidebar-item" id="logoutSidebar" style="color:#f44336;">🚪 Logout</div>
+        </div>
+        <div class="sidebar-footer">
+            <div class="app-version">App Version 1.0.4</div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="balance-card">💰 ₹<span id="userBalance">0</span></div>
         </div>
 
-        <!-- User Bar -->
-        <div class="user-bar">
-            <div class="user-info">
-                <div class="user-avatar">👤</div>
-                <div class="user-details">
-                    <span class="user-name" id="userName">Loading...</span>
-                    <span class="user-balance">💰 ₹<span id="userBalance">0</span></span>
-                </div>
-            </div>
-            <button class="logout-btn" id="logoutBtn">Logout</button>
+        <div class="menu-row">
+            <div class="menu-item" onclick="openDeposit()"><span>💰</span><p>Deposit</p></div>
+            <div class="menu-item" onclick="openWithdraw()"><span>💸</span><p>Withdraw</p></div>
+            <div class="menu-item whatsapp" onclick="openWhatsApp()"><span>📱</span><p>WhatsApp</p></div>
+            <div class="menu-item call" onclick="openCall()"><span>📞</span><p>Call Us</p></div>
         </div>
 
-        <!-- Menu Buttons -->
-        <div class="menu-buttons">
-            <div class="menu-btn" onclick="openDeposit()">
-                <span>💰</span>
-                <p>Deposit</p>
-            </div>
-            <div class="menu-btn" onclick="openWithdraw()">
-                <span>💸</span>
-                <p>Withdraw</p>
-            </div>
-            <div class="menu-btn whatsapp" onclick="openWhatsApp()">
-                <span>📱</span>
-                <p>WhatsApp</p>
-            </div>
-            <div class="menu-btn call" onclick="openCall()">
-                <span>📞</span>
-                <p>Call Us</p>
-            </div>
-        </div>
-
-        <!-- Main Markets Section -->
         <div class="section-title">
             <h2>Main Markets</h2>
-            <div class="new-badge">NEW</div>
         </div>
 
-        <!-- Markets List -->
         <div id="marketsList"></div>
+    </div>
 
-        <!-- Footer -->
-        <div class="footer">
-            <p>WIN777</p>
-        </div>
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="scrollToSection('markets')"><span>🏠</span><p>Home</p></div>
+        <div class="nav-item" onclick="scrollToSection('history')"><span>📋</span><p>History</p></div>
+        <div class="nav-item" onclick="openJackpot()"><span>🎰</span><p>Jackpot</p></div>
+        <div class="nav-item" onclick="scrollToSection('play')"><span>🎮</span><p>Play</p></div>
     </div>
 
     <!-- Deposit Modal -->
     <div id="depositModal" class="modal">
-        <div class="modal-content">
-            <h3>💰 Deposit Money</h3>
+        <div class="modal-content"><h3>💰 Deposit Money</h3>
             <input type="number" id="depositAmount" placeholder="Enter amount (₹)">
             <div class="modal-buttons">
                 <button class="close-modal" onclick="closeDeposit()">Cancel</button>
@@ -488,27 +491,13 @@
 
     <!-- Withdraw Modal -->
     <div id="withdrawModal" class="modal">
-        <div class="modal-content">
-            <h3>💸 Withdraw Money</h3>
+        <div class="modal-content"><h3>💸 Withdraw Money</h3>
             <input type="number" id="withdrawAmount" placeholder="Enter amount (₹)">
             <div class="modal-buttons">
                 <button class="close-modal" onclick="closeWithdraw()">Cancel</button>
                 <button class="confirm-modal" onclick="confirmWithdraw()">Withdraw</button>
             </div>
             <div id="withdrawMsg" style="color:#f44336; font-size:12px; margin-top:10px;"></div>
-        </div>
-    </div>
-
-    <!-- Bid Modal -->
-    <div id="bidModal" class="modal">
-        <div class="modal-content">
-            <h3 id="bidModalTitle">Place Bid</h3>
-            <input type="number" id="bidAmount" placeholder="Enter bid amount (₹)">
-            <div class="modal-buttons">
-                <button class="close-modal" onclick="closeBidModal()">Cancel</button>
-                <button class="confirm-modal" onclick="confirmBid()">Place Bid</button>
-            </div>
-            <div id="bidMsg" style="color:#f44336; font-size:12px; margin-top:10px;"></div>
         </div>
     </div>
 
@@ -528,77 +517,48 @@
         
         let currentUser = null;
         let userData = null;
-        let selectedMarket = null;
         
-        // Create animated background particles
-        for (let i = 0; i < 30; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.width = Math.random() * 200 + 50 + 'px';
-            particle.style.height = particle.style.width;
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.top = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 20 + 's';
-            particle.style.animationDuration = Math.random() * 25 + 15 + 's';
-            document.getElementById('bgParticles').appendChild(particle);
+        // All Markets Data
+        const markets = [
+            { name: 'SHREE GANESH', numbers: '340-76-349', openTime: '09:00 AM', closeTime: '10:00 AM', status: 'closed' },
+            { name: 'OMKAR MORNING', numbers: '126-92-570', openTime: '09:40 AM', closeTime: '10:40 AM', status: 'closed' },
+            { name: 'GOA MORNING', numbers: '244-01-678', openTime: '10:15 AM', closeTime: '12:15 PM', status: 'closed' },
+            { name: 'SRIDEVI', numbers: '148-31-155', openTime: '11:40 AM', closeTime: '12:40 PM', status: 'closed' },
+            { name: 'TIME BAZAR', numbers: '990-86-150', openTime: '01:05 PM', closeTime: '02:05 PM', status: 'closed' },
+            { name: 'MADHUR DAY', numbers: '690-58-459', openTime: '01:35 PM', closeTime: '02:35 PM', status: 'closed' },
+            { name: 'GOA DAY', numbers: '330-64-356', openTime: '02:00 PM', closeTime: '04:00 PM', status: 'closed' },
+            { name: 'MILAN DAY', numbers: '257-4*-*##', openTime: '03:05 PM', closeTime: '05:05 PM', status: 'running' },
+            { name: 'RAJDHANI DAY', numbers: '160-7*-**#', openTime: '03:10 PM', closeTime: '05:10 PM', status: 'running' },
+            { name: 'OMKAR DAY', numbers: '122-5*-***', openTime: '03:30 PM', closeTime: '05:30 PM', status: 'running' },
+            { name: 'KALYAN', numbers: '127-0*-***', openTime: '03:45 PM', closeTime: '05:45 PM', status: 'running' },
+            { name: 'SRIDEVI NIGHT', numbers: 'HHH _ HH _ HHH', openTime: '07:20 PM', closeTime: '08:20 PM', status: 'open' },
+            { name: 'MADHUR NIGHT', numbers: 'HHH _ HH _ HHH', openTime: '08:30 PM', closeTime: '10:30 PM', status: 'open' },
+            { name: 'GOA NIGHT', numbers: 'HHH _ HH _ HHH', openTime: '08:50 PM', closeTime: '10:50 PM', status: 'open' },
+            { name: 'MILAN NIGHT', numbers: 'HHH _ HH _ HHH', openTime: '09:05 PM', closeTime: '11:05 PM', status: 'open' },
+            { name: 'OMKAR NIGHT', numbers: 'HHH _ HH _ HHH', openTime: '09:05 PM', closeTime: '11:05 PM', status: 'open' },
+            { name: 'KALYAN NIGHT', numbers: 'HHH _ HH _ HHH', openTime: '09:35 PM', closeTime: '11:35 PM', status: 'open' },
+            { name: 'RAJDHANI NIGHT', numbers: 'HH _ HH _ HHH', openTime: '09:36 PM', closeTime: '11:42 PM', status: 'open' },
+            { name: 'MAIN BAZAR', numbers: 'HH _ HH _ HHH', openTime: '09:55 PM', closeTime: '11:59 PM', status: 'open' }
+        ];
+        
+        function getStatusText(status) {
+            if (status === 'open') return '🟢 Open Now';
+            if (status === 'running') return '🟡 Running for Open';
+            return '🔴 Closed for Today';
         }
         
-        // Market data
-        let markets = [
-            { 
-                id: 'm1', 
-                name: 'SHREE GANESH', 
-                numbers: '340-76-349',
-                openTime: '09:00 AM', 
-                closeTime: '10:00 AM', 
-                status: 'closed' 
-            },
-            { 
-                id: 'm2', 
-                name: 'OMKAR MORNING', 
-                numbers: '126-92-570',
-                openTime: '09:40 AM', 
-                closeTime: '10:40 AM', 
-                status: 'closed' 
-            },
-            { 
-                id: 'm3', 
-                name: 'GOA MORNING', 
-                numbers: '244-01-678',
-                openTime: '10:15 AM', 
-                closeTime: '12:15 PM', 
-                status: 'closed' 
-            },
-            { 
-                id: 'm4', 
-                name: 'KALYAN MORNING', 
-                numbers: '123-45-678',
-                openTime: '11:00 AM', 
-                closeTime: '01:00 PM', 
-                status: 'open' 
-            },
-            { 
-                id: 'm5', 
-                name: 'RAJDHANI DAY', 
-                numbers: '234-56-789',
-                openTime: '12:00 PM', 
-                closeTime: '02:00 PM', 
-                status: 'open' 
-            },
-            { 
-                id: 'm6', 
-                name: 'MAIN BAZAR', 
-                numbers: '345-67-890',
-                openTime: '03:00 PM', 
-                closeTime: '05:00 PM', 
-                status: 'open' 
-            }
-        ];
+        function getStatusClass(status) {
+            if (status === 'open') return 'status-open';
+            if (status === 'running') return 'status-open';
+            return 'status-closed';
+        }
+        
+        function isPlayable(status) {
+            return status === 'open' || status === 'running';
+        }
         
         function renderMarkets() {
             const container = document.getElementById('marketsList');
-            if (!container) return;
-            
             container.innerHTML = markets.map(market => `
                 <div class="market-card">
                     <div class="market-header">
@@ -610,129 +570,19 @@
                         <span>⏰ Close Bids: ${market.closeTime}</span>
                     </div>
                     <div>
-                        <span class="market-status ${market.status === 'open' ? 'status-open' : 'status-closed'}">
-                            ${market.status === 'open' ? '🟢 Open Now' : '🔴 Closed for Today'}
+                        <span class="market-status ${getStatusClass(market.status)}">
+                            ${getStatusText(market.status)}
                         </span>
                     </div>
-                    ${market.status === 'open' ? `
-                        <div class="bid-section">
-                            <div class="bid-input-group">
-                                <input type="number" id="bid-${market.id}" class="bid-input" placeholder="Enter bid amount (₹)">
-                            </div>
-                            <button class="bid-btn" onclick="openBidModal('${market.id}', '${market.name}')">Place Bid</button>
-                        </div>
-                    ` : ''}
+                    <button class="play-btn" ${!isPlayable(market.status) ? 'disabled' : ''} onclick="placeBid('${market.name}')">
+                        ${isPlayable(market.status) ? '🎲 Play' : 'Closed for Today'}
+                    </button>
                 </div>
             `).join('');
         }
         
-        function openBidModal(marketId, marketName) {
-            selectedMarket = { id: marketId, name: marketName };
-            document.getElementById('bidModalTitle').innerHTML = `🎲 ${marketName}`;
-            document.getElementById('bidAmount').value = '';
-            document.getElementById('bidMsg').innerHTML = '';
-            document.getElementById('bidModal').style.display = 'flex';
-        }
-        
-        function closeBidModal() {
-            document.getElementById('bidModal').style.display = 'none';
-            selectedMarket = null;
-        }
-        
-        async function confirmBid() {
-            const amount = parseInt(document.getElementById('bidAmount').value);
-            
-            if (!amount || amount <= 0) {
-                document.getElementById('bidMsg').innerHTML = 'Enter valid amount';
-                return;
-            }
-            if (!currentUser) return;
-            if (userData.balance < amount) {
-                document.getElementById('bidMsg').innerHTML = 'Insufficient balance!';
-                return;
-            }
-            
-            const newBalance = userData.balance - amount;
-            
-            await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
-            await db.collection('bids').add({
-                userId: currentUser.uid,
-                marketId: selectedMarket.id,
-                marketName: selectedMarket.name,
-                amount: amount,
-                status: 'pending',
-                createdAt: new Date()
-            });
-            await addTransaction('debit', amount, `Bid on ${selectedMarket.name}`);
-            await loadUserData();
-            
-            alert(`✅ Bid placed successfully!\nAmount: ₹${amount}\nMarket: ${selectedMarket.name}`);
-            closeBidModal();
-            document.getElementById(`bid-${selectedMarket.id}`).value = '';
-        }
-        
-        function openDeposit() {
-            document.getElementById('depositAmount').value = '';
-            document.getElementById('depositMsg').innerHTML = '';
-            document.getElementById('depositModal').style.display = 'flex';
-        }
-        
-        function closeDeposit() {
-            document.getElementById('depositModal').style.display = 'none';
-        }
-        
-        async function confirmDeposit() {
-            const amount = parseInt(document.getElementById('depositAmount').value);
-            if (!amount || amount <= 0) {
-                document.getElementById('depositMsg').innerHTML = 'Enter valid amount';
-                return;
-            }
-            
-            const newBalance = (userData.balance || 0) + amount;
-            await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
-            await addTransaction('credit', amount, 'Deposit');
-            await loadUserData();
-            
-            document.getElementById('depositMsg').innerHTML = '<span style="color:#4caf50;">✅ Deposit successful!</span>';
-            setTimeout(() => closeDeposit(), 1500);
-        }
-        
-        function openWithdraw() {
-            document.getElementById('withdrawAmount').value = '';
-            document.getElementById('withdrawMsg').innerHTML = '';
-            document.getElementById('withdrawModal').style.display = 'flex';
-        }
-        
-        function closeWithdraw() {
-            document.getElementById('withdrawModal').style.display = 'none';
-        }
-        
-        async function confirmWithdraw() {
-            const amount = parseInt(document.getElementById('withdrawAmount').value);
-            if (!amount || amount <= 0) {
-                document.getElementById('withdrawMsg').innerHTML = 'Enter valid amount';
-                return;
-            }
-            if (userData.balance < amount) {
-                document.getElementById('withdrawMsg').innerHTML = 'Insufficient balance';
-                return;
-            }
-            
-            const newBalance = userData.balance - amount;
-            await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
-            await addTransaction('debit', amount, 'Withdrawal Request');
-            await loadUserData();
-            
-            document.getElementById('withdrawMsg').innerHTML = '<span style="color:#4caf50;">✅ Withdrawal request submitted!</span>';
-            setTimeout(() => closeWithdraw(), 1500);
-        }
-        
-        function openWhatsApp() {
-            window.open('https://wa.me/919876543210', '_blank');
-        }
-        
-        function openCall() {
-            window.location.href = 'tel:+919876543210';
+        function placeBid(marketName) {
+            alert(`Bid on ${marketName} - Feature coming soon!`);
         }
         
         async function loadUserData() {
@@ -742,20 +592,70 @@
             const userDoc = await db.collection('users').doc(user.uid).get();
             userData = userDoc.data();
             document.getElementById('userBalance').innerText = userData?.balance || 0;
-            document.getElementById('userName').innerHTML = userData?.name || 'User';
+            document.getElementById('sidebarUserName').innerHTML = userData?.name || 'User';
+            document.getElementById('sidebarUserPhone').innerHTML = userData?.phone || 'No phone';
         }
         
-        async function addTransaction(type, amount, description) {
-            await db.collection('transactions').add({
-                userId: currentUser.uid,
-                type: type,
-                amount: amount,
-                description: description,
-                date: new Date()
-            });
+        // Navigation functions
+        function navigateTo(page) {
+            closeSidebar();
+            if (page === 'profile') window.location.href = 'profile.html';
+            else if (page === 'mpin') window.location.href = 'mpin.html';
+            else if (page === 'gamerates') window.location.href = 'gamerates.html';
+            else alert(`${page} page - Coming soon!`);
         }
         
-        document.getElementById('logoutBtn')?.addEventListener('click', async () => {
+        function shareApp() {
+            if (navigator.share) {
+                navigator.share({ title: 'WIN777', url: window.location.href });
+            } else {
+                alert('Copy link: ' + window.location.href);
+            }
+        }
+        
+        function toggleDarkMode() { alert('Dark mode toggled'); }
+        function scrollToSection(section) { alert(`Scrolling to ${section}`); }
+        function openJackpot() { alert('Jackpot feature coming soon!'); }
+        
+        function openDeposit() { document.getElementById('depositModal').style.display = 'flex'; }
+        function closeDeposit() { document.getElementById('depositModal').style.display = 'none'; }
+        function openWithdraw() { document.getElementById('withdrawModal').style.display = 'flex'; }
+        function closeWithdraw() { document.getElementById('withdrawModal').style.display = 'none'; }
+        function openWhatsApp() { window.open('https://wa.me/919876543210', '_blank'); }
+        function openCall() { window.location.href = 'tel:+919876543210'; }
+        
+        async function confirmDeposit() {
+            const amount = parseInt(document.getElementById('depositAmount').value);
+            if (!amount || amount <= 0) { document.getElementById('depositMsg').innerHTML = 'Enter valid amount'; return; }
+            const newBalance = (userData.balance || 0) + amount;
+            await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
+            await loadUserData();
+            document.getElementById('depositMsg').innerHTML = '<span style="color:#4caf50;">✅ Deposit successful!</span>';
+            setTimeout(() => closeDeposit(), 1500);
+        }
+        
+        async function confirmWithdraw() {
+            const amount = parseInt(document.getElementById('withdrawAmount').value);
+            if (!amount || amount <= 0) { document.getElementById('withdrawMsg').innerHTML = 'Enter valid amount'; return; }
+            if (userData.balance < amount) { document.getElementById('withdrawMsg').innerHTML = 'Insufficient balance'; return; }
+            const newBalance = userData.balance - amount;
+            await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
+            await loadUserData();
+            document.getElementById('withdrawMsg').innerHTML = '<span style="color:#4caf50;">✅ Withdrawal request submitted!</span>';
+            setTimeout(() => closeWithdraw(), 1500);
+        }
+        
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.remove('active');
+        }
+        
+        document.getElementById('menuBtn').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        });
+        document.getElementById('overlay').addEventListener('click', closeSidebar);
+        document.getElementById('logoutSidebar').addEventListener('click', async () => {
             await auth.signOut();
             window.location.href = 'index.html';
         });
