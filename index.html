@@ -142,12 +142,12 @@
         /* Logo Section */
         .logo-section {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .logo-img {
-            width: 140px;
-            height: 140px;
+            width: 130px;
+            height: 130px;
             object-fit: contain;
             display: block;
             margin: 0 auto;
@@ -163,29 +163,37 @@
         /* Trust Badge */
         .trust-badge {
             text-align: center;
-            margin-top: 8px;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
 
-        .trust-text {
-            font-size: 13px;
-            color: #666;
-            letter-spacing: 1px;
-            display: inline-block;
-            padding: 6px 16px;
-            background: linear-gradient(135deg, #667eea15, #764ba215);
-            border-radius: 40px;
-            font-weight: 500;
-        }
-
-        .trust-text span {
-            color: #667eea;
+        .trust-main {
+            font-size: 14px;
             font-weight: 600;
+            color: #333;
+            letter-spacing: 0.5px;
+        }
+
+        .trust-main span {
+            color: #667eea;
+        }
+
+        .trust-features {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 6px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .trust-features span {
+            color: #4caf50;
+            margin-right: 3px;
         }
 
         /* Input Section */
         .input-section {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .input-label {
@@ -196,56 +204,50 @@
             display: block;
         }
 
-        /* Country Selector Box */
-        .country-selector-box {
-            display: flex;
-            align-items: center;
-            gap: 12px;
+        /* Country Select Box */
+        .country-box {
+            width: 100%;
+            padding: 15px 16px;
             background: white;
             border: 1.5px solid #e8e8e8;
             border-radius: 20px;
-            padding: 4px;
+            font-size: 16px;
+            color: #333;
+            outline: none;
             transition: all 0.3s ease;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 20px;
         }
 
-        .country-selector-box:focus-within {
+        .country-box:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        .country-code-select {
-            width: 100px;
-            padding: 15px 10px;
-            background: #f8f8f8;
-            border: none;
-            border-radius: 16px;
-            font-size: 15px;
-            font-weight: 500;
-            color: #333;
-            outline: none;
-            cursor: pointer;
-            text-align: center;
-        }
-
-        .phone-input {
-            flex: 1;
-            padding: 15px 12px;
-            background: transparent;
-            border: none;
+        /* Phone Input Box */
+        .phone-box {
+            width: 100%;
+            padding: 15px 16px;
+            background: white;
+            border: 1.5px solid #e8e8e8;
+            border-radius: 20px;
             font-size: 16px;
             color: #333;
             outline: none;
+            transition: all 0.3s ease;
         }
 
-        .phone-input::placeholder {
+        .phone-box:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .phone-box::placeholder {
             color: #bbb;
-        }
-
-        .example-text {
-            font-size: 12px;
-            color: #999;
-            margin-top: 8px;
-            margin-left: 8px;
         }
 
         /* Continue Button */
@@ -262,7 +264,7 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
-            margin-top: 8px;
+            margin-top: 10px;
         }
 
         .continue-btn:before {
@@ -469,18 +471,18 @@
         /* Mobile Responsive */
         @media (max-width: 480px) {
             .login-container { padding: 30px 20px; border-radius: 32px; }
-            .logo-img { width: 110px; height: 110px; }
+            .logo-img { width: 100px; height: 100px; }
             .otp-digit { width: 45px; height: 55px; font-size: 22px; }
             .num-btn { padding: 14px; font-size: 22px; border-radius: 18px; }
             .pin-input { width: 170px; font-size: 20px; letter-spacing: 6px; }
             .falling-number { font-size: 36px; }
-            .country-code-select { width: 85px; padding: 12px 8px; font-size: 14px; }
-            .phone-input { padding: 12px 10px; }
+            .trust-main { font-size: 12px; }
+            .trust-features { font-size: 10px; gap: 8px; }
         }
 
         @media (max-width: 380px) {
             .login-container { padding: 25px 16px; }
-            .logo-img { width: 90px; height: 90px; }
+            .logo-img { width: 85px; height: 85px; }
             .otp-digit { width: 40px; height: 50px; font-size: 20px; }
             .num-btn { padding: 12px; font-size: 20px; }
             .falling-number { font-size: 30px; }
@@ -501,34 +503,33 @@
             <div class="logo-fallback" style="display: none;">WIN</div>
         </div>
 
-        <!-- Trust Badge - India's Most Trusted -->
+        <!-- Trust Badge -->
         <div class="trust-badge">
-            <div class="trust-text">
-                🇮🇳 <span>India's Most Trusted</span> • Secure • Easy To Use
+            <div class="trust-main">
+                🇮🇳 <span>India's Most Trusted App</span>
+            </div>
+            <div class="trust-features">
+                <span>✓</span> Secure <span>✓</span> Easy To Use
             </div>
         </div>
 
         <!-- Phone Login Section -->
         <div id="phoneSection">
+            <!-- Box 1: Select Country -->
             <div class="input-section">
-                <label class="input-label">Enter Your Phone Number</label>
-                <div class="country-selector-box">
-                    <select id="countryCode" class="country-code-select">
-                        <option value="+91">🇮🇳 +91</option>
-                        <option value="+1">🇺🇸 +1</option>
-                        <option value="+44">🇬🇧 +44</option>
-                        <option value="+61">🇦🇺 +61</option>
-                        <option value="+971">🇦🇪 +971</option>
-                        <option value="+86">🇨🇳 +86</option>
-                        <option value="+81">🇯🇵 +81</option>
-                        <option value="+49">🇩🇪 +49</option>
-                        <option value="+33">🇫🇷 +33</option>
-                        <option value="+7">🇷🇺 +7</option>
-                    </select>
-                    <input type="tel" id="phoneNumber" class="phone-input" placeholder="9876543210" maxlength="15" inputmode="numeric">
-                </div>
-                <div class="example-text">EX: 98765 43210</div>
+                <label class="input-label">Select Country</label>
+                <select id="countryCode" class="country-box">
+                    <option value="+91">🇮🇳 India (+91)</option>
+                    <option value="+966">🇸🇦 Saudi Arabia (+966)</option>
+                </select>
             </div>
+
+            <!-- Box 2: Enter Mobile Number -->
+            <div class="input-section">
+                <label class="input-label">Enter Mobile Number</label>
+                <input type="tel" id="phoneNumber" class="phone-box" placeholder="Enter your mobile number" maxlength="15" inputmode="numeric">
+            </div>
+
             <button class="continue-btn" id="sendOtpBtn">Continue</button>
             <div id="phoneError" class="error-msg"></div>
         </div>
