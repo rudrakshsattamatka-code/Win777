@@ -250,6 +250,14 @@
             font-weight: bold;
         }
 
+        .menu-item.funds {
+            background: linear-gradient(135deg, #1a5d1a, #2e7d32);
+        }
+
+        .menu-item.funds p {
+            color: white;
+        }
+
         .menu-item.whatsapp {
             background: linear-gradient(135deg, #075e54, #128c7e);
         }
@@ -346,12 +354,6 @@
             background: rgba(76,175,80,0.2);
             color: #4caf50;
             border: 1px solid #4caf50;
-        }
-
-        .status-running {
-            background: rgba(255,193,7,0.2);
-            color: #ffc107;
-            border: 1px solid #ffc107;
         }
 
         .status-closed {
@@ -556,6 +558,10 @@
                 <span>💸</span>
                 <p>Withdraw</p>
             </div>
+            <div class="menu-item funds" onclick="openFunds()">
+                <span>🏦</span>
+                <p>Funds</p>
+            </div>
             <div class="menu-item whatsapp" onclick="openWhatsApp()">
                 <span>📱</span>
                 <p>WhatsApp</p>
@@ -580,13 +586,13 @@
             <span>🏠</span>
             <p>Home</p>
         </div>
-        <div class="nav-item" onclick="scrollToSection('history')">
+        <div class="nav-item" onclick="openHistory()">
             <span>📋</span>
             <p>History</p>
         </div>
-        <div class="nav-item" onclick="openJackpot()">
-            <span>🎰</span>
-            <p>Jackpot</p>
+        <div class="nav-item" onclick="openFunds()">
+            <span>🏦</span>
+            <p>Funds</p>
         </div>
         <div class="nav-item" onclick="scrollToSection('play')">
             <span>🎮</span>
@@ -620,6 +626,23 @@
         </div>
     </div>
 
+    <!-- Funds Modal -->
+    <div id="fundsModal" class="modal">
+        <div class="modal-content">
+            <h3>🏦 Funds Summary</h3>
+            <div style="text-align:center; margin-bottom:15px;">
+                <p style="color:#aaa;">Available Balance</p>
+                <p style="color:#ff9800; font-size:32px; font-weight:bold;">₹<span id="fundsBalance">0</span></p>
+            </div>
+            <div style="margin-bottom:15px;">
+                <p style="color:#aaa;">Total Deposited: ₹<span id="totalDeposited">0</span></p>
+                <p style="color:#aaa;">Total Withdrawn: ₹<span id="totalWithdrawn">0</span></p>
+                <p style="color:#aaa;">Total Bids: ₹<span id="totalBidAmount">0</span></p>
+            </div>
+            <button class="close-modal" onclick="closeFunds()" style="width:100%;">Close</button>
+        </div>
+    </div>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
@@ -650,76 +673,117 @@
             document.getElementById('bgParticles').appendChild(particle);
         }
         
-        // All Markets Data
-        const markets = [
-            { name: 'SHREE GANESH', numbers: '340-76-349', openTime: '09:00 AM', closeTime: '10:00 AM', status: 'closed' },
-            { name: 'OMKAR MORNING', numbers: '126-92-570', openTime: '09:40 AM', closeTime: '10:40 AM', status: 'closed' },
-            { name: 'GOA MORNING', numbers: '244-01-678', openTime: '10:15 AM', closeTime: '12:15 PM', status: 'closed' },
-            { name: 'SRIDEVI', numbers: '148-31-155', openTime: '11:40 AM', closeTime: '12:40 PM', status: 'closed' },
-            { name: 'TIME BAZAR', numbers: '990-86-150', openTime: '01:05 PM', closeTime: '02:05 PM', status: 'closed' },
-            { name: 'MADHUR DAY', numbers: '690-58-459', openTime: '01:35 PM', closeTime: '02:35 PM', status: 'closed' },
-            { name: 'GOA DAY', numbers: '330-64-356', openTime: '02:00 PM', closeTime: '04:00 PM', status: 'closed' },
-            { name: 'MILAN DAY', numbers: '257-4*-*##', openTime: '03:05 PM', closeTime: '05:05 PM', status: 'running' },
-            { name: 'RAJDHANI DAY', numbers: '160-7*-**#', openTime: '03:10 PM', closeTime: '05:10 PM', status: 'running' },
-            { name: 'OMKAR DAY', numbers: '122-5*-***', openTime: '03:30 PM', closeTime: '05:30 PM', status: 'running' },
-            { name: 'KALYAN', numbers: '127-0*-***', openTime: '03:45 PM', closeTime: '05:45 PM', status: 'running' },
-            { name: 'SRIDEVI NIGHT', numbers: 'HHH _ HH _ HHH', openTime: '07:20 PM', closeTime: '08:20 PM', status: 'open' },
-            { name: 'MADHUR NIGHT', numbers: 'HHH _ HH _ HHH', openTime: '08:30 PM', closeTime: '10:30 PM', status: 'open' },
-            { name: 'GOA NIGHT', numbers: 'HHH _ HH _ HHH', openTime: '08:50 PM', closeTime: '10:50 PM', status: 'open' },
-            { name: 'MILAN NIGHT', numbers: 'HHH _ HH _ HHH', openTime: '09:05 PM', closeTime: '11:05 PM', status: 'open' },
-            { name: 'OMKAR NIGHT', numbers: 'HHH _ HH _ HHH', openTime: '09:05 PM', closeTime: '11:05 PM', status: 'open' },
-            { name: 'KALYAN NIGHT', numbers: 'HHH _ HH _ HHH', openTime: '09:35 PM', closeTime: '11:35 PM', status: 'open' },
-            { name: 'RAJDHANI NIGHT', numbers: 'HH _ HH _ HHH', openTime: '09:36 PM', closeTime: '11:42 PM', status: 'open' },
-            { name: 'MAIN BAZAR', numbers: 'HH _ HH _ HHH', openTime: '09:55 PM', closeTime: '11:59 PM', status: 'open' }
-        ];
-        
+        // Market Timings
+        const marketTimings = {
+            'SHREE GANESH': { open: '09:00 AM', close: '10:00 AM', numbers: '340-76-349' },
+            'OMKAR MORNING': { open: '09:40 AM', close: '10:40 AM', numbers: '126-92-570' },
+            'GOA MORNING': { open: '10:15 AM', close: '12:15 PM', numbers: '244-01-678' },
+            'SRIDEVI': { open: '11:40 AM', close: '12:40 PM', numbers: '148-31-155' },
+            'TIME BAZAR': { open: '01:05 PM', close: '02:05 PM', numbers: '990-86-150' },
+            'MADHUR DAY': { open: '01:35 PM', close: '02:35 PM', numbers: '690-58-459' },
+            'GOA DAY': { open: '02:00 PM', close: '04:00 PM', numbers: '330-64-356' },
+            'MILAN DAY': { open: '03:05 PM', close: '05:05 PM', numbers: '257-4*-*##' },
+            'RAJDHANI DAY': { open: '03:10 PM', close: '05:10 PM', numbers: '160-7*-**#' },
+            'OMKAR DAY': { open: '03:30 PM', close: '05:30 PM', numbers: '122-5*-***' },
+            'KALYAN': { open: '03:45 PM', close: '05:45 PM', numbers: '127-0*-***' },
+            'SRIDEVI NIGHT': { open: '07:20 PM', close: '08:20 PM', numbers: 'HHH _ HH _ HHH' },
+            'MADHUR NIGHT': { open: '08:30 PM', close: '10:30 PM', numbers: 'HHH _ HH _ HHH' },
+            'GOA NIGHT': { open: '08:50 PM', close: '10:50 PM', numbers: 'HHH _ HH _ HHH' },
+            'MILAN NIGHT': { open: '09:05 PM', close: '11:05 PM', numbers: 'HHH _ HH _ HHH' },
+            'OMKAR NIGHT': { open: '09:05 PM', close: '11:05 PM', numbers: 'HHH _ HH _ HHH' },
+            'KALYAN NIGHT': { open: '09:35 PM', close: '11:35 PM', numbers: 'HHH _ HH _ HHH' },
+            'RAJDHANI NIGHT': { open: '09:36 PM', close: '11:42 PM', numbers: 'HH _ HH _ HHH' },
+            'MAIN BAZAR': { open: '09:55 PM', close: '11:59 PM', numbers: 'HH _ HH _ HHH' }
+        };
+
+        function parseTime(timeStr) {
+            const date = new Date();
+            let hours = 0, minutes = 0;
+            const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+            if (match) {
+                hours = parseInt(match[1]);
+                minutes = parseInt(match[2]);
+                if (match[3].toUpperCase() === 'PM' && hours !== 12) hours += 12;
+                if (match[3].toUpperCase() === 'AM' && hours === 12) hours = 0;
+            }
+            date.setHours(hours, minutes, 0, 0);
+            return date;
+        }
+
+        function checkMarketStatus(marketName) {
+            const timing = marketTimings[marketName];
+            if (!timing) return 'open';
+            
+            const now = new Date();
+            const closeTime = parseTime(timing.close);
+            const openTime = parseTime(timing.open);
+            
+            // Midnight reset at 12:30 AM
+            const midnightReset = new Date();
+            midnightReset.setHours(0, 30, 0, 0);
+            
+            if (now >= midnightReset && now < openTime) {
+                return 'closed';
+            }
+            
+            if (now >= openTime && now <= closeTime) {
+                return 'open';
+            }
+            
+            return 'closed';
+        }
+
         function getStatusText(status) {
             if (status === 'open') return '🟢 Open Now';
-            if (status === 'running') return '🟡 Running for Open';
             return '🔴 Closed for Today';
         }
-        
+
         function getStatusClass(status) {
-            if (status === 'open') return 'status-open';
-            if (status === 'running') return 'status-running';
-            return 'status-closed';
+            return status === 'open' ? 'status-open' : 'status-closed';
         }
-        
+
         function isPlayable(status) {
-            return status === 'open' || status === 'running';
+            return status === 'open';
         }
-        
-        // Redirect to betting page with market name
+
         function placeBid(marketName) {
+            if (checkMarketStatus(marketName) === 'closed') {
+                alert('Market is closed! Come back tomorrow at 12:30 AM');
+                return;
+            }
             window.location.href = `betting.html?market=${encodeURIComponent(marketName)}`;
         }
-        
+
         function renderMarkets() {
             const container = document.getElementById('marketsList');
             if (!container) return;
             
-            container.innerHTML = markets.map(market => `
-                <div class="market-card">
-                    <div class="market-header">
-                        <span class="market-name">${market.name}</span>
-                        <span class="market-numbers">${market.numbers}</span>
+            container.innerHTML = '';
+            for (const [marketName, data] of Object.entries(marketTimings)) {
+                const status = checkMarketStatus(marketName);
+                container.innerHTML += `
+                    <div class="market-card">
+                        <div class="market-header">
+                            <span class="market-name">${marketName}</span>
+                            <span class="market-numbers">${data.numbers}</span>
+                        </div>
+                        <div class="market-timing">
+                            <span>🕐 Open: ${data.open}</span>
+                            <span>⏰ Close: ${data.close}</span>
+                        </div>
+                        <div>
+                            <span class="market-status ${getStatusClass(status)}">
+                                ${getStatusText(status)}
+                            </span>
+                        </div>
+                        <button class="play-btn" ${status !== 'open' ? 'disabled' : ''} onclick="placeBid('${marketName}')">
+                            ${status === 'open' ? '🎲 Play Now' : '🔒 Closed for Today'}
+                        </button>
                     </div>
-                    <div class="market-timing">
-                        <span>🕐 Open: ${market.openTime}</span>
-                        <span>⏰ Close: ${market.closeTime}</span>
-                    </div>
-                    <div>
-                        <span class="market-status ${getStatusClass(market.status)}">
-                            ${getStatusText(market.status)}
-                        </span>
-                    </div>
-                    <button class="play-btn" ${!isPlayable(market.status) ? 'disabled' : ''} onclick="placeBid('${market.name}')">
-                        ${isPlayable(market.status) ? '🎲 Play Now' : '🔒 Closed for Today'}
-                    </button>
-                </div>
-            `).join('');
+                `;
+            }
         }
-        
+
         async function loadUserData() {
             const user = auth.currentUser;
             if (!user) return;
@@ -731,7 +795,7 @@
             document.getElementById('sidebarUserName').innerHTML = userData?.name || 'User';
             document.getElementById('sidebarUserPhone').innerHTML = userData?.phone || 'No phone';
         }
-        
+
         async function addTransaction(type, amount, description) {
             await db.collection('transactions').add({
                 userId: currentUser.uid,
@@ -741,8 +805,42 @@
                 date: new Date()
             });
         }
-        
-        // Navigation functions
+
+        async function loadFundsData() {
+            if (!currentUser) return;
+            
+            // Get total deposits
+            const deposits = await db.collection('transactions')
+                .where('userId', '==', currentUser.uid)
+                .where('type', '==', 'credit')
+                .get();
+            let totalDeposited = 0;
+            deposits.forEach(doc => totalDeposited += doc.data().amount);
+            
+            // Get total withdrawals
+            const withdrawals = await db.collection('transactions')
+                .where('userId', '==', currentUser.uid)
+                .where('type', '==', 'debit')
+                .where('description', '==', 'Withdrawal Request')
+                .get();
+            let totalWithdrawn = 0;
+            withdrawals.forEach(doc => totalWithdrawn += doc.data().amount);
+            
+            // Get total bids
+            const bids = await db.collection('transactions')
+                .where('userId', '==', currentUser.uid)
+                .where('type', '==', 'debit')
+                .where('description', '>=', 'Bid on')
+                .get();
+            let totalBids = 0;
+            bids.forEach(doc => totalBids += doc.data().amount);
+            
+            document.getElementById('fundsBalance').innerText = userData?.balance || 0;
+            document.getElementById('totalDeposited').innerText = totalDeposited;
+            document.getElementById('totalWithdrawn').innerText = totalWithdrawn;
+            document.getElementById('totalBidAmount').innerText = totalBids;
+        }
+
         function navigateTo(page) {
             closeSidebar();
             if (page === 'profile') window.location.href = 'profile.html';
@@ -750,7 +848,7 @@
             else if (page === 'gamerates') window.location.href = 'gamerates.html';
             else alert(`${page} page - Coming soon!`);
         }
-        
+
         function shareApp() {
             if (navigator.share) {
                 navigator.share({ title: 'WIN777', url: window.location.href });
@@ -758,28 +856,39 @@
                 alert('Copy link: ' + window.location.href);
             }
         }
-        
+
         function toggleDarkMode() { 
             document.body.style.background = document.body.style.background === '#0a0a0f' ? '#1a1a2e' : '#0a0a0f';
         }
-        
+
         function scrollToSection(section) {
-            document.querySelector('.nav-item.active')?.classList.remove('active');
-            event.target.closest('.nav-item').classList.add('active');
-            if (section === 'history') alert('Bid history page coming soon!');
-            else if (section === 'play') document.getElementById('marketsList').scrollIntoView({ behavior: 'smooth' });
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            if (section === 'markets') {
+                document.querySelector('.bottom-nav .nav-item:first-child').classList.add('active');
+                document.getElementById('marketsList').scrollIntoView({ behavior: 'smooth' });
+            } else if (section === 'play') {
+                document.querySelectorAll('.nav-item')[3].classList.add('active');
+                document.getElementById('marketsList').scrollIntoView({ behavior: 'smooth' });
+            }
         }
-        
-        function openJackpot() { alert('🎰 Jackpot feature coming soon!'); }
-        
-        // Deposit/Withdraw functions
+
+        function openHistory() { 
+            alert('Bid history page coming soon!'); 
+        }
+
+        function openFunds() { 
+            loadFundsData();
+            document.getElementById('fundsModal').style.display = 'flex'; 
+        }
+        function closeFunds() { document.getElementById('fundsModal').style.display = 'none'; }
+
         function openDeposit() { document.getElementById('depositModal').style.display = 'flex'; }
         function closeDeposit() { document.getElementById('depositModal').style.display = 'none'; }
         function openWithdraw() { document.getElementById('withdrawModal').style.display = 'flex'; }
         function closeWithdraw() { document.getElementById('withdrawModal').style.display = 'none'; }
         function openWhatsApp() { window.open('https://wa.me/919876543210', '_blank'); }
         function openCall() { window.location.href = 'tel:+919876543210'; }
-        
+
         async function confirmDeposit() {
             const amount = parseInt(document.getElementById('depositAmount').value);
             if (!amount || amount <= 0) {
@@ -794,7 +903,7 @@
             document.getElementById('depositMsg').style.color = '#4caf50';
             setTimeout(() => closeDeposit(), 1500);
         }
-        
+
         async function confirmWithdraw() {
             const amount = parseInt(document.getElementById('withdrawAmount').value);
             if (!amount || amount <= 0) {
@@ -817,13 +926,12 @@
             document.getElementById('withdrawMsg').style.color = '#4caf50';
             setTimeout(() => closeWithdraw(), 1500);
         }
-        
+
         function closeSidebar() {
             document.getElementById('sidebar').classList.remove('open');
             document.getElementById('overlay').classList.remove('active');
         }
-        
-        // Event Listeners
+
         document.getElementById('menuBtn').addEventListener('click', () => {
             document.getElementById('sidebar').classList.toggle('open');
             document.getElementById('overlay').classList.toggle('active');
@@ -833,15 +941,17 @@
             await auth.signOut();
             window.location.href = 'index.html';
         });
-        
-        // Initialize
+
+        // Auto refresh market status every minute
+        setInterval(() => {
+            renderMarkets();
+        }, 60000);
+
         auth.onAuthStateChanged(async (user) => {
             if (!user) window.location.href = 'index.html';
             else { 
                 await loadUserData(); 
                 renderMarkets();
-                // Auto-refresh market status every minute
-                setInterval(() => renderMarkets(), 60000);
             }
         });
     </script>
