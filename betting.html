@@ -373,16 +373,19 @@
         let currentUser = null;
         let userData = null;
         let currentMarket = '';
-        let currentBidType = 'open'; // 'open' or 'close'
+        let currentPhase = 'open_bid';
+        let currentBidType = 'open';
         let currentGameType = 'Single Digit';
         let bids = [];
         let selectedNumbers = new Set();
         let selectionMode = 'multiple';
 
-        // Game Types based on bid type
-        const gameTypes = ['Single Digit', 'Single Pana', 'Double Pana', 'Triple Pana'];
+        // Game Types based on Phase
+        const openPhaseGameTypes = ['Single Digit', 'Jodi', 'Single Pana', 'Double Pana', 'Triple Pana', 'Half Sangam A', 'Half Sangam B', 'Full Sangam'];
+        const closePhaseGameTypes = ['Single Digit', 'Single Pana', 'Double Pana', 'Triple Pana'];
+        
+        let gameTypes = openPhaseGameTypes;
 
-        // Pana Lists
         const singlePanaList = [
             '127', '136', '145', '190', '235', '280', '370', '389', '460', '479', '569', '578',
             '128', '137', '146', '236', '245', '290', '380', '470', '489', '560', '579', '678',
@@ -398,6 +401,11 @@
         ];
 
         const triplePanaList = ['111', '222', '333', '444', '555', '666', '777', '888', '999', '000'];
+
+        const jodiList = [];
+        for (let i = 0; i <= 99; i++) {
+            jodiList.push(i.toString().padStart(2, '0'));
+        }
 
         function renderGameTypeSelector() {
             const container = document.getElementById('gameTypeSelector');
@@ -444,6 +452,42 @@
             renderGamePanel();
         }
 
+        function addHalfSangamA() {
+            const openPana = document.getElementById('openPana')?.value.trim();
+            const closeDigit = document.getElementById('closeDigit')?.value.trim();
+            if (!openPana || !closeDigit) return;
+            const value = `${openPana}-${closeDigit}`;
+            if (selectedNumbers.has(value)) return;
+            selectedNumbers.add(value);
+            document.getElementById('openPana').value = '';
+            document.getElementById('closeDigit').value = '';
+            renderGamePanel();
+        }
+
+        function addHalfSangamB() {
+            const openDigit = document.getElementById('openDigit')?.value.trim();
+            const closePana = document.getElementById('closePana')?.value.trim();
+            if (!openDigit || !closePana) return;
+            const value = `${openDigit}-${closePana}`;
+            if (selectedNumbers.has(value)) return;
+            selectedNumbers.add(value);
+            document.getElementById('openDigit').value = '';
+            document.getElementById('closePana').value = '';
+            renderGamePanel();
+        }
+
+        function addFullSangam() {
+            const openPana = document.getElementById('fullOpenPana')?.value.trim();
+            const closePana = document.getElementById('fullClosePana')?.value.trim();
+            if (!openPana || !closePana) return;
+            const value = `${openPana}-${closePana}`;
+            if (selectedNumbers.has(value)) return;
+            selectedNumbers.add(value);
+            document.getElementById('fullOpenPana').value = '';
+            document.getElementById('fullClosePana').value = '';
+            renderGamePanel();
+        }
+
         function addSelectedToBids() {
             if (selectedNumbers.size === 0) return;
             const points = document.getElementById('pointsInput')?.value || 10;
@@ -462,6 +506,11 @@
             renderGamePanel();
         }
 
+        function setGameOption(option) {
+            currentBidType = option;
+            renderGamePanel();
+        }
+
         function removeBid(index) {
             bids.splice(index, 1);
             updateSummary();
@@ -474,7 +523,14 @@
             if (currentGameType === 'Single Digit') {
                 panel.innerHTML = `
                     <div class="game-panel">
-                        <div class="game-title">${currentMarket} - ${currentGameType} (${currentBidType === 'open' ? 'OPEN' : 'CLOSE'})</div>
+                        <div class="game-title">${currentMarket} - ${currentGameType}</div>
+                        <div class="game-subtitle">${currentPhase === 'open_bid' ? 'Select Open or Close' : 'Close Only'}</div>
+                        ${currentPhase === 'open_bid' ? `
+                        <div class="game-type-row">
+                            <label class="game-type-option"><input type="radio" name="gameType" value="open" ${currentBidType === 'open' ? 'checked' : ''} onchange="setGameOption('open')"> Open</label>
+                            <label class="game-type-option"><input type="radio" name="gameType" value="close" ${currentBidType === 'close' ? 'checked' : ''} onchange="setGameOption('close')"> Close</label>
+                        </div>
+                        ` : '<div class="game-type-row"><span style="color:#ff9800;">🔒 Close Only Bidding</span></div>'}
                         <div class="points-row"><div class="points-label">Points per bet</div><input type="number" id="pointsInput" class="points-input" value="10"></div>
                         <div class="manual-entry"><label class="manual-label">✏️ Manual Entry</label><input type="text" id="manualValue" class="manual-input" placeholder="Enter digit (0-9)"><button class="add-manual-btn" onclick="addManualNumber()">+ Add Manual</button></div>
                         <div class="selection-mode"><button class="mode-btn ${selectionMode === 'multiple' ? 'active' : ''}" onclick="toggleSelectionMode()">Multiple</button><button class="mode-btn ${selectionMode === 'single' ? 'active' : ''}" onclick="toggleSelectionMode()">Single</button></div>
@@ -490,11 +546,36 @@
                     grid.innerHTML = digits.map(d => `<button class="number-btn ${selectedNumbers.has(d) ? 'selected' : ''}" onclick="toggleNumber('${d}')">${d}</button>`).join('');
                 }
             }
+            else if (currentGameType === 'Jodi' && currentPhase === 'open_bid') {
+                panel.innerHTML = `
+                    <div class="game-panel">
+                        <div class="game-title">${currentMarket} - ${currentGameType}</div>
+                        <div class="points-row"><div class="points-label">Points per bet</div><input type="number" id="pointsInput" class="points-input" value="10"></div>
+                        <div class="manual-entry"><label class="manual-label">✏️ Manual Entry</label><input type="text" id="manualValue" class="manual-input" placeholder="Enter Jodi (00-99)"><button class="add-manual-btn" onclick="addManualNumber()">+ Add Manual</button></div>
+                        <div class="selection-mode"><button class="mode-btn ${selectionMode === 'multiple' ? 'active' : ''}" onclick="toggleSelectionMode()">Multiple</button><button class="mode-btn ${selectionMode === 'single' ? 'active' : ''}" onclick="toggleSelectionMode()">Single</button></div>
+                        <div class="selected-count">Selected: ${selectedNumbers.size} Jodi(s)</div>
+                        <div class="jodi-grid" id="jodiGrid"></div>
+                        <button class="add-selected-btn" onclick="addSelectedToBids()">Add ${selectedNumbers.size} Jodi(s) to Bids</button>
+                        ${renderBidItems()}
+                    </div>
+                `;
+                const grid = document.getElementById('jodiGrid');
+                if (grid) {
+                    grid.innerHTML = jodiList.map(j => `<button class="jodi-btn ${selectedNumbers.has(j) ? 'selected' : ''}" onclick="toggleNumber('${j}')">${j}</button>`).join('');
+                }
+            }
             else if (currentGameType === 'Single Pana' || currentGameType === 'Double Pana' || currentGameType === 'Triple Pana') {
                 const panaList = currentGameType === 'Single Pana' ? singlePanaList : (currentGameType === 'Double Pana' ? doublePanaList : triplePanaList);
                 panel.innerHTML = `
                     <div class="game-panel">
-                        <div class="game-title">${currentMarket} - ${currentGameType} (${currentBidType === 'open' ? 'OPEN' : 'CLOSE'})</div>
+                        <div class="game-title">${currentMarket} - ${currentGameType}</div>
+                        <div class="game-subtitle">${currentPhase === 'open_bid' ? 'Select Open or Close' : 'Close Only'}</div>
+                        ${currentPhase === 'open_bid' ? `
+                        <div class="game-type-row">
+                            <label class="game-type-option"><input type="radio" name="gameType" value="open" ${currentBidType === 'open' ? 'checked' : ''} onchange="setGameOption('open')"> Open</label>
+                            <label class="game-type-option"><input type="radio" name="gameType" value="close" ${currentBidType === 'close' ? 'checked' : ''} onchange="setGameOption('close')"> Close</label>
+                        </div>
+                        ` : '<div class="game-type-row"><span style="color:#ff9800;">🔒 Close Only Bidding</span></div>'}
                         <div class="points-row"><div class="points-label">Points per bet</div><input type="number" id="pointsInput" class="points-input" value="10"></div>
                         <div class="manual-entry"><label class="manual-label">✏️ Manual Entry</label><input type="text" id="manualValue" class="manual-input" placeholder="Enter Pana"><button class="add-manual-btn" onclick="addManualNumber()">+ Add Manual</button></div>
                         <div class="selection-mode"><button class="mode-btn ${selectionMode === 'multiple' ? 'active' : ''}" onclick="toggleSelectionMode()">Multiple</button><button class="mode-btn ${selectionMode === 'single' ? 'active' : ''}" onclick="toggleSelectionMode()">Single</button></div>
@@ -508,6 +589,63 @@
                 if (grid) {
                     grid.innerHTML = panaList.map(p => `<button class="pana-btn ${selectedNumbers.has(p) ? 'selected' : ''}" onclick="toggleNumber('${p}')">${p}</button>`).join('');
                 }
+            }
+            else if (currentGameType === 'Half Sangam A' && currentPhase === 'open_bid') {
+                panel.innerHTML = `
+                    <div class="game-panel">
+                        <div class="game-title">${currentMarket} - ${currentGameType}</div>
+                        <div class="game-subtitle">Open Pana (3 digits) + Close Digit (1 digit)</div>
+                        <div class="points-row"><div class="points-label">Points per bet</div><input type="number" id="pointsInput" class="points-input" value="10"></div>
+                        <div class="manual-entry">
+                            <label class="manual-label">🎲 Open Pana (3 digits)</label>
+                            <input type="text" id="openPana" class="manual-input" placeholder="e.g., 127">
+                            <label class="manual-label">🎯 Close Digit (1 digit)</label>
+                            <input type="text" id="closeDigit" class="manual-input" placeholder="e.g., 5">
+                            <button class="add-manual-btn" onclick="addHalfSangamA()">+ Add Half Sangam A</button>
+                        </div>
+                        <div class="selected-count">Selected: ${selectedNumbers.size} item(s)</div>
+                        <button class="add-selected-btn" onclick="addSelectedToBids()">Add ${selectedNumbers.size} Item(s) to Bids</button>
+                        ${renderBidItems()}
+                    </div>
+                `;
+            }
+            else if (currentGameType === 'Half Sangam B' && currentPhase === 'open_bid') {
+                panel.innerHTML = `
+                    <div class="game-panel">
+                        <div class="game-title">${currentMarket} - ${currentGameType}</div>
+                        <div class="game-subtitle">Open Digit (1 digit) + Close Pana (3 digits)</div>
+                        <div class="points-row"><div class="points-label">Points per bet</div><input type="number" id="pointsInput" class="points-input" value="10"></div>
+                        <div class="manual-entry">
+                            <label class="manual-label">🎲 Open Digit (1 digit)</label>
+                            <input type="text" id="openDigit" class="manual-input" placeholder="e.g., 5">
+                            <label class="manual-label">🎯 Close Pana (3 digits)</label>
+                            <input type="text" id="closePana" class="manual-input" placeholder="e.g., 127">
+                            <button class="add-manual-btn" onclick="addHalfSangamB()">+ Add Half Sangam B</button>
+                        </div>
+                        <div class="selected-count">Selected: ${selectedNumbers.size} item(s)</div>
+                        <button class="add-selected-btn" onclick="addSelectedToBids()">Add ${selectedNumbers.size} Item(s) to Bids</button>
+                        ${renderBidItems()}
+                    </div>
+                `;
+            }
+            else if (currentGameType === 'Full Sangam' && currentPhase === 'open_bid') {
+                panel.innerHTML = `
+                    <div class="game-panel">
+                        <div class="game-title">${currentMarket} - ${currentGameType}</div>
+                        <div class="game-subtitle">Open Pana (3 digits) + Close Pana (3 digits)</div>
+                        <div class="points-row"><div class="points-label">Points per bet</div><input type="number" id="pointsInput" class="points-input" value="10"></div>
+                        <div class="manual-entry">
+                            <label class="manual-label">🎲 Open Pana (3 digits)</label>
+                            <input type="text" id="fullOpenPana" class="manual-input" placeholder="e.g., 127">
+                            <label class="manual-label">🎯 Close Pana (3 digits)</label>
+                            <input type="text" id="fullClosePana" class="manual-input" placeholder="e.g., 456">
+                            <button class="add-manual-btn" onclick="addFullSangam()">+ Add Full Sangam</button>
+                        </div>
+                        <div class="selected-count">Selected: ${selectedNumbers.size} item(s)</div>
+                        <button class="add-selected-btn" onclick="addSelectedToBids()">Add ${selectedNumbers.size} Item(s) to Bids</button>
+                        ${renderBidItems()}
+                    </div>
+                `;
             }
         }
 
@@ -583,10 +721,19 @@
 
         const urlParams = new URLSearchParams(window.location.search);
         currentMarket = decodeURIComponent(urlParams.get('market') || 'Main Bazar');
+        currentPhase = urlParams.get('phase') || 'open_bid';
         currentBidType = urlParams.get('bidType') || 'open';
         
+        if (currentPhase === 'close_bid') {
+            gameTypes = closePhaseGameTypes;
+            currentGameType = 'Single Digit';
+            currentBidType = 'close';
+        } else {
+            gameTypes = openPhaseGameTypes;
+        }
+        
         document.getElementById('marketName').innerHTML = currentMarket;
-        document.getElementById('bidTypeBadge').innerHTML = currentBidType === 'open' ? '🎲 OPEN BIDDING' : '🔒 CLOSE BIDDING';
+        document.getElementById('bidTypeBadge').innerHTML = currentPhase === 'open_bid' ? '🎲 OPEN BIDDING - All Bets Available' : '🔒 CLOSE BIDDING - Close Bets Only';
 
         auth.onAuthStateChanged(async (user) => {
             if (!user) window.location.href = 'index.html';
