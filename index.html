@@ -8,997 +8,136 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
         body {
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 16px;
+            padding: 20px;
             position: relative;
-            overflow: hidden;
+            overflow-x: hidden;
         }
-
-        /* Falling Numbers Animation */
-        .falling-numbers {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            overflow: hidden;
-            pointer-events: none;
-        }
-
-        .falling-number {
+        /* Animated Background */
+        .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; overflow: hidden; }
+        .particle {
             position: absolute;
-            color: rgba(255, 255, 255, 0.2);
-            font-size: 48px;
-            font-weight: bold;
-            font-family: monospace;
-            animation: fall linear infinite;
-            user-select: none;
-            text-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
-        }
-
-        @keyframes fall {
-            0% {
-                transform: translateY(-100px) rotate(0deg) scale(1);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.8;
-                transform: translateY(0px) rotate(10deg) scale(1.1);
-            }
-            50% {
-                opacity: 0.5;
-                transform: translateY(50vh) rotate(180deg) scale(0.9);
-            }
-            90% {
-                opacity: 0.3;
-            }
-            100% {
-                transform: translateY(100vh) rotate(360deg) scale(0.5);
-                opacity: 0;
-            }
-        }
-
-        /* Stars Effect */
-        .stars {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .star {
-            position: absolute;
-            background: white;
+            background: rgba(255,152,0,0.15);
             border-radius: 50%;
-            animation: twinkle 3s infinite ease-in-out;
+            animation: float 15s infinite ease-in-out;
         }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 0.2; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.5); }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+            25% { transform: translateY(-100px) translateX(50px); opacity: 0.6; }
+            50% { transform: translateY(-200px) translateX(-50px); opacity: 0.3; }
+            75% { transform: translateY(-100px) translateX(50px); opacity: 0.6; }
         }
-
-        /* Glow Orb */
         .glow-orb {
             position: fixed;
             top: 50%;
             left: 50%;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(255,255,255,0.12), transparent);
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255,152,0,0.15), transparent);
             border-radius: 50%;
             transform: translate(-50%, -50%);
-            animation: pulse 8s infinite;
+            animation: pulse 6s infinite;
             z-index: 0;
         }
-
-        @keyframes pulse {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
-            50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.1; }
-        }
-
-        /* Main Container */
+        @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.3; } 50% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.1; } }
         .login-container {
-            width: 100%;
-            max-width: 420px;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(5px);
-            border-radius: 40px;
-            padding: 40px 28px;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
             position: relative;
             z-index: 2;
-            animation: slideUp 0.6s ease-out;
-            border: none;
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Logo Section */
-        .logo-section {
-            text-align: center;
-            margin-bottom: 15px;
-        }
-
-        .logo-img {
-            width: 130px;
-            height: 130px;
-            object-fit: contain;
-            display: block;
-            margin: 0 auto;
-            filter: drop-shadow(0 8px 20px rgba(0,0,0,0.15));
-            animation: logoFloat 3s ease-in-out infinite;
-        }
-
-        @keyframes logoFloat {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-6px); }
-        }
-
-        /* Trust Badge */
-        .trust-badge {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .trust-main {
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-            letter-spacing: 0.5px;
-        }
-
-        .trust-main span {
-            color: #667eea;
-        }
-
-        .trust-features {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 6px;
-            font-size: 12px;
-            color: #888;
-        }
-
-        .trust-features span {
-            color: #4caf50;
-            margin-right: 3px;
-        }
-
-        /* Input Section */
-        .input-section {
-            margin-bottom: 20px;
-        }
-
-        .input-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        /* Country Select Box */
-        .country-box {
             width: 100%;
-            padding: 15px 16px;
-            background: white;
-            border: 1.5px solid #e8e8e8;
-            border-radius: 20px;
-            font-size: 16px;
-            color: #333;
-            outline: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666eea' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 16px center;
-            background-size: 20px;
+            max-width: 420px;
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 48px;
+            padding: 40px 28px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,152,0,0.2);
+            animation: slideUp 0.5s ease-out;
         }
-
-        .country-box:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        /* Phone Input Box */
-        .phone-box {
-            width: 100%;
-            padding: 15px 16px;
-            background: white;
-            border: 1.5px solid #e8e8e8;
-            border-radius: 20px;
-            font-size: 16px;
-            color: #333;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .phone-box:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .phone-box::placeholder {
-            color: #bbb;
-        }
-
-        /* Continue Button */
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .logo-section { text-align: center; margin-bottom: 30px; }
+        .logo-img { width: 120px; height: 120px; object-fit: contain; display: block; margin: 0 auto; filter: drop-shadow(0 8px 20px rgba(0,0,0,0.3)); }
+        .trust-badge { text-align: center; margin-bottom: 30px; }
+        .trust-main { font-size: 14px; font-weight: 600; color: #ff9800; letter-spacing: 0.5px; background: rgba(0,0,0,0.3); display: inline-block; padding: 6px 18px; border-radius: 40px; }
+        .trust-features { display: flex; justify-content: center; gap: 12px; margin-top: 8px; font-size: 12px; color: #aaa; }
+        .trust-features span { color: #4caf50; margin-right: 3px; }
+        .input-section { margin-bottom: 20px; }
+        .input-label { font-size: 14px; font-weight: 600; color: #ddd; margin-bottom: 8px; display: block; }
+        .country-selector-box { display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,152,0,0.3); border-radius: 20px; padding: 4px; transition: all 0.3s ease; }
+        .country-selector-box:focus-within { border-color: #ff9800; box-shadow: 0 0 0 3px rgba(255,152,0,0.1); }
+        .country-code-select { width: 100px; padding: 15px 10px; background: #1a1a2e; border: none; border-radius: 16px; font-size: 15px; font-weight: 500; color: #ff9800; outline: none; cursor: pointer; text-align: center; }
+        .phone-input { flex: 1; padding: 15px 12px; background: transparent; border: none; font-size: 16px; color: white; outline: none; }
+        .phone-input::placeholder { color: #666; }
         .continue-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border: none;
-            border-radius: 20px;
-            color: white;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            margin-top: 10px;
+            width: 100%; padding: 16px; background: linear-gradient(135deg, #ff9800, #ff5722); border: none; border-radius: 28px;
+            color: #1a1a2e; font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.3s; margin-top: 10px;
         }
-
-        .continue-btn:before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255,255,255,0.25);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.5s, height 0.5s;
-        }
-
-        .continue-btn:hover:before {
-            width: 300px;
-            height: 300px;
-        }
-
-        .continue-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        .continue-btn:active {
-            transform: translateY(0);
-        }
-
-        .continue-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* OTP Section */
-        .otp-section {
-            text-align: center;
-        }
-
-        .otp-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #1a1a2e;
-            margin-bottom: 8px;
-        }
-
-        .otp-subtitle {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 20px;
-        }
-
-        .edit-number {
-            color: #667eea;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* OTP Input Grid */
-        .otp-grid {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin-bottom: 28px;
-            flex-wrap: wrap;
-        }
-
-        .otp-digit {
-            width: 52px;
-            height: 62px;
-            background: #f5f5f5;
-            border: 2px solid #e0e0e0;
-            border-radius: 18px;
-            text-align: center;
-            font-size: 26px;
-            font-weight: 600;
-            color: #333;
-            outline: none;
-            transition: all 0.2s ease;
-        }
-
-        .otp-digit:focus {
-            border-color: #667eea;
-            transform: scale(1.05);
-        }
-
-        /* Number Pad */
-        .number-pad {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .num-btn {
-            background: #f5f5f5;
-            border: none;
-            padding: 18px;
-            border-radius: 22px;
-            font-size: 26px;
-            font-weight: 600;
-            color: #333;
-            cursor: pointer;
-            transition: all 0.1s ease;
-        }
-
-        .num-btn:active {
-            background: #e0e0e0;
-            transform: scale(0.95);
-        }
-
-        .num-btn.delete {
-            background: #ffebee;
-            color: #f44336;
-        }
-
-        /* Resend Text */
-        .resend-text {
-            text-align: center;
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 16px;
-        }
-
-        .resend-link {
-            color: #667eea;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .resend-link.disabled {
-            color: #ccc;
-            cursor: not-allowed;
-        }
-
-        /* PIN Sections */
-        .pin-section {
-            text-align: center;
-        }
-
-        .pin-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #1a1a2e;
-            margin-bottom: 8px;
-        }
-
-        .pin-input {
-            width: 200px;
-            padding: 15px;
-            text-align: center;
-            font-size: 24px;
-            letter-spacing: 8px;
-            border: 2px solid #e0e0e0;
-            border-radius: 18px;
-            margin: 20px auto;
-            display: block;
-        }
-
-        .pin-input:focus {
-            border-color: #667eea;
-        }
-
-        .error-msg {
-            color: #f44336;
-            font-size: 12px;
-            text-align: center;
-            margin-top: 12px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .loading-spinner {
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            border: 2px solid white;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .auto-otp-status {
-            font-size: 12px;
-            color: #4caf50;
-            text-align: center;
-            margin-bottom: 15px;
-            padding: 6px;
-            background: rgba(76, 175, 80, 0.1);
-            border-radius: 25px;
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 480px) {
-            .login-container { padding: 30px 20px; border-radius: 32px; }
-            .logo-img { width: 100px; height: 100px; }
-            .otp-digit { width: 45px; height: 55px; font-size: 22px; }
-            .num-btn { padding: 14px; font-size: 22px; border-radius: 18px; }
-            .pin-input { width: 170px; font-size: 20px; letter-spacing: 6px; }
-            .falling-number { font-size: 36px; }
-            .trust-main { font-size: 12px; }
-            .trust-features { font-size: 10px; gap: 8px; }
-        }
-
-        @media (max-width: 380px) {
-            .login-container { padding: 25px 16px; }
-            .logo-img { width: 85px; height: 85px; }
-            .otp-digit { width: 40px; height: 50px; font-size: 20px; }
-            .num-btn { padding: 12px; font-size: 20px; }
-            .falling-number { font-size: 30px; }
-        }
+        .continue-btn:active { transform: scale(0.98); }
+        .continue-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .secondary-btn { background: transparent; border: 1px solid #ff9800; color: #ff9800; }
+        .error-msg { color: #ff6b6b; font-size: 12px; text-align: center; margin-top: 12px; }
+        .success-msg { color: #8bc34a; font-size: 12px; text-align: center; margin-top: 12px; }
+        .info-box { background: rgba(33,150,243,0.1); border-radius: 20px; padding: 12px 16px; margin-bottom: 24px; border-left: 4px solid #ff9800; }
+        .info-box p { color: #90caf9; font-size: 12px; }
+        .otp-digit { width: 52px; height: 62px; background: #1a1a2e; border: 2px solid #333; border-radius: 16px; text-align: center; font-size: 26px; font-weight: 600; color: white; margin: 0 5px; }
+        .pin-input { width: 200px; padding: 15px; text-align: center; font-size: 24px; letter-spacing: 8px; background: #1a1a2e; border: 1px solid #ff9800; border-radius: 16px; color: white; }
+        .number-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
+        .num-btn { background: #1a1a2e; border: 1px solid #333; padding: 16px; border-radius: 20px; font-size: 24px; font-weight: 600; color: white; cursor: pointer; }
+        .hidden { display: none; }
+        @media (max-width: 480px) { .login-container { padding: 30px 20px; } .logo-img { width: 90px; height: 90px; } .otp-digit { width: 45px; height: 55px; } }
     </style>
 </head>
 <body>
-
-    <!-- Falling Numbers Animation Background -->
-    <div class="falling-numbers" id="fallingNumbers"></div>
-    <div class="stars" id="stars"></div>
+    <div class="particles" id="particles"></div>
     <div class="glow-orb"></div>
-
     <div class="login-container" id="loginContainer">
-        <!-- Logo Section -->
-        <div class="logo-section">
-            <img src="https://i.imgur.com/lPQ7wQD.png" class="logo-img" alt="Logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-            <div class="logo-fallback" style="display: none;">WIN</div>
-        </div>
-
-        <!-- Trust Badge -->
-        <div class="trust-badge">
-            <div class="trust-main">
-                🇮🇳 <span>India's Most Trusted App</span>
-            </div>
-            <div class="trust-features">
-                <span>✓</span> Secure <span>✓</span> Easy To Use
-            </div>
-        </div>
-
-        <!-- Phone Login Section -->
-        <div id="phoneSection">
-            <!-- Box 1: Select Country -->
-            <div class="input-section">
-                <label class="input-label">Select Country</label>
-                <select id="countryCode" class="country-box">
-                    <option value="+91">🇮🇳 India (+91)</option>
-                    <option value="+966">🇸🇦 Saudi Arabia (+966)</option>
-                </select>
-            </div>
-
-            <!-- Box 2: Enter Mobile Number -->
-            <div class="input-section">
-                <label class="input-label">Enter Mobile Number</label>
-                <input type="tel" id="phoneNumber" class="phone-box" placeholder="Enter your mobile number" maxlength="15" inputmode="numeric">
-            </div>
-
-            <button class="continue-btn" id="sendOtpBtn">Continue</button>
-            <div id="phoneError" class="error-msg"></div>
-        </div>
-
-        <!-- OTP Section -->
-        <div id="otpSection" class="hidden">
-            <div class="otp-section">
-                <div class="otp-title">We just sent an SMS</div>
-                <div class="otp-subtitle">
-                    Enter the six digit security code we sent to <span id="displayPhone"></span>
-                    <br>
-                    <a href="#" id="editNumber" class="edit-number">Edit Number</a>
-                </div>
-                <div class="otp-grid">
-                    <input type="text" class="otp-digit" maxlength="1" data-index="0" id="otp0">
-                    <input type="text" class="otp-digit" maxlength="1" data-index="1" id="otp1">
-                    <input type="text" class="otp-digit" maxlength="1" data-index="2" id="otp2">
-                    <input type="text" class="otp-digit" maxlength="1" data-index="3" id="otp3">
-                    <input type="text" class="otp-digit" maxlength="1" data-index="4" id="otp4">
-                    <input type="text" class="otp-digit" maxlength="1" data-index="5" id="otp5">
-                </div>
-                <div class="auto-otp-status" id="autoOtpStatus">
-                    📱 Auto-read OTP enabled
-                </div>
-                <div class="number-pad" id="numberPad">
-                    <button class="num-btn" data-num="1">1</button>
-                    <button class="num-btn" data-num="2">2</button>
-                    <button class="num-btn" data-num="3">3</button>
-                    <button class="num-btn" data-num="4">4</button>
-                    <button class="num-btn" data-num="5">5</button>
-                    <button class="num-btn" data-num="6">6</button>
-                    <button class="num-btn" data-num="7">7</button>
-                    <button class="num-btn" data-num="8">8</button>
-                    <button class="num-btn" data-num="9">9</button>
-                    <button class="num-btn" data-num="0">0</button>
-                    <button class="num-btn delete" data-num="del">⌫</button>
-                    <button class="num-btn" data-num="clear">C</button>
-                </div>
-                <div class="resend-text" id="resendText">
-                    Didn't receive code? <span id="resendLink" class="resend-link">Resend</span>
-                </div>
-                <button class="continue-btn" id="verifyOtpBtn">Verify & Continue</button>
-                <div id="otpError" class="error-msg"></div>
-            </div>
-        </div>
-
-        <!-- PIN Registration Section -->
-        <div id="pinSection" class="hidden">
-            <div class="pin-section">
-                <div class="pin-title">Set your 4-digit PIN</div>
-                <p style="color:#666; margin-bottom:10px; font-size:13px;">Create a secure PIN for quick login</p>
-                <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="●●●●">
-                <div class="pin-title" style="margin-top:20px;">Confirm PIN</div>
-                <input type="password" id="confirmPinInput" class="pin-input" maxlength="4" placeholder="●●●●">
-                <button class="continue-btn" id="registerPinBtn" style="margin-top:20px;">Create Account</button>
-                <div id="pinError" class="error-msg"></div>
-            </div>
-        </div>
-
-        <!-- PIN Login Section -->
-        <div id="pinLoginSection" class="hidden">
-            <div class="pin-section">
-                <div class="pin-title">Enter your PIN</div>
-                <p style="color:#666; margin-bottom:10px; font-size:13px;">Enter your 4-digit PIN to login</p>
-                <input type="password" id="pinLoginInput" class="pin-input" maxlength="4" placeholder="●●●●">
-                <button class="continue-btn" id="pinLoginBtn">Unlock Dashboard</button>
-                <button class="continue-btn" id="logoutPinBtn" style="background:#f5f5f5; color:#666; margin-top:10px;">Use different account</button>
-                <div id="pinLoginError" class="error-msg"></div>
-            </div>
-        </div>
+        <div class="logo-section"><img src="https://i.imgur.com/lPQ7wQD.png" class="logo-img" alt="Logo"></div>
+        <div class="trust-badge"><div class="trust-main">🇮🇳 India's Most Trusted App</div><div class="trust-features"><span>✓</span> Secure <span>✓</span> Easy To Use</div></div>
+        <div id="dynamicScreen"></div>
     </div>
-
     <script>
-        // ========== FALLING NUMBERS ANIMATION ==========
-        const fallingContainer = document.getElementById('fallingNumbers');
-        const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'WIN', '777', '★', '♦', '♣', '♥', '♠'];
-        
-        function createFallingNumber() {
-            const div = document.createElement('div');
-            div.className = 'falling-number';
-            const randomNumber = numbers[Math.floor(Math.random() * numbers.length)];
-            div.textContent = randomNumber;
-            div.style.left = Math.random() * 100 + '%';
-            div.style.fontSize = (Math.random() * 40 + 30) + 'px';
-            div.style.animationDuration = (Math.random() * 12 + 6) + 's';
-            div.style.animationDelay = (Math.random() * 5) + 's';
-            div.style.opacity = Math.random() * 0.4 + 0.1;
-            fallingContainer.appendChild(div);
-            
-            setTimeout(() => {
-                div.remove();
-            }, 15000);
+        // Particles
+        for (let i = 0; i < 40; i++) { const p = document.createElement('div'); p.className = 'particle'; p.style.width = Math.random() * 120 + 20 + 'px'; p.style.height = p.style.width; p.style.left = Math.random() * 100 + '%'; p.style.top = Math.random() * 100 + '%'; p.style.animationDelay = Math.random() * 15 + 's'; p.style.animationDuration = Math.random() * 20 + 10 + 's'; document.getElementById('particles').appendChild(p); }
+        const firebaseConfig = { apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38", authDomain: "win777-ed482.firebaseapp.com", projectId: "win777-ed482", storageBucket: "win777-ed482.firebasestorage.app", messagingSenderId: "843686112399", appId: "1:843686112399:web:9c20a96831e6a94cd814fa" };
+        firebase.initializeApp(firebaseConfig); const auth = firebase.auth(); const db = firebase.firestore(); auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+        let confirmationResult = null, currentPhone = null, countdown = 0, timerInterval = null, appState = 'login', recaptchaVerifier = null;
+        const dynamicScreen = document.getElementById('dynamicScreen');
+        function renderScreen() { if (appState === 'login') renderLogin(); else if (appState === 'otp-verify') renderOtp(); else if (appState === 'register-pin') renderRegister(); else if (appState === 'pin-login') renderPinLogin(); }
+        function showMessage(msg, isError = true) { const d = document.querySelector('#dynamicScreen .error-msg, #dynamicScreen .success-msg'); if (d) { d.innerText = msg; d.className = isError ? 'error-msg' : 'success-msg'; setTimeout(() => { if (d.innerText === msg) d.innerText = ''; }, 5000); } }
+        function initRecaptcha() { if (!recaptchaVerifier && document.getElementById('recaptcha-container')) recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { size: 'invisible' }); return recaptchaVerifier; }
+        async function sendOTP(phoneNumber) {
+            if (!phoneNumber || phoneNumber.length < 10) { showMessage('📱 Enter valid 10-digit number'); return; }
+            const fullPhone = '+91' + phoneNumber; currentPhone = fullPhone;
+            const btn = document.getElementById('sendOtpBtn'); btn.disabled = true; btn.innerHTML = '<span class="loading-spinner">⏳</span> Sending...';
+            try { const verifier = initRecaptcha(); const confirmation = await auth.signInWithPhoneNumber(fullPhone, verifier); confirmationResult = confirmation; appState = 'otp-verify'; startTimer(60); renderScreen(); showMessage('✅ OTP sent! Check your phone', false); }
+            catch (error) { showMessage('❌ ' + error.message); btn.disabled = false; btn.innerHTML = 'Send OTP'; }
         }
-        
-        setInterval(createFallingNumber, 250);
-        for (let i = 0; i < 30; i++) {
-            setTimeout(createFallingNumber, i * 100);
+        async function verifyOTP(otpCode) {
+            if (!confirmationResult) { showMessage('Session expired'); return; }
+            if (!otpCode || otpCode.length !== 6) { showMessage('Enter 6-digit OTP'); return; }
+            const btn = document.getElementById('verifyOtpBtn'); btn.disabled = true; btn.innerHTML = '<span class="loading-spinner">⏳</span> Verifying...';
+            try { const result = await confirmationResult.confirm(otpCode); const user = result.user; const userDoc = await db.collection('users').doc(user.uid).get(); if (userDoc.exists && userDoc.data().pin) window.location.href = 'dashboard.html'; else appState = 'register-pin'; renderScreen(); }
+            catch (error) { showMessage('❌ Invalid OTP'); btn.disabled = false; btn.innerHTML = 'Verify'; }
         }
-
-        // ========== STARS ANIMATION ==========
-        const starsContainer = document.getElementById('stars');
-        for (let i = 0; i < 100; i++) {
-            const star = document.createElement('div');
-            star.className = 'star';
-            star.style.width = Math.random() * 3 + 1 + 'px';
-            star.style.height = star.style.width;
-            star.style.left = Math.random() * 100 + '%';
-            star.style.top = Math.random() * 100 + '%';
-            star.style.animationDelay = Math.random() * 5 + 's';
-            star.style.animationDuration = Math.random() * 3 + 2 + 's';
-            starsContainer.appendChild(star);
+        async function registerUser(name, pin, confirmPin) {
+            if (!name || name.length < 2) { showMessage('Enter your name'); return; } if (!/^\d{4}$/.test(pin)) { showMessage('PIN must be 4 digits'); return; } if (pin !== confirmPin) { showMessage('PINs do not match'); return; }
+            const user = auth.currentUser; if (!user) { showMessage('Session expired'); return; }
+            const btn = document.getElementById('registerBtn'); btn.disabled = true; btn.innerHTML = 'Creating...';
+            try { await db.collection('users').doc(user.uid).set({ uid: user.uid, phone: user.phoneNumber, name: name, pin: pin, role: 'user', balance: 0, createdAt: new Date() }); window.location.href = 'dashboard.html'; }
+            catch (error) { showMessage('Error: ' + error.message); } finally { btn.disabled = false; btn.innerHTML = 'Create Account'; }
         }
-
-        // ========== FIREBASE CONFIG ==========
-        const firebaseConfig = {
-            apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
-            authDomain: "win777-ed482.firebaseapp.com",
-            projectId: "win777-ed482",
-            storageBucket: "win777-ed482.firebasestorage.app",
-            messagingSenderId: "843686112399",
-            appId: "1:843686112399:web:9c20a96831e6a94cd814fa",
-            measurementId: "G-YG8V7EJ0PL"
-        };
-        
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-        
-        let confirmationResult = null;
-        let currentPhone = null;
-        let countdown = 0;
-        let timerInterval = null;
-        let recaptchaVerifier = null;
-        
-        // DOM Elements
-        const phoneSection = document.getElementById('phoneSection');
-        const otpSection = document.getElementById('otpSection');
-        const pinSection = document.getElementById('pinSection');
-        const pinLoginSection = document.getElementById('pinLoginSection');
-        
-        const otpDigits = document.querySelectorAll('.otp-digit');
-        const displayPhoneSpan = document.getElementById('displayPhone');
-        const autoOtpStatus = document.getElementById('autoOtpStatus');
-        
-        function showScreen(screen) {
-            phoneSection.classList.add('hidden');
-            otpSection.classList.add('hidden');
-            pinSection.classList.add('hidden');
-            pinLoginSection.classList.add('hidden');
-            
-            if (screen === 'phone') phoneSection.classList.remove('hidden');
-            else if (screen === 'otp') otpSection.classList.remove('hidden');
-            else if (screen === 'pin') pinSection.classList.remove('hidden');
-            else if (screen === 'pinLogin') pinLoginSection.classList.remove('hidden');
-        }
-        
-        function initRecaptcha() {
-            if (!recaptchaVerifier) {
-                const container = document.createElement('div');
-                container.id = 'recaptcha-container';
-                container.style.position = 'absolute';
-                container.style.left = '-9999px';
-                document.body.appendChild(container);
-                recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { size: 'invisible' });
-            }
-            return recaptchaVerifier;
-        }
-        
-        function startTimer(seconds) {
-            countdown = seconds;
-            if (timerInterval) clearInterval(timerInterval);
-            timerInterval = setInterval(() => {
-                if (countdown <= 1) {
-                    clearInterval(timerInterval);
-                    timerInterval = null;
-                    const resendLink = document.getElementById('resendLink');
-                    if (resendLink) {
-                        resendLink.innerHTML = 'Resend';
-                        resendLink.classList.remove('disabled');
-                    }
-                } else {
-                    countdown--;
-                    const resendLink = document.getElementById('resendLink');
-                    if (resendLink) {
-                        resendLink.innerHTML = `Resend in ${countdown}s`;
-                        resendLink.classList.add('disabled');
-                    }
-                }
-            }, 1000);
-        }
-        
-        function showError(elementId, message) {
-            const errorDiv = document.getElementById(elementId);
-            if (errorDiv) {
-                errorDiv.innerText = message;
-                setTimeout(() => { errorDiv.innerText = ''; }, 5000);
-            }
-        }
-        
-        function setOtpValue(code) {
-            for (let i = 0; i < code.length && i < 6; i++) {
-                if (otpDigits[i]) {
-                    otpDigits[i].value = code[i];
-                }
-            }
-            if (code.length === 6) {
-                autoOtpStatus.innerHTML = '✅ OTP detected! Auto-verifying...';
-                setTimeout(() => {
-                    document.getElementById('verifyOtpBtn').click();
-                }, 500);
-            }
-        }
-        
-        // Auto-read OTP from SMS
-        if ('OTPCredential' in window) {
-            const ac = new AbortController();
-            const abortTimeout = setTimeout(() => ac.abort(), 60000);
-            
-            navigator.credentials.get({
-                otp: { transport: ['sms'] },
-                signal: ac.signal
-            }).then(credential => {
-                clearTimeout(abortTimeout);
-                if (credential && credential.code) {
-                    const otpCode = credential.code;
-                    autoOtpStatus.innerHTML = '📱 OTP detected! Auto-filling...';
-                    setOtpValue(otpCode);
-                }
-            }).catch(err => {
-                autoOtpStatus.innerHTML = '📱 Enter OTP manually';
-            });
-        } else {
-            autoOtpStatus.innerHTML = '📱 Enter OTP manually';
-        }
-        
-        // OTP Input handling
-        otpDigits.forEach((input, index) => {
-            input.addEventListener('input', (e) => {
-                if (e.target.value.length === 1 && index < 5) {
-                    otpDigits[index + 1].focus();
-                }
-            });
-            
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && !e.target.value && index > 0) {
-                    otpDigits[index - 1].focus();
-                }
-            });
-        });
-        
-        // Number pad
-        document.querySelectorAll('.num-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const num = btn.dataset.num;
-                if (num === 'del') {
-                    for (let i = 5; i >= 0; i--) {
-                        if (otpDigits[i].value) {
-                            otpDigits[i].value = '';
-                            otpDigits[i].focus();
-                            break;
-                        }
-                    }
-                } else if (num === 'clear') {
-                    otpDigits.forEach(digit => digit.value = '');
-                    otpDigits[0].focus();
-                } else {
-                    for (let i = 0; i < 6; i++) {
-                        if (!otpDigits[i].value) {
-                            otpDigits[i].value = num;
-                            if (i < 5) otpDigits[i + 1].focus();
-                            break;
-                        }
-                    }
-                }
-            });
-        });
-        
-        function getOTPCode() {
-            let code = '';
-            otpDigits.forEach(digit => { code += digit.value; });
-            return code;
-        }
-        
-        // Send OTP
-        document.getElementById('sendOtpBtn').addEventListener('click', async () => {
-            const code = document.getElementById('countryCode').value;
-            const phone = document.getElementById('phoneNumber').value.replace(/\D/g, '');
-            
-            if (!phone || phone.length < 6) {
-                showError('phoneError', 'Enter valid phone number');
-                return;
-            }
-            
-            const fullPhone = code + phone;
-            currentPhone = fullPhone;
-            displayPhoneSpan.innerText = fullPhone;
-            
-            const btn = document.getElementById('sendOtpBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="loading-spinner"></span> Sending...';
-            
-            try {
-                const verifier = initRecaptcha();
-                const confirmation = await auth.signInWithPhoneNumber(fullPhone, verifier);
-                confirmationResult = confirmation;
-                showScreen('otp');
-                startTimer(60);
-                autoOtpStatus.innerHTML = '📱 Waiting for OTP... Auto-read enabled';
-            } catch (error) {
-                showError('phoneError', error.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = 'Continue';
-            }
-        });
-        
-        // Verify OTP
-        document.getElementById('verifyOtpBtn').addEventListener('click', async () => {
-            const code = getOTPCode();
-            if (code.length !== 6) {
-                showError('otpError', 'Enter 6-digit OTP');
-                return;
-            }
-            
-            const btn = document.getElementById('verifyOtpBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="loading-spinner"></span> Verifying...';
-            
-            try {
-                const result = await confirmationResult.confirm(code);
-                const user = result.user;
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                
-                if (userDoc.exists && userDoc.data().pin) {
-                    showScreen('pinLogin');
-                } else {
-                    showScreen('pin');
-                }
-            } catch (error) {
-                showError('otpError', 'Invalid OTP. Try again.');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = 'Verify & Continue';
-            }
-        });
-        
-        // Resend OTP
-        document.getElementById('resendLink').addEventListener('click', async () => {
-            if (countdown > 0) {
-                showError('otpError', `Wait ${countdown} seconds`);
-                return;
-            }
-            
-            const btn = document.getElementById('resendLink');
-            btn.innerHTML = 'Sending...';
-            
-            try {
-                const verifier = initRecaptcha();
-                const confirmation = await auth.signInWithPhoneNumber(currentPhone, verifier);
-                confirmationResult = confirmation;
-                startTimer(60);
-                autoOtpStatus.innerHTML = '📱 OTP resent! Waiting for auto-read...';
-                showError('otpError', '✅ OTP resent!');
-                setTimeout(() => showError('otpError', ''), 3000);
-            } catch (error) {
-                showError('otpError', error.message);
-            } finally {
-                btn.innerHTML = 'Resend';
-            }
-        });
-        
-        // Edit number
-        document.getElementById('editNumber').addEventListener('click', (e) => {
-            e.preventDefault();
-            showScreen('phone');
-            otpDigits.forEach(digit => digit.value = '');
-            autoOtpStatus.innerHTML = '📱 Auto-read OTP enabled';
-        });
-        
-        // Register PIN
-        document.getElementById('registerPinBtn').addEventListener('click', async () => {
-            const pin = document.getElementById('pinInput').value;
-            const confirmPin = document.getElementById('confirmPinInput').value;
-            
-            if (!pin || pin.length !== 4) {
-                showError('pinError', 'PIN must be 4 digits');
-                return;
-            }
-            if (pin !== confirmPin) {
-                showError('pinError', 'PINs do not match');
-                return;
-            }
-            
-            const user = auth.currentUser;
-            if (!user) {
-                showError('pinError', 'Session expired');
-                return;
-            }
-            
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            const name = userDoc.exists ? userDoc.data().name : 'User';
-            
-            const btn = document.getElementById('registerPinBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="loading-spinner"></span> Creating...';
-            
-            try {
-                await db.collection('users').doc(user.uid).set({
-                    uid: user.uid,
-                    phone: user.phoneNumber,
-                    name: name,
-                    pin: pin,
-                    role: 'user',
-                    balance: 0,
-                    createdAt: new Date()
-                });
-                window.location.href = 'dashboard.html';
-            } catch (error) {
-                showError('pinError', error.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = 'Create Account';
-            }
-        });
-        
-        // PIN Login
-        document.getElementById('pinLoginBtn').addEventListener('click', async () => {
-            const pin = document.getElementById('pinLoginInput').value;
-            
-            if (!pin || pin.length !== 4) {
-                showError('pinLoginError', 'Enter 4-digit PIN');
-                return;
-            }
-            
-            const user = auth.currentUser;
-            if (!user) {
-                showScreen('phone');
-                return;
-            }
-            
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (userDoc.exists && userDoc.data().pin === pin) {
-                window.location.href = 'dashboard.html';
-            } else {
-                showError('pinLoginError', 'Incorrect PIN');
-            }
-        });
-        
-        // Logout
-        document.getElementById('logoutPinBtn').addEventListener('click', async () => {
-            await auth.signOut();
-            showScreen('phone');
-            document.getElementById('pinLoginInput').value = '';
-        });
-        
-        // Check existing session
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                if (userDoc.exists && userDoc.data().pin) {
-                    showScreen('pinLogin');
-                } else {
-                    showScreen('phone');
-                }
-            } else {
-                showScreen('phone');
-            }
-        });
+        async function verifyPinLogin(pin) { const user = auth.currentUser; if (!user) { appState = 'login'; renderScreen(); return; } const userDoc = await db.collection('users').doc(user.uid).get(); if (userDoc.exists && userDoc.data().pin === pin) window.location.href = 'dashboard.html'; else showMessage('❌ Incorrect PIN'); }
+        function startTimer(seconds) { countdown = seconds; if (timerInterval) clearInterval(timerInterval); timerInterval = setInterval(() => { if (countdown <= 1) { clearInterval(timerInterval); timerInterval = null; renderScreen(); } else { countdown--; const t = document.getElementById('resendTimer'); if (t) t.innerText = `${countdown}s`; } }, 1000); }
+        function renderLogin() { dynamicScreen.innerHTML = `<div class="screen"><div id="recaptcha-container"></div><div class="input-section"><label class="input-label">Enter Your Phone Number</label><div class="country-selector-box"><div class="country-code-select">🇮🇳 +91</div><input type="tel" id="phoneNumber" class="phone-input" placeholder="9876543210" maxlength="10"></div></div><button class="continue-btn" id="sendOtpBtn">Send OTP</button><div class="error-msg"></div></div>`; document.getElementById('sendOtpBtn').addEventListener('click', () => sendOTP(document.getElementById('phoneNumber').value.replace(/\D/g, ''))); setTimeout(() => initRecaptcha(), 500); }
+        function renderOtp() { dynamicScreen.innerHTML = `<div class="screen"><div id="recaptcha-container"></div><div class="info-box"><p>📨 OTP sent to ${currentPhone}</p></div><div class="otp-grid" style="display:flex; justify-content:center;"><input type="text" class="otp-digit" maxlength="1" id="otp1"><input type="text" class="otp-digit" maxlength="1" id="otp2"><input type="text" class="otp-digit" maxlength="1" id="otp3"><input type="text" class="otp-digit" maxlength="1" id="otp4"><input type="text" class="otp-digit" maxlength="1" id="otp5"><input type="text" class="otp-digit" maxlength="1" id="otp6"></div><button class="continue-btn" id="verifyOtpBtn">Verify & Login</button><button class="secondary-btn" id="resendBtn">${countdown > 0 ? `Resend in <span id="resendTimer">${countdown}s</span>` : 'Resend OTP'}</button><button class="secondary-btn" id="backBtn">← Back</button><div class="error-msg"></div></div>`; document.getElementById('verifyOtpBtn').onclick = () => { let code = ''; for(let i=1;i<=6;i++) code += document.getElementById(`otp${i}`).value; verifyOTP(code); }; document.getElementById('resendBtn').onclick = async () => { if(countdown>0) showMessage(`Wait ${countdown}s`); else { const v=initRecaptcha(); const c=await auth.signInWithPhoneNumber(currentPhone, v); confirmationResult=c; startTimer(60); showMessage('✅ Resent!', false); renderScreen(); } }; document.getElementById('backBtn').onclick = () => { appState='login'; renderScreen(); }; }
+        function renderRegister() { dynamicScreen.innerHTML = `<div class="screen"><div class="info-box"><p>✨ Complete Profile</p></div><input type="text" id="fullName" placeholder="Full Name" style="width:100%; padding:14px; background:#1a1a2e; border:1px solid #333; border-radius:16px; color:white; margin-bottom:15px;"><input type="password" id="pin" placeholder="4-Digit PIN" maxlength="4" style="width:100%; padding:14px; background:#1a1a2e; border:1px solid #333; border-radius:16px; color:white; margin-bottom:15px;"><input type="password" id="confirmPin" placeholder="Confirm PIN" maxlength="4" style="width:100%; padding:14px; background:#1a1a2e; border:1px solid #333; border-radius:16px; color:white; margin-bottom:15px;"><button class="continue-btn" id="registerBtn">Create Account</button><div class="error-msg"></div></div>`; document.getElementById('registerBtn').onclick = () => registerUser(document.getElementById('fullName').value, document.getElementById('pin').value, document.getElementById('confirmPin').value); }
+        function renderPinLogin() { dynamicScreen.innerHTML = `<div class="screen"><div class="info-box"><p>🔐 Enter 4-digit PIN</p></div><input type="password" id="pinInput" class="pin-input" placeholder="●●●●" style="width:100%; text-align:center; margin:10px 0;"><button class="continue-btn" id="pinLoginBtn">Unlock Dashboard</button><button class="secondary-btn" id="logoutPinBtn">Use different account</button><div class="error-msg"></div></div>`; document.getElementById('pinLoginBtn').onclick = () => verifyPinLogin(document.getElementById('pinInput').value); document.getElementById('logoutPinBtn').onclick = async () => { await auth.signOut(); appState='login'; renderScreen(); }; }
+        auth.onAuthStateChanged(async (user) => { if(user) { const doc = await db.collection('users').doc(user.uid).get(); if(doc.exists && doc.data().pin) appState='pin-login'; else appState='login'; renderScreen(); } else renderScreen(); });
     </script>
 </body>
 </html>
