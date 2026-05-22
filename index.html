@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>win777 - Secure Login</title>
+    <title>win777 - OTP Login</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -28,7 +28,7 @@
             background: rgba(30, 30, 47, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 36px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
             overflow: hidden;
         }
         .header {
@@ -39,12 +39,12 @@
         }
         .header h1 {
             font-size: 32px;
-            margin-bottom: 5px;
             letter-spacing: 2px;
         }
         .header p {
             font-size: 13px;
             opacity: 0.9;
+            margin-top: 5px;
         }
         .screen {
             padding: 30px 24px;
@@ -67,12 +67,10 @@
             border-radius: 16px;
             color: white;
             font-size: 16px;
-            transition: 0.2s;
         }
         input:focus, select:focus {
             border-color: #ff9800;
             outline: none;
-            background: #2f2f41;
         }
         button {
             width: 100%;
@@ -88,7 +86,7 @@
             transition: 0.2s;
         }
         button:active { transform: scale(0.98); }
-        button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
         .secondary-btn {
             background: transparent;
             border: 1px solid #ff9800;
@@ -141,25 +139,6 @@
             vertical-align: middle;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .pin-dots {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin: 20px 0;
-        }
-        .pin-dot {
-            width: 50px;
-            height: 50px;
-            background: #2a2a3a;
-            border-radius: 25px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-            border-bottom: 3px solid #ff9800;
-        }
         footer {
             text-align: center;
             padding: 20px;
@@ -173,14 +152,13 @@
 <div class="app-container">
     <div class="header">
         <h1>WIN777</h1>
-        <p>Secure Authentication System</p>
+        <p>Secure OTP Authentication</p>
     </div>
     <div id="dynamicScreen"></div>
     <footer>Protected by advanced security</footer>
 </div>
 
 <script>
-    // Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
         authDomain: "win777-ed482.firebaseapp.com",
@@ -196,28 +174,24 @@
     const db = firebase.firestore();
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     
-    // App State
     let confirmationResult = null;
     let currentPhone = null;
     let countdown = 0;
     let timerInterval = null;
     let appState = 'login';
     let recaptchaVerifier = null;
-    let retryCount = 0;
-    let lastPhoneRequest = null;
     
     const dynamicScreen = document.getElementById('dynamicScreen');
     
-    // Initialize reCAPTCHA once - crucial fix
     function initRecaptcha() {
         if (!recaptchaVerifier && document.getElementById('recaptcha-container')) {
             try {
                 recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-                    size: 'invisible',
-                    'callback': () => {}
+                    size: 'invisible'
                 });
+                console.log('reCAPTCHA initialized');
             } catch (e) {
-                console.log('reCAPTCHA already exists');
+                console.log('reCAPTCHA error:', e);
             }
         }
         return recaptchaVerifier;
@@ -227,8 +201,6 @@
         if (appState === 'login') renderLogin();
         else if (appState === 'otp-verify') renderOtp();
         else if (appState === 'register-pin') renderRegister();
-        else if (appState === 'pin-login') renderPinLogin();
-        else if (appState === 'dashboard') renderDashboard();
     }
     
     function showMessage(msg, isError = true) {
@@ -242,20 +214,11 @@
         }
     }
     
-    // Send OTP with retry logic and rate limiting protection
     async function sendOTP(phoneNumber) {
         if (!phoneNumber || phoneNumber.length < 10) {
-            showMessage('📱 Please enter a valid 10-digit mobile number');
-            return false;
+            showMessage('📱 Enter valid 10-digit mobile number');
+            return;
         }
-        
-        // Rate limiting - prevent too many requests
-        const now = Date.now();
-        if (lastPhoneRequest && (now - lastPhoneRequest) < 30000) {
-            showMessage('⏱️ Please wait 30 seconds before trying again');
-            return false;
-        }
-        lastPhoneRequest = now;
         
         const fullPhone = phoneNumber.startsWith('+') ? phoneNumber : '+91' + phoneNumber;
         currentPhone = fullPhone;
@@ -268,7 +231,7 @@
         try {
             const verifier = initRecaptcha();
             if (!verifier) {
-                setTimeout(() => initRecaptcha(), 100);
+                throw new Error('reCAPTCHA not ready');
             }
             
             const confirmation = await auth.signInWithPhoneNumber(fullPhone, verifier);
@@ -276,54 +239,31 @@
             appState = 'otp-verify';
             startTimer(60);
             renderScreen();
-            showMessage('✅ OTP sent successfully! Check your phone', false);
-            retryCount = 0;
-            return true;
+            showMessage('✅ OTP sent! Check your phone', false);
         } catch (error) {
-            console.error('OTP Error:', error);
-            
-            let userFriendlyMessage = '';
-            
-            switch(error.code) {
-                case 'auth/too-many-requests':
-                    userFriendlyMessage = '⚠️ Too many attempts. Please wait 1 hour before trying again.';
-                    break;
-                case 'auth/invalid-phone-number':
-                    userFriendlyMessage = '❌ Invalid phone number. Please check and try again.';
-                    break;
-                case 'auth/quota-exceeded':
-                    userFriendlyMessage = '📞 Daily SMS limit reached. Please try again tomorrow.';
-                    break;
-                case 'auth/billing-not-enabled':
-                    userFriendlyMessage = '💳 Billing setup in progress. Please wait 5 minutes and refresh.';
-                    break;
-                default:
-                    userFriendlyMessage = `❌ ${error.message}`;
+            console.error('Error:', error);
+            let msg = error.message;
+            if (error.code === 'auth/captcha-check-failed') {
+                msg = 'Please refresh the page and try again. Make sure you are using http://localhost or https:// domain.';
+            } else if (error.code === 'auth/too-many-requests') {
+                msg = 'Too many attempts. Please wait 1 hour.';
             }
-            
-            showMessage(userFriendlyMessage);
-            retryCount++;
-            
-            if (retryCount >= 3) {
-                showMessage('⚠️ Multiple failed attempts. Please wait 10 minutes before trying again.');
-            }
-            
+            showMessage('❌ ' + msg);
             btn.disabled = false;
             btn.innerHTML = originalText;
-            return false;
         }
     }
     
     async function verifyOTP(otpCode) {
         if (!confirmationResult) {
-            showMessage('Session expired. Please request OTP again.');
+            showMessage('Session expired. Request OTP again.');
             appState = 'login';
             renderScreen();
             return;
         }
         
         if (!otpCode || otpCode.length !== 6) {
-            showMessage('Please enter the 6-digit OTP');
+            showMessage('Enter 6-digit OTP');
             return;
         }
         
@@ -338,15 +278,20 @@
             const userDoc = await db.collection('users').doc(user.uid).get();
             
             if (userDoc.exists && userDoc.data().pin) {
-                // Existing user - store session and go to dashboard
                 localStorage.setItem('win777_user', JSON.stringify({
                     uid: user.uid,
                     name: userDoc.data().name,
                     role: userDoc.data().role
                 }));
-                window.location.href = 'dashboard.html';
+                showMessage('✅ Login successful! Redirecting...', false);
+                setTimeout(() => {
+                    if (userDoc.data().role === 'admin') {
+                        window.location.href = 'admin.html';
+                    } else {
+                        window.location.href = 'dashboard.html';
+                    }
+                }, 1000);
             } else {
-                // New user - set up PIN
                 appState = 'register-pin';
                 renderScreen();
             }
@@ -360,7 +305,7 @@
     
     async function resendOTP() {
         if (countdown > 0) {
-            showMessage(`Please wait ${countdown} seconds before resending`);
+            showMessage(`Wait ${countdown} seconds`);
             return;
         }
         
@@ -373,22 +318,22 @@
             const confirmation = await auth.signInWithPhoneNumber(currentPhone, verifier);
             confirmationResult = confirmation;
             startTimer(60);
-            showMessage('✅ OTP resent successfully!', false);
+            showMessage('✅ OTP resent!', false);
             renderScreen();
         } catch (error) {
-            showMessage('Failed to resend OTP. Please try again.');
+            showMessage('Failed to resend');
         } finally {
             btn.disabled = false;
         }
     }
     
     async function registerUser(name, pin, confirmPin) {
-        if (!name || name.trim().length < 2) {
-            showMessage('Please enter your full name');
+        if (!name || name.length < 2) {
+            showMessage('Enter your name');
             return;
         }
         if (!/^\d{4}$/.test(pin)) {
-            showMessage('PIN must be exactly 4 digits (0-9)');
+            showMessage('PIN must be 4 digits');
             return;
         }
         if (pin !== confirmPin) {
@@ -398,79 +343,33 @@
         
         const user = auth.currentUser;
         if (!user) {
-            showMessage('Session expired. Please login again.');
-            appState = 'login';
-            renderScreen();
+            showMessage('Session expired');
             return;
         }
         
         const btn = document.getElementById('registerBtn');
         btn.disabled = true;
-        btn.innerHTML = '<span class="loading"></span> Creating Account...';
+        btn.innerHTML = '<span class="loading"></span> Creating...';
         
         try {
             await db.collection('users').doc(user.uid).set({
                 uid: user.uid,
                 phone: user.phoneNumber,
-                name: name.trim(),
+                name: name,
                 pin: pin,
                 role: 'user',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                createdAt: new Date()
             });
-            
-            localStorage.setItem('win777_user', JSON.stringify({
-                uid: user.uid,
-                name: name.trim(),
-                role: 'user'
-            }));
-            
-            showMessage('✅ Account created successfully! Redirecting...', false);
+            showMessage('✅ Account created! Redirecting...', false);
             setTimeout(() => {
                 window.location.href = 'dashboard.html';
-            }, 1500);
+            }, 1000);
         } catch (error) {
             showMessage('Error: ' + error.message);
         } finally {
             btn.disabled = false;
             btn.innerHTML = 'Create Account';
         }
-    }
-    
-    async function verifyPinLogin(pin) {
-        const user = auth.currentUser;
-        if (!user) {
-            appState = 'login';
-            renderScreen();
-            return;
-        }
-        
-        try {
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (userDoc.exists && userDoc.data().pin === pin) {
-                localStorage.setItem('win777_user', JSON.stringify({
-                    uid: user.uid,
-                    name: userDoc.data().name,
-                    role: userDoc.data().role
-                }));
-                
-                if (userDoc.data().role === 'admin') {
-                    window.location.href = 'admin.html';
-                } else {
-                    window.location.href = 'dashboard.html';
-                }
-            } else {
-                showMessage('❌ Incorrect PIN. Please try again.');
-            }
-        } catch (error) {
-            showMessage('Error verifying PIN. Please try again.');
-        }
-    }
-    
-    async function logout() {
-        await auth.signOut();
-        localStorage.removeItem('win777_user');
-        appState = 'login';
-        renderScreen();
     }
     
     function startTimer(seconds) {
@@ -489,13 +388,12 @@
         }, 1000);
     }
     
-    // UI Rendering Functions
     function renderLogin() {
         dynamicScreen.innerHTML = `
             <div class="screen">
                 <div id="recaptcha-container"></div>
                 <div class="info-box">
-                    <p>🔐 Secure OTP verification. Real SMS will be sent to your phone.</p>
+                    <p>🔐 Real SMS will be sent to your phone</p>
                 </div>
                 <div class="input-group">
                     <label>📱 Mobile Number</label>
@@ -504,10 +402,8 @@
                             <option value="+91">🇮🇳 +91</option>
                             <option value="+1">🇺🇸 +1</option>
                             <option value="+44">🇬🇧 +44</option>
-                            <option value="+61">🇦🇺 +61</option>
-                            <option value="+971">🇦🇪 +971</option>
                         </select>
-                        <input type="tel" id="phoneNumber" placeholder="9876543210" maxlength="10" inputmode="numeric">
+                        <input type="tel" id="phoneNumber" placeholder="9876543210" maxlength="10">
                     </div>
                 </div>
                 <button id="sendOtpBtn">📨 Send OTP</button>
@@ -521,7 +417,7 @@
             sendOTP(code + phone);
         });
         
-        setTimeout(() => initRecaptcha(), 100);
+        setTimeout(() => initRecaptcha(), 500);
     }
     
     function renderOtp() {
@@ -530,15 +426,14 @@
                 <div id="recaptcha-container"></div>
                 <div class="info-box">
                     <p>📨 OTP sent to ${currentPhone}</p>
-                    <p style="font-size:11px; margin-top:5px;">Enter the 6-digit code received via SMS</p>
                 </div>
                 <div class="input-group">
                     <label>🔐 Enter OTP</label>
-                    <input type="text" id="otpInput" placeholder="123456" maxlength="6" autocomplete="off" inputmode="numeric">
+                    <input type="text" id="otpInput" placeholder="123456" maxlength="6">
                 </div>
-                <button id="verifyOtpBtn">✓ Verify & Continue</button>
-                <button id="resendOtpBtn" class="secondary-btn">${countdown > 0 ? `⏱️ Resend in <span id="resendTimer">${countdown}s</span>` : '⟳ Resend OTP'}</button>
-                <button id="backBtn" class="secondary-btn">← Change Number</button>
+                <button id="verifyOtpBtn">✓ Verify</button>
+                <button id="resendOtpBtn" class="secondary-btn">${countdown > 0 ? `⏱️ Resend in <span id="resendTimer">${countdown}s</span>` : '⟳ Resend'}</button>
+                <button id="backBtn" class="secondary-btn">← Back</button>
                 <div class="error-msg"></div>
             </div>
         `;
@@ -556,18 +451,18 @@
     function renderRegister() {
         dynamicScreen.innerHTML = `
             <div class="screen">
-                <h3 style="margin-bottom: 20px; color: #ff9800;">✨ Complete Profile</h3>
+                <h3 style="margin-bottom: 20px; color:#ff9800;">✨ Complete Profile</h3>
                 <div class="input-group">
                     <label>👤 Full Name</label>
-                    <input type="text" id="fullName" placeholder="John Doe" autocomplete="off">
+                    <input type="text" id="fullName" placeholder="John Doe">
                 </div>
                 <div class="input-group">
-                    <label>🔐 Create 4-Digit PIN</label>
-                    <input type="password" id="pin" maxlength="4" placeholder="****" inputmode="numeric">
+                    <label>🔐 4-Digit PIN</label>
+                    <input type="password" id="pin" maxlength="4" placeholder="****">
                 </div>
                 <div class="input-group">
                     <label>✓ Confirm PIN</label>
-                    <input type="password" id="confirmPin" maxlength="4" placeholder="****" inputmode="numeric">
+                    <input type="password" id="confirmPin" maxlength="4" placeholder="****">
                 </div>
                 <button id="registerBtn">🚀 Create Account</button>
                 <div class="error-msg"></div>
@@ -582,64 +477,13 @@
         });
     }
     
-    function renderPinLogin() {
-        dynamicScreen.innerHTML = `
-            <div class="screen">
-                <h3 style="margin-bottom: 20px; color: #ff9800;">🔐 Enter PIN</h3>
-                <div class="info-box">
-                    <p>Welcome back! Enter your 4-digit PIN to login</p>
-                </div>
-                <div class="input-group">
-                    <label>4-Digit PIN</label>
-                    <input type="password" id="pinInput" maxlength="4" placeholder="****" inputmode="numeric">
-                </div>
-                <button id="pinLoginBtn">🔓 Unlock Dashboard</button>
-                <button id="logoutPinBtn" class="secondary-btn">Use different account</button>
-                <div class="error-msg"></div>
-            </div>
-        `;
-        
-        document.getElementById('pinLoginBtn').addEventListener('click', () => {
-            verifyPinLogin(document.getElementById('pinInput').value);
-        });
-        document.getElementById('logoutPinBtn').addEventListener('click', async () => {
-            await auth.signOut();
-            appState = 'login';
-            renderScreen();
-        });
-    }
-    
-    function renderDashboard() {
-        const userData = JSON.parse(localStorage.getItem('win777_user') || '{}');
-        dynamicScreen.innerHTML = `
-            <div class="screen">
-                <div class="info-box">
-                    <p>👋 Welcome back, ${userData.name || 'User'}!</p>
-                </div>
-                <button id="logoutBtn">🚪 Logout</button>
-                <div class="error-msg"></div>
-            </div>
-        `;
-        
-        document.getElementById('logoutBtn').addEventListener('click', logout);
-    }
-    
-    // Check existing session on load
+    // Check existing session
     auth.onAuthStateChanged(async (user) => {
         if (user && !window.location.pathname.includes('dashboard.html')) {
             const userDoc = await db.collection('users').doc(user.uid).get();
             if (userDoc.exists && userDoc.data().pin) {
-                if (userDoc.data().role === 'admin') {
-                    window.location.href = 'admin.html';
-                } else {
-                    window.location.href = 'dashboard.html';
-                }
-            } else if (userDoc.exists && !userDoc.data().pin) {
-                appState = 'register-pin';
-                renderScreen();
+                window.location.href = 'dashboard.html';
             }
-        } else if (!user) {
-            renderScreen();
         }
     });
     
