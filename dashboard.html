@@ -8,474 +8,98 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            overflow-x: hidden;
-            padding-bottom: 70px;
-        }
-
-        .header {
-            background: rgba(255,255,255,0.95);
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .logo-small {
-            font-size: 24px;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .balance-card {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            padding: 8px 16px;
-            border-radius: 30px;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 20px 16px;
-        }
-
-        .market-card {
-            background: white;
-            border-radius: 24px;
-            padding: 18px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: 0.2s;
-        }
-
-        .market-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .market-name {
-            font-size: 18px;
-            font-weight: 700;
-            color: #333;
-        }
-
-        .market-status {
-            font-size: 11px;
-            padding: 4px 12px;
-            border-radius: 20px;
-        }
-
-        .status-open-bid {
-            background: #e3f2fd;
-            color: #2196f3;
-        }
-
-        .status-close-bid {
-            background: #fff3e0;
-            color: #ff9800;
-        }
-
-        .status-closed {
-            background: #ffebee;
-            color: #f44336;
-        }
-
-        .market-time {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 12px;
-        }
-
-        .bid-phase {
-            font-size: 12px;
-            padding: 6px 10px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            font-weight: 500;
-        }
-
-        .bid-phase-open {
-            background: #e3f2fd;
-            color: #2196f3;
-        }
-
-        .bid-phase-close {
-            background: #fff3e0;
-            color: #ff9800;
-        }
-
-        .play-btn {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border: none;
-            border-radius: 20px;
-            color: white;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background: #0a0a0f; min-height: 100vh; padding-bottom: 80px; }
+        .header { background: #1a1a2e; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .logo-small { font-size: 24px; font-weight: bold; color: #ff9800; }
+        .balance-card { background: linear-gradient(135deg, #ff9800, #ff5722); padding: 8px 16px; border-radius: 30px; color: #1a1a2e; font-weight: bold; }
+        .menu-btn { background: none; border: none; font-size: 24px; color: #ff9800; cursor: pointer; }
+        .sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100%; background: #1a1a2e; z-index: 1000; transition: 0.3s; overflow-y: auto; }
+        .sidebar.open { left: 0; }
+        .sidebar-header { padding: 25px; text-align: center; border-bottom: 1px solid #333; background: #0a0a0f; }
+        .sidebar-header h2 { color: #ff9800; }
+        .sidebar-item { padding: 15px 25px; display: flex; align-items: center; gap: 12px; color: #aaa; cursor: pointer; border-bottom: 1px solid #222; transition: 0.2s; }
+        .sidebar-item:hover { background: #ff980015; color: #ff9800; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 999; display: none; }
+        .overlay.active { display: block; }
+        .container { max-width: 500px; margin: 0 auto; padding: 20px 16px; }
+        .market-card { background: linear-gradient(135deg, #1a1a2e, #12121f); border-radius: 20px; padding: 18px; margin-bottom: 16px; border: 1px solid #ff980020; transition: 0.2s; }
+        .market-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+        .market-name { font-size: 18px; font-weight: 800; color: #ff9800; text-transform: uppercase; letter-spacing: 1px; }
+        .market-result { font-size: 12px; color: #ff5722; background: #ff980010; padding: 4px 10px; border-radius: 20px; font-family: monospace; }
+        .market-status { font-size: 11px; padding: 4px 12px; border-radius: 20px; }
+        .status-open-bid { background: #e3f2fd; color: #2196f3; }
+        .status-close-bid { background: #fff3e0; color: #ff9800; }
+        .status-closed { background: #ffebee; color: #f44336; }
+        .market-time { font-size: 12px; color: #aaa; margin-bottom: 10px; }
+        .bid-phase { font-size: 11px; padding: 6px; border-radius: 10px; margin-bottom: 12px; text-align: center; }
+        .bid-phase-open { background: #2196f310; color: #2196f3; }
+        .bid-phase-close { background: #ff980010; color: #ff9800; }
+        .play-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #ff9800, #ff5722); border: none; border-radius: 16px; color: #1a1a2e; font-weight: 800; cursor: pointer; transition: 0.2s; }
         .play-btn:active { transform: scale(0.98); }
         .play-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 12px 20px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-
-        .nav-item {
-            text-align: center;
-            color: #999;
-            cursor: pointer;
-            font-size: 12px;
-            transition: 0.2s;
-        }
-
-        .nav-item.active { color: #667eea; }
-        .nav-item span { font-size: 22px; display: block; margin-bottom: 2px; }
-
-        .menu-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            color: #667eea;
-        }
-
-        .sidebar {
-            position: fixed;
-            left: -280px;
-            top: 0;
-            width: 280px;
-            height: 100%;
-            background: white;
-            z-index: 1000;
-            transition: 0.3s;
-            box-shadow: 2px 0 20px rgba(0,0,0,0.1);
-            overflow-y: auto;
-        }
-
-        .sidebar.open { left: 0; }
-
-        .sidebar-header {
-            padding: 25px;
-            text-align: center;
-            border-bottom: 1px solid #eee;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-        }
-
-        .sidebar-header h2 { color: white; font-size: 24px; }
-
-        .sidebar-item {
-            padding: 15px 25px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: #333;
-            cursor: pointer;
-            border-bottom: 1px solid #f0f0f0;
-            transition: 0.2s;
-        }
-
-        .sidebar-item:hover { background: #f5f5f5; color: #667eea; }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-            display: none;
-        }
-
-        .overlay.active { display: block; }
-        
-        .current-time {
-            background: white;
-            margin: 10px 16px;
-            padding: 10px;
-            border-radius: 20px;
-            text-align: center;
-            font-size: 14px;
-            color: #333;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .current-time span {
-            color: #667eea;
-            font-weight: bold;
-        }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #1a1a2e; display: flex; justify-content: space-around; padding: 10px 20px; border-top: 1px solid #ff980020; z-index: 100; }
+        .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 11px; }
+        .nav-item.active { color: #ff9800; }
+        .nav-item span { font-size: 22px; display: block; }
+        .card { background: #1a1a2e; border-radius: 24px; padding: 20px; margin-bottom: 20px; border: 1px solid #ff980020; }
+        .card-title { font-size: 18px; font-weight: bold; color: #ff9800; margin-bottom: 15px; border-left: 4px solid #ff9800; padding-left: 12px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; color: #aaa; font-size: 12px; margin-bottom: 5px; }
+        .form-group input, .form-group select { width: 100%; padding: 12px; background: #0a0a0f; border: 1px solid #333; border-radius: 12px; color: white; }
+        .save-btn { background: linear-gradient(135deg, #ff9800, #ff5722); padding: 12px; border: none; border-radius: 12px; color: #1a1a2e; font-weight: bold; width: 100%; cursor: pointer; }
+        .data-table { width: 100%; overflow-x: auto; }
+        .data-table table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 10px; text-align: left; border-bottom: 1px solid #333; color: #ddd; font-size: 13px; }
+        .data-table th { color: #ff9800; }
+        .hidden { display: none; }
+        .upi-options { display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0; }
+        .upi-btn { background: #0a0a0f; border: 1px solid #ff9800; padding: 12px; border-radius: 12px; flex: 1; text-align: center; cursor: pointer; color: #ff9800; font-weight: bold; }
+        .amount-options { display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0; }
+        .amount-chip { background: #0a0a0f; border: 1px solid #333; padding: 10px 15px; border-radius: 30px; cursor: pointer; color: white; }
+        .amount-chip.active { background: #ff9800; color: #1a1a2e; border-color: #ff9800; }
+        @media (max-width: 480px) { .market-name { font-size: 14px; } .market-result { font-size: 10px; } }
     </style>
 </head>
 <body>
-
-    <div class="header">
-        <button class="menu-btn" id="menuBtn">☰</button>
-        <div class="logo-small">WIN777</div>
-        <div class="balance-card">💰 ₹<span id="userBalance">0</span></div>
-    </div>
-
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header"><h2>WIN777</h2></div>
-        <div class="sidebar-item" onclick="navigateTo('profile')">👤 My Profile</div>
-        <div class="sidebar-item" onclick="navigateTo('mpin')">🔐 Change MPIN</div>
-        <div class="sidebar-item" onclick="navigateTo('history')">📋 Bid History</div>
-        <div class="sidebar-item" onclick="navigateTo('funds')">🏦 Funds</div>
-        <div class="sidebar-item" onclick="navigateTo('support')">📞 Support</div>
-        <div class="sidebar-item" id="logoutBtn" style="color:#f44336;">🚪 Logout</div>
-    </div>
-
+    <div class="header"><button class="menu-btn" id="menuBtn">☰</button><div class="logo-small">WIN777</div><div class="balance-card">💰 ₹<span id="userBalance">0</span></div></div>
+    <div class="sidebar" id="sidebar"><div class="sidebar-header"><h2>WIN777</h2></div><div class="sidebar-item" onclick="showPage('profile')">👤 My Profile</div><div class="sidebar-item" onclick="showPage('bank')">🏦 Bank Details</div><div class="sidebar-item" onclick="showPage('history')">📋 Bid History</div><div class="sidebar-item" onclick="showPage('transactions')">📊 Transactions</div><div class="sidebar-item" id="logoutBtn" style="color:#f44336;">🚪 Logout</div></div>
     <div class="overlay" id="overlay"></div>
-
-    <div class="current-time" id="currentTimeDisplay">
-        🕐 Current Server Time: <span id="currentTime">--:-- --</span>
-    </div>
-
-    <div class="container">
-        <div id="marketsList"></div>
-    </div>
-
-    <div class="bottom-nav">
-        <div class="nav-item active" onclick="scrollToMarkets()"><span>🏠</span><p>Home</p></div>
-        <div class="nav-item" onclick="navigateTo('history')"><span>📋</span><p>History</p></div>
-        <div class="nav-item" onclick="navigateTo('funds')"><span>🏦</span><p>Funds</p></div>
-        <div class="nav-item" onclick="navigateTo('profile')"><span>👤</span><p>Profile</p></div>
-    </div>
-
+    <div class="container"><div id="marketsList"></div><div id="profilePage" class="hidden"><div class="card"><div class="card-title">👤 My Profile</div><p id="profileName" style="color:white;"></p><p id="profilePhone" style="color:#aaa;"></p><p id="profileBalance" style="color:#ff9800;"></p></div></div><div id="bankPage" class="hidden"><div class="card"><div class="card-title">🏦 Bank Details</div><div class="form-group"><label>Account Holder Name</label><input type="text" id="accName" placeholder="Full Name"></div><div class="form-group"><label>Bank Name</label><input type="text" id="bankName" placeholder="Bank Name"></div><div class="form-group"><label>Account Number</label><input type="text" id="accNumber" placeholder="Account Number"></div><div class="form-group"><label>IFSC Code</label><input type="text" id="ifsc" placeholder="IFSC Code"></div><button class="save-btn" id="saveBankBtn">Save Bank Details</button><div id="bankMsg"></div></div></div><div id="historyPage" class="hidden"><div class="card"><div class="card-title">📋 Bid History</div><div id="bidHistoryList"></div></div></div><div id="transactionsPage" class="hidden"><div class="card"><div class="card-title">📊 Transactions</div><div id="transactionsList"></div></div></div></div>
+    <div class="bottom-nav"><div class="nav-item active" onclick="scrollToMarkets()"><span>🏠</span><p>Home</p></div><div class="nav-item" onclick="showDepositModal()"><span>💰</span><p>Deposit</p></div><div class="nav-item" onclick="showWithdrawModal()"><span>💸</span><p>Withdraw</p></div><div class="nav-item" onclick="showPage('profile')"><span>👤</span><p>Profile</p></div></div>
+    <!-- Deposit Modal -->
+    <div id="depositModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; justify-content:center; align-items:center;"><div style="background:#1a1a2e; border-radius:30px; padding:25px; width:90%; max-width:350px;"><h3 style="color:#ff9800;">💰 Deposit Money</h3><div class="amount-options"><div class="amount-chip" onclick="setDepositAmount(200)">₹200</div><div class="amount-chip" onclick="setDepositAmount(500)">₹500</div><div class="amount-chip" onclick="setDepositAmount(1000)">₹1000</div><div class="amount-chip" onclick="setDepositAmount(2000)">₹2000</div><div class="amount-chip" onclick="setDepositAmount(5000)">₹5000</div><div class="amount-chip" onclick="setDepositAmount(10000)">₹10000</div></div><input type="number" id="customAmount" placeholder="Enter Amount (200-49000)" style="width:100%; padding:12px; background:#0a0a0f; border:1px solid #333; border-radius:12px; color:white; margin:10px 0;"><div class="upi-options"><div class="upi-btn" onclick="payWithUPI('googlepay')">Google Pay</div><div class="upi-btn" onclick="payWithUPI('phonepe')">PhonePe</div><div class="upi-btn" onclick="payWithUPI('paytm')">Paytm</div></div><button class="save-btn" id="confirmDepositBtn">Pay ₹<span id="displayAmount">200</span></button><button class="save-btn" style="background:#333; margin-top:10px;" onclick="closeDepositModal()">Cancel</button><div id="depositMsg"></div></div></div>
+    <!-- Withdraw Modal -->
+    <div id="withdrawModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; justify-content:center; align-items:center;"><div style="background:#1a1a2e; border-radius:30px; padding:25px; width:90%; max-width:350px;"><h3 style="color:#ff9800;">💸 Withdraw Money</h3><div class="form-group"><label>Select Bank Account</label><select id="withdrawBankSelect"><option value="">Select Saved Bank</option></select></div><div class="form-group"><label>Amount (Min ₹500)</label><input type="number" id="withdrawAmount" placeholder="Enter Amount"></div><button class="save-btn" id="confirmWithdrawBtn">Request Withdrawal</button><button class="save-btn" style="background:#333; margin-top:10px;" onclick="closeWithdrawModal()">Cancel</button><div id="withdrawMsg"></div></div></div>
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
-            authDomain: "win777-ed482.firebaseapp.com",
-            projectId: "win777-ed482",
-            storageBucket: "win777-ed482.firebasestorage.app",
-            messagingSenderId: "843686112399",
-            appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
-        };
-        
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        
-        let currentUser = null;
-        let userData = null;
-
-        const markets = [
-            { name: 'Kalyan Morning', openBidEnd: '11:00 AM', closeBidEnd: '11:30 AM' },
-            { name: 'Milan Morning', openBidEnd: '11:30 AM', closeBidEnd: '12:00 PM' },
-            { name: 'Sridevi', openBidEnd: '12:35 PM', closeBidEnd: '01:05 PM' },
-            { name: 'Time Bazar', openBidEnd: '02:00 PM', closeBidEnd: '02:30 PM' },
-            { name: 'Milan Day', openBidEnd: '05:00 PM', closeBidEnd: '05:30 PM' },
-            { name: 'Kalyan', openBidEnd: '05:40 PM', closeBidEnd: '06:10 PM' }
-        ];
-
-        function updateCurrentTime() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            document.getElementById('currentTime').innerText = timeStr;
-        }
-
-        function parseTime(timeStr) {
-            const date = new Date();
-            let hours = 0, minutes = 0;
-            const match = timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
-            if (match) {
-                hours = parseInt(match[1]);
-                minutes = parseInt(match[2]);
-                if (match[3].toUpperCase() === 'PM' && hours !== 12) hours += 12;
-                if (match[3].toUpperCase() === 'AM' && hours === 12) hours = 0;
-            }
-            date.setHours(hours, minutes, 0, 0);
-            return date;
-        }
-
-        function getMarketPhase(market) {
-            const now = new Date();
-            const midnightReset = new Date();
-            midnightReset.setHours(0, 30, 0, 0);
-            
-            const openBidEnd = parseTime(market.openBidEnd);
-            const closeBidEnd = parseTime(market.closeBidEnd);
-            
-            if (now >= midnightReset && now < openBidEnd) {
-                return 'open_bid';
-            }
-            
-            if (now >= openBidEnd && now < closeBidEnd) {
-                return 'close_bid';
-            }
-            
-            return 'closed';
-        }
-
-        function getPhaseText(phase) {
-            switch(phase) {
-                case 'open_bid': return '🎲 Open Bidding Active';
-                case 'close_bid': return '🔒 Close Bidding Active';
-                case 'closed': return '🔴 Market Closed for Today';
-                default: return 'Closed';
-            }
-        }
-
-        function getPhaseClass(phase) {
-            switch(phase) {
-                case 'open_bid': return 'status-open-bid';
-                case 'close_bid': return 'status-close-bid';
-                default: return 'status-closed';
-            }
-        }
-
-        function getBidPhaseText(phase) {
-            switch(phase) {
-                case 'open_bid': return '📈 ALL BETS AVAILABLE: Single Digit (Open/Close), Jodi, Pana (Open/Close), Half Sangam A/B, Full Sangam';
-                case 'close_bid': return '📉 CLOSE BETS ONLY: Single Digit (Close), Single Pana (Close), Double Pana (Close), Triple Pana (Close)';
-                default: return '';
-            }
-        }
-
-        function getBidPhaseClass(phase) {
-            switch(phase) {
-                case 'open_bid': return 'bid-phase-open';
-                case 'close_bid': return 'bid-phase-close';
-                default: return '';
-            }
-        }
-
-        function isPlayable(phase) {
-            return phase === 'open_bid' || phase === 'close_bid';
-        }
-
-        function getBidType(phase) {
-            if (phase === 'open_bid') return 'open';
-            if (phase === 'close_bid') return 'close';
-            return null;
-        }
-
-        function playMarket(marketName, bidType, phase) {
-            if (!isPlayable(phase)) {
-                alert(`${marketName} is closed! Come back tomorrow at 12:30 AM`);
-                return;
-            }
-            window.location.href = `betting.html?market=${encodeURIComponent(marketName)}&bidType=${bidType}&phase=${phase}`;
-        }
-
-        function renderMarkets() {
-            const container = document.getElementById('marketsList');
-            container.innerHTML = '';
-            
-            markets.forEach(market => {
-                const phase = getMarketPhase(market);
-                const playable = isPlayable(phase);
-                const bidType = getBidType(phase);
-                const phaseText = getPhaseText(phase);
-                const phaseClass = getPhaseClass(phase);
-                const bidPhaseText = getBidPhaseText(phase);
-                const bidPhaseClass = getBidPhaseClass(phase);
-                
-                container.innerHTML += `
-                    <div class="market-card">
-                        <div class="market-header">
-                            <span class="market-name">${market.name}</span>
-                            <span class="market-status ${phaseClass}">
-                                ${phaseText}
-                            </span>
-                        </div>
-                        <div class="market-time">
-                            ⏰ Open Bid Ends: ${market.openBidEnd} | Close Bid Ends: ${market.closeBidEnd}
-                        </div>
-                        ${bidPhaseText ? `<div class="bid-phase ${bidPhaseClass}">${bidPhaseText}</div>` : ''}
-                        <button class="play-btn" ${!playable ? 'disabled' : ''} onclick="playMarket('${market.name}', '${bidType}', '${phase}')">
-                            ${playable ? (phase === 'open_bid' ? '🎲 Place Bets (All Types)' : '🔒 Place Close Bets Only') : '🔴 Market Closed'}
-                        </button>
-                    </div>
-                `;
-            });
-        }
-
-        async function loadUserData() {
-            const user = auth.currentUser;
-            if (!user) return;
-            currentUser = user;
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            userData = userDoc.data();
-            document.getElementById('userBalance').innerText = userData?.balance || 0;
-        }
-
-        function navigateTo(page) {
-            closeSidebar();
-            if (page === 'profile') alert('Profile page coming soon');
-            else if (page === 'mpin') alert('Change MPIN coming soon');
-            else if (page === 'history') alert('Bid History coming soon');
-            else if (page === 'funds') alert('Funds page coming soon');
-            else if (page === 'support') alert('Support: WhatsApp +919876543210');
-        }
-
-        function scrollToMarkets() {
-            document.querySelector('.container').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function closeSidebar() {
-            document.getElementById('sidebar').classList.remove('open');
-            document.getElementById('overlay').classList.remove('active');
-        }
-
-        document.getElementById('menuBtn').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('open');
-            document.getElementById('overlay').classList.toggle('active');
-        });
-        
-        document.getElementById('overlay').addEventListener('click', closeSidebar);
-        
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
-            await auth.signOut();
-            window.location.href = 'index.html';
-        });
-
-        setInterval(updateCurrentTime, 1000);
-        setInterval(() => renderMarkets(), 30000);
-
-        auth.onAuthStateChanged(async (user) => {
-            if (!user) window.location.href = 'index.html';
-            else { 
-                await loadUserData(); 
-                renderMarkets();
-                updateCurrentTime();
-            }
-        });
+        const firebaseConfig = { apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38", authDomain: "win777-ed482.firebaseapp.com", projectId: "win777-ed482", storageBucket: "win777-ed482.firebasestorage.app", messagingSenderId: "843686112399", appId: "1:843686112399:web:9c20a96831e6a94cd814fa" };
+        firebase.initializeApp(firebaseConfig); const auth = firebase.auth(); const db = firebase.firestore();
+        let currentUser = null, userData = null, currentDepositAmount = 200, withdrawalLimitCount = 0;
+        const markets = [{ name: 'KALYAN MORNING', openBidEnd: '11:00 AM', closeBidEnd: '11:30 AM', result: '***-**-***' },{ name: 'MILAN MORNING', openBidEnd: '11:30 AM', closeBidEnd: '12:00 PM', result: '***-**-***' },{ name: 'SRIDEVI', openBidEnd: '12:35 PM', closeBidEnd: '01:05 PM', result: '***-**-***' },{ name: 'TIME BAZAR', openBidEnd: '02:00 PM', closeBidEnd: '02:30 PM', result: '***-**-***' },{ name: 'MILAN DAY', openBidEnd: '05:00 PM', closeBidEnd: '05:30 PM', result: '***-**-***' },{ name: 'KALYAN', openBidEnd: '05:40 PM', closeBidEnd: '06:10 PM', result: '***-**-***' }];
+        function parseTime(t) { const d=new Date(); let h=0,m=0, match=t.match(/(\d+):(\d+)\s*(AM|PM)/i); if(match){ h=parseInt(match[1]); m=parseInt(match[2]); if(match[3].toUpperCase()==='PM' && h!==12) h+=12; if(match[3].toUpperCase()==='AM' && h===12) h=0; } d.setHours(h,m,0,0); return d; }
+        function getMarketPhase(m){ const n=new Date(), mr=new Date(); mr.setHours(0,30,0,0); const o=parseTime(m.openBidEnd), c=parseTime(m.closeBidEnd); if(n>=mr && n<o) return 'open_bid'; if(n>=o && n<c) return 'close_bid'; return 'closed'; }
+        function renderMarkets(){ const c=document.getElementById('marketsList'); c.innerHTML=''; markets.forEach(m=>{ const p=getMarketPhase(m); const isPlayable=p!=='closed'; c.innerHTML+=`<div class="market-card"><div class="market-header"><span class="market-name">${m.name}</span><span class="market-result">RESULT: ${m.result}</span></div><div class="market-time">⏰ Open Ends: ${m.openBidEnd} | Close Ends: ${m.closeBidEnd}</div><div class="bid-phase ${p==='open_bid'?'bid-phase-open':'bid-phase-close'}">${p==='open_bid'?'📈 ALL BETS AVAILABLE':'📉 CLOSE BETS ONLY'}</div><button class="play-btn" ${!isPlayable?'disabled':''} onclick="playMarket('${m.name}','${p}')">${isPlayable?'🎲 PLAY BUTTON':'🔴 MARKET CLOSED'}</button></div>`; }); }
+        function playMarket(name,phase){ window.location.href=`betting.html?market=${encodeURIComponent(name)}&phase=${phase}`; }
+        async function loadUserData(){ const u=auth.currentUser; if(!u) return; currentUser=u; const doc=await db.collection('users').doc(u.uid).get(); userData=doc.data(); document.getElementById('userBalance').innerText=userData?.balance||0; document.getElementById('profileName').innerHTML=`👤 ${userData?.name||'User'}`; document.getElementById('profilePhone').innerHTML=`📞 ${userData?.phone||''}`; document.getElementById('profileBalance').innerHTML=`💰 Balance: ₹${userData?.balance||0}`; if(userData?.bankDetails){ document.getElementById('accName').value=userData.bankDetails.accName||''; document.getElementById('bankName').value=userData.bankDetails.bankName||''; document.getElementById('accNumber').value=userData.bankDetails.accNumber||''; document.getElementById('ifsc').value=userData.bankDetails.ifsc||''; } loadBidHistory(); loadTransactions(); loadWithdrawCount(); }
+        async function loadBidHistory(){ const bids=await db.collection('bids').where('userId','==',currentUser.uid).orderBy('createdAt','desc').get(); const div=document.getElementById('bidHistoryList'); if(bids.empty){ div.innerHTML='<p style="color:#888;">No bids yet</p>'; return; } div.innerHTML=`<div class="data-table"><table><tr><th>Market</th><th>Type</th><th>Value</th><th>Points</th><th>Status</th></tr>${bids.docs.map(d=>`<tr><td>${d.data().market}</td><td>${d.data().gameType}</td><td>${d.data().value}</td><td>${d.data().points}</td><td>${d.data().status}</td></tr>`).join('')}</table></div>`; }
+        async function loadTransactions(){ const trans=await db.collection('transactions').where('userId','==',currentUser.uid).orderBy('date','desc').get(); const div=document.getElementById('transactionsList'); if(trans.empty){ div.innerHTML='<p style="color:#888;">No transactions</p>'; return; } div.innerHTML=`<div class="data-table"><table><tr><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr>${trans.docs.map(d=>`<tr><td style="color:${d.data().type==='credit'?'#4caf50':'#f44336'}">${d.data().type}</td><td>₹${d.data().amount}</td><td>${d.data().status||'Completed'}</td><td>${d.data().date?.toDate().toLocaleString()||''}</td></tr>`).join('')}</table></div>`; }
+        async function loadWithdrawCount(){ const today=new Date().toDateString(); const req=await db.collection('withdrawRequests').where('userId','==',currentUser.uid).where('date','==',today).get(); withdrawalLimitCount=req.size; }
+        document.getElementById('saveBankBtn').onclick=async()=>{ const bank={accName:document.getElementById('accName').value, bankName:document.getElementById('bankName').value, accNumber:document.getElementById('accNumber').value, ifsc:document.getElementById('ifsc').value}; await db.collection('users').doc(currentUser.uid).update({bankDetails:bank}); alert('Bank details saved!'); };
+        function showPage(page){ document.getElementById('marketsList').classList.add('hidden'); document.getElementById('profilePage').classList.add('hidden'); document.getElementById('bankPage').classList.add('hidden'); document.getElementById('historyPage').classList.add('hidden'); document.getElementById('transactionsPage').classList.add('hidden'); if(page==='markets') document.getElementById('marketsList').classList.remove('hidden'); else if(page==='profile') document.getElementById('profilePage').classList.remove('hidden'); else if(page==='bank') document.getElementById('bankPage').classList.remove('hidden'); else if(page==='history') { document.getElementById('historyPage').classList.remove('hidden'); loadBidHistory(); } else if(page==='transactions') { document.getElementById('transactionsPage').classList.remove('hidden'); loadTransactions(); } closeSidebar(); }
+        function scrollToMarkets(){ document.getElementById('marketsList').scrollIntoView({behavior:'smooth'}); }
+        function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('active'); }
+        document.getElementById('menuBtn').onclick=()=>{ document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('active'); };
+        document.getElementById('overlay').onclick=closeSidebar;
+        document.getElementById('logoutBtn').onclick=async()=>{ await auth.signOut(); window.location.href='index.html'; };
+        function setDepositAmount(amt){ currentDepositAmount=amt; document.getElementById('displayAmount').innerText=amt; document.getElementById('customAmount').value=''; }
+        function payWithUPI(app){ let amount=currentDepositAmount; const custom=parseInt(document.getElementById('customAmount').value); if(custom>=200 && custom<=49000) amount=custom; if(amount<200 || amount>49000){ alert('Amount must be between ₹200 and ₹49,000'); return; } let upiUrl=''; if(app==='googlepay') upiUrl='tez://'; else if(app==='phonepe') upiUrl='phonepe://'; else upiUrl='paytm://'; const upiIntent=`upi://pay?pa=win777@okhdfcbank&pn=WIN777&am=${amount}&cu=INR`; window.location.href=upiIntent; setTimeout(()=>{ document.getElementById('depositModal').style.display='none'; startPaymentVerification(amount); }, 500); }
+        function startPaymentVerification(amount){ alert(`Please complete payment of ₹${amount}. Waiting for verification...`); setTimeout(async()=>{ const newBalance=(userData.balance||0)+amount; await db.collection('users').doc(currentUser.uid).update({balance:newBalance}); await db.collection('transactions').add({userId:currentUser.uid, type:'credit', amount:amount, status:'Completed', date:new Date()}); loadUserData(); alert(`✅ ₹${amount} deposited successfully!`); }, 300000); } // 5 min wait
+        function showDepositModal(){ document.getElementById('depositModal').style.display='flex'; }
+        function closeDepositModal(){ document.getElementById('depositModal').style.display='none'; }
+        async function showWithdrawModal(){ await loadWithdrawCount(); if(withdrawalLimitCount>=5){ alert('Daily withdrawal limit reached (5 times).'); return; } const doc=await db.collection('users').doc(currentUser.uid).get(); const bank=doc.data().bankDetails; const select=document.getElementById('withdrawBankSelect'); select.innerHTML=''; if(bank) select.innerHTML+=`<option value="${bank.accNumber}">${bank.bankName} - ${bank.accNumber}</option>`; select.innerHTML+=`<option value="new">+ Add New Bank</option>`; document.getElementById('withdrawModal').style.display='flex'; }
+        function closeWithdrawModal(){ document.getElementById('withdrawModal').style.display='none'; }
+        document.getElementById('confirmWithdrawBtn').onclick=async()=>{ const amount=parseInt(document.getElementById('withdrawAmount').value); if(amount<500){ alert('Minimum withdrawal ₹500'); return; } if(amount>userData.balance){ alert('Insufficient balance'); return; } const bankSelect=document.getElementById('withdrawBankSelect').value; let bankDetails=userData.bankDetails; if(bankSelect==='new'){ bankDetails={accName:prompt('Account Name'), bankName:prompt('Bank Name'), accNumber:prompt('Account Number'), ifsc:prompt('IFSC')}; } await db.collection('withdrawRequests').add({userId:currentUser.uid, amount:amount, bankDetails:bankDetails, status:'Pending', date:new Date().toDateString(), createdAt:new Date()}); await db.collection('transactions').add({userId:currentUser.uid, type:'debit', amount:amount, status:'Pending', description:'Withdrawal Request', date:new Date()}); alert('Withdrawal request sent for approval!'); closeWithdrawModal(); };
+        auth.onAuthStateChanged(async (user)=>{ if(!user) window.location.href='index.html'; else { await loadUserData(); renderMarkets(); setInterval(renderMarkets,30000); } });
     </script>
 </body>
 </html>
