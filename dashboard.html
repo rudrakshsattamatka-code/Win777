@@ -61,8 +61,8 @@
 </div>
 <div class="bottom-nav"><div class="nav-item active" onclick="showPage('markets')"><span>🏠</span><p>Home</p></div><div class="nav-item" onclick="showDeposit()"><span>💰</span><p>Deposit</p></div><div class="nav-item" onclick="showWithdraw()"><span>💸</span><p>Withdraw</p></div><div class="nav-item" onclick="showPage('profile')"><span>👤</span><p>Profile</p></div></div>
 
-<div id="depositModal" class="modal"><div class="modal-content"><h3 style="color:#0096ff">Deposit</h3><div class="amount-options"><div class="amount-chip" onclick="setAmount(200)">₹200</div><div class="amount-chip" onclick="setAmount(500)">₹500</div><div class="amount-chip" onclick="setAmount(1000)">₹1000</div><div class="amount-chip" onclick="setAmount(5000)">₹5000</div></div><input type="number" id="customAmount" placeholder="Enter Amount"><button id="payBtn">Pay with UPI</button><div id="depositMsg"></div><button style="background:#333;margin-top:10px" onclick="closeDeposit()">Cancel</button></div></div>
-<div id="withdrawModal" class="modal"><div class="modal-content"><h3 style="color:#0096ff">Withdraw</h3><select id="bankSelect"></select><input type="number" id="withdrawAmount" placeholder="Amount (Min 500)"><button id="withdrawBtn">Request</button><button style="background:#333;margin-top:10px" onclick="closeWithdraw()">Cancel</button><div id="withdrawMsg"></div></div></div>
+<div id="depositModal" class="modal"><div class="modal-content"><h3 style="color:#0096ff">Deposit</h3><div class="amount-options"><div class="amount-chip" onclick="setAmount(200)">₹200</div><div class="amount-chip" onclick="setAmount(500)">₹500</div><div class="amount-chip" onclick="setAmount(1000)">₹1000</div><div class="amount-chip" onclick="setAmount(5000)">₹5000</div></div><input type="number" id="customAmount" placeholder="Enter Amount"><button id="payBtn">Request Deposit</button><div id="depositMsg"></div><button style="background:#333;margin-top:10px" onclick="closeDeposit()">Cancel</button></div></div>
+<div id="withdrawModal" class="modal"><div class="modal-content"><h3 style="color:#0096ff">Withdraw</h3><select id="bankSelect"></select><input type="number" id="withdrawAmount" placeholder="Amount (Min 500)"><button id="withdrawBtn">Request Withdrawal</button><button style="background:#333;margin-top:10px" onclick="closeWithdraw()">Cancel</button><div id="withdrawMsg"></div></div></div>
 
 <script>
     const firebaseConfig = {
@@ -133,7 +133,7 @@
         let bids = await db.collection('bids').where('userId','==',currentUser.uid).orderBy('createdAt','desc').get();
         let html = '<table><tr><th>Market</th><th>Type</th><th>Value</th><th>Points</th></tr>';
         bids.forEach(d => {
-            html += `<tr><td>${d.data().market}</td><td>${d.data().gameType}</td><td>${d.data().value}</td><td>${d.data().points}</td></tr>`;
+            html += `<tr><td>${d.data().market || '-'}</td><td>${d.data().gameType || '-'}</td><td>${d.data().value || '-'}</td><td>${d.data().points || '-'}</td></tr>`;
         });
         html += '</table>';
         document.getElementById('bidList').innerHTML = html || '<p>No bids yet</p>';
@@ -189,7 +189,14 @@
     function setAmount(amt){ currentAmount = amt; document.getElementById('customAmount').value = ''; }
     function showDeposit(){ document.getElementById('depositModal').style.display = 'flex'; }
     function closeDeposit(){ document.getElementById('depositModal').style.display = 'none'; }
-    function showWithdraw(){ document.getElementById('withdrawModal').style.display = 'flex'; }
+    function showWithdraw(){ 
+        let bank = userData?.bankDetails;
+        let select = document.getElementById('bankSelect');
+        select.innerHTML = '';
+        if(bank) select.innerHTML += `<option value="saved">${bank.bankName} - ${bank.accNumber}</option>`;
+        select.innerHTML += `<option value="new">+ Add New Bank</option>`;
+        document.getElementById('withdrawModal').style.display = 'flex'; 
+    }
     function closeWithdraw(){ document.getElementById('withdrawModal').style.display = 'none'; }
     
     document.getElementById('payBtn').onclick = async () => {
@@ -217,6 +224,7 @@
                 accNumber: prompt('Account Number'),
                 ifsc: prompt('IFSC Code')
             };
+            if(!bankDetails.accName) return;
         }
         await db.collection('withdrawRequests').add({
             userId: currentUser.uid, amount: amount, bankDetails: bankDetails, status: 'Pending', date: new Date()
