@@ -22,7 +22,6 @@
             padding-bottom: 70px;
         }
 
-        /* Header */
         .header {
             background: rgba(255,255,255,0.95);
             padding: 15px 20px;
@@ -53,14 +52,12 @@
             font-size: 14px;
         }
 
-        /* Main Container */
         .container {
             max-width: 500px;
             margin: 0 auto;
             padding: 20px 16px;
         }
 
-        /* Market Card */
         .market-card {
             background: white;
             border-radius: 24px;
@@ -70,15 +67,13 @@
             transition: 0.2s;
         }
 
-        .market-card:active {
-            transform: scale(0.98);
-        }
-
         .market-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .market-name {
@@ -88,14 +83,19 @@
         }
 
         .market-status {
-            font-size: 12px;
+            font-size: 11px;
             padding: 4px 12px;
             border-radius: 20px;
         }
 
-        .status-open {
-            background: #e8f5e9;
-            color: #4caf50;
+        .status-open-bid {
+            background: #e3f2fd;
+            color: #2196f3;
+        }
+
+        .status-close-bid {
+            background: #fff3e0;
+            color: #ff9800;
         }
 
         .status-closed {
@@ -107,6 +107,13 @@
             font-size: 13px;
             color: #666;
             margin-bottom: 12px;
+        }
+
+        .bid-phase {
+            font-size: 12px;
+            color: #667eea;
+            margin-bottom: 12px;
+            font-weight: 500;
         }
 
         .play-btn {
@@ -122,16 +129,9 @@
             transition: 0.2s;
         }
 
-        .play-btn:active {
-            transform: scale(0.98);
-        }
+        .play-btn:active { transform: scale(0.98); }
+        .play-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .play-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -153,17 +153,9 @@
             transition: 0.2s;
         }
 
-        .nav-item.active {
-            color: #667eea;
-        }
+        .nav-item.active { color: #667eea; }
+        .nav-item span { font-size: 22px; display: block; margin-bottom: 2px; }
 
-        .nav-item span {
-            font-size: 22px;
-            display: block;
-            margin-bottom: 2px;
-        }
-
-        /* Menu Button */
         .menu-btn {
             background: none;
             border: none;
@@ -172,7 +164,6 @@
             color: #667eea;
         }
 
-        /* Sidebar */
         .sidebar {
             position: fixed;
             left: -280px;
@@ -186,9 +177,7 @@
             overflow-y: auto;
         }
 
-        .sidebar.open {
-            left: 0;
-        }
+        .sidebar.open { left: 0; }
 
         .sidebar-header {
             padding: 25px;
@@ -197,10 +186,7 @@
             background: linear-gradient(135deg, #667eea, #764ba2);
         }
 
-        .sidebar-header h2 {
-            color: white;
-            font-size: 24px;
-        }
+        .sidebar-header h2 { color: white; font-size: 24px; }
 
         .sidebar-item {
             padding: 15px 25px;
@@ -213,10 +199,7 @@
             transition: 0.2s;
         }
 
-        .sidebar-item:hover {
-            background: #f5f5f5;
-            color: #667eea;
-        }
+        .sidebar-item:hover { background: #f5f5f5; color: #667eea; }
 
         .overlay {
             position: fixed;
@@ -229,13 +212,8 @@
             display: none;
         }
 
-        .overlay.active {
-            display: block;
-        }
-
-        .hidden {
-            display: none;
-        }
+        .overlay.active { display: block; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -247,9 +225,7 @@
     </div>
 
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h2>WIN777</h2>
-        </div>
+        <div class="sidebar-header"><h2>WIN777</h2></div>
         <div class="sidebar-item" onclick="navigateTo('profile')">👤 My Profile</div>
         <div class="sidebar-item" onclick="navigateTo('mpin')">🔐 Change MPIN</div>
         <div class="sidebar-item" onclick="navigateTo('history')">📋 Bid History</div>
@@ -288,14 +264,14 @@
         let currentUser = null;
         let userData = null;
 
-        // Updated Markets
+        // Markets with Open and Close Bid Times
         const markets = [
-            { name: 'Kalyan Morning', openTime: '10:00 AM', closeTime: '11:00 AM', status: 'check' },
-            { name: 'Milan Morning', openTime: '11:00 AM', closeTime: '11:30 AM', status: 'check' },
-            { name: 'Sridevi', openTime: '11:35 AM', closeTime: '12:35 PM', status: 'check' },
-            { name: 'Time Bazar', openTime: '01:00 PM', closeTime: '02:00 PM', status: 'check' },
-            { name: 'Milan Day', openTime: '03:00 PM', closeTime: '05:00 PM', status: 'check' },
-            { name: 'Kalyan', openTime: '03:40 PM', closeTime: '05:40 PM', status: 'check' }
+            { name: 'Kalyan Morning', openBidTime: '10:00 AM', closeBidTime: '11:00 AM', marketCloseTime: '11:00 AM' },
+            { name: 'Milan Morning', openBidTime: '11:00 AM', closeBidTime: '11:30 AM', marketCloseTime: '11:30 AM' },
+            { name: 'Sridevi', openBidTime: '11:35 AM', closeBidTime: '12:35 PM', marketCloseTime: '12:35 PM' },
+            { name: 'Time Bazar', openBidTime: '01:00 PM', closeBidTime: '02:00 PM', marketCloseTime: '02:00 PM' },
+            { name: 'Milan Day', openBidTime: '03:00 PM', closeBidTime: '05:00 PM', marketCloseTime: '05:00 PM' },
+            { name: 'Kalyan', openBidTime: '03:40 PM', closeBidTime: '05:40 PM', marketCloseTime: '05:40 PM' }
         ];
 
         function parseTime(timeStr) {
@@ -312,15 +288,64 @@
             return date;
         }
 
-        function checkMarketStatus(market) {
+        function getMarketPhase(market) {
             const now = new Date();
-            const openTime = parseTime(market.openTime);
-            const closeTime = parseTime(market.closeTime);
+            const midnightReset = new Date();
+            midnightReset.setHours(0, 30, 0, 0);
             
-            if (now >= openTime && now <= closeTime) {
-                return 'open';
+            const openBidTime = parseTime(market.openBidTime);
+            const closeBidTime = parseTime(market.closeBidTime);
+            const marketCloseTime = parseTime(market.marketCloseTime);
+            
+            // After midnight 12:30 AM, all markets reset and are ready for next day's open bidding
+            if (now >= midnightReset && now < openBidTime) {
+                return 'waiting';
             }
+            
+            // Open Bidding Period
+            if (now >= openBidTime && now < closeBidTime) {
+                return 'open_bid';
+            }
+            
+            // Close Bidding Period (between close bid time and market close time)
+            if (now >= closeBidTime && now < marketCloseTime) {
+                return 'close_bid';
+            }
+            
+            // Market Fully Closed
             return 'closed';
+        }
+
+        function getPhaseText(phase) {
+            switch(phase) {
+                case 'open_bid': return '🎲 Open Bidding Active';
+                case 'close_bid': return '🔒 Close Bidding Active';
+                case 'closed': return '🔴 Market Closed for Today';
+                case 'waiting': return '⏳ Waiting for Open Bid';
+                default: return 'Closed';
+            }
+        }
+
+        function getPhaseClass(phase) {
+            switch(phase) {
+                case 'open_bid': return 'status-open-bid';
+                case 'close_bid': return 'status-close-bid';
+                default: return 'status-closed';
+            }
+        }
+
+        function isPlayable(phase) {
+            return phase === 'open_bid' || phase === 'close_bid';
+        }
+
+        function getBidType(phase) {
+            if (phase === 'open_bid') return 'open';
+            if (phase === 'close_bid') return 'close';
+            return null;
+        }
+
+        function playMarket(marketName, bidType) {
+            window.location.href = `betting.html?market=${encodeURIComponent(marketName)}&bidType=${bidType}`;
         }
 
         function renderMarkets() {
@@ -328,30 +353,29 @@
             container.innerHTML = '';
             
             markets.forEach(market => {
-                const status = checkMarketStatus(market);
-                const isOpen = status === 'open';
+                const phase = getMarketPhase(market);
+                const playable = isPlayable(phase);
+                const bidType = getBidType(phase);
                 
                 container.innerHTML += `
                     <div class="market-card">
                         <div class="market-header">
                             <span class="market-name">${market.name}</span>
-                            <span class="market-status ${isOpen ? 'status-open' : 'status-closed'}">
-                                ${isOpen ? '🟢 Open Now' : '🔴 Closed'}
+                            <span class="market-status ${getPhaseClass(phase)}">
+                                ${getPhaseText(phase)}
                             </span>
                         </div>
                         <div class="market-time">
-                            ⏰ ${market.openTime} - ${market.closeTime}
+                            ⏰ Open Bid: ${market.openBidTime} | Close Bid: ${market.closeBidTime}
                         </div>
-                        <button class="play-btn" ${!isOpen ? 'disabled' : ''} onclick="playMarket('${market.name}')">
-                            ${isOpen ? '🎲 Play Now' : 'Closed'}
+                        ${phase === 'open_bid' ? '<div class="bid-phase">📈 You can place OPEN bids now (Single Digit, Single Pana, Double Pana, Triple Pana)</div>' : ''}
+                        ${phase === 'close_bid' ? '<div class="bid-phase">📉 You can place CLOSE bids now (Single Digit, Single Pana, Double Pana, Triple Pana)</div>' : ''}
+                        <button class="play-btn" ${!playable ? 'disabled' : ''} onclick="playMarket('${market.name}', '${bidType}')">
+                            ${playable ? (phase === 'open_bid' ? '🎲 Place Open Bid' : '🔒 Place Close Bid') : '🔴 Market Closed'}
                         </button>
                     </div>
                 `;
             });
-        }
-
-        function playMarket(marketName) {
-            window.location.href = `betting.html?market=${encodeURIComponent(marketName)}`;
         }
 
         async function loadUserData() {
@@ -393,8 +417,8 @@
             window.location.href = 'index.html';
         });
 
-        // Auto refresh market status every minute
-        setInterval(() => renderMarkets(), 60000);
+        // Auto refresh market status every 30 seconds
+        setInterval(() => renderMarkets(), 30000);
 
         auth.onAuthStateChanged(async (user) => {
             if (!user) window.location.href = 'index.html';
