@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WIN777 - My Profile</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #0a0a0f; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: #ff9800; font-size: 32px; }
+        .profile-card {
+            background: linear-gradient(135deg, #1a1a2e, #12121f);
+            border-radius: 30px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,152,0,0.2);
+        }
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff9800, #ff5722);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 40px;
+        }
+        .name { text-align: center; color: white; font-size: 20px; margin-bottom: 5px; }
+        .phone { text-align: center; color: #aaa; font-size: 14px; margin-bottom: 20px; }
+        .section-title {
+            color: #ff9800;
+            font-size: 16px;
+            margin-bottom: 15px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid rgba(255,152,0,0.3);
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: #ddd;
+            font-size: 14px;
+        }
+        .info-label { color: #888; }
+        .back-btn {
+            background: linear-gradient(135deg, #ff9800, #ff5722);
+            border: none;
+            padding: 14px;
+            border-radius: 16px;
+            color: white;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>My Profile</h1>
+        </div>
+        <div class="profile-card">
+            <div class="avatar">👤</div>
+            <div class="name" id="profileName">Loading...</div>
+            <div class="phone" id="profilePhone">Loading...</div>
+            
+            <div class="section-title">Personal Details</div>
+            <div class="info-row"><span class="info-label">First name</span><span id="firstName">-</span></div>
+            <div class="info-row"><span class="info-label">Last name</span><span id="lastName">-</span></div>
+            <div class="info-row"><span class="info-label">Language</span><span>Hindi</span></div>
+            
+            <div class="section-title">Account & Address Details</div>
+            <div class="info-row"><span class="info-label">PIN Code</span><span id="pinCode">572101</span></div>
+            <div class="info-row"><span class="info-label">State</span><span id="state">Karnataka</span></div>
+            <div class="info-row"><span class="info-label">City</span><span id="city">Tumakuru</span></div>
+        </div>
+        <button class="back-btn" onclick="goBack()">← Back to Dashboard</button>
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
+            authDomain: "win777-ed482.firebaseapp.com",
+            projectId: "win777-ed482",
+            storageBucket: "win777-ed482.firebasestorage.app",
+            messagingSenderId: "843686112399",
+            appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) window.location.href = 'index.html';
+            else {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                const data = userDoc.data();
+                document.getElementById('profileName').innerHTML = data?.name || 'User';
+                document.getElementById('profilePhone').innerHTML = user.phoneNumber || 'No phone';
+                const nameParts = (data?.name || 'User').split(' ');
+                document.getElementById('firstName').innerHTML = nameParts[0] || '-';
+                document.getElementById('lastName').innerHTML = nameParts.slice(1).join(' ') || '-';
+            }
+        });
+        
+        function goBack() { window.location.href = 'dashboard.html'; }
+    </script>
+</body>
+</html>
