@@ -303,13 +303,14 @@
             status: 'Pending',
             date: new Date(),
             upiId: UPI_ID,
+            requestedAmount: amount,  // Store exact requested amount
             description: 'Deposit Request'
         });
         currentTransactionId = transactionRef.id;
         return transactionRef.id;
     }
     
-    function startTimerAndWait() {
+    function startTimerAndWait(requestedAmount) {
         const timerBox = document.getElementById('timerBox');
         timerBox.classList.remove('hidden');
         let timeLeft = 300;
@@ -328,13 +329,19 @@
                 if (doc.exists && doc.data().status === 'Completed') {
                     clearInterval(timerInterval);
                     timerBox.classList.add('hidden');
-                    showMessage('✅ Payment successful! Balance updated.', 'success');
+                    // Verify the approved amount matches requested amount
+                    const approvedAmount = doc.data().amount;
+                    if (approvedAmount === requestedAmount) {
+                        showMessage(`✅ ₹${approvedAmount} added successfully!`, 'success');
+                    } else {
+                        showMessage(`⚠️ Amount mismatch! Requested: ₹${requestedAmount}, Approved: ₹${approvedAmount}`, 'error');
+                    }
                     loadUserData();
                     setTimeout(() => window.location.href = 'dashboard.html', 2000);
                 } else if (doc.exists && doc.data().status === 'Rejected') {
                     clearInterval(timerInterval);
                     timerBox.classList.add('hidden');
-                    showMessage('❌ Payment rejected by admin.', 'error');
+                    showMessage('❌ Deposit request rejected by admin.', 'error');
                 }
             });
         }
@@ -355,16 +362,22 @@
             return;
         }
         
-        // Create UPI intent URL
-        const upiIntent = `upi://pay?pa=${UPI_ID}&pn=WIN777&am=${amount}&cu=INR`;
+        // Store the exact amount selected by user
+        const exactAmount = amount;
+        
+        // Create UPI intent URL with exact amount
+        const upiIntent = `upi://pay?pa=${UPI_ID}&pn=WIN777&am=${exactAmount}&cu=INR`;
+        
+        // Show message
+        showMessage(`Please pay ₹${exactAmount} in UPI app`, 'pending');
         
         // Open UPI app
         window.location.href = upiIntent;
         
         // Ask for confirmation after returning from UPI app
         setTimeout(() => {
-            if (confirm(`Did you successfully pay ₹${amount}?`)) {
-                processPayment(amount);
+            if (confirm(`Did you successfully pay ₹${exactAmount}?`)) {
+                processPayment(exactAmount);
             } else {
                 showMessage('Payment not confirmed. You can try again.', 'pending');
             }
@@ -372,10 +385,10 @@
     };
     
     async function processPayment(amount) {
-        showMessage('Creating deposit request...', 'pending');
+        showMessage(`Creating deposit request for ₹${amount}...`, 'pending');
         await createDepositRequest(amount);
         showMessage(`✅ Deposit request of ₹${amount} created! Waiting for admin approval.`, 'success');
-        startTimerAndWait();
+        startTimerAndWait(amount);
     }
     
     function goBack() { window.location.href = 'dashboard.html'; }
