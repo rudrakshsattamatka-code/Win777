@@ -128,67 +128,20 @@
         .custom-amount input::placeholder {
             color: #555;
         }
-        .upi-manual {
-            margin-bottom: 20px;
-            padding: 16px;
-            background: #1a1a2e;
-            border-radius: 16px;
-            text-align: center;
-            border: 1px solid #0096ff;
-        }
-        .upi-manual p {
-            color: #aaa;
-            font-size: 12px;
-            margin-bottom: 8px;
-        }
-        .upi-id-code {
-            background: #0a0a0f;
-            padding: 12px;
-            border-radius: 12px;
-            color: #00ffaa;
-            font-family: monospace;
-            font-size: 16px;
-            font-weight: bold;
-            margin: 10px 0;
-            word-break: break-all;
-            letter-spacing: 1px;
-        }
-        .copy-btn {
-            background: #0096ff;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 10px;
-            color: white;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: bold;
-        }
-        .copy-btn:active {
-            transform: scale(0.95);
-        }
-        .add-fund-btn {
+        .pay-btn {
             width: 100%;
-            padding: 16px;
+            padding: 18px;
             background: linear-gradient(135deg, #0096ff, #00ffaa);
             border: none;
-            border-radius: 20px;
+            border-radius: 24px;
             color: #1a1a2e;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-bottom: 12px;
-        }
-        .create-request-btn {
-            width: 100%;
-            padding: 16px;
-            background: #1a1a2e;
-            border: 1px solid #0096ff;
-            border-radius: 20px;
-            color: #0096ff;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
             cursor: pointer;
             margin-bottom: 15px;
+        }
+        .pay-btn:active {
+            transform: scale(0.98);
         }
         .timer-box {
             background: #1a1a2e;
@@ -278,16 +231,7 @@
         <input type="number" id="customAmount" placeholder="Enter custom amount (Min ₹100)">
     </div>
 
-    <!-- UPI Payment Info -->
-    <div class="upi-manual">
-        <p>📱 Send payment to this UPI ID</p>
-        <div class="upi-id-code" id="upiIdDisplay">ganeshpatil99@slc</div>
-        <button class="copy-btn" onclick="copyUPI()">📋 Copy UPI ID</button>
-        <p style="font-size: 11px; margin-top: 10px; color: #888;">After payment, click "I Have Paid" button</p>
-    </div>
-
-    <button class="add-fund-btn" id="paidBtn">✅ I Have Paid</button>
-    <button class="create-request-btn" id="createRequestBtn">📝 Create Deposit Request</button>
+    <button class="pay-btn" id="payBtn">💳 PAY NOW</button>
 
     <div class="note-text">
         ⚡ Minimum deposit ₹100 | Maximum ₹50,000
@@ -351,11 +295,6 @@
         setTimeout(() => msgDiv.classList.add('hidden'), 5000);
     }
     
-    function copyUPI() {
-        navigator.clipboard.writeText(UPI_ID);
-        showMessage('✅ UPI ID copied to clipboard!', 'success');
-    }
-    
     async function createDepositRequest(amount) {
         const transactionRef = await db.collection('transactions').add({
             userId: currentUser.uid,
@@ -401,33 +340,43 @@
         }
     }
     
-    // I Have Paid Button
-    document.getElementById('paidBtn').onclick = async () => {
+    // Direct Payment - Opens UPI app automatically
+    document.getElementById('payBtn').onclick = async () => {
         let amount = selectedAmount;
         const customAmount = parseInt(document.getElementById('customAmount').value);
         if (customAmount >= 100) amount = customAmount;
-        if (amount < 100) { showMessage('Minimum deposit is ₹100', 'error'); return; }
-        if (amount > 50000) { showMessage('Maximum deposit is ₹50000', 'error'); return; }
         
+        if (amount < 100) {
+            showMessage('Minimum deposit is ₹100', 'error');
+            return;
+        }
+        if (amount > 50000) {
+            showMessage('Maximum deposit is ₹50000', 'error');
+            return;
+        }
+        
+        // Create UPI intent URL
+        const upiIntent = `upi://pay?pa=${UPI_ID}&pn=WIN777&am=${amount}&cu=INR`;
+        
+        // Open UPI app
+        window.location.href = upiIntent;
+        
+        // Ask for confirmation after returning from UPI app
+        setTimeout(() => {
+            if (confirm(`Did you successfully pay ₹${amount}?`)) {
+                processPayment(amount);
+            } else {
+                showMessage('Payment not confirmed. You can try again.', 'pending');
+            }
+        }, 8000);
+    };
+    
+    async function processPayment(amount) {
         showMessage('Creating deposit request...', 'pending');
         await createDepositRequest(amount);
         showMessage(`✅ Deposit request of ₹${amount} created! Waiting for admin approval.`, 'success');
         startTimerAndWait();
-    };
-    
-    // Create Request Button
-    document.getElementById('createRequestBtn').onclick = async () => {
-        let amount = selectedAmount;
-        const customAmount = parseInt(document.getElementById('customAmount').value);
-        if (customAmount >= 100) amount = customAmount;
-        if (amount < 100) { showMessage('Minimum deposit is ₹100', 'error'); return; }
-        if (amount > 50000) { showMessage('Maximum deposit is ₹50000', 'error'); return; }
-        
-        showMessage('Creating deposit request...', 'pending');
-        await createDepositRequest(amount);
-        showMessage(`✅ Deposit request of ₹${amount} created! Send payment to ${UPI_ID}`, 'success');
-        startTimerAndWait();
-    };
+    }
     
     function goBack() { window.location.href = 'dashboard.html'; }
     
