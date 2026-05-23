@@ -2,61 +2,243 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>WIN777 - Login</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
-        body{background:#0a0a0f;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}
-        .login-box{background:#1a1a2e;padding:30px;border-radius:20px;width:100%;max-width:400px;border:1px solid #0096ff}
-        .logo{text-align:center;margin-bottom:20px}
-        .logo img{width:80px}
-        h2{color:#0096ff;text-align:center;margin-bottom:20px}
-        input{width:100%;padding:12px;margin:10px 0;background:#0a0a0f;border:1px solid #0096ff;border-radius:10px;color:white}
-        button{width:100%;padding:12px;background:#0096ff;border:none;border-radius:10px;color:white;font-weight:bold;cursor:pointer}
-        .error{color:#ff6b6b;font-size:12px;margin-top:10px;text-align:center}
-        .otp-group{display:flex;gap:10px;justify-content:center;margin:15px 0}
-        .otp-digit{width:45px;height:50px;text-align:center;font-size:20px;background:#0a0a0f;border:1px solid #0096ff;border-radius:10px;color:white}
-        .hidden{display:none}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #0a0a0f;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+            background: #1a1a2e;
+            border-radius: 24px;
+            padding: 40px 28px;
+            border: 1px solid #0096ff;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .logo img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+        }
+        .trust-badge {
+            text-align: center;
+            color: #0096ff;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-label {
+            color: #ccc;
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .phone-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+        .country-code {
+            width: 80px;
+            padding: 14px;
+            background: #0a0a0f;
+            border: 1px solid #0096ff;
+            border-radius: 12px;
+            color: #0096ff;
+            font-weight: bold;
+            text-align: center;
+        }
+        .phone-input {
+            flex: 1;
+            padding: 14px;
+            background: #0a0a0f;
+            border: 1px solid #0096ff;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+        .phone-input:focus {
+            border-color: #00ffaa;
+        }
+        .continue-btn {
+            width: 100%;
+            padding: 14px;
+            background: #0096ff;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .continue-btn:active {
+            transform: scale(0.98);
+        }
+        .continue-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .secondary-btn {
+            background: transparent;
+            border: 1px solid #0096ff;
+            color: #0096ff;
+        }
+        .error-msg {
+            color: #ff6b6b;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 12px;
+        }
+        .success-msg {
+            color: #8bc34a;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 12px;
+        }
+        .info-box {
+            background: rgba(0,150,255,0.1);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border-left: 3px solid #0096ff;
+            color: #ccc;
+            font-size: 13px;
+        }
+        .otp-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .otp-digit {
+            width: 50px;
+            height: 55px;
+            background: #0a0a0f;
+            border: 1px solid #0096ff;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 24px;
+            color: white;
+            outline: none;
+        }
+        .otp-digit:focus {
+            border-color: #00ffaa;
+        }
+        .pin-input {
+            width: 200px;
+            padding: 14px;
+            text-align: center;
+            font-size: 24px;
+            letter-spacing: 8px;
+            background: #0a0a0f;
+            border: 1px solid #0096ff;
+            border-radius: 12px;
+            color: white;
+            display: block;
+            margin: 10px auto;
+        }
+        .hidden {
+            display: none;
+        }
+        .resend-btn {
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
-<div class="login-box">
-    <div class="logo"><img src="https://i.imgur.com/lPQ7wQD.png" alt="logo"></div>
+<div class="login-container">
+    <div class="logo">
+        <img src="https://i.imgur.com/lPQ7wQD.png" alt="WIN777">
+    </div>
+    <div class="trust-badge">🇮🇳 India's Most Trusted App</div>
+
+    <!-- Phone Login Screen -->
     <div id="phoneScreen">
-        <h2>Welcome Back!</h2>
-        <input type="tel" id="phone" placeholder="Enter 10 digit mobile number">
-        <button id="sendOtpBtn">Send OTP</button>
-        <div id="phoneError" class="error"></div>
-    </div>
-    <div id="otpScreen" class="hidden">
-        <h2>Enter OTP</h2>
-        <div class="otp-group">
-            <input type="text" class="otp-digit" maxlength="1" id="otp1"><input type="text" class="otp-digit" maxlength="1" id="otp2">
-            <input type="text" class="otp-digit" maxlength="1" id="otp3"><input type="text" class="otp-digit" maxlength="1" id="otp4">
-            <input type="text" class="otp-digit" maxlength="1" id="otp5"><input type="text" class="otp-digit" maxlength="1" id="otp6">
+        <div class="input-group">
+            <label class="input-label">Enter Your Phone Number</label>
+            <div class="phone-wrapper">
+                <div class="country-code">+91</div>
+                <input type="tel" id="phoneNumber" class="phone-input" placeholder="9876543210" maxlength="10">
+            </div>
         </div>
-        <button id="verifyBtn">Verify</button>
-        <button id="resendBtn" style="background:#333;margin-top:10px">Resend OTP</button>
-        <div id="otpError" class="error"></div>
+        <button class="continue-btn" id="sendOtpBtn">Send OTP</button>
+        <div id="phoneError" class="error-msg"></div>
     </div>
-    <div id="pinScreen" class="hidden">
-        <h2>Create 4-digit PIN</h2>
-        <input type="password" id="pin" maxlength="4" placeholder="Enter PIN">
-        <input type="password" id="confirmPin" maxlength="4" placeholder="Confirm PIN">
-        <button id="registerBtn">Create Account</button>
-        <div id="pinError" class="error"></div>
+
+    <!-- OTP Verification Screen -->
+    <div id="otpScreen" class="hidden">
+        <div class="info-box">
+            📨 OTP sent to your phone number
+        </div>
+        <div class="otp-group">
+            <input type="text" class="otp-digit" maxlength="1" id="otp1">
+            <input type="text" class="otp-digit" maxlength="1" id="otp2">
+            <input type="text" class="otp-digit" maxlength="1" id="otp3">
+            <input type="text" class="otp-digit" maxlength="1" id="otp4">
+            <input type="text" class="otp-digit" maxlength="1" id="otp5">
+            <input type="text" class="otp-digit" maxlength="1" id="otp6">
+        </div>
+        <button class="continue-btn" id="verifyOtpBtn">Verify OTP</button>
+        <button class="secondary-btn resend-btn" id="resendOtpBtn">Resend OTP</button>
+        <button class="secondary-btn" id="backToPhoneBtn">← Change Number</button>
+        <div id="otpError" class="error-msg"></div>
     </div>
+
+    <!-- Register PIN Screen (New User) -->
+    <div id="registerScreen" class="hidden">
+        <div class="info-box">
+            ✨ Complete your profile
+        </div>
+        <div class="input-group">
+            <label class="input-label">Full Name</label>
+            <input type="text" id="fullName" class="phone-input" placeholder="Enter your name">
+        </div>
+        <div class="input-group">
+            <label class="input-label">Create 4-Digit PIN</label>
+            <input type="password" id="pin" class="phone-input" maxlength="4" placeholder="****">
+        </div>
+        <div class="input-group">
+            <label class="input-label">Confirm PIN</label>
+            <input type="password" id="confirmPin" class="phone-input" maxlength="4" placeholder="****">
+        </div>
+        <button class="continue-btn" id="registerBtn">Create Account</button>
+        <div id="registerError" class="error-msg"></div>
+    </div>
+
+    <!-- PIN Login Screen (Existing User) -->
     <div id="pinLoginScreen" class="hidden">
-        <h2>Enter 4-digit PIN</h2>
-        <input type="password" id="loginPin" maxlength="4" placeholder="Enter PIN">
-        <button id="pinLoginBtn">Login</button>
-        <button id="logoutPinBtn" style="background:#333;margin-top:10px">Use different account</button>
-        <div id="pinLoginError" class="error"></div>
+        <div class="info-box">
+            🔐 Welcome back! Enter your 4-digit PIN
+        </div>
+        <input type="password" id="loginPin" class="pin-input" maxlength="4" placeholder="●●●●">
+        <button class="continue-btn" id="pinLoginBtn">Unlock Dashboard</button>
+        <button class="secondary-btn" id="logoutPinBtn">Use different account</button>
+        <div id="pinLoginError" class="error-msg"></div>
     </div>
 </div>
+
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
@@ -66,150 +248,286 @@
         messagingSenderId: "843686112399",
         appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
     };
+    
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     
-    let confirmation = null;
+    let confirmationResult = null;
     let currentPhone = null;
-    let timerInterval = null;
     let countdown = 0;
+    let timerInterval = null;
+    let recaptchaVerifier = null;
     
-    function showScreen(screen){
-        document.getElementById('phoneScreen').classList.add('hidden');
-        document.getElementById('otpScreen').classList.add('hidden');
-        document.getElementById('pinScreen').classList.add('hidden');
-        document.getElementById('pinLoginScreen').classList.add('hidden');
-        document.getElementById(screen).classList.remove('hidden');
+    // DOM Elements
+    const phoneScreen = document.getElementById('phoneScreen');
+    const otpScreen = document.getElementById('otpScreen');
+    const registerScreen = document.getElementById('registerScreen');
+    const pinLoginScreen = document.getElementById('pinLoginScreen');
+    
+    function showScreen(screen) {
+        phoneScreen.classList.add('hidden');
+        otpScreen.classList.add('hidden');
+        registerScreen.classList.add('hidden');
+        pinLoginScreen.classList.add('hidden');
+        
+        if (screen === 'phone') phoneScreen.classList.remove('hidden');
+        else if (screen === 'otp') otpScreen.classList.remove('hidden');
+        else if (screen === 'register') registerScreen.classList.remove('hidden');
+        else if (screen === 'pinLogin') pinLoginScreen.classList.remove('hidden');
     }
     
-    document.getElementById('sendOtpBtn').onclick = async () => {
-        let phone = document.getElementById('phone').value;
-        if(phone.length < 10){
-            document.getElementById('phoneError').innerText = 'Enter valid 10 digit number';
-            return;
+    function showError(elementId, message) {
+        const el = document.getElementById(elementId);
+        if (el) {
+            el.innerText = message;
+            setTimeout(() => { el.innerText = ''; }, 5000);
         }
-        let fullPhone = '+91' + phone;
-        currentPhone = fullPhone;
-        let btn = document.getElementById('sendOtpBtn');
-        btn.disabled = true;
-        btn.innerText = 'Sending...';
-        
-        let recaptcha = new firebase.auth.RecaptchaVerifier('app', {size:'invisible'});
-        try{
-            confirmation = await auth.signInWithPhoneNumber(fullPhone, recaptcha);
-            showScreen('otpScreen');
-            startTimer(60);
-            document.getElementById('otpError').innerText = 'OTP sent!';
-        } catch(e){
-            document.getElementById('phoneError').innerText = e.message;
-        }
-        btn.disabled = false;
-        btn.innerText = 'Send OTP';
-    };
+    }
     
-    function startTimer(sec){
-        countdown = sec;
-        if(timerInterval) clearInterval(timerInterval);
+    function startTimer(seconds) {
+        countdown = seconds;
+        if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
-            if(countdown <= 1){
+            if (countdown <= 1) {
                 clearInterval(timerInterval);
-                document.getElementById('resendBtn').innerHTML = 'Resend OTP';
-                document.getElementById('resendBtn').disabled = false;
+                timerInterval = null;
+                const resendBtn = document.getElementById('resendOtpBtn');
+                if (resendBtn) {
+                    resendBtn.innerText = 'Resend OTP';
+                    resendBtn.disabled = false;
+                }
             } else {
                 countdown--;
-                document.getElementById('resendBtn').innerHTML = `Resend in ${countdown}s`;
-                document.getElementById('resendBtn').disabled = true;
+                const resendBtn = document.getElementById('resendOtpBtn');
+                if (resendBtn) {
+                    resendBtn.innerText = `Resend in ${countdown}s`;
+                    resendBtn.disabled = true;
+                }
             }
         }, 1000);
     }
     
-    document.getElementById('verifyBtn').onclick = async () => {
+    // Initialize reCAPTCHA
+    function initRecaptcha() {
+        if (!recaptchaVerifier) {
+            const container = document.createElement('div');
+            container.id = 'recaptcha-container';
+            container.style.position = 'absolute';
+            container.style.left = '-9999px';
+            document.body.appendChild(container);
+            recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                size: 'invisible'
+            });
+        }
+        return recaptchaVerifier;
+    }
+    
+    // Send OTP
+    document.getElementById('sendOtpBtn').onclick = async () => {
+        const phone = document.getElementById('phoneNumber').value.replace(/\D/g, '');
+        if (!phone || phone.length < 10) {
+            showError('phoneError', 'Enter valid 10-digit mobile number');
+            return;
+        }
+        
+        const fullPhone = '+91' + phone;
+        currentPhone = fullPhone;
+        
+        const btn = document.getElementById('sendOtpBtn');
+        btn.disabled = true;
+        btn.innerText = 'Sending...';
+        
+        try {
+            const verifier = initRecaptcha();
+            confirmationResult = await auth.signInWithPhoneNumber(fullPhone, verifier);
+            showScreen('otp');
+            startTimer(60);
+            showError('otpError', 'OTP sent successfully!');
+        } catch (error) {
+            console.error(error);
+            let errorMsg = error.message;
+            if (error.code === 'auth/invalid-phone-number') errorMsg = 'Invalid phone number';
+            else if (error.code === 'auth/too-many-requests') errorMsg = 'Too many requests. Try later';
+            showError('phoneError', errorMsg);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = 'Send OTP';
+        }
+    };
+    
+    // Verify OTP
+    document.getElementById('verifyOtpBtn').onclick = async () => {
         let code = '';
-        for(let i=1;i<=6;i++) code += document.getElementById(`otp${i}`).value;
-        if(code.length !== 6){
-            document.getElementById('otpError').innerText = 'Enter 6 digit OTP';
+        for (let i = 1; i <= 6; i++) {
+            code += document.getElementById(`otp${i}`).value;
+        }
+        if (code.length !== 6) {
+            showError('otpError', 'Enter 6-digit OTP');
             return;
         }
-        try{
-            let result = await confirmation.confirm(code);
-            let user = result.user;
-            let doc = await db.collection('users').doc(user.uid).get();
-            if(doc.exists && doc.data().pin){
-                window.location.href = 'dashboard.html';
+        
+        const btn = document.getElementById('verifyOtpBtn');
+        btn.disabled = true;
+        btn.innerText = 'Verifying...';
+        
+        try {
+            const result = await confirmationResult.confirm(code);
+            const user = result.user;
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            
+            if (userDoc.exists && userDoc.data().pin) {
+                // Existing user - go to PIN login
+                showScreen('pinLogin');
             } else {
-                showScreen('pinScreen');
+                // New user - register PIN
+                showScreen('register');
             }
-        } catch(e){
-            document.getElementById('otpError').innerText = 'Invalid OTP';
+        } catch (error) {
+            showError('otpError', 'Invalid OTP. Please try again.');
+        } finally {
+            btn.disabled = false;
+            btn.innerText = 'Verify OTP';
         }
     };
     
-    document.getElementById('resendBtn').onclick = async () => {
-        let recaptcha = new firebase.auth.RecaptchaVerifier('app', {size:'invisible'});
-        confirmation = await auth.signInWithPhoneNumber(currentPhone, recaptcha);
-        startTimer(60);
-        document.getElementById('otpError').innerText = 'OTP resent!';
+    // Resend OTP
+    document.getElementById('resendOtpBtn').onclick = async () => {
+        if (countdown > 0) {
+            showError('otpError', `Wait ${countdown} seconds`);
+            return;
+        }
+        
+        const btn = document.getElementById('resendOtpBtn');
+        btn.innerText = 'Sending...';
+        
+        try {
+            const verifier = initRecaptcha();
+            confirmationResult = await auth.signInWithPhoneNumber(currentPhone, verifier);
+            startTimer(60);
+            showError('otpError', 'OTP resent!');
+        } catch (error) {
+            showError('otpError', error.message);
+        } finally {
+            btn.innerText = 'Resend OTP';
+        }
     };
     
+    // Back to phone
+    document.getElementById('backToPhoneBtn').onclick = () => {
+        showScreen('phone');
+        for (let i = 1; i <= 6; i++) {
+            document.getElementById(`otp${i}`).value = '';
+        }
+    };
+    
+    // Register new user
     document.getElementById('registerBtn').onclick = async () => {
-        let pin = document.getElementById('pin').value;
-        let confirm = document.getElementById('confirmPin').value;
-        if(pin.length !== 4){
-            document.getElementById('pinError').innerText = 'PIN must be 4 digits';
+        const name = document.getElementById('fullName').value.trim();
+        const pin = document.getElementById('pin').value;
+        const confirmPin = document.getElementById('confirmPin').value;
+        
+        if (!name || name.length < 2) {
+            showError('registerError', 'Enter your full name');
             return;
         }
-        if(pin !== confirm){
-            document.getElementById('pinError').innerText = 'PINs do not match';
+        if (!pin || pin.length !== 4) {
+            showError('registerError', 'PIN must be 4 digits');
             return;
         }
-        let user = auth.currentUser;
-        if(!user) return;
-        await db.collection('users').doc(user.uid).set({
-            uid: user.uid,
-            phone: user.phoneNumber,
-            name: 'User',
-            pin: pin,
-            balance: 0,
-            role: 'user'
-        });
-        window.location.href = 'dashboard.html';
+        if (pin !== confirmPin) {
+            showError('registerError', 'PINs do not match');
+            return;
+        }
+        
+        const user = auth.currentUser;
+        if (!user) {
+            showError('registerError', 'Session expired. Please login again.');
+            showScreen('phone');
+            return;
+        }
+        
+        const btn = document.getElementById('registerBtn');
+        btn.disabled = true;
+        btn.innerText = 'Creating...';
+        
+        try {
+            await db.collection('users').doc(user.uid).set({
+                uid: user.uid,
+                phone: user.phoneNumber,
+                name: name,
+                pin: pin,
+                role: 'user',
+                balance: 0,
+                createdAt: new Date()
+            });
+            window.location.href = 'dashboard.html';
+        } catch (error) {
+            showError('registerError', error.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = 'Create Account';
+        }
     };
     
+    // PIN Login
     document.getElementById('pinLoginBtn').onclick = async () => {
-        let pin = document.getElementById('loginPin').value;
-        if(pin.length !== 4){
-            document.getElementById('pinLoginError').innerText = 'Enter 4 digit PIN';
+        const pin = document.getElementById('loginPin').value;
+        if (!pin || pin.length !== 4) {
+            showError('pinLoginError', 'Enter 4-digit PIN');
             return;
         }
-        let user = auth.currentUser;
-        if(!user){
-            showScreen('phoneScreen');
+        
+        const user = auth.currentUser;
+        if (!user) {
+            showScreen('phone');
             return;
         }
-        let doc = await db.collection('users').doc(user.uid).get();
-        if(doc.exists && doc.data().pin === pin){
+        
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        if (userDoc.exists && userDoc.data().pin === pin) {
             window.location.href = 'dashboard.html';
         } else {
-            document.getElementById('pinLoginError').innerText = 'Wrong PIN';
+            showError('pinLoginError', 'Incorrect PIN');
         }
     };
     
+    // Logout from PIN screen
     document.getElementById('logoutPinBtn').onclick = async () => {
         await auth.signOut();
-        showScreen('phoneScreen');
+        showScreen('phone');
+        document.getElementById('loginPin').value = '';
     };
     
+    // Auto-focus OTP inputs
+    for (let i = 1; i <= 6; i++) {
+        const input = document.getElementById(`otp${i}`);
+        input.addEventListener('input', (e) => {
+            if (e.target.value.length === 1 && i < 6) {
+                document.getElementById(`otp${i + 1}`).focus();
+            }
+        });
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !e.target.value && i > 1) {
+                document.getElementById(`otp${i - 1}`).focus();
+            }
+        });
+    }
+    
+    // Check existing session on load
     auth.onAuthStateChanged(async (user) => {
-        if(user){
-            let doc = await db.collection('users').doc(user.uid).get();
-            if(doc.exists && doc.data().pin){
-                showScreen('pinLoginScreen');
+        if (user) {
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (userDoc.exists && userDoc.data().pin) {
+                showScreen('pinLogin');
+            } else if (userDoc.exists && !userDoc.data().pin) {
+                showScreen('register');
             } else {
-                showScreen('phoneScreen');
+                showScreen('phone');
             }
         } else {
-            showScreen('phoneScreen');
+            showScreen('phone');
         }
     });
 </script>
