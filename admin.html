@@ -20,8 +20,8 @@
         .sidebar-item{padding:15px 20px;color:#ccc;cursor:pointer;border-bottom:1px solid #222}
         .sidebar-item:hover{background:#1a1a1a;color:#fff}
         .main-content{margin-left:250px;padding:20px}
-        .card{background:#fff;border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
-        .card h3{margin-bottom:15px;color:#333}
+        .card{background:#fff;border-radius:12px;padding:20px;margin-bottom:20px}
+        .card h3{margin-bottom:15px}
         input,select{padding:8px;margin:5px;border:1px solid #ddd;border-radius:6px;width:calc(100% - 10px)}
         button{background:#0096ff;border:none;padding:8px 16px;border-radius:6px;color:white;cursor:pointer;margin:5px}
         .market-item,.user-item{background:#f9f9f9;padding:10px;margin:8px 0;border-radius:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap}
@@ -42,7 +42,7 @@
 <div id="adminPanel" class="admin-panel">
     <div class="sidebar"><h2>WIN777</h2><div class="sidebar-item" onclick="showSection('markets')">🎮 Markets</div><div class="sidebar-item" onclick="showSection('users')">👥 Users</div><div class="sidebar-item" onclick="showSection('deposits')">💰 Deposits</div><div class="sidebar-item" onclick="showSection('withdrawals')">💸 Withdrawals</div><div class="sidebar-item" onclick="showSection('settings')">⚙️ Settings</div><div class="sidebar-item" onclick="logout()">🚪 Logout</div></div>
     <div class="main-content">
-        <div id="marketsSection"><div class="card"><h3>➕ Add New Market</h3><input type="text" id="marketName" placeholder="Market Name (e.g., KALYAN MORNING)"><input type="text" id="marketResult" placeholder="Result (e.g., 123-45-678)"><select id="marketStatus"><option value="open">🟢 OPEN - All Bets</option><option value="close">🟡 CLOSE - Close Bets Only</option><option value="closed">🔴 CLOSED - No Bets</option></select><button onclick="addMarket()">Add Market</button></div><div class="card"><h3>📋 Markets (Click on Status to Change)</h3><div id="marketsList"></div></div></div>
+        <div id="marketsSection"><div class="card"><h3>➕ Add New Market</h3><input type="text" id="marketName" placeholder="Market Name"><input type="text" id="marketResult" placeholder="Result (e.g., 123-45-678)"><select id="marketStatus"><option value="open">🟢 OPEN - All Bets</option><option value="close">🟡 CLOSE - Close Bets Only</option><option value="closed">🔴 CLOSED - No Bets</option></select><button onclick="addMarket()">Add Market</button></div><div class="card"><h3>📋 Markets (Click on Status to Change)</h3><div id="marketsList"></div></div></div>
         <div id="usersSection" class="hidden"><div class="card"><h3>👥 Users</h3><div id="usersList"></div></div></div>
         <div id="depositsSection" class="hidden"><div class="card"><h3>💰 Deposit Requests</h3><div id="depositsList"></div></div></div>
         <div id="withdrawalsSection" class="hidden"><div class="card"><h3>💸 Withdrawal Requests</h3><div id="withdrawalsList"></div></div></div>
@@ -77,7 +77,6 @@
         }
     }
     
-    // ============ MARKETS ============
     async function loadMarkets(){
         let snap = await db.collection('markets').get();
         let html = '';
@@ -125,7 +124,7 @@
     
     async function editMarket(id, oldName, oldResult){
         let newName = prompt('New market name', oldName);
-        let newResult = prompt('New result (e.g., 123-45-678)', oldResult);
+        let newResult = prompt('New result', oldResult);
         if(newName){
             await db.collection('markets').doc(id).update({name: newName, result: newResult});
             await loadMarkets();
@@ -133,13 +132,12 @@
     }
     
     async function deleteMarket(id){
-        if(confirm('Delete this market permanently?')){
+        if(confirm('Delete this market?')){
             await db.collection('markets').doc(id).delete();
             await loadMarkets();
         }
     }
     
-    // ============ USERS ============
     async function loadUsers(){
         let users = await db.collection('users').get();
         let html = '';
@@ -157,7 +155,7 @@
     }
     
     async function addBalance(uid){
-        let amt = prompt('Enter amount to add to user balance');
+        let amt = prompt('Enter amount to add');
         if(amt && !isNaN(amt)){
             let user = await db.collection('users').doc(uid).get();
             let newBalance = (user.data().balance || 0) + parseInt(amt);
@@ -168,7 +166,7 @@
     }
     
     async function clearUserBids(uid){
-        if(confirm('Clear ALL bid history for this user?')){
+        if(confirm('Clear all bid history for this user?')){
             let bids = await db.collection('bids').where('userId','==',uid).get();
             for(let bid of bids.docs){
                 await bid.ref.delete();
@@ -177,7 +175,6 @@
         }
     }
     
-    // ============ DEPOSITS ============
     async function loadDeposits(){
         let reqs = await db.collection('transactions').where('type','==','credit').where('status','==','Pending').get();
         let html = '<table><tr><th>User ID</th><th>Amount</th><th>Date</th><th>Action</th></tr>';
@@ -205,10 +202,9 @@
         await loadUsers();
     }
     
-    // ============ WITHDRAWALS ============
     async function loadWithdrawals(){
         let reqs = await db.collection('withdrawRequests').where('status','==','Pending').get();
-        let html = '<table><tr><th>User ID</th><th>Amount</th><th>Bank</th><th>Action</th></tr>';
+        let html = 'ables\n  <thead>\n    <tr><th>User ID</th><th>Amount</th><th>Bank</th><th>Action</th></tr>\n  </thead>\n  <tbody>';
         for(let doc of reqs.docs){
             let d = doc.data();
             html += `<tr>
@@ -218,7 +214,7 @@
                 <td><button class="btn-success" onclick="approveWithdraw('${doc.id}','${d.amount}','${d.userId}')">Approve</button></td>
             </tr>`;
         }
-        html += '</table>';
+        html += '</tbody></table>';
         document.getElementById('withdrawalsList').innerHTML = html;
         if(reqs.size === 0) document.getElementById('withdrawalsList').innerHTML = '<p>No pending withdrawals</p>';
     }
@@ -240,7 +236,6 @@
         await loadUsers();
     }
     
-    // ============ SETTINGS ============
     function changePassword(){
         let old = document.getElementById('oldPass').value;
         let newP = document.getElementById('newPass').value;
