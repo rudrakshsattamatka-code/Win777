@@ -147,13 +147,14 @@
         if (confirm('Delete?')) { await db.collection('markets').doc(id).delete(); loadMarkets(); }
     }
     
-    // USERS
+    // USERS - Fix: Convert balance to number
     async function loadUsers() {
         const users = await db.collection('users').get();
         let html = '';
         for (const doc of users.docs) {
             const u = doc.data();
-            let balance = Number(u.balance) || 0;
+            let balance = Number(u.balance);
+            if (isNaN(balance)) balance = 0;
             html += `<div class="user-item"><div><b>${u.name}</b><br>${u.phone}<br>Balance: ₹${balance}</div><div><button onclick="addBalance('${doc.id}')">Add ₹</button><button onclick="viewUserBids('${doc.id}')">View Bids</button><button onclick="clearUserBids('${doc.id}')" class="btn-danger">Clear Bids</button></div></div>`;
         }
         document.getElementById('usersList').innerHTML = html || '<p>No users</p>';
@@ -163,7 +164,8 @@
         const amt = prompt('Enter amount to add:');
         if (amt && !isNaN(amt) && parseInt(amt) > 0) {
             const user = await db.collection('users').doc(uid).get();
-            let currentBalance = Number(user.data().balance) || 0;
+            let currentBalance = Number(user.data().balance);
+            if (isNaN(currentBalance)) currentBalance = 0;
             let newBalance = currentBalance + Number(amt);
             await db.collection('users').doc(uid).update({ balance: newBalance });
             alert(`✅ ₹${amt} added! New balance: ₹${newBalance}`);
@@ -186,7 +188,7 @@
         }
     }
     
-    // DEPOSITS - FIXED: Adds exact NUMBER amount
+    // DEPOSITS - FIXED: Converts everything to NUMBER
     async function loadDeposits() {
         const reqs = await db.collection('transactions').where('type', '==', 'credit').where('status', '==', 'Pending').get();
         let html = '';
@@ -194,7 +196,7 @@
             const d = doc.data();
             const user = await db.collection('users').doc(d.userId).get();
             const userName = user.exists ? user.data().name : 'Unknown';
-            const amount = Number(d.amount) || 0;
+            const amount = Number(d.amount);
             html += `
                 <div class="request-item" style="border-left: 4px solid #ff9800;">
                     <div>
@@ -213,11 +215,12 @@
         document.getElementById('depositsList').innerHTML = html || '<p>No pending deposits</p>';
     }
     
-    // APPROVE DEPOSIT - Adds exact NUMBER, not string
+    // APPROVE DEPOSIT - Adds exact NUMBER amount (not string concatenation)
     async function approveDeposit(id, exactAmount, userId) {
         if (confirm(`Approve deposit of ₹${exactAmount} for this user?`)) {
             const user = await db.collection('users').doc(userId).get();
-            let currentBalance = Number(user.data().balance) || 0;
+            let currentBalance = Number(user.data().balance);
+            if (isNaN(currentBalance)) currentBalance = 0;
             let newBalance = currentBalance + Number(exactAmount);
             await db.collection('users').doc(userId).update({ balance: newBalance });
             await db.collection('transactions').doc(id).update({ status: 'Completed' });
@@ -264,7 +267,8 @@
     async function approveWithdraw(id, amount, userId) {
         if (confirm(`Approve withdrawal of ₹${amount}?`)) {
             const user = await db.collection('users').doc(userId).get();
-            let currentBalance = Number(user.data().balance) || 0;
+            let currentBalance = Number(user.data().balance);
+            if (isNaN(currentBalance)) currentBalance = 0;
             if (currentBalance < amount) { alert('Insufficient balance'); return; }
             let newBalance = currentBalance - amount;
             await db.collection('users').doc(userId).update({ balance: newBalance });
