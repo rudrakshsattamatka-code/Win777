@@ -23,7 +23,6 @@
             max-width: 450px;
             margin: 0 auto;
         }
-        /* Header */
         .header {
             display: flex;
             align-items: center;
@@ -46,7 +45,6 @@
             font-size: 24px;
             flex: 1;
         }
-        /* User Card */
         .user-card {
             background: #1a1a2e;
             border-radius: 20px;
@@ -76,7 +74,6 @@
             font-size: 20px;
             font-weight: bold;
         }
-        /* Balance Card */
         .balance-card {
             background: linear-gradient(135deg, #0096ff, #00ffaa);
             border-radius: 20px;
@@ -94,7 +91,6 @@
             font-weight: bold;
             margin-top: 5px;
         }
-        /* Amount Grid */
         .amount-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -111,16 +107,11 @@
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.2s;
         }
         .amount-btn.active {
             background: #0096ff;
             color: #1a1a2e;
         }
-        .amount-btn:active {
-            transform: scale(0.95);
-        }
-        /* Custom Amount */
         .custom-amount {
             margin-bottom: 25px;
         }
@@ -137,7 +128,44 @@
         .custom-amount input::placeholder {
             color: #555;
         }
-        /* Add Fund Button */
+        .upi-manual {
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #1a1a2e;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid #0096ff;
+        }
+        .upi-manual p {
+            color: #aaa;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+        .upi-id-code {
+            background: #0a0a0f;
+            padding: 12px;
+            border-radius: 12px;
+            color: #00ffaa;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 0;
+            word-break: break-all;
+            letter-spacing: 1px;
+        }
+        .copy-btn {
+            background: #0096ff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
         .add-fund-btn {
             width: 100%;
             padding: 16px;
@@ -148,12 +176,20 @@
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
+            margin-bottom: 12px;
+        }
+        .create-request-btn {
+            width: 100%;
+            padding: 16px;
+            background: #1a1a2e;
+            border: 1px solid #0096ff;
+            border-radius: 20px;
+            color: #0096ff;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
             margin-bottom: 15px;
         }
-        .add-fund-btn:active {
-            transform: scale(0.98);
-        }
-        /* Timer Box */
         .timer-box {
             background: #1a1a2e;
             border-radius: 16px;
@@ -173,7 +209,6 @@
             font-size: 12px;
             margin-top: 5px;
         }
-        /* Message */
         .message {
             padding: 12px;
             border-radius: 12px;
@@ -199,17 +234,21 @@
         .hidden {
             display: none;
         }
+        .note-text {
+            font-size: 11px;
+            color: #ff9800;
+            text-align: center;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- Header -->
     <div class="header">
         <button class="back-btn" onclick="goBack()">←</button>
         <h1>ADD FUND</h1>
     </div>
 
-    <!-- User Card -->
     <div class="user-card">
         <div>
             <div class="user-name" id="userName">Loading...</div>
@@ -221,13 +260,11 @@
         </div>
     </div>
 
-    <!-- Balance Card -->
     <div class="balance-card">
         <div class="label">Available Balance</div>
         <div class="amount">₹<span id="balanceAmount">0</span></div>
     </div>
 
-    <!-- Amount Grid -->
     <div class="amount-grid">
         <div class="amount-btn" onclick="selectAmount(100)">₹100</div>
         <div class="amount-btn" onclick="selectAmount(500)">₹500</div>
@@ -237,22 +274,30 @@
         <div class="amount-btn" onclick="selectAmount(7000)">₹7000</div>
     </div>
 
-    <!-- Custom Amount -->
     <div class="custom-amount">
         <input type="number" id="customAmount" placeholder="Enter custom amount (Min ₹100)">
     </div>
 
-    <!-- Add Fund Button (Only this - No UPI Apps) -->
-    <button class="add-fund-btn" id="addFundBtn">Add Fund</button>
+    <!-- UPI Payment Info -->
+    <div class="upi-manual">
+        <p>📱 Send payment to this UPI ID</p>
+        <div class="upi-id-code" id="upiIdDisplay">ganeshpatil99@slc</div>
+        <button class="copy-btn" onclick="copyUPI()">📋 Copy UPI ID</button>
+        <p style="font-size: 11px; margin-top: 10px; color: #888;">After payment, click "I Have Paid" button</p>
+    </div>
 
-    <!-- Timer Box (Hidden initially) -->
+    <button class="add-fund-btn" id="paidBtn">✅ I Have Paid</button>
+    <button class="create-request-btn" id="createRequestBtn">📝 Create Deposit Request</button>
+
+    <div class="note-text">
+        ⚡ Minimum deposit ₹100 | Maximum ₹50,000
+    </div>
+
     <div id="timerBox" class="timer-box hidden">
         <div class="timer-text" id="countdownTimer">05:00</div>
         <div class="timer-label">⏳ Waiting for admin approval...</div>
         <div class="timer-label" style="font-size: 11px; margin-top: 8px;">Your payment is being verified</div>
     </div>
-
-    <!-- Message -->
     <div id="message" class="message hidden"></div>
 </div>
 
@@ -275,17 +320,12 @@
     let selectedAmount = 100;
     let currentTransactionId = null;
     let timerInterval = null;
-    const UPI_ID = "savithakcanara@ybl";
+    const UPI_ID = "ganeshpatil99@slc";
     
-    // ============ LOAD USER DATA ============
     async function loadUserData() {
         const user = auth.currentUser;
-        if (!user) {
-            window.location.href = 'index.html';
-            return;
-        }
+        if (!user) { window.location.href = 'index.html'; return; }
         currentUser = user;
-        
         const doc = await db.collection('users').doc(user.uid).get();
         if (doc.exists) {
             userData = doc.data();
@@ -296,33 +336,26 @@
         }
     }
     
-    // ============ SELECT AMOUNT ============
     function selectAmount(amount) {
         selectedAmount = amount;
-        // Highlight selected amount
-        document.querySelectorAll('.amount-btn').forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.innerText === `₹${amount}`) {
-                btn.classList.add('active');
-            }
-        });
-        // Clear custom amount
+        document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
         document.getElementById('customAmount').value = '';
     }
     
-    // ============ SHOW MESSAGE ============
     function showMessage(msg, type) {
-        const messageDiv = document.getElementById('message');
-        messageDiv.innerText = msg;
-        messageDiv.className = `message message-${type}`;
-        messageDiv.classList.remove('hidden');
-        
-        setTimeout(() => {
-            messageDiv.classList.add('hidden');
-        }, 5000);
+        const msgDiv = document.getElementById('message');
+        msgDiv.innerText = msg;
+        msgDiv.className = `message message-${type}`;
+        msgDiv.classList.remove('hidden');
+        setTimeout(() => msgDiv.classList.add('hidden'), 5000);
     }
     
-    // ============ CREATE DEPOSIT REQUEST ============
+    function copyUPI() {
+        navigator.clipboard.writeText(UPI_ID);
+        showMessage('✅ UPI ID copied to clipboard!', 'success');
+    }
+    
     async function createDepositRequest(amount) {
         const transactionRef = await db.collection('transactions').add({
             userId: currentUser.uid,
@@ -337,113 +370,70 @@
         return transactionRef.id;
     }
     
-    // ============ START TIMER AND WAIT FOR APPROVAL ============
     function startTimerAndWait() {
         const timerBox = document.getElementById('timerBox');
         timerBox.classList.remove('hidden');
-        
-        let timeLeft = 300; // 5 minutes
+        let timeLeft = 300;
         const timerDisplay = document.getElementById('countdownTimer');
-        
         if (timerInterval) clearInterval(timerInterval);
         timerInterval = setInterval(() => {
             timeLeft--;
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
             timerDisplay.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                timerBox.classList.add('hidden');
-                showMessage('⏰ Time expired! Your request is still pending. Admin will approve manually.', 'pending');
-            }
+            if (timeLeft <= 0) { clearInterval(timerInterval); timerBox.classList.add('hidden'); }
         }, 1000);
         
-        // Listen for transaction status change
         if (currentTransactionId) {
-            const unsubscribe = db.collection('transactions').doc(currentTransactionId)
-                .onSnapshot((doc) => {
-                    if (doc.exists) {
-                        const status = doc.data().status;
-                        if (status === 'Completed') {
-                            clearInterval(timerInterval);
-                            timerBox.classList.add('hidden');
-                            showMessage('✅ Payment successful! Balance updated.', 'success');
-                            loadUserData();
-                            setTimeout(() => {
-                                window.location.href = 'dashboard.html';
-                            }, 2000);
-                            unsubscribe();
-                        } else if (status === 'Rejected') {
-                            clearInterval(timerInterval);
-                            timerBox.classList.add('hidden');
-                            showMessage('❌ Payment rejected by admin. Please contact support.', 'error');
-                            unsubscribe();
-                        }
-                    }
-                });
+            db.collection('transactions').doc(currentTransactionId).onSnapshot((doc) => {
+                if (doc.exists && doc.data().status === 'Completed') {
+                    clearInterval(timerInterval);
+                    timerBox.classList.add('hidden');
+                    showMessage('✅ Payment successful! Balance updated.', 'success');
+                    loadUserData();
+                    setTimeout(() => window.location.href = 'dashboard.html', 2000);
+                } else if (doc.exists && doc.data().status === 'Rejected') {
+                    clearInterval(timerInterval);
+                    timerBox.classList.add('hidden');
+                    showMessage('❌ Payment rejected by admin.', 'error');
+                }
+            });
         }
     }
     
-    // ============ ADD FUND BUTTON ============
-    document.getElementById('addFundBtn').onclick = async () => {
+    // I Have Paid Button
+    document.getElementById('paidBtn').onclick = async () => {
         let amount = selectedAmount;
         const customAmount = parseInt(document.getElementById('customAmount').value);
-        if (customAmount >= 100) {
-            amount = customAmount;
-        }
-        
-        if (amount < 100) {
-            showMessage('Minimum deposit amount is ₹100', 'error');
-            return;
-        }
-        
-        if (amount > 50000) {
-            showMessage('Maximum deposit amount is ₹50000', 'error');
-            return;
-        }
+        if (customAmount >= 100) amount = customAmount;
+        if (amount < 100) { showMessage('Minimum deposit is ₹100', 'error'); return; }
+        if (amount > 50000) { showMessage('Maximum deposit is ₹50000', 'error'); return; }
         
         showMessage('Creating deposit request...', 'pending');
-        
-        try {
-            await createDepositRequest(amount);
-            showMessage(`✅ Deposit request of ₹${amount} created!`, 'success');
-            
-            // Open UPI app with pre-filled amount
-            setTimeout(() => {
-                const upiIntent = `upi://pay?pa=${UPI_ID}&pn=WIN777&am=${amount}&cu=INR`;
-                window.location.href = upiIntent;
-            }, 1500);
-            
-            // After returning from UPI app, ask for confirmation
-            setTimeout(() => {
-                if (confirm(`Did you successfully pay ₹${amount}?`)) {
-                    startTimerAndWait();
-                } else {
-                    showMessage('Payment not confirmed. Request pending for admin approval.', 'pending');
-                    startTimerAndWait();
-                }
-            }, 5000);
-            
-        } catch (error) {
-            showMessage('Error: ' + error.message, 'error');
-        }
+        await createDepositRequest(amount);
+        showMessage(`✅ Deposit request of ₹${amount} created! Waiting for admin approval.`, 'success');
+        startTimerAndWait();
     };
     
-    // ============ GO BACK ============
-    function goBack() {
-        window.location.href = 'dashboard.html';
-    }
+    // Create Request Button
+    document.getElementById('createRequestBtn').onclick = async () => {
+        let amount = selectedAmount;
+        const customAmount = parseInt(document.getElementById('customAmount').value);
+        if (customAmount >= 100) amount = customAmount;
+        if (amount < 100) { showMessage('Minimum deposit is ₹100', 'error'); return; }
+        if (amount > 50000) { showMessage('Maximum deposit is ₹50000', 'error'); return; }
+        
+        showMessage('Creating deposit request...', 'pending');
+        await createDepositRequest(amount);
+        showMessage(`✅ Deposit request of ₹${amount} created! Send payment to ${UPI_ID}`, 'success');
+        startTimerAndWait();
+    };
     
-    // ============ INITIALIZE ============
+    function goBack() { window.location.href = 'dashboard.html'; }
+    
     auth.onAuthStateChanged(async (user) => {
-        if (!user) {
-            window.location.href = 'index.html';
-        } else {
-            await loadUserData();
-            // Set default active amount
-            document.querySelector('.amount-btn').classList.add('active');
-        }
+        if (!user) window.location.href = 'index.html';
+        else { await loadUserData(); document.querySelector('.amount-btn').classList.add('active'); }
     });
 </script>
 </body>
