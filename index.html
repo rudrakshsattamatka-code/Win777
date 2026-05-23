@@ -8,173 +8,36 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-        }
-        body {
-            background: #0a0a0f;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        .login-container {
-            width: 100%;
-            max-width: 400px;
-            background: #1a1a2e;
-            border-radius: 24px;
-            padding: 40px 28px;
-            border: 1px solid #0096ff;
-        }
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        .logo img {
-            width: 100px;
-            height: 100px;
-            object-fit: contain;
-        }
-        .trust-badge {
-            text-align: center;
-            color: #0096ff;
-            font-size: 14px;
-            margin-bottom: 30px;
-        }
-        .input-group {
-            margin-bottom: 20px;
-        }
-        .input-label {
-            color: #ccc;
-            font-size: 14px;
-            margin-bottom: 8px;
-            display: block;
-        }
-        .phone-wrapper {
-            display: flex;
-            gap: 10px;
-        }
-        .country-code {
-            width: 80px;
-            padding: 14px;
-            background: #0a0a0f;
-            border: 1px solid #0096ff;
-            border-radius: 12px;
-            color: #0096ff;
-            font-weight: bold;
-            text-align: center;
-        }
-        .phone-input {
-            flex: 1;
-            padding: 14px;
-            background: #0a0a0f;
-            border: 1px solid #0096ff;
-            border-radius: 12px;
-            color: white;
-            font-size: 16px;
-            outline: none;
-        }
-        .phone-input:focus {
-            border-color: #00ffaa;
-        }
-        .continue-btn {
-            width: 100%;
-            padding: 14px;
-            background: #0096ff;
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .continue-btn:active {
-            transform: scale(0.98);
-        }
-        .continue-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-        .secondary-btn {
-            background: transparent;
-            border: 1px solid #0096ff;
-            color: #0096ff;
-        }
-        .error-msg {
-            color: #ff6b6b;
-            font-size: 12px;
-            text-align: center;
-            margin-top: 12px;
-        }
-        .success-msg {
-            color: #8bc34a;
-            font-size: 12px;
-            text-align: center;
-            margin-top: 12px;
-        }
-        .info-box {
-            background: rgba(0,150,255,0.1);
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border-left: 3px solid #0096ff;
-            color: #ccc;
-            font-size: 13px;
-        }
-        .otp-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin: 20px 0;
-        }
-        .otp-digit {
-            width: 50px;
-            height: 55px;
-            background: #0a0a0f;
-            border: 1px solid #0096ff;
-            border-radius: 12px;
-            text-align: center;
-            font-size: 24px;
-            color: white;
-            outline: none;
-        }
-        .otp-digit:focus {
-            border-color: #00ffaa;
-        }
-        .pin-input {
-            width: 200px;
-            padding: 14px;
-            text-align: center;
-            font-size: 24px;
-            letter-spacing: 8px;
-            background: #0a0a0f;
-            border: 1px solid #0096ff;
-            border-radius: 12px;
-            color: white;
-            display: block;
-            margin: 10px auto;
-        }
-        .hidden {
-            display: none;
-        }
-        .resend-btn {
-            margin-top: 10px;
-        }
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+        body{background:#0a0a0f;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+        .login-container{width:100%;max-width:400px;background:#1a1a2e;border-radius:24px;padding:40px 28px;border:1px solid #0096ff}
+        .logo{text-align:center;margin-bottom:30px}
+        .logo img{width:100px;height:100px;object-fit:contain}
+        .trust-badge{text-align:center;color:#0096ff;font-size:14px;margin-bottom:30px}
+        .input-group{margin-bottom:20px}
+        .input-label{color:#ccc;font-size:14px;margin-bottom:8px;display:block}
+        .phone-wrapper{display:flex;gap:10px}
+        .country-code{width:80px;padding:14px;background:#0a0a0f;border:1px solid #0096ff;border-radius:12px;color:#0096ff;font-weight:bold;text-align:center}
+        .phone-input{flex:1;padding:14px;background:#0a0a0f;border:1px solid #0096ff;border-radius:12px;color:white;font-size:16px;outline:none}
+        .phone-input:focus{border-color:#00ffaa}
+        .continue-btn{width:100%;padding:14px;background:#0096ff;border:none;border-radius:12px;color:white;font-weight:bold;font-size:16px;cursor:pointer;margin-top:10px}
+        .continue-btn:active{transform:scale(0.98)}
+        .continue-btn:disabled{opacity:0.6;cursor:not-allowed}
+        .secondary-btn{background:transparent;border:1px solid #0096ff;color:#0096ff}
+        .error-msg{color:#ff6b6b;font-size:12px;text-align:center;margin-top:12px}
+        .info-box{background:rgba(0,150,255,0.1);padding:12px;border-radius:12px;margin-bottom:20px;border-left:3px solid #0096ff;color:#ccc;font-size:13px}
+        .otp-group{display:flex;gap:10px;justify-content:center;margin:20px 0}
+        .otp-digit{width:50px;height:55px;background:#0a0a0f;border:1px solid #0096ff;border-radius:12px;text-align:center;font-size:24px;color:white;outline:none}
+        .otp-digit:focus{border-color:#00ffaa}
+        .pin-input{width:200px;padding:14px;text-align:center;font-size:24px;letter-spacing:8px;background:#0a0a0f;border:1px solid #0096ff;border-radius:12px;color:white;display:block;margin:10px auto}
+        .hidden{display:none}
     </style>
 </head>
 <body>
 <div class="login-container">
-    <div class="logo">
-        <img src="https://i.imgur.com/lPQ7wQD.png" alt="WIN777">
-    </div>
+    <div class="logo"><img src="https://i.imgur.com/lPQ7wQD.png" alt="WIN777"></div>
     <div class="trust-badge">🇮🇳 India's Most Trusted App</div>
 
-    <!-- Phone Login Screen -->
     <div id="phoneScreen">
         <div class="input-group">
             <label class="input-label">Enter Your Phone Number</label>
@@ -187,11 +50,8 @@
         <div id="phoneError" class="error-msg"></div>
     </div>
 
-    <!-- OTP Verification Screen -->
     <div id="otpScreen" class="hidden">
-        <div class="info-box">
-            📨 OTP sent to your phone number
-        </div>
+        <div class="info-box">📨 OTP sent to your phone number</div>
         <div class="otp-group">
             <input type="text" class="otp-digit" maxlength="1" id="otp1">
             <input type="text" class="otp-digit" maxlength="1" id="otp2">
@@ -201,16 +61,13 @@
             <input type="text" class="otp-digit" maxlength="1" id="otp6">
         </div>
         <button class="continue-btn" id="verifyOtpBtn">Verify OTP</button>
-        <button class="secondary-btn resend-btn" id="resendOtpBtn">Resend OTP</button>
-        <button class="secondary-btn" id="backToPhoneBtn">← Change Number</button>
+        <button class="secondary-btn" id="resendOtpBtn" style="margin-top:10px">Resend OTP</button>
+        <button class="secondary-btn" id="backToPhoneBtn" style="margin-top:10px">← Change Number</button>
         <div id="otpError" class="error-msg"></div>
     </div>
 
-    <!-- Register PIN Screen (New User) -->
     <div id="registerScreen" class="hidden">
-        <div class="info-box">
-            ✨ Complete your profile
-        </div>
+        <div class="info-box">✨ Complete your profile</div>
         <div class="input-group">
             <label class="input-label">Full Name</label>
             <input type="text" id="fullName" class="phone-input" placeholder="Enter your name">
@@ -227,11 +84,8 @@
         <div id="registerError" class="error-msg"></div>
     </div>
 
-    <!-- PIN Login Screen (Existing User) -->
     <div id="pinLoginScreen" class="hidden">
-        <div class="info-box">
-            🔐 Welcome back! Enter your 4-digit PIN
-        </div>
+        <div class="info-box">🔐 Welcome back! Enter your 4-digit PIN</div>
         <input type="password" id="loginPin" class="pin-input" maxlength="4" placeholder="●●●●">
         <button class="continue-btn" id="pinLoginBtn">Unlock Dashboard</button>
         <button class="secondary-btn" id="logoutPinBtn">Use different account</button>
@@ -260,7 +114,6 @@
     let timerInterval = null;
     let recaptchaVerifier = null;
     
-    // DOM Elements
     const phoneScreen = document.getElementById('phoneScreen');
     const otpScreen = document.getElementById('otpScreen');
     const registerScreen = document.getElementById('registerScreen');
@@ -271,18 +124,14 @@
         otpScreen.classList.add('hidden');
         registerScreen.classList.add('hidden');
         pinLoginScreen.classList.add('hidden');
-        
-        if (screen === 'phone') phoneScreen.classList.remove('hidden');
-        else if (screen === 'otp') otpScreen.classList.remove('hidden');
-        else if (screen === 'register') registerScreen.classList.remove('hidden');
-        else if (screen === 'pinLogin') pinLoginScreen.classList.remove('hidden');
+        document.getElementById(screen).classList.remove('hidden');
     }
     
     function showError(elementId, message) {
         const el = document.getElementById(elementId);
         if (el) {
             el.innerText = message;
-            setTimeout(() => { el.innerText = ''; }, 5000);
+            setTimeout(() => el.innerText = '', 5000);
         }
     }
     
@@ -309,7 +158,6 @@
         }, 1000);
     }
     
-    // Initialize reCAPTCHA
     function initRecaptcha() {
         if (!recaptchaVerifier) {
             const container = document.createElement('div');
@@ -317,91 +165,70 @@
             container.style.position = 'absolute';
             container.style.left = '-9999px';
             document.body.appendChild(container);
-            recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-                size: 'invisible'
-            });
+            recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { size: 'invisible' });
         }
         return recaptchaVerifier;
     }
     
-    // Send OTP
     document.getElementById('sendOtpBtn').onclick = async () => {
         const phone = document.getElementById('phoneNumber').value.replace(/\D/g, '');
         if (!phone || phone.length < 10) {
             showError('phoneError', 'Enter valid 10-digit mobile number');
             return;
         }
-        
         const fullPhone = '+91' + phone;
         currentPhone = fullPhone;
-        
         const btn = document.getElementById('sendOtpBtn');
         btn.disabled = true;
         btn.innerText = 'Sending...';
-        
         try {
             const verifier = initRecaptcha();
             confirmationResult = await auth.signInWithPhoneNumber(fullPhone, verifier);
-            showScreen('otp');
+            showScreen('otpScreen');
             startTimer(60);
             showError('otpError', 'OTP sent successfully!');
         } catch (error) {
-            console.error(error);
-            let errorMsg = error.message;
-            if (error.code === 'auth/invalid-phone-number') errorMsg = 'Invalid phone number';
-            else if (error.code === 'auth/too-many-requests') errorMsg = 'Too many requests. Try later';
-            showError('phoneError', errorMsg);
+            showError('phoneError', error.message);
         } finally {
             btn.disabled = false;
             btn.innerText = 'Send OTP';
         }
     };
     
-    // Verify OTP
     document.getElementById('verifyOtpBtn').onclick = async () => {
         let code = '';
-        for (let i = 1; i <= 6; i++) {
-            code += document.getElementById(`otp${i}`).value;
-        }
+        for (let i = 1; i <= 6; i++) code += document.getElementById(`otp${i}`).value;
         if (code.length !== 6) {
             showError('otpError', 'Enter 6-digit OTP');
             return;
         }
-        
         const btn = document.getElementById('verifyOtpBtn');
         btn.disabled = true;
         btn.innerText = 'Verifying...';
-        
         try {
             const result = await confirmationResult.confirm(code);
             const user = result.user;
             const userDoc = await db.collection('users').doc(user.uid).get();
-            
             if (userDoc.exists && userDoc.data().pin) {
-                // Existing user - go to PIN login
-                showScreen('pinLogin');
+                showScreen('pinLoginScreen');
             } else {
-                // New user - register PIN
-                showScreen('register');
+                showScreen('registerScreen');
             }
         } catch (error) {
-            showError('otpError', 'Invalid OTP. Please try again.');
+            showError('otpError', 'Invalid OTP. Try again.');
         } finally {
             btn.disabled = false;
             btn.innerText = 'Verify OTP';
         }
     };
     
-    // Resend OTP
     document.getElementById('resendOtpBtn').onclick = async () => {
         if (countdown > 0) {
             showError('otpError', `Wait ${countdown} seconds`);
             return;
         }
-        
         const btn = document.getElementById('resendOtpBtn');
         btn.innerText = 'Sending...';
-        
         try {
             const verifier = initRecaptcha();
             confirmationResult = await auth.signInWithPhoneNumber(currentPhone, verifier);
@@ -414,20 +241,15 @@
         }
     };
     
-    // Back to phone
     document.getElementById('backToPhoneBtn').onclick = () => {
-        showScreen('phone');
-        for (let i = 1; i <= 6; i++) {
-            document.getElementById(`otp${i}`).value = '';
-        }
+        showScreen('phoneScreen');
+        for (let i = 1; i <= 6; i++) document.getElementById(`otp${i}`).value = '';
     };
     
-    // Register new user
     document.getElementById('registerBtn').onclick = async () => {
         const name = document.getElementById('fullName').value.trim();
         const pin = document.getElementById('pin').value;
         const confirmPin = document.getElementById('confirmPin').value;
-        
         if (!name || name.length < 2) {
             showError('registerError', 'Enter your full name');
             return;
@@ -440,18 +262,15 @@
             showError('registerError', 'PINs do not match');
             return;
         }
-        
         const user = auth.currentUser;
         if (!user) {
             showError('registerError', 'Session expired. Please login again.');
-            showScreen('phone');
+            showScreen('phoneScreen');
             return;
         }
-        
         const btn = document.getElementById('registerBtn');
         btn.disabled = true;
         btn.innerText = 'Creating...';
-        
         try {
             await db.collection('users').doc(user.uid).set({
                 uid: user.uid,
@@ -471,20 +290,17 @@
         }
     };
     
-    // PIN Login
     document.getElementById('pinLoginBtn').onclick = async () => {
         const pin = document.getElementById('loginPin').value;
         if (!pin || pin.length !== 4) {
             showError('pinLoginError', 'Enter 4-digit PIN');
             return;
         }
-        
         const user = auth.currentUser;
         if (!user) {
-            showScreen('phone');
+            showScreen('phoneScreen');
             return;
         }
-        
         const userDoc = await db.collection('users').doc(user.uid).get();
         if (userDoc.exists && userDoc.data().pin === pin) {
             window.location.href = 'dashboard.html';
@@ -493,14 +309,12 @@
         }
     };
     
-    // Logout from PIN screen
     document.getElementById('logoutPinBtn').onclick = async () => {
         await auth.signOut();
-        showScreen('phone');
+        showScreen('phoneScreen');
         document.getElementById('loginPin').value = '';
     };
     
-    // Auto-focus OTP inputs
     for (let i = 1; i <= 6; i++) {
         const input = document.getElementById(`otp${i}`);
         input.addEventListener('input', (e) => {
@@ -515,19 +329,16 @@
         });
     }
     
-    // Check existing session on load
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             const userDoc = await db.collection('users').doc(user.uid).get();
             if (userDoc.exists && userDoc.data().pin) {
-                showScreen('pinLogin');
-            } else if (userDoc.exists && !userDoc.data().pin) {
-                showScreen('register');
+                showScreen('pinLoginScreen');
             } else {
-                showScreen('phone');
+                showScreen('phoneScreen');
             }
         } else {
-            showScreen('phone');
+            showScreen('phoneScreen');
         }
     });
 </script>
