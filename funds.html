@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WIN777 - Funds</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}
+        body{background:#0a0a0f;min-height:100vh;padding:20px}
+        .container{max-width:450px;margin:0 auto}
+        .header{display:flex;align-items:center;gap:15px;margin-bottom:20px}
+        .back-btn{background:#1a1a2e;border:none;color:#0096ff;font-size:24px;width:40px;height:40px;border-radius:12px;cursor:pointer;border:1px solid #0096ff}
+        .header h1{color:#0096ff;font-size:24px;flex:1}
+        .balance-card{background:linear-gradient(135deg,#0096ff,#00ffaa);border-radius:20px;padding:20px;text-align:center;margin-bottom:25px}
+        .balance-card .amount{color:white;font-size:36px;font-weight:bold}
+        .menu-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;margin-bottom:20px}
+        .menu-card{background:#1a1a2e;border-radius:20px;padding:20px;text-align:center;cursor:pointer;border:1px solid #0096ff}
+        .menu-icon{font-size:40px;margin-bottom:10px}
+        .menu-title{color:#0096ff;font-size:16px;font-weight:bold;margin-bottom:5px}
+        .menu-desc{color:#888;font-size:11px}
+        .history-section{background:#1a1a2e;border-radius:20px;padding:15px;border:1px solid #0096ff}
+        .section-title{color:#0096ff;font-size:16px;font-weight:bold;margin-bottom:15px;border-left:3px solid #0096ff;padding-left:10px}
+        .history-list{max-height:300px;overflow-y:auto}
+        .history-item{background:#0a0a0f;border-radius:12px;padding:12px;margin-bottom:10px;border-left:3px solid}
+        .history-item.credit{border-left-color:#4caf50}
+        .history-item.debit{border-left-color:#f44336}
+        .history-header{display:flex;justify-content:space-between;margin-bottom:8px}
+        .history-type.credit{color:#4caf50}
+        .history-type.debit{color:#f44336}
+        .history-status{padding:2px 8px;border-radius:20px;font-size:11px;display:inline-block}
+        .status-completed{background:#4caf5020;color:#4caf50}
+        .status-pending{background:#ff980020;color:#ff9800}
+        .history-date{font-size:10px;color:#666;margin-top:5px}
+        .no-data{color:#888;text-align:center;padding:20px}
+        .hidden{display:none}
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <h1>Funds</h1>
+    </div>
+
+    <div class="balance-card"><div class="amount">₹<span id="userBalance">0</span></div></div>
+
+    <div class="menu-grid">
+        <div class="menu-card" onclick="window.location.href='deposit.html'"><div class="menu-icon">💰</div><div class="menu-title">Add Fund</div><div class="menu-desc">You can add fund to your wallet</div></div>
+        <div class="menu-card" onclick="window.location.href='withdraw.html'"><div class="menu-icon">💸</div><div class="menu-title">Withdraw Fund</div><div class="menu-desc">You can withdraw winnings</div></div>
+        <div class="menu-card" onclick="window.location.href='dashboard.html?page=bank'"><div class="menu-icon">🏦</div><div class="menu-title">Add Bank Details</div><div class="menu-desc">You can add your bank details for withdrawal</div></div>
+        <div class="menu-card" onclick="showBankHistory()"><div class="menu-icon">📋</div><div class="menu-title">Bank Details History</div><div class="menu-desc">You can see your bank details history here</div></div>
+    </div>
+
+    <div class="history-section">
+        <div class="section-title">📊 Fund Request History</div>
+        <div id="historyList" class="history-list"><div class="no-data">Loading...</div></div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
+        authDomain: "win777-ed482.firebaseapp.com",
+        projectId: "win777-ed482",
+        storageBucket: "win777-ed482.firebasestorage.app",
+        messagingSenderId: "843686112399",
+        appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    let currentUser = null;
+    let userData = null;
+    
+    async function loadUserData() {
+        const user = auth.currentUser;
+        if (!user) { window.location.href = 'index.html'; return; }
+        currentUser = user;
+        const doc = await db.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+            userData = doc.data();
+            document.getElementById('userBalance').innerText = userData?.balance || 0;
+        }
+    }
+    
+    async function loadHistory() {
+        if (!currentUser) return;
+        const transactions = await db.collection('transactions').where('userId', '==', currentUser.uid).orderBy('date', 'desc').get();
+        let html = '';
+        if (transactions.empty) {
+            html = '<div class="no-data">No fund requests yet</div>';
+        } else {
+            transactions.forEach(doc => {
+                const t = doc.data();
+                let typeClass = t.type === 'credit' ? 'credit' : 'debit';
+                let typeText = t.type === 'credit' ? 'Deposit Request' : 'Withdrawal Request';
+                let statusClass = t.status === 'Completed' ? 'status-completed' : 'status-pending';
+                let statusText = t.status === 'Completed' ? 'Completed' : 'Pending';
+                const date = t.date?.toDate ? t.date.toDate().toLocaleString() : 'Pending';
+                html += `<div class="history-item ${typeClass}"><div class="history-header"><span class="history-type ${typeClass}">${typeText}</span><span>₹${t.amount}</span></div><div><span class="history-status ${statusClass}">${statusText}</span></div><div class="history-date">📅 ${date}</div></div>`;
+            });
+        }
+        document.getElementById('historyList').innerHTML = html;
+    }
+    
+    async function showBankHistory() {
+        if (userData?.bankDetails) {
+            alert(`Bank Details:\nBank: ${userData.bankDetails.bankName}\nAccount: ${userData.bankDetails.accNumber}\nIFSC: ${userData.bankDetails.ifsc}\nHolder: ${userData.bankDetails.accName}`);
+        } else {
+            alert('No bank details added yet');
+        }
+    }
+    
+    function goBack() { window.location.href = 'dashboard.html'; }
+    
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) window.location.href = 'index.html';
+        else { await loadUserData(); await loadHistory(); }
+    });
+</script>
+</body>
+</html>
