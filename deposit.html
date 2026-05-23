@@ -137,6 +137,9 @@
             cursor: pointer;
             margin-bottom: 15px;
         }
+        .pay-btn:active {
+            transform: scale(0.98);
+        }
         .timer-box {
             background: #1a1a2e;
             border-radius: 16px;
@@ -281,7 +284,6 @@
         const doc = await db.collection('users').doc(user.uid).get();
         if (doc.exists) {
             userData = doc.data();
-            // Convert balance to number
             let balance = Number(userData?.balance);
             if (isNaN(balance)) balance = 0;
             document.getElementById('userBalance').innerText = balance;
@@ -341,8 +343,7 @@
                 if (doc.exists && doc.data().status === 'Completed') {
                     clearInterval(timerInterval);
                     timerBox.classList.add('hidden');
-                    const approvedAmount = Number(doc.data().amount);
-                    showMessage(`✅ ₹${approvedAmount} added successfully!`, 'success');
+                    showMessage(`✅ ₹${doc.data().amount} added successfully!`, 'success');
                     loadUserData();
                     setTimeout(() => window.location.href = 'dashboard.html', 2000);
                 } else if (doc.exists && doc.data().status === 'Rejected') {
@@ -354,6 +355,7 @@
         }
     }
     
+    // FIXED: UPI intent sends ONLY the selected amount, NOT balance + amount
     document.getElementById('payBtn').onclick = async () => {
         let amount = selectedAmount;
         const customAmount = parseInt(document.getElementById('customAmount').value);
@@ -368,7 +370,9 @@
             return;
         }
         
+        // This is the EXACT amount to send to UPI - NOT adding any balance
         const exactAmount = amount;
+        
         const btn = document.getElementById('payBtn');
         btn.disabled = true;
         btn.innerText = 'Processing...';
@@ -377,8 +381,12 @@
         await createDepositRequest(exactAmount);
         showMessage(`✅ Request created! Pay ₹${exactAmount} to ${UPI_ID}`, 'success');
         
+        // FIXED: UPI intent with ONLY the selected amount
         const upiIntent = `upi://pay?pa=${UPI_ID}&pn=WIN777&am=${exactAmount}&cu=INR`;
-        setTimeout(() => { window.location.href = upiIntent; }, 1500);
+        
+        setTimeout(() => { 
+            window.location.href = upiIntent; 
+        }, 1500);
         
         setTimeout(() => {
             btn.disabled = false;
