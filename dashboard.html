@@ -61,8 +61,8 @@
 </div>
 <div class="bottom-nav"><div class="nav-item active" onclick="showPage('markets')"><span>🏠</span><p>Home</p></div><div class="nav-item" onclick="showDeposit()"><span>💰</span><p>Deposit</p></div><div class="nav-item" onclick="showWithdraw()"><span>💸</span><p>Withdraw</p></div><div class="nav-item" onclick="showPage('profile')"><span>👤</span><p>Profile</p></div></div>
 
-<div id="depositModal" class="modal"><div class="modal-content"><h3 style="color:#0096ff">Deposit</h3><div class="amount-options"><div class="amount-chip" onclick="setAmount(200)">₹200</div><div class="amount-chip" onclick="setAmount(500)">₹500</div><div class="amount-chip" onclick="setAmount(1000)">₹1000</div><div class="amount-chip" onclick="setAmount(5000)">₹5000</div></div><input type="number" id="customAmount" placeholder="Enter Amount"><button id="payBtn">Request Deposit</button><div id="depositMsg"></div><button style="background:#333;margin-top:10px" onclick="closeDeposit()">Cancel</button></div></div>
-<div id="withdrawModal" class="modal"><div class="modal-content"><h3 style="color:#0096ff">Withdraw</h3><select id="bankSelect"></select><input type="number" id="withdrawAmount" placeholder="Amount (Min 500)"><button id="withdrawBtn">Request Withdrawal</button><button style="background:#333;margin-top:10px" onclick="closeWithdraw()">Cancel</button><div id="withdrawMsg"></div></div></div>
+<div id="depositModal" class="modal"><div class="modal-content"><h3>💰 Deposit</h3><div class="amount-options"><div class="amount-chip" onclick="setAmount(200)">₹200</div><div class="amount-chip" onclick="setAmount(500)">₹500</div><div class="amount-chip" onclick="setAmount(1000)">₹1000</div><div class="amount-chip" onclick="setAmount(5000)">₹5000</div></div><input type="number" id="customAmount" placeholder="Enter Amount"><button id="payBtn">Request Deposit</button><div id="depositMsg"></div><button style="background:#333;margin-top:10px" onclick="closeDeposit()">Cancel</button></div></div>
+<div id="withdrawModal" class="modal"><div class="modal-content"><h3>💸 Withdraw</h3><select id="bankSelect"></select><input type="number" id="withdrawAmount" placeholder="Amount (Min 500)"><button id="withdrawBtn">Request Withdrawal</button><button style="background:#333;margin-top:10px" onclick="closeWithdraw()">Cancel</button><div id="withdrawMsg"></div></div></div>
 
 <script>
     const firebaseConfig = {
@@ -90,6 +90,10 @@
     
     function renderMarkets(){
         let html = '';
+        if(markets.length === 0){
+            document.getElementById('marketsPage').innerHTML = '<div class="market-card"><p style="color:#aaa;text-align:center">No markets. Admin will add soon.</p></div>';
+            return;
+        }
         for(let m of markets){
             let statusClass = '', statusText = '', disabled = false;
             if(m.status === 'open'){ statusClass = 'status-open'; statusText = '🟢 OPEN - All Bets'; disabled = false; }
@@ -131,9 +135,9 @@
     
     async function loadBids(){
         let bids = await db.collection('bids').where('userId','==',currentUser.uid).orderBy('createdAt','desc').get();
-        let html = '<table><tr><th>Market</th><th>Type</th><th>Value</th><th>Points</th></tr>';
+        let html = '<tr><tr><th>Market</th><th>Type</th><th>Value</th><th>Points</th></tr>';
         bids.forEach(d => {
-            html += `<tr><td>${d.data().market || '-'}</td><td>${d.data().gameType || '-'}</td><td>${d.data().value || '-'}</td><td>${d.data().points || '-'}</td></tr>`;
+            html += `<tr><td>${d.data().market || '-'}</td><td>${d.data().gameType || '-'}</td><td>${d.data().value || '-'}</td><td>${d.data().points || '-'}</td></td>`;
         });
         html += '</table>';
         document.getElementById('bidList').innerHTML = html || '<p>No bids yet</p>';
@@ -143,9 +147,9 @@
         let trans = await db.collection('transactions').where('userId','==',currentUser.uid).orderBy('date','desc').get();
         let html = '<table><tr><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr>';
         trans.forEach(d => {
-            html += `<tr><td>${d.data().type === 'credit' ? 'Deposit' : 'Withdraw'}</td><td>₹${d.data().amount}</td><td>${d.data().status || 'Pending'}</td><td>${d.data().date?.toDate().toLocaleString() || 'Pending'}</td></tr>`;
+            html += `<td><td>${d.data().type === 'credit' ? 'Deposit' : 'Withdraw'}</td><td>₹${d.data().amount}</td><td>${d.data().status || 'Pending'}</td><td>${d.data().date?.toDate().toLocaleString() || 'Pending'}</td></tr>`;
         });
-        html += '</table>';
+        html += '</tr>';
         document.getElementById('transList').innerHTML = html || '<p>No transactions</p>';
     }
     
@@ -207,7 +211,7 @@
         await db.collection('transactions').add({
             userId: currentUser.uid, type: 'credit', amount: amt, status: 'Pending', date: new Date()
         });
-        alert(`Deposit request of ₹${amt} created. Admin will approve after payment.`);
+        alert(`Deposit request of ₹${amt} created. Admin will approve.`);
         closeDeposit();
         loadTransactions();
     };
@@ -239,7 +243,7 @@
     
     auth.onAuthStateChanged(async (user) => {
         if(!user) window.location.href = 'index.html';
-        else { await loadUser(); await loadMarkets(); }
+        else { await loadUser(); await loadMarkets(); setInterval(loadMarkets, 30000); }
     });
 </script>
 </body>
