@@ -35,6 +35,7 @@
         .hidden{display:none}
         .btn-danger{background:#dc3545}
         .btn-success{background:#28a745}
+        .request-item{background:#fff3e0;padding:12px;margin:8px 0;border-radius:8px;border-left:4px solid #ff9800}
     </style>
 </head>
 <body>
@@ -46,7 +47,7 @@
         <div id="usersSection" class="hidden"><div class="card"><h3>👥 Users</h3><div id="usersList"></div></div></div>
         <div id="depositsSection" class="hidden"><div class="card"><h3>💰 Deposit Requests</h3><div id="depositsList"></div></div></div>
         <div id="withdrawalsSection" class="hidden"><div class="card"><h3>💸 Withdrawal Requests</h3><div id="withdrawalsList"></div></div></div>
-        <div id="settingsSection" class="hidden"><div class="card"><h3>🔐 Change Password</h3><input type="password" id="oldPass" placeholder="Old Password"><input type="password" id="newPass" placeholder="New Password"><button onclick="changePassword()">Update</button><div id="passMsg"></div></div><div class="card"><h3>🏧 UPI ID Settings</h3><input type="text" id="upiId" placeholder="UPI ID"><button onclick="updateUPI()">Update UPI ID</button><div id="upiMsg"></div></div></div>
+        <div id="settingsSection" class="hidden"><div class="card"><h3>🔐 Change Password</h3><input type="password" id="oldPass" placeholder="Old Password"><input type="password" id="newPass" placeholder="New Password"><button onclick="changePassword()">Update</button><div id="passMsg"></div></div><div class="card"><h3>🏧 UPI ID Settings</h3><input type="text" id="upiId" placeholder="UPI ID" value="win777@okhdfcbank"><button onclick="updateUPI()">Update UPI ID</button><div id="upiMsg"></div></div></div>
     </div>
 </div>
 
@@ -77,6 +78,7 @@
         }
     }
     
+    // ============ MARKETS ============
     async function loadMarkets(){
         let snap = await db.collection('markets').get();
         let html = '';
@@ -138,6 +140,7 @@
         }
     }
     
+    // ============ USERS ============
     async function loadUsers(){
         let users = await db.collection('users').get();
         let html = '';
@@ -147,6 +150,7 @@
                 <div><b>${u.name || 'User'}</b><br>${u.phone || 'No phone'}<br>Balance: ₹${u.balance || 0}</div>
                 <div>
                     <button onclick="addBalance('${doc.id}')">Add Balance</button>
+                    <button onclick="viewUserBids('${doc.id}')">View Bids</button>
                     <button onclick="clearUserBids('${doc.id}')" class="btn-danger">Clear Bids</button>
                 </div>
             </div>`;
@@ -155,7 +159,7 @@
     }
     
     async function addBalance(uid){
-        let amt = prompt('Enter amount to add');
+        let amt = prompt('Enter amount to add to user balance');
         if(amt && !isNaN(amt)){
             let user = await db.collection('users').doc(uid).get();
             let newBalance = (user.data().balance || 0) + parseInt(amt);
@@ -165,8 +169,19 @@
         }
     }
     
+    async function viewUserBids(uid){
+        let bids = await db.collection('bids').where('userId','==',uid).get();
+        if(bids.size === 0){
+            alert('No bids from this user');
+            return;
+        }
+        let msg = '';
+        bids.forEach(d => msg += `${d.data().market}: ${d.data().value} (${d.data().points} pts)\n`);
+        alert(msg);
+    }
+    
     async function clearUserBids(uid){
-        if(confirm('Clear all bid history for this user?')){
+        if(confirm('Clear ALL bid history for this user?')){
             let bids = await db.collection('bids').where('userId','==',uid).get();
             for(let bid of bids.docs){
                 await bid.ref.delete();
@@ -175,67 +190,116 @@
         }
     }
     
+    // ============ DEPOSITS ============
     async function loadDeposits(){
         let reqs = await db.collection('transactions').where('type','==','credit').where('status','==','Pending').get();
-        let html = '<table><tr><th>User ID</th><th>Amount</th><th>Date</th><th>Action</th></tr>';
+        let html = '';
+        if(reqs.size === 0){
+            document.getElementById('depositsList').innerHTML = '<p>No pending deposit requests</p>';
+            return;
+        }
         for(let doc of reqs.docs){
             let d = doc.data();
-            html += `<tr>
-                <td>${d.userId.substring(0,15)}...</td>
-                <td>₹${d.amount}</td>
-                <td>${d.date?.toDate().toLocaleString() || 'Pending'}</td>
-                <td><button class="btn-success" onclick="approveDeposit('${doc.id}','${d.amount}','${d.userId}')">Approve</button></td>
-            </tr>`;
+            let user = await db.collection('users').doc(d.userId).get();
+            let userName = user.exists ? user.data().name : 'Unknown';
+            html += `<div class="request-item">
+                <div>
+                    <b>User:</b> ${userName}<br>
+                    <b>Amount:</b> ₹${d.amount}<br>
+                    <b>Date:</b> ${d.date?.toDate().toLocaleString() || 'Pending'}<br>
+                    <b>UPI ID:</b> win777@okhdfcbank
+                </div>
+                <div>
+                    <button class="btn-success" onclick="approveDeposit('${doc.id}','${d.amount}','${d.userId}')">✅ Approve</button>
+                    <button class="btn-danger" onclick="rejectDeposit('${doc.id}')">❌ Reject</button>
+                </div>
+            </div>`;
         }
-        html += '</table>';
         document.getElementById('depositsList').innerHTML = html;
-        if(reqs.size === 0) document.getElementById('depositsList').innerHTML = '<p>No pending deposits</p>';
     }
     
     async function approveDeposit(id, amount, userId){
-        let user = await db.collection('users').doc(userId).get();
-        let newBalance = (user.data().balance || 0) + amount;
-        await db.collection('users').doc(userId).update({balance: newBalance});
-        await db.collection('transactions').doc(id).update({status: 'Completed'});
-        alert(`✅ Deposit of ₹${amount} approved!`);
-        await loadDeposits();
-        await loadUsers();
+        if(confirm(`Approve deposit of ₹${amount} for this user?`)){
+            let user = await db.collection('users').doc(userId).get();
+            let newBalance = (user.data().balance || 0) + amount;
+            await db.collection('users').doc(userId).update({balance: newBalance});
+            await db.collection('transactions').doc(id).update({status: 'Completed'});
+            alert(`✅ Deposit of ₹${amount} approved!`);
+            await loadDeposits();
+            await loadUsers();
+        }
     }
     
+    async function rejectDeposit(id){
+        if(confirm('Reject this deposit request?')){
+            await db.collection('transactions').doc(id).update({status: 'Rejected'});
+            alert('Deposit rejected!');
+            await loadDeposits();
+        }
+    }
+    
+    // ============ WITHDRAWALS ============
     async function loadWithdrawals(){
         let reqs = await db.collection('withdrawRequests').where('status','==','Pending').get();
-        let html = 'ables\n  <thead>\n    <tr><th>User ID</th><th>Amount</th><th>Bank</th><th>Action</th></tr>\n  </thead>\n  <tbody>';
+        let html = '';
+        if(reqs.size === 0){
+            document.getElementById('withdrawalsList').innerHTML = '<p>No pending withdrawal requests</p>';
+            return;
+        }
         for(let doc of reqs.docs){
             let d = doc.data();
-            html += `<tr>
-                <td>${d.userId.substring(0,15)}...</td>
-                <td>₹${d.amount}</td>
-                <td>${d.bankDetails?.bankName || 'N/A'}</td>
-                <td><button class="btn-success" onclick="approveWithdraw('${doc.id}','${d.amount}','${d.userId}')">Approve</button></td>
-            </tr>`;
+            let user = await db.collection('users').doc(d.userId).get();
+            let userName = user.exists ? user.data().name : 'Unknown';
+            html += `<div class="request-item">
+                <div>
+                    <b>User:</b> ${userName}<br>
+                    <b>Amount:</b> ₹${d.amount}<br>
+                    <b>Bank:</b> ${d.bankDetails?.bankName || 'N/A'}<br>
+                    <b>Account:</b> ${d.bankDetails?.accNumber || 'N/A'}<br>
+                    <b>IFSC:</b> ${d.bankDetails?.ifsc || 'N/A'}
+                </div>
+                <div>
+                    <button class="btn-success" onclick="approveWithdraw('${doc.id}','${d.amount}','${d.userId}')">✅ Approve</button>
+                    <button class="btn-danger" onclick="rejectWithdraw('${doc.id}')">❌ Reject</button>
+                </div>
+            </div>`;
         }
-        html += '</tbody></table>';
         document.getElementById('withdrawalsList').innerHTML = html;
-        if(reqs.size === 0) document.getElementById('withdrawalsList').innerHTML = '<p>No pending withdrawals</p>';
     }
     
     async function approveWithdraw(id, amount, userId){
         let user = await db.collection('users').doc(userId).get();
         if(user.data().balance < amount){
-            alert('❌ Insufficient balance!');
+            alert('❌ Insufficient balance! Cannot approve.');
             return;
         }
-        let newBalance = user.data().balance - amount;
-        await db.collection('users').doc(userId).update({balance: newBalance});
-        await db.collection('withdrawRequests').doc(id).update({status: 'Completed'});
-        await db.collection('transactions').add({
-            userId: userId, type: 'debit', amount: amount, status: 'Completed', date: new Date()
-        });
-        alert(`✅ Withdrawal of ₹${amount} approved!`);
-        await loadWithdrawals();
-        await loadUsers();
+        if(confirm(`Approve withdrawal of ₹${amount} for this user?`)){
+            let newBalance = user.data().balance - amount;
+            await db.collection('users').doc(userId).update({balance: newBalance});
+            await db.collection('withdrawRequests').doc(id).update({status: 'Completed'});
+            await db.collection('transactions').add({
+                userId: userId,
+                type: 'debit',
+                amount: amount,
+                status: 'Completed',
+                date: new Date(),
+                description: 'Withdrawal Approved'
+            });
+            alert(`✅ Withdrawal of ₹${amount} approved!`);
+            await loadWithdrawals();
+            await loadUsers();
+        }
     }
     
+    async function rejectWithdraw(id){
+        if(confirm('Reject this withdrawal request?')){
+            await db.collection('withdrawRequests').doc(id).update({status: 'Rejected'});
+            alert('Withdrawal rejected!');
+            await loadWithdrawals();
+        }
+    }
+    
+    // ============ SETTINGS ============
     function changePassword(){
         let old = document.getElementById('oldPass').value;
         let newP = document.getElementById('newPass').value;
