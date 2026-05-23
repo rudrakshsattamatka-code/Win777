@@ -472,6 +472,7 @@
         window.location.href = `betting.html?market=${encodeURIComponent(name)}&status=${status}`;
     }
     
+    // FIXED: Loads balance as NUMBER, not string
     async function loadUserData() {
         const user = auth.currentUser;
         if (!user) return;
@@ -482,11 +483,8 @@
             if (doc.exists) {
                 userData = doc.data();
                 
-                // IMPORTANT: Ensure balance is treated as a NUMBER
-                let balance = userData?.balance;
-                if (typeof balance === 'string') {
-                    balance = parseInt(balance) || 0;
-                }
+                // IMPORTANT: Force balance to be a NUMBER
+                let balance = Number(userData?.balance);
                 if (isNaN(balance)) balance = 0;
                 
                 document.getElementById('userBalance').innerText = balance;
@@ -593,7 +591,7 @@
                     if (t.status === 'Rejected') statusColor = '#f44336';
                     html += `<tr>
                         <td>${t.type === 'credit' ? 'Deposit' : 'Withdraw'}</td>
-                        <td>₹${t.amount}</td>
+                        <td>₹${Number(t.amount) || 0}</td>
                         <td style="color: ${statusColor}">${t.status || 'Pending'}</td>
                         <td>${t.date?.toDate ? t.date.toDate().toLocaleString() : 'Pending'}</td>
                     </tr>`;
