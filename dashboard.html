@@ -239,50 +239,48 @@
                     document.getElementById('accNumber').value = userData.bankDetails.accNumber || '';
                     document.getElementById('ifsc').value = userData.bankDetails.ifsc || '';
                 }
-            } else {
-                console.log('User document not found, creating...');
-                await db.collection('users').doc(user.uid).set({
-                    uid: user.uid,
-                    phone: user.phoneNumber,
-                    name: 'User',
-                    balance: 0,
-                    createdAt: new Date()
-                });
-                await loadUserData();
             }
         } catch (error) {
             console.error('Error loading user:', error);
         }
     }
     
-    // ============ BID HISTORY ============
+    // ============ BID HISTORY (NO INDEX REQUIRED) ============
     async function loadBidHistory() {
         if (!currentUser) {
-            console.log('No current user');
             document.getElementById('bidHistoryList').innerHTML = '<div class="no-data">Please login again</div>';
             return;
         }
         
         try {
-            console.log('Loading bids for user:', currentUser.uid);
+            // Get all bids for this user (without ordering to avoid index)
             const bids = await db.collection('bids')
                 .where('userId', '==', currentUser.uid)
-                .orderBy('createdAt', 'desc')
                 .get();
             
-            console.log('Bids found:', bids.size);
+            // Convert to array and sort manually
+            let bidsArray = [];
+            bids.forEach(doc => {
+                bidsArray.push({ id: doc.id, ...doc.data() });
+            });
+            
+            // Sort by createdAt (newest first)
+            bidsArray.sort((a, b) => {
+                let dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
+                let dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
+                return dateB - dateA;
+            });
             
             let html = '';
-            if (bids.empty) {
+            if (bidsArray.length === 0) {
                 html = '<div class="no-data">No bids placed yet</div>';
             } else {
-                html = `<table>
+                html = `ables
                     <thead>
                         <tr><th>Market</th><th>Type</th><th>Value</th><th>Points</th><th>Status</th></tr>
                     </thead>
                     <tbody>`;
-                bids.forEach(doc => {
-                    const b = doc.data();
+                for (let b of bidsArray) {
                     html += `<tr>
                         <td>${b.market || '-'}</td>
                         <td>${b.gameType || '-'}</td>
@@ -290,17 +288,17 @@
                         <td>${b.points || '-'}</td>
                         <td>${b.status || 'Pending'}</td>
                     </tr>`;
-                });
+                }
                 html += `</tbody></table>`;
             }
             document.getElementById('bidHistoryList').innerHTML = html;
         } catch (error) {
             console.error('Error loading bids:', error);
-            document.getElementById('bidHistoryList').innerHTML = '<div class="no-data">Error loading bid history: ' + error.message + '</div>';
+            document.getElementById('bidHistoryList').innerHTML = '<div class="no-data">Error loading bid history. Please create index or contact admin.</div>';
         }
     }
     
-    // ============ TRANSACTION HISTORY ============
+    // ============ TRANSACTION HISTORY (NO INDEX REQUIRED) ============
     async function loadTransactionHistory() {
         if (!currentUser) {
             document.getElementById('transactionsList').innerHTML = '<div class="no-data">Please login again</div>';
@@ -308,25 +306,34 @@
         }
         
         try {
-            console.log('Loading transactions for user:', currentUser.uid);
+            // Get all transactions for this user (without ordering to avoid index)
             const transactions = await db.collection('transactions')
                 .where('userId', '==', currentUser.uid)
-                .orderBy('date', 'desc')
                 .get();
             
-            console.log('Transactions found:', transactions.size);
+            // Convert to array and sort manually
+            let transArray = [];
+            transactions.forEach(doc => {
+                transArray.push({ id: doc.id, ...doc.data() });
+            });
+            
+            // Sort by date (newest first)
+            transArray.sort((a, b) => {
+                let dateA = a.date?.toDate ? a.date.toDate() : new Date(0);
+                let dateB = b.date?.toDate ? b.date.toDate() : new Date(0);
+                return dateB - dateA;
+            });
             
             let html = '';
-            if (transactions.empty) {
+            if (transArray.length === 0) {
                 html = '<div class="no-data">No transactions yet</div>';
             } else {
-                html = `<table>
+                html = `ables
                     <thead>
                         <tr><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr>
                     </thead>
                     <tbody>`;
-                transactions.forEach(doc => {
-                    const t = doc.data();
+                for (let t of transArray) {
                     let statusColor = '#ff9800';
                     if (t.status === 'Completed') statusColor = '#4caf50';
                     if (t.status === 'Rejected') statusColor = '#f44336';
@@ -336,13 +343,13 @@
                         <td style="color: ${statusColor}">${t.status || 'Pending'}</td>
                         <td>${t.date?.toDate ? t.date.toDate().toLocaleString() : t.date || 'Pending'}</td>
                     </tr>`;
-                });
+                }
                 html += `</tbody></table>`;
             }
             document.getElementById('transactionsList').innerHTML = html;
         } catch (error) {
             console.error('Error loading transactions:', error);
-            document.getElementById('transactionsList').innerHTML = '<div class="no-data">Error loading transaction history: ' + error.message + '</div>';
+            document.getElementById('transactionsList').innerHTML = '<div class="no-data">Error loading transaction history</div>';
         }
     }
     
@@ -505,11 +512,9 @@
         document.getElementById(page + 'Page').classList.remove('hidden');
         
         if (page === 'history') {
-            console.log('Loading bid history...');
             loadBidHistory();
         }
         if (page === 'transactions') {
-            console.log('Loading transaction history...');
             loadTransactionHistory();
         }
         
@@ -537,14 +542,10 @@
         if (!user) {
             window.location.href = 'index.html';
         } else {
-            console.log('User logged in:', user.uid);
             await loadUserData();
             await loadMarkets();
-            
-            // Test bid history loading
             await loadBidHistory();
             await loadTransactionHistory();
-            
             setInterval(loadMarkets, 30000);
         }
     });
