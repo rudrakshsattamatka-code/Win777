@@ -13,7 +13,7 @@
         .login-box{background:#1a1a2e;padding:30px;border-radius:20px;width:100%;max-width:400px;border:1px solid #0096ff}
         .logo{text-align:center;margin-bottom:20px}
         .logo img{width:80px}
-        h2{color:#0096ff;text-align:center;margin-bottom:20px;font-size:20px}
+        h2{color:#0096ff;text-align:center;margin-bottom:20px}
         input{width:100%;padding:12px;margin:10px 0;background:#0a0a0f;border:1px solid #0096ff;border-radius:10px;color:white}
         button{width:100%;padding:12px;background:#0096ff;border:none;border-radius:10px;color:white;font-weight:bold;cursor:pointer}
         .error{color:#ff6b6b;font-size:12px;margin-top:10px;text-align:center}
@@ -23,7 +23,7 @@
     </style>
 </head>
 <body>
-<div class="login-box" id="app">
+<div class="login-box">
     <div class="logo"><img src="https://i.imgur.com/lPQ7wQD.png" alt="logo"></div>
     <div id="phoneScreen">
         <h2>Welcome Back!</h2>
@@ -83,7 +83,6 @@
         document.getElementById(screen).classList.remove('hidden');
     }
     
-    // Send OTP
     document.getElementById('sendOtpBtn').onclick = async () => {
         let phone = document.getElementById('phone').value;
         if(phone.length < 10){
@@ -125,7 +124,6 @@
         }, 1000);
     }
     
-    // Verify OTP
     document.getElementById('verifyBtn').onclick = async () => {
         let code = '';
         for(let i=1;i<=6;i++) code += document.getElementById(`otp${i}`).value;
@@ -147,7 +145,6 @@
         }
     };
     
-    // Resend OTP
     document.getElementById('resendBtn').onclick = async () => {
         let recaptcha = new firebase.auth.RecaptchaVerifier('app', {size:'invisible'});
         confirmation = await auth.signInWithPhoneNumber(currentPhone, recaptcha);
@@ -155,7 +152,6 @@
         document.getElementById('otpError').innerText = 'OTP resent!';
     };
     
-    // Register PIN
     document.getElementById('registerBtn').onclick = async () => {
         let pin = document.getElementById('pin').value;
         let confirm = document.getElementById('confirmPin').value;
@@ -180,7 +176,6 @@
         window.location.href = 'dashboard.html';
     };
     
-    // PIN Login
     document.getElementById('pinLoginBtn').onclick = async () => {
         let pin = document.getElementById('loginPin').value;
         if(pin.length !== 4){
@@ -218,6 +213,5 @@
         }
     });
 </script>
-<div id="app"></div>
 </body>
 </html>
