@@ -91,39 +91,21 @@
             font-weight: bold;
             margin-top: 5px;
         }
-        .amount-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+        .amount-input {
             margin-bottom: 25px;
         }
-        .amount-btn {
+        .amount-input input {
+            width: 100%;
+            padding: 16px;
             background: #1a1a2e;
-            border: 1px solid #0096ff;
-            border-radius: 16px;
-            padding: 14px;
-            text-align: center;
+            border: 2px solid #0096ff;
+            border-radius: 20px;
             color: white;
             font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .amount-btn.active {
-            background: #0096ff;
-            color: #1a1a2e;
-        }
-        .custom-amount {
-            margin-bottom: 25px;
-        }
-        .custom-amount input {
-            width: 100%;
-            padding: 14px;
-            background: #1a1a2e;
-            border: 1px solid #0096ff;
-            border-radius: 16px;
-            color: white;
-            font-size: 16px;
             text-align: center;
+        }
+        .amount-input input::placeholder {
+            color: #555;
         }
         .pay-btn {
             width: 100%;
@@ -139,6 +121,10 @@
         }
         .pay-btn:active {
             transform: scale(0.98);
+        }
+        .pay-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
         .timer-box {
             background: #1a1a2e;
@@ -190,15 +176,24 @@
             text-align: center;
             margin-top: 10px;
         }
-        .amount-display {
-            text-align: center;
-            font-size: 28px;
-            font-weight: bold;
-            color: #0096ff;
-            margin-bottom: 20px;
-            padding: 10px;
+        .upi-id-box {
             background: #1a1a2e;
             border-radius: 16px;
+            padding: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px solid #0096ff;
+        }
+        .upi-id-box p {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        .upi-id {
+            color: #00ffaa;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 1px;
         }
     </style>
 </head>
@@ -225,33 +220,25 @@
         <div class="amount">₹<span id="balanceAmount">0</span></div>
     </div>
 
-    <div class="amount-grid">
-        <div class="amount-btn" onclick="selectAmount(100)">₹100</div>
-        <div class="amount-btn" onclick="selectAmount(500)">₹500</div>
-        <div class="amount-btn" onclick="selectAmount(1000)">₹1000</div>
-        <div class="amount-btn" onclick="selectAmount(2000)">₹2000</div>
-        <div class="amount-btn" onclick="selectAmount(5000)">₹5000</div>
-        <div class="amount-btn" onclick="selectAmount(7000)">₹7000</div>
+    <div class="amount-input">
+        <input type="number" id="depositAmount" placeholder="Enter amount (Min ₹100)" value="100">
     </div>
 
-    <div class="custom-amount">
-        <input type="number" id="customAmount" placeholder="Enter custom amount (Min ₹100)">
-    </div>
-
-    <div class="amount-display" id="amountDisplay">
-        ₹100
+    <div class="upi-id-box">
+        <p>📱 Send payment to this UPI ID</p>
+        <div class="upi-id">ganeshpatil99@slc</div>
     </div>
 
     <button class="pay-btn" id="payBtn">💳 PAY NOW</button>
 
     <div class="note-text">
-        ⚡ Minimum deposit ₹100 | Maximum ₹50,000<br>
-        📱 UPI ID: <strong>ganeshpatil99@slc</strong>
+        ⚡ Minimum deposit ₹100 | Maximum ₹50,000
     </div>
 
     <div id="timerBox" class="timer-box hidden">
         <div class="timer-text" id="countdownTimer">05:00</div>
         <div class="timer-label">⏳ Waiting for admin approval...</div>
+        <div class="timer-label" style="font-size: 11px; margin-top: 8px;">Your payment is being verified</div>
     </div>
     <div id="message" class="message hidden"></div>
 </div>
@@ -272,7 +259,6 @@
     
     let currentUser = null;
     let userData = null;
-    let selectedAmount = 100;
     let currentTransactionId = null;
     let timerInterval = null;
     const UPI_ID = "ganeshpatil99@slc";
@@ -291,14 +277,6 @@
             document.getElementById('userName').innerHTML = userData?.name || 'User';
             document.getElementById('userPhone').innerHTML = userData?.phone || '';
         }
-    }
-    
-    function selectAmount(amount) {
-        selectedAmount = amount;
-        document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-        document.getElementById('customAmount').value = '';
-        document.getElementById('amountDisplay').innerHTML = `₹${amount}`;
     }
     
     function showMessage(msg, type) {
@@ -355,24 +333,20 @@
         }
     }
     
-    // FIXED: UPI intent sends ONLY the selected amount, NOT balance + amount
+    // Direct Payment - Opens UPI app with amount
     document.getElementById('payBtn').onclick = async () => {
-        let amount = selectedAmount;
-        const customAmount = parseInt(document.getElementById('customAmount').value);
-        if (customAmount >= 100) amount = customAmount;
+        const amount = parseInt(document.getElementById('depositAmount').value);
         
-        if (amount < 100) {
-            showMessage('Minimum deposit is ₹100', 'error');
+        if (isNaN(amount) || amount < 100) {
+            showMessage('Minimum deposit amount is ₹100', 'error');
             return;
         }
         if (amount > 50000) {
-            showMessage('Maximum deposit is ₹50000', 'error');
+            showMessage('Maximum deposit amount is ₹50000', 'error');
             return;
         }
         
-        // This is the EXACT amount to send to UPI - NOT adding any balance
         const exactAmount = amount;
-        
         const btn = document.getElementById('payBtn');
         btn.disabled = true;
         btn.innerText = 'Processing...';
@@ -381,39 +355,33 @@
         await createDepositRequest(exactAmount);
         showMessage(`✅ Request created! Pay ₹${exactAmount} to ${UPI_ID}`, 'success');
         
-        // FIXED: UPI intent with ONLY the selected amount
+        // Standard UPI intent - opens installed UPI app directly
         const upiIntent = `upi://pay?pa=${UPI_ID}&pn=WIN777&am=${exactAmount}&cu=INR`;
         
+        // Open UPI app
         setTimeout(() => { 
             window.location.href = upiIntent; 
         }, 1500);
         
+        // Ask for confirmation after returning from UPI app
         setTimeout(() => {
             btn.disabled = false;
             btn.innerText = 'PAY NOW';
-            if (confirm(`Did you pay ₹${exactAmount} to ${UPI_ID}?`)) {
+            if (confirm(`Did you successfully pay ₹${exactAmount} to ${UPI_ID}?`)) {
                 showMessage(`✅ Payment confirmed! Waiting for admin approval.`, 'success');
                 startTimerAndWait();
             } else {
-                showMessage(`⏳ Request pending. Admin will approve manually.`, 'pending');
+                showMessage(`⏳ Payment not confirmed. Request pending for admin approval.`, 'pending');
                 startTimerAndWait();
             }
         }, 10000);
     };
     
-    document.getElementById('customAmount').addEventListener('input', function() {
-        const custom = parseInt(this.value);
-        if (custom >= 100 && custom <= 50000) {
-            document.getElementById('amountDisplay').innerHTML = `₹${custom}`;
-            document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
-        }
-    });
-    
     function goBack() { window.location.href = 'dashboard.html'; }
     
     auth.onAuthStateChanged(async (user) => {
         if (!user) window.location.href = 'index.html';
-        else { await loadUserData(); document.querySelector('.amount-btn').classList.add('active'); }
+        else { await loadUserData(); }
     });
 </script>
 </body>
