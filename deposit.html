@@ -137,9 +137,6 @@
             cursor: pointer;
             margin-bottom: 15px;
         }
-        .pay-btn:active {
-            transform: scale(0.98);
-        }
         .timer-box {
             background: #1a1a2e;
             border-radius: 16px;
@@ -284,9 +281,8 @@
         const doc = await db.collection('users').doc(user.uid).get();
         if (doc.exists) {
             userData = doc.data();
-            let balance = userData?.balance || 0;
-            // Ensure balance is a number
-            balance = Number(balance);
+            // Convert balance to number
+            let balance = Number(userData?.balance);
             if (isNaN(balance)) balance = 0;
             document.getElementById('userBalance').innerText = balance;
             document.getElementById('balanceAmount').innerText = balance;
@@ -315,11 +311,11 @@
         const transactionRef = await db.collection('transactions').add({
             userId: currentUser.uid,
             type: 'credit',
-            amount: amount,
+            amount: Number(amount),
             status: 'Pending',
             date: new Date(),
             upiId: UPI_ID,
-            requestedAmount: amount,
+            requestedAmount: Number(amount),
             description: `Deposit Request - ₹${amount}`
         });
         currentTransactionId = transactionRef.id;
@@ -345,7 +341,7 @@
                 if (doc.exists && doc.data().status === 'Completed') {
                     clearInterval(timerInterval);
                     timerBox.classList.add('hidden');
-                    const approvedAmount = doc.data().amount;
+                    const approvedAmount = Number(doc.data().amount);
                     showMessage(`✅ ₹${approvedAmount} added successfully!`, 'success');
                     loadUserData();
                     setTimeout(() => window.location.href = 'dashboard.html', 2000);
