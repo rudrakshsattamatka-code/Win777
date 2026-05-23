@@ -107,6 +107,7 @@
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
+            transition: 0.2s;
         }
         .amount-btn.active {
             background: #0096ff;
@@ -125,9 +126,6 @@
             font-size: 16px;
             text-align: center;
         }
-        .custom-amount input::placeholder {
-            color: #555;
-        }
         .pay-btn {
             width: 100%;
             padding: 18px;
@@ -139,9 +137,14 @@
             font-weight: bold;
             cursor: pointer;
             margin-bottom: 15px;
+            transition: 0.2s;
         }
         .pay-btn:active {
             transform: scale(0.98);
+        }
+        .pay-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
         .timer-box {
             background: #1a1a2e;
@@ -195,10 +198,21 @@
         }
         .amount-display {
             text-align: center;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             color: #0096ff;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #1a1a2e;
+            border-radius: 16px;
+        }
+        .success-animation {
+            animation: pulse 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
@@ -239,19 +253,20 @@
     </div>
 
     <div class="amount-display" id="amountDisplay">
-        Amount: ₹100
+        ₹100
     </div>
 
     <button class="pay-btn" id="payBtn">💳 PAY NOW</button>
 
     <div class="note-text">
-        ⚡ Minimum deposit ₹100 | Maximum ₹50,000
+        ⚡ Minimum deposit ₹100 | Maximum ₹50,000<br>
+        📱 UPI ID: <strong>ganeshpatil99@slc</strong>
     </div>
 
     <div id="timerBox" class="timer-box hidden">
         <div class="timer-text" id="countdownTimer">05:00</div>
         <div class="timer-label">⏳ Waiting for admin approval...</div>
-        <div class="timer-label" style="font-size: 11px; margin-top: 8px;">Your payment is being verified</div>
+        <div class="timer-label" style="font-size: 11px; margin-top: 8px;">Please wait while we verify your payment</div>
     </div>
     <div id="message" class="message hidden"></div>
 </div>
@@ -275,6 +290,7 @@
     let selectedAmount = 100;
     let currentTransactionId = null;
     let timerInterval = null;
+    let paymentConfirmed = false;
     const UPI_ID = "ganeshpatil99@slc";
     
     async function loadUserData() {
@@ -296,7 +312,9 @@
         document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
         event.target.classList.add('active');
         document.getElementById('customAmount').value = '';
-        document.getElementById('amountDisplay').innerHTML = `Amount: ₹${amount}`;
+        document.getElementById('amountDisplay').innerHTML = `₹${amount}`;
+        document.getElementById('amountDisplay').classList.add('success-animation');
+        setTimeout(() => document.getElementById('amountDisplay').classList.remove('success-animation'), 500);
     }
     
     function showMessage(msg, type) {
@@ -316,7 +334,8 @@
             date: new Date(),
             upiId: UPI_ID,
             requestedAmount: amount,
-            description: 'Deposit Request'
+            description: `Deposit Request - ₹${amount}`,
+            createdAt: new Date()
         });
         currentTransactionId = transactionRef.id;
         return transactionRef.id;
@@ -333,26 +352,36 @@
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
             timerDisplay.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            if (timeLeft <= 0) { clearInterval(timerInterval); timerBox.classList.add('hidden'); }
+            if (timeLeft <= 0) { 
+                clearInterval(timerInterval); 
+                timerBox.classList.add('hidden');
+                if (!paymentConfirmed) {
+                    showMessage('⏰ Time expired! Admin will still process your request.', 'pending');
+                }
+            }
         }, 1000);
         
         if (currentTransactionId) {
-            db.collection('transactions').doc(currentTransactionId).onSnapshot((doc) => {
-                if (doc.exists && doc.data().status === 'Completed') {
-                    clearInterval(timerInterval);
-                    timerBox.classList.add('hidden');
-                    const approvedAmount = doc.data().amount;
-                    if (approvedAmount === requestedAmount) {
-                        showMessage(`✅ ₹${approvedAmount} added successfully!`, 'success');
-                    } else {
-                        showMessage(`⚠️ Amount mismatch! Requested: ₹${requestedAmount}, Approved: ₹${approvedAmount}`, 'error');
+            const unsubscribe = db.collection('transactions').doc(currentTransactionId).onSnapshot((doc) => {
+                if (doc.exists) {
+                    const status = doc.data().status;
+                    if (status === 'Completed') {
+                        paymentConfirmed = true;
+                        clearInterval(timerInterval);
+                        timerBox.classList.add('hidden');
+                        const approvedAmount = doc.data().amount;
+                        showMessage(`✅ ₹${approvedAmount} added successfully to your wallet!`, 'success');
+                        loadUserData();
+                        setTimeout(() => {
+                            window.location.href = 'dashboard.html';
+                        }, 2000);
+                        unsubscribe();
+                    } else if (status === 'Rejected') {
+                        clearInterval(timerInterval);
+                        timerBox.classList.add('hidden');
+                        showMessage('❌ Deposit request was rejected. Please contact support.', 'error');
+                        unsubscribe();
                     }
-                    loadUserData();
-                    setTimeout(() => window.location.href = 'dashboard.html', 2000);
-                } else if (doc.exists && doc.data().status === 'Rejected') {
-                    clearInterval(timerInterval);
-                    timerBox.classList.add('hidden');
-                    showMessage('❌ Deposit request rejected by admin.', 'error');
                 }
             });
         }
@@ -373,49 +402,50 @@
             return;
         }
         
-        // Store the exact amount selected by user
         const exactAmount = amount;
+        const btn = document.getElementById('payBtn');
+        btn.disabled = true;
+        btn.innerText = '⏳ Processing...';
         
-        // Show amount being paid
-        showMessage(`Please pay ₹${exactAmount} in UPI app`, 'pending');
+        // Create deposit request first
+        showMessage(`Creating deposit request for ₹${exactAmount}...`, 'pending');
+        await createDepositRequest(exactAmount);
+        showMessage(`✅ Deposit request of ₹${exactAmount} created!`, 'success');
         
-        // Create UPI intent URL with exact amount - Multiple formats for compatibility
-        const encodedUpiId = encodeURIComponent(UPI_ID);
-        const encodedName = encodeURIComponent("WIN777");
+        // Open UPI app
+        const upiIntent = `upi://pay?pa=${UPI_ID}&pn=WIN777&am=${exactAmount}&cu=INR`;
         
-        // Standard UPI intent
-        const upiIntent = `upi://pay?pa=${encodedUpiId}&pn=${encodedName}&am=${exactAmount}&cu=INR&m=0`;
-        
-        // Also try to open with specific app intents
         setTimeout(() => {
-            // Try standard UPI first
             window.location.href = upiIntent;
-        }, 100);
+        }, 1500);
         
         // Ask for confirmation after returning from UPI app
         setTimeout(() => {
-            if (confirm(`Did you successfully pay ₹${exactAmount} to ${UPI_ID}?`)) {
-                processPayment(exactAmount);
+            btn.disabled = false;
+            btn.innerText = '💳 PAY NOW';
+            if (confirm(`✅ Did you successfully pay ₹${exactAmount} to ${UPI_ID}?`)) {
+                showMessage(`✅ Payment confirmed! Waiting for admin approval.`, 'success');
+                startTimerAndWait(exactAmount);
             } else {
-                showMessage('Payment not confirmed. You can try again.', 'pending');
+                showMessage('⏳ Payment not confirmed. Your request is pending for admin approval.', 'pending');
+                startTimerAndWait(exactAmount);
             }
         }, 10000);
     };
     
-    async function processPayment(amount) {
-        showMessage(`Creating deposit request for ₹${amount}...`, 'pending');
-        await createDepositRequest(amount);
-        showMessage(`✅ Deposit request of ₹${amount} created! Waiting for admin approval.`, 'success');
-        startTimerAndWait(amount);
-    }
-    
     // Update amount display when custom amount changes
     document.getElementById('customAmount').addEventListener('input', function() {
         const custom = parseInt(this.value);
-        if (custom >= 100) {
-            document.getElementById('amountDisplay').innerHTML = `Amount: ₹${custom}`;
+        if (custom >= 100 && custom <= 50000) {
+            document.getElementById('amountDisplay').innerHTML = `₹${custom}`;
+            document.getElementById('amountDisplay').classList.add('success-animation');
+            setTimeout(() => document.getElementById('amountDisplay').classList.remove('success-animation'), 500);
             // Remove active class from preset buttons
             document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
+        } else if (custom > 50000) {
+            showMessage('Maximum deposit is ₹50,000', 'error');
+            this.value = 50000;
+            document.getElementById('amountDisplay').innerHTML = `₹50000`;
         }
     });
     
@@ -423,7 +453,7 @@
     
     auth.onAuthStateChanged(async (user) => {
         if (!user) window.location.href = 'index.html';
-        else { await loadUserData(); document.querySelector('.amount-btn').classList.add('active'); document.getElementById('amountDisplay').innerHTML = 'Amount: ₹100'; }
+        else { await loadUserData(); document.querySelector('.amount-btn').classList.add('active'); document.getElementById('amountDisplay').innerHTML = '₹100'; }
     });
 </script>
 </body>
