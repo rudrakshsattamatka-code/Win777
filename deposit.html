@@ -193,6 +193,13 @@
             text-align: center;
             margin-top: 10px;
         }
+        .amount-display {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #0096ff;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -229,6 +236,10 @@
 
     <div class="custom-amount">
         <input type="number" id="customAmount" placeholder="Enter custom amount (Min ₹100)">
+    </div>
+
+    <div class="amount-display" id="amountDisplay">
+        Amount: ₹100
     </div>
 
     <button class="pay-btn" id="payBtn">💳 PAY NOW</button>
@@ -285,6 +296,7 @@
         document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
         event.target.classList.add('active');
         document.getElementById('customAmount').value = '';
+        document.getElementById('amountDisplay').innerHTML = `Amount: ₹${amount}`;
     }
     
     function showMessage(msg, type) {
@@ -303,7 +315,7 @@
             status: 'Pending',
             date: new Date(),
             upiId: UPI_ID,
-            requestedAmount: amount,  // Store exact requested amount
+            requestedAmount: amount,
             description: 'Deposit Request'
         });
         currentTransactionId = transactionRef.id;
@@ -329,7 +341,6 @@
                 if (doc.exists && doc.data().status === 'Completed') {
                     clearInterval(timerInterval);
                     timerBox.classList.add('hidden');
-                    // Verify the approved amount matches requested amount
                     const approvedAmount = doc.data().amount;
                     if (approvedAmount === requestedAmount) {
                         showMessage(`✅ ₹${approvedAmount} added successfully!`, 'success');
@@ -347,7 +358,7 @@
         }
     }
     
-    // Direct Payment - Opens UPI app automatically
+    // Direct Payment - Opens UPI app automatically with exact amount
     document.getElementById('payBtn').onclick = async () => {
         let amount = selectedAmount;
         const customAmount = parseInt(document.getElementById('customAmount').value);
@@ -365,23 +376,30 @@
         // Store the exact amount selected by user
         const exactAmount = amount;
         
-        // Create UPI intent URL with exact amount
-        const upiIntent = `upi://pay?pa=${UPI_ID}&pn=WIN777&am=${exactAmount}&cu=INR`;
-        
-        // Show message
+        // Show amount being paid
         showMessage(`Please pay ₹${exactAmount} in UPI app`, 'pending');
         
-        // Open UPI app
-        window.location.href = upiIntent;
+        // Create UPI intent URL with exact amount - Multiple formats for compatibility
+        const encodedUpiId = encodeURIComponent(UPI_ID);
+        const encodedName = encodeURIComponent("WIN777");
+        
+        // Standard UPI intent
+        const upiIntent = `upi://pay?pa=${encodedUpiId}&pn=${encodedName}&am=${exactAmount}&cu=INR&m=0`;
+        
+        // Also try to open with specific app intents
+        setTimeout(() => {
+            // Try standard UPI first
+            window.location.href = upiIntent;
+        }, 100);
         
         // Ask for confirmation after returning from UPI app
         setTimeout(() => {
-            if (confirm(`Did you successfully pay ₹${exactAmount}?`)) {
+            if (confirm(`Did you successfully pay ₹${exactAmount} to ${UPI_ID}?`)) {
                 processPayment(exactAmount);
             } else {
                 showMessage('Payment not confirmed. You can try again.', 'pending');
             }
-        }, 8000);
+        }, 10000);
     };
     
     async function processPayment(amount) {
@@ -391,11 +409,21 @@
         startTimerAndWait(amount);
     }
     
+    // Update amount display when custom amount changes
+    document.getElementById('customAmount').addEventListener('input', function() {
+        const custom = parseInt(this.value);
+        if (custom >= 100) {
+            document.getElementById('amountDisplay').innerHTML = `Amount: ₹${custom}`;
+            // Remove active class from preset buttons
+            document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
+        }
+    });
+    
     function goBack() { window.location.href = 'dashboard.html'; }
     
     auth.onAuthStateChanged(async (user) => {
         if (!user) window.location.href = 'index.html';
-        else { await loadUserData(); document.querySelector('.amount-btn').classList.add('active'); }
+        else { await loadUserData(); document.querySelector('.amount-btn').classList.add('active'); document.getElementById('amountDisplay').innerHTML = 'Amount: ₹100'; }
     });
 </script>
 </body>
