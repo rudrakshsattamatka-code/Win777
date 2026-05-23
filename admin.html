@@ -103,7 +103,6 @@
         } else { document.getElementById('loginError').innerText = 'Wrong password'; }
     }
     
-    // MARKETS
     async function loadMarkets() {
         const snap = await db.collection('markets').get();
         let html = '';
@@ -147,7 +146,7 @@
         if (confirm('Delete?')) { await db.collection('markets').doc(id).delete(); loadMarkets(); }
     }
     
-    // USERS - Fix: Convert balance to number
+    // USERS - Fix balance to number
     async function loadUsers() {
         const users = await db.collection('users').get();
         let html = '';
@@ -188,7 +187,7 @@
         }
     }
     
-    // DEPOSITS - FIXED: Converts everything to NUMBER
+    // DEPOSITS - FIXED: Adds exact NUMBER amount
     async function loadDeposits() {
         const reqs = await db.collection('transactions').where('type', '==', 'credit').where('status', '==', 'Pending').get();
         let html = '';
@@ -215,7 +214,7 @@
         document.getElementById('depositsList').innerHTML = html || '<p>No pending deposits</p>';
     }
     
-    // APPROVE DEPOSIT - Adds exact NUMBER amount (not string concatenation)
+    // APPROVE DEPOSIT - Adds exact NUMBER amount (mathematical addition)
     async function approveDeposit(id, exactAmount, userId) {
         if (confirm(`Approve deposit of ₹${exactAmount} for this user?`)) {
             const user = await db.collection('users').doc(userId).get();
