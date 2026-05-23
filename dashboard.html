@@ -40,18 +40,27 @@
         .card-title{color:#0096ff;margin-bottom:12px;font-weight:bold;font-size:16px;border-left:3px solid #0096ff;padding-left:10px}
         input,select{width:100%;padding:10px;margin:5px 0;background:#0a0a0f;border:1px solid #0096ff;border-radius:8px;color:white}
         button{background:#0096ff;padding:10px;border:none;border-radius:8px;color:white;font-weight:bold;cursor:pointer}
+        .bid-card{background:#1a1a2e;border-radius:20px;padding:16px;margin-bottom:15px;border:1px solid #0096ff;position:relative;overflow:hidden}
+        .bid-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:linear-gradient(180deg,#0096ff,#00ffaa)}
+        .bid-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+        .bid-market{font-size:16px;font-weight:bold;color:#0096ff}
+        .bid-type{font-size:12px;color:#ff9800;background:rgba(255,152,0,0.1);padding:4px 10px;border-radius:20px}
+        .bid-id{font-size:11px;color:#666;font-family:monospace;margin-bottom:12px;word-break:break-all}
+        .bid-details{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:10px}
+        .bid-digit{font-size:32px;font-weight:bold;color:#00ffaa}
+        .bid-points{font-size:18px;font-weight:bold;color:white}
+        .bid-info{display:flex;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+        .bid-date{font-size:11px;color:#888}
+        .bid-status{margin-top:12px;padding:8px;border-radius:12px;text-align:center;font-size:13px;font-weight:bold}
+        .status-won{background:#4caf5020;color:#4caf50;border:1px solid #4caf50}
+        .status-lost{background:#f4433620;color:#f44336;border:1px solid #f44336}
+        .status-pending{background:#ff980020;color:#ff9800;border:1px solid #ff9800}
+        .no-data{color:#888;text-align:center;padding:30px}
         .data-table{width:100%;overflow-x:auto}
         table{width:100%;border-collapse:collapse}
         th,td{padding:8px;text-align:left;border-bottom:1px solid #0096ff;color:#ddd;font-size:12px}
         th{color:#0096ff}
-        .no-data{color:#888;text-align:center;padding:20px}
         .hidden{display:none}
-        .amount-options{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
-        .amount-chip{background:#0a0a0f;border:1px solid #0096ff;padding:8px 15px;border-radius:30px;cursor:pointer;color:white}
-        .amount-chip.active{background:#0096ff;color:white}
-        .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:2000;justify-content:center;align-items:center}
-        .modal-content{background:#1a1a2e;border-radius:20px;padding:20px;width:90%;max-width:350px;border:1px solid #0096ff}
-        .modal-content h3{color:#0096ff;margin-bottom:15px}
     </style>
 </head>
 <body>
@@ -68,6 +77,7 @@
     <div class="sidebar-item" onclick="showPage('bank')">🏦 Bank Details</div>
     <div class="sidebar-item" onclick="showPage('history')">📋 Bid History</div>
     <div class="sidebar-item" onclick="showPage('transactions')">📊 Transactions</div>
+    <div class="sidebar-item" onclick="window.location.href='funds.html'">🏦 Funds</div>
     <div class="sidebar-item" id="logoutBtn">🚪 Logout</div>
 </div>
 <div class="overlay" id="overlay"></div>
@@ -76,75 +86,42 @@
     <div id="marketsPage"></div>
     
     <div id="profilePage" class="hidden">
-        <div class="card">
-            <div class="card-title">My Profile</div>
-            <p id="profileName" style="color:white; margin:5px 0"></p>
-            <p id="profilePhone" style="color:#aaa; margin:5px 0"></p>
-            <p id="profileBalance" style="color:#0096ff; font-size:18px; font-weight:bold; margin:5px 0"></p>
+        <div class="card"><div class="card-title">My Profile</div>
+        <p id="profileName" style="color:white; margin:5px 0"></p>
+        <p id="profilePhone" style="color:#aaa; margin:5px 0"></p>
+        <p id="profileBalance" style="color:#0096ff; font-size:18px; font-weight:bold; margin:5px 0"></p>
         </div>
     </div>
     
     <div id="bankPage" class="hidden">
-        <div class="card">
-            <div class="card-title">Bank Details</div>
-            <input type="text" id="accName" placeholder="Account Holder Name">
-            <input type="text" id="bankName" placeholder="Bank Name">
-            <input type="text" id="accNumber" placeholder="Account Number">
-            <input type="text" id="ifsc" placeholder="IFSC Code">
-            <button id="saveBankBtn">Save Bank Details</button>
-            <div id="bankMsg" style="color:#4caf50; margin-top:8px;"></div>
+        <div class="card"><div class="card-title">Bank Details</div>
+        <input type="text" id="accName" placeholder="Account Holder Name">
+        <input type="text" id="bankName" placeholder="Bank Name">
+        <input type="text" id="accNumber" placeholder="Account Number">
+        <input type="text" id="ifsc" placeholder="IFSC Code">
+        <button id="saveBankBtn">Save Bank Details</button>
+        <div id="bankMsg" style="color:#4caf50; margin-top:8px;"></div>
         </div>
     </div>
     
     <div id="historyPage" class="hidden">
-        <div class="card">
-            <div class="card-title">📋 Bid History</div>
-            <div id="bidHistoryList" class="data-table"></div>
+        <div class="card"><div class="card-title">📋 Bid History</div>
+        <div id="bidHistoryList"></div>
         </div>
     </div>
     
     <div id="transactionsPage" class="hidden">
-        <div class="card">
-            <div class="card-title">📊 Transaction History</div>
-            <div id="transactionsList" class="data-table"></div>
+        <div class="card"><div class="card-title">📊 Transaction History</div>
+        <div id="transactionsList" class="data-table"></div>
         </div>
     </div>
 </div>
 
 <div class="bottom-nav">
     <div class="nav-item active" onclick="showPage('markets')"><span>🏠</span><p>Home</p></div>
-    <div class="nav-item" onclick="showDeposit()"><span>💰</span><p>Deposit</p></div>
-    <div class="nav-item" onclick="showWithdraw()"><span>💸</span><p>Withdraw</p></div>
+    <div class="nav-item" onclick="window.location.href='deposit.html'"><span>💰</span><p>Deposit</p></div>
+    <div class="nav-item" onclick="window.location.href='withdraw.html'"><span>💸</span><p>Withdraw</p></div>
     <div class="nav-item" onclick="showPage('profile')"><span>👤</span><p>Profile</p></div>
-</div>
-
-<!-- Deposit Modal -->
-<div id="depositModal" class="modal">
-    <div class="modal-content">
-        <h3>💰 Deposit Money</h3>
-        <div class="amount-options">
-            <div class="amount-chip" onclick="selectAmount(200)">₹200</div>
-            <div class="amount-chip" onclick="selectAmount(500)">₹500</div>
-            <div class="amount-chip" onclick="selectAmount(1000)">₹1000</div>
-            <div class="amount-chip" onclick="selectAmount(5000)">₹5000</div>
-        </div>
-        <input type="number" id="customAmount" placeholder="Enter amount (Min ₹200)">
-        <button id="depositBtn">Request Deposit</button>
-        <div id="depositMsg" style="margin-top:10px; font-size:12px;"></div>
-        <button onclick="closeDeposit()" style="background:#333; margin-top:10px">Cancel</button>
-    </div>
-</div>
-
-<!-- Withdraw Modal -->
-<div id="withdrawModal" class="modal">
-    <div class="modal-content">
-        <h3>💸 Withdraw Money</h3>
-        <select id="bankSelect"></select>
-        <input type="number" id="withdrawAmount" placeholder="Amount (Min ₹500)">
-        <button id="withdrawBtn">Request Withdrawal</button>
-        <div id="withdrawMsg" style="margin-top:10px; font-size:12px;"></div>
-        <button onclick="closeWithdraw()" style="background:#333; margin-top:10px">Cancel</button>
-    </div>
 </div>
 
 <script>
@@ -164,19 +141,12 @@
     let currentUser = null;
     let userData = null;
     let markets = [];
-    let selectedAmount = 200;
     
-    // ============ MARKETS ============
     async function loadMarkets() {
-        try {
-            const snapshot = await db.collection('markets').get();
-            markets = [];
-            snapshot.forEach(doc => markets.push({ id: doc.id, ...doc.data() }));
-            renderMarkets();
-        } catch (error) {
-            console.error('Error loading markets:', error);
-            document.getElementById('marketsPage').innerHTML = '<div class="market-card"><p class="no-data">Error loading markets</p></div>';
-        }
+        const snapshot = await db.collection('markets').get();
+        markets = [];
+        snapshot.forEach(doc => markets.push({ id: doc.id, ...doc.data() }));
+        renderMarkets();
     }
     
     function renderMarkets() {
@@ -186,29 +156,15 @@
         } else {
             for (let m of markets) {
                 let statusClass = '', statusText = '', disabled = false;
-                if (m.status === 'open') {
-                    statusClass = 'status-open';
-                    statusText = '🟢 OPEN - All Bets';
-                    disabled = false;
-                } else if (m.status === 'close') {
-                    statusClass = 'status-close';
-                    statusText = '🟡 CLOSE - Close Bets Only';
-                    disabled = false;
-                } else {
-                    statusClass = 'status-closed';
-                    statusText = '🔴 CLOSED';
-                    disabled = true;
-                }
-                html += `
-                    <div class="market-card">
-                        <div class="market-name">${m.name || 'Unnamed'}</div>
-                        <div class="market-result">Result: ${m.result || '***-**-***'}</div>
-                        <div><span class="market-status ${statusClass}">${statusText}</span></div>
-                        <button class="play-btn" ${disabled ? 'disabled' : ''} onclick="playMarket('${m.name}', '${m.status}')">
-                            ${disabled ? 'CLOSED' : 'PLAY NOW'}
-                        </button>
-                    </div>
-                `;
+                if (m.status === 'open') { statusClass = 'status-open'; statusText = '🟢 OPEN - All Bets'; disabled = false; }
+                else if (m.status === 'close') { statusClass = 'status-close'; statusText = '🟡 CLOSE - Close Bets Only'; disabled = false; }
+                else { statusClass = 'status-closed'; statusText = '🔴 CLOSED'; disabled = true; }
+                html += `<div class="market-card">
+                    <div class="market-name">${m.name || 'Unnamed'}</div>
+                    <div class="market-result">Result: ${m.result || '***-**-***'}</div>
+                    <div><span class="market-status ${statusClass}">${statusText}</span></div>
+                    <button class="play-btn" ${disabled ? 'disabled' : ''} onclick="playMarket('${m.name}', '${m.status}')">${disabled ? 'CLOSED' : 'PLAY NOW'}</button>
+                </div>`;
             }
         }
         document.getElementById('marketsPage').innerHTML = html;
@@ -218,142 +174,89 @@
         window.location.href = `betting.html?market=${encodeURIComponent(name)}&status=${status}`;
     }
     
-    // ============ USER DATA ============
     async function loadUserData() {
         const user = auth.currentUser;
         if (!user) return;
         currentUser = user;
-        
-        try {
-            const doc = await db.collection('users').doc(user.uid).get();
-            if (doc.exists) {
-                userData = doc.data();
-                document.getElementById('userBalance').innerText = userData?.balance || 0;
-                document.getElementById('profileName').innerHTML = `👤 ${userData?.name || 'User'}`;
-                document.getElementById('profilePhone').innerHTML = `📞 ${userData?.phone || ''}`;
-                document.getElementById('profileBalance').innerHTML = `💰 Balance: ₹${userData?.balance || 0}`;
-                
-                if (userData?.bankDetails) {
-                    document.getElementById('accName').value = userData.bankDetails.accName || '';
-                    document.getElementById('bankName').value = userData.bankDetails.bankName || '';
-                    document.getElementById('accNumber').value = userData.bankDetails.accNumber || '';
-                    document.getElementById('ifsc').value = userData.bankDetails.ifsc || '';
-                }
+        const doc = await db.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+            userData = doc.data();
+            document.getElementById('userBalance').innerText = userData?.balance || 0;
+            document.getElementById('profileName').innerHTML = `👤 ${userData?.name || 'User'}`;
+            document.getElementById('profilePhone').innerHTML = `📞 ${userData?.phone || ''}`;
+            document.getElementById('profileBalance').innerHTML = `💰 Balance: ₹${userData?.balance || 0}`;
+            if (userData?.bankDetails) {
+                document.getElementById('accName').value = userData.bankDetails.accName || '';
+                document.getElementById('bankName').value = userData.bankDetails.bankName || '';
+                document.getElementById('accNumber').value = userData.bankDetails.accNumber || '';
+                document.getElementById('ifsc').value = userData.bankDetails.ifsc || '';
             }
-        } catch (error) {
-            console.error('Error loading user:', error);
         }
     }
     
-    // ============ BID HISTORY (NO INDEX REQUIRED) ============
     async function loadBidHistory() {
-        if (!currentUser) {
-            document.getElementById('bidHistoryList').innerHTML = '<div class="no-data">Please login again</div>';
-            return;
-        }
+        if (!currentUser) return;
+        const bids = await db.collection('bids').where('userId', '==', currentUser.uid).get();
+        let bidsArray = [];
+        bids.forEach(doc => bidsArray.push({ id: doc.id, ...doc.data() }));
+        bidsArray.sort((a, b) => {
+            let dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
+            let dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
+            return dateB - dateA;
+        });
         
-        try {
-            // Get all bids for this user (without ordering to avoid index)
-            const bids = await db.collection('bids')
-                .where('userId', '==', currentUser.uid)
-                .get();
-            
-            // Convert to array and sort manually
-            let bidsArray = [];
-            bids.forEach(doc => {
-                bidsArray.push({ id: doc.id, ...doc.data() });
-            });
-            
-            // Sort by createdAt (newest first)
-            bidsArray.sort((a, b) => {
-                let dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
-                let dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
-                return dateB - dateA;
-            });
-            
-            let html = '';
-            if (bidsArray.length === 0) {
-                html = '<div class="no-data">No bids placed yet</div>';
-            } else {
-                html = `ables
-                    <thead>
-                        <tr><th>Market</th><th>Type</th><th>Value</th><th>Points</th><th>Status</th></tr>
-                    </thead>
-                    <tbody>`;
-                for (let b of bidsArray) {
-                    html += `<tr>
-                        <td>${b.market || '-'}</td>
-                        <td>${b.gameType || '-'}</td>
-                        <td>${b.value || '-'}</td>
-                        <td>${b.points || '-'}</td>
-                        <td>${b.status || 'Pending'}</td>
-                    </tr>`;
-                }
-                html += `</tbody></table>`;
+        let html = '';
+        if (bidsArray.length === 0) {
+            html = '<div class="no-data">No bids placed yet</div>';
+        } else {
+            for (let bid of bidsArray) {
+                const bidDate = bid.createdAt?.toDate ? bid.createdAt.toDate() : new Date();
+                const formattedDate = bidDate.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric' });
+                const formattedTime = bidDate.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+                let statusClass = 'status-pending', statusText = 'Pending';
+                if (bid.status === 'won') { statusClass = 'status-won'; statusText = '🎉 You Won!'; }
+                else if (bid.status === 'lost') { statusClass = 'status-lost'; statusText = 'Better Luck Next Time!!!'; }
+                else { statusText = '⏳ Pending Result'; }
+                html += `<div class="bid-card">
+                    <div class="bid-header"><span class="bid-market">${bid.market || 'Unknown Market'}</span><span class="bid-type">${bid.gameType || 'Unknown Type'}${bid.bidType ? ',' + bid.bidType.toUpperCase() : ''}</span></div>
+                    <div class="bid-id">Bid ID: ${bid.id.substring(0, 10)}...</div>
+                    <div class="bid-details"><div class="bid-digit">${bid.value || '-'}</div><div class="bid-points">Points: ${bid.points || 0}</div></div>
+                    <div class="bid-info"><div class="bid-date">📅 ${formattedDate}</div><div class="bid-date">🎲 PLAY FOR: ${formattedDate}</div></div>
+                    <div class="bid-info"><div class="bid-date">⏰ Bid Time: ${formattedTime}</div></div>
+                    <div class="bid-status ${statusClass}">${statusText}</div>
+                </div>`;
             }
-            document.getElementById('bidHistoryList').innerHTML = html;
-        } catch (error) {
-            console.error('Error loading bids:', error);
-            document.getElementById('bidHistoryList').innerHTML = '<div class="no-data">Error loading bid history. Please create index or contact admin.</div>';
         }
+        document.getElementById('bidHistoryList').innerHTML = html;
     }
     
-    // ============ TRANSACTION HISTORY (NO INDEX REQUIRED) ============
     async function loadTransactionHistory() {
-        if (!currentUser) {
-            document.getElementById('transactionsList').innerHTML = '<div class="no-data">Please login again</div>';
-            return;
-        }
+        if (!currentUser) return;
+        const transactions = await db.collection('transactions').where('userId', '==', currentUser.uid).get();
+        let transArray = [];
+        transactions.forEach(doc => transArray.push({ id: doc.id, ...doc.data() }));
+        transArray.sort((a, b) => {
+            let dateA = a.date?.toDate ? a.date.toDate() : new Date(0);
+            let dateB = b.date?.toDate ? b.date.toDate() : new Date(0);
+            return dateB - dateA;
+        });
         
-        try {
-            // Get all transactions for this user (without ordering to avoid index)
-            const transactions = await db.collection('transactions')
-                .where('userId', '==', currentUser.uid)
-                .get();
-            
-            // Convert to array and sort manually
-            let transArray = [];
-            transactions.forEach(doc => {
-                transArray.push({ id: doc.id, ...doc.data() });
-            });
-            
-            // Sort by date (newest first)
-            transArray.sort((a, b) => {
-                let dateA = a.date?.toDate ? a.date.toDate() : new Date(0);
-                let dateB = b.date?.toDate ? b.date.toDate() : new Date(0);
-                return dateB - dateA;
-            });
-            
-            let html = '';
-            if (transArray.length === 0) {
-                html = '<div class="no-data">No transactions yet</div>';
-            } else {
-                html = `ables
-                    <thead>
-                        <tr><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr>
-                    </thead>
-                    <tbody>`;
-                for (let t of transArray) {
-                    let statusColor = '#ff9800';
-                    if (t.status === 'Completed') statusColor = '#4caf50';
-                    if (t.status === 'Rejected') statusColor = '#f44336';
-                    html += `<tr>
-                        <td>${t.type === 'credit' ? 'Deposit' : 'Withdraw'}</td>
-                        <td>₹${t.amount}</td>
-                        <td style="color: ${statusColor}">${t.status || 'Pending'}</td>
-                        <td>${t.date?.toDate ? t.date.toDate().toLocaleString() : t.date || 'Pending'}</td>
-                    </tr>`;
-                }
-                html += `</tbody></table>`;
+        let html = '';
+        if (transArray.length === 0) {
+            html = '<div class="no-data">No transactions yet</div>';
+        } else {
+            html = `<table><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr>`;
+            for (let t of transArray) {
+                let statusColor = '#ff9800';
+                if (t.status === 'Completed') statusColor = '#4caf50';
+                if (t.status === 'Rejected') statusColor = '#f44336';
+                html += `<tr><td>${t.type === 'credit' ? 'Deposit' : 'Withdraw'}</td><td>₹${t.amount}</td><td style="color:${statusColor}">${t.status || 'Pending'}</td><td>${t.date?.toDate ? t.date.toDate().toLocaleString() : 'Pending'}</td></tr>`;
             }
-            document.getElementById('transactionsList').innerHTML = html;
-        } catch (error) {
-            console.error('Error loading transactions:', error);
-            document.getElementById('transactionsList').innerHTML = '<div class="no-data">Error loading transaction history</div>';
+            html += `</table>`;
         }
+        document.getElementById('transactionsList').innerHTML = html;
     }
     
-    // ============ BANK DETAILS ============
     document.getElementById('saveBankBtn').onclick = async () => {
         const bank = {
             accName: document.getElementById('accName').value,
@@ -367,157 +270,21 @@
             setTimeout(() => document.getElementById('bankMsg').innerHTML = '', 3000);
             return;
         }
-        try {
-            await db.collection('users').doc(currentUser.uid).update({ bankDetails: bank });
-            document.getElementById('bankMsg').innerHTML = '✅ Bank details saved!';
-            document.getElementById('bankMsg').style.color = '#4caf50';
-            setTimeout(() => document.getElementById('bankMsg').innerHTML = '', 3000);
-        } catch (error) {
-            alert('Error: ' + error.message);
-        }
+        await db.collection('users').doc(currentUser.uid).update({ bankDetails: bank });
+        document.getElementById('bankMsg').innerHTML = '✅ Bank details saved!';
+        document.getElementById('bankMsg').style.color = '#4caf50';
+        setTimeout(() => document.getElementById('bankMsg').innerHTML = '', 3000);
     };
     
-    // ============ DEPOSIT ============
-    function selectAmount(amt) {
-        selectedAmount = amt;
-        document.querySelectorAll('.amount-chip').forEach(chip => chip.classList.remove('active'));
-        event.target.classList.add('active');
-    }
-    
-    function showDeposit() {
-        document.getElementById('depositModal').style.display = 'flex';
-        document.getElementById('depositMsg').innerHTML = '';
-    }
-    
-    function closeDeposit() {
-        document.getElementById('depositModal').style.display = 'none';
-    }
-    
-    document.getElementById('depositBtn').onclick = async () => {
-        let amount = selectedAmount;
-        const custom = parseInt(document.getElementById('customAmount').value);
-        if (custom >= 200) amount = custom;
-        if (amount < 200) {
-            document.getElementById('depositMsg').innerHTML = '❌ Minimum deposit is ₹200';
-            document.getElementById('depositMsg').style.color = '#f44336';
-            return;
-        }
-        
-        document.getElementById('depositMsg').innerHTML = '⏳ Creating deposit request...';
-        document.getElementById('depositMsg').style.color = '#ff9800';
-        
-        try {
-            await db.collection('transactions').add({
-                userId: currentUser.uid,
-                type: 'credit',
-                amount: amount,
-                status: 'Pending',
-                date: new Date()
-            });
-            document.getElementById('depositMsg').innerHTML = '✅ Deposit request created! Admin will approve.';
-            document.getElementById('depositMsg').style.color = '#4caf50';
-            
-            setTimeout(() => {
-                closeDeposit();
-                loadTransactionHistory();
-            }, 2000);
-        } catch (error) {
-            document.getElementById('depositMsg').innerHTML = '❌ Error: ' + error.message;
-            document.getElementById('depositMsg').style.color = '#f44336';
-        }
-    };
-    
-    // ============ WITHDRAW ============
-    async function showWithdraw() {
-        if (!userData?.bankDetails) {
-            alert('Please add bank details first in Profile > Bank Details');
-            showPage('bank');
-            return;
-        }
-        const select = document.getElementById('bankSelect');
-        select.innerHTML = '';
-        select.innerHTML += `<option value="saved">${userData.bankDetails.bankName} - ${userData.bankDetails.accNumber}</option>`;
-        select.innerHTML += `<option value="new">+ Add New Bank</option>`;
-        document.getElementById('withdrawModal').style.display = 'flex';
-        document.getElementById('withdrawMsg').innerHTML = '';
-    }
-    
-    function closeWithdraw() {
-        document.getElementById('withdrawModal').style.display = 'none';
-    }
-    
-    document.getElementById('withdrawBtn').onclick = async () => {
-        const amount = parseInt(document.getElementById('withdrawAmount').value);
-        if (amount < 500) {
-            document.getElementById('withdrawMsg').innerHTML = '❌ Minimum withdrawal is ₹500';
-            document.getElementById('withdrawMsg').style.color = '#f44336';
-            return;
-        }
-        if (amount > (userData?.balance || 0)) {
-            document.getElementById('withdrawMsg').innerHTML = `❌ Insufficient balance! Your balance is ₹${userData?.balance || 0}`;
-            document.getElementById('withdrawMsg').style.color = '#f44336';
-            return;
-        }
-        
-        let bankDetails = userData.bankDetails;
-        if (document.getElementById('bankSelect').value === 'new') {
-            bankDetails = {
-                accName: prompt('Enter Account Holder Name'),
-                bankName: prompt('Enter Bank Name'),
-                accNumber: prompt('Enter Account Number'),
-                ifsc: prompt('Enter IFSC Code')
-            };
-            if (!bankDetails.accName) return;
-        }
-        
-        document.getElementById('withdrawMsg').innerHTML = '⏳ Sending withdrawal request...';
-        document.getElementById('withdrawMsg').style.color = '#ff9800';
-        
-        try {
-            await db.collection('withdrawRequests').add({
-                userId: currentUser.uid,
-                amount: amount,
-                bankDetails: bankDetails,
-                status: 'Pending',
-                date: new Date()
-            });
-            await db.collection('transactions').add({
-                userId: currentUser.uid,
-                type: 'debit',
-                amount: amount,
-                status: 'Pending',
-                date: new Date()
-            });
-            document.getElementById('withdrawMsg').innerHTML = '✅ Withdrawal request sent! Admin will approve.';
-            document.getElementById('withdrawMsg').style.color = '#4caf50';
-            
-            setTimeout(() => {
-                closeWithdraw();
-                loadTransactionHistory();
-            }, 2000);
-        } catch (error) {
-            document.getElementById('withdrawMsg').innerHTML = '❌ Error: ' + error.message;
-            document.getElementById('withdrawMsg').style.color = '#f44336';
-        }
-    };
-    
-    // ============ UI NAVIGATION ============
     function showPage(page) {
         document.getElementById('marketsPage').classList.add('hidden');
         document.getElementById('profilePage').classList.add('hidden');
         document.getElementById('bankPage').classList.add('hidden');
         document.getElementById('historyPage').classList.add('hidden');
         document.getElementById('transactionsPage').classList.add('hidden');
-        
         document.getElementById(page + 'Page').classList.remove('hidden');
-        
-        if (page === 'history') {
-            loadBidHistory();
-        }
-        if (page === 'transactions') {
-            loadTransactionHistory();
-        }
-        
+        if (page === 'history') loadBidHistory();
+        if (page === 'transactions') loadTransactionHistory();
         closeSidebar();
     }
     
@@ -531,23 +298,14 @@
         document.getElementById('overlay').classList.toggle('active');
     };
     document.getElementById('overlay').onclick = closeSidebar;
-    
     document.getElementById('logoutBtn').onclick = async () => {
         await auth.signOut();
         window.location.href = 'index.html';
     };
     
-    // ============ INITIALIZE ============
     auth.onAuthStateChanged(async (user) => {
-        if (!user) {
-            window.location.href = 'index.html';
-        } else {
-            await loadUserData();
-            await loadMarkets();
-            await loadBidHistory();
-            await loadTransactionHistory();
-            setInterval(loadMarkets, 30000);
-        }
+        if (!user) window.location.href = 'index.html';
+        else { await loadUserData(); await loadMarkets(); setInterval(loadMarkets, 30000); }
     });
 </script>
 </body>
