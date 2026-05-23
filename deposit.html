@@ -284,10 +284,14 @@
         const doc = await db.collection('users').doc(user.uid).get();
         if (doc.exists) {
             userData = doc.data();
+            let balance = userData?.balance || 0;
+            // Ensure balance is a number
+            balance = Number(balance);
+            if (isNaN(balance)) balance = 0;
+            document.getElementById('userBalance').innerText = balance;
+            document.getElementById('balanceAmount').innerText = balance;
             document.getElementById('userName').innerHTML = userData?.name || 'User';
             document.getElementById('userPhone').innerHTML = userData?.phone || '';
-            document.getElementById('userBalance').innerText = userData?.balance || 0;
-            document.getElementById('balanceAmount').innerText = userData?.balance || 0;
         }
     }
     
@@ -375,7 +379,7 @@
         
         showMessage(`Creating deposit request for ₹${exactAmount}...`, 'pending');
         await createDepositRequest(exactAmount);
-        showMessage(`✅ Request created! Pay ₹${exactAmount} in UPI app`, 'success');
+        showMessage(`✅ Request created! Pay ₹${exactAmount} to ${UPI_ID}`, 'success');
         
         const upiIntent = `upi://pay?pa=${UPI_ID}&pn=WIN777&am=${exactAmount}&cu=INR`;
         setTimeout(() => { window.location.href = upiIntent; }, 1500);
