@@ -11,21 +11,21 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
         body { background: #0a0a0f; padding-bottom: 70px; }
         .app-container { max-width: 500px; margin: 0 auto; background: #0a0a0f; min-height: 100vh; }
-        /* Header - Light Blue */
         .header { background: #0a0a0f; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #00b4ff; }
         .logo { color: #00b4ff; font-size: 22px; font-weight: bold; }
         .balance { background: #00b4ff; padding: 5px 12px; border-radius: 20px; color: #000; font-weight: bold; font-size: 14px; }
-        .welcome-text { color: #00b4ff; font-size: 13px; text-align: center; padding: 10px; background: #1a1a2e; margin: 10px; border-radius: 10px; }
-        /* Notice Board */
+        .profile-row { display: flex; align-items: center; gap: 12px; background: #1a1a2e; margin: 10px; padding: 12px 15px; border-radius: 16px; border: 1px solid #00b4ff; }
+        .profile-avatar { width: 50px; height: 50px; background: linear-gradient(135deg, #00b4ff, #0099cc); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #000; }
+        .profile-info { flex: 1; }
+        .profile-name { color: white; font-size: 16px; font-weight: bold; }
+        .profile-phone { color: #888; font-size: 12px; }
         .notice-board { background: linear-gradient(135deg, #00b4ff, #0099cc); margin: 10px; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; }
         .notice-icon { font-size: 24px; }
         .notice-text { flex: 1; color: #000; font-weight: bold; font-size: 13px; }
         .close-notice { background: none; border: none; color: #000; font-size: 18px; cursor: pointer; }
-        /* Games Row */
         .games-row { display: flex; justify-content: space-around; background: #1a1a2e; margin: 10px; padding: 12px; border-radius: 12px; }
         .game-icon { text-align: center; color: #aaa; font-size: 12px; cursor: pointer; }
         .game-icon span { font-size: 24px; display: block; margin-bottom: 4px; }
-        /* Market Card */
         .market-card { background: #1a1a2e; margin: 12px; border-radius: 16px; padding: 16px; border: 1px solid #00b4ff; cursor: pointer; }
         .market-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .market-name { color: #00b4ff; font-size: 16px; font-weight: bold; }
@@ -35,7 +35,6 @@
         .status-closed { background: #f4433620; color: #f44336; border: 1px solid #f44336; }
         .status-close { background: #00b4ff20; color: #00b4ff; border: 1px solid #00b4ff; }
         .status-open { background: #4caf5020; color: #4caf50; border: 1px solid #4caf50; }
-        /* Bottom Navigation */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #1a1a2e; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #00b4ff; }
         .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 11px; }
         .nav-item.active { color: #00b4ff; }
@@ -45,17 +44,17 @@
 </head>
 <body>
 <div class="app-container">
-    <div class="header">
-        <div class="logo">WIN777</div>
-        <div class="balance">₹<span id="userBalance">0</span></div>
+    <div class="header"><div class="logo">WIN777</div><div class="balance">₹<span id="userBalance">0</span></div></div>
+    
+    <!-- Profile Row -->
+    <div class="profile-row">
+        <div class="profile-avatar">👤</div>
+        <div class="profile-info"><div class="profile-name" id="profileName">Loading...</div><div class="profile-phone" id="profilePhone">Loading...</div></div>
+        <div style="color:#00b4ff; font-size:12px; cursor:pointer;" onclick="location.href='profile.html'">View Profile →</div>
     </div>
     
     <!-- Notice Board -->
-    <div id="noticeBoard" class="notice-board">
-        <div class="notice-icon">📢</div>
-        <div class="notice-text" id="noticeText">Welcome to WIN777! Play big · Win big · Unlimited</div>
-        <button class="close-notice" onclick="closeNotice()">✕</button>
-    </div>
+    <div id="noticeBoard" class="notice-board"><div class="notice-icon">📢</div><div class="notice-text" id="noticeText">Welcome to WIN777! Play big · Win big · Unlimited</div><button class="close-notice" onclick="closeNotice()">✕</button></div>
     
     <div class="games-row">
         <div class="game-icon" onclick="showGames()"><span>🎮</span><p>Games</p></div>
@@ -76,15 +75,7 @@
 </div>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
-        authDomain: "win777-ed482.firebaseapp.com",
-        projectId: "win777-ed482",
-        storageBucket: "win777-ed482.firebasestorage.app",
-        messagingSenderId: "843686112399",
-        appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
-    };
-    
+    const firebaseConfig = { apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38", authDomain: "win777-ed482.firebaseapp.com", projectId: "win777-ed482", storageBucket: "win777-ed482.firebasestorage.app", messagingSenderId: "843686112399", appId: "1:843686112399:web:9c20a96831e6a94cd814fa" };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -99,29 +90,14 @@
         { name: 'KALYAN', numbers: '***-***-***', openTime: '3:40 PM', closeTime: '5:40 PM', status: 'open', openBid: '3:40 PM', closeBid: '5:40 PM' }
     ];
     
-    function getStatusText(status) {
-        if (status === 'open') return 'Running For Open';
-        if (status === 'close') return 'Running For Close';
-        return 'Closed For Today';
-    }
-    
-    function getStatusClass(status) {
-        if (status === 'open') return 'status-open';
-        if (status === 'close') return 'status-close';
-        return 'status-closed';
-    }
+    function getStatusText(status) { if (status === 'open') return 'Running For Open'; if (status === 'close') return 'Running For Close'; return 'Closed For Today'; }
+    function getStatusClass(status) { if (status === 'open') return 'status-open'; if (status === 'close') return 'status-close'; return 'status-closed'; }
     
     function renderMarkets() {
         const container = document.getElementById('marketsList');
         container.innerHTML = '';
         markets.forEach(market => {
-            container.innerHTML += `
-                <div class="market-card" onclick="openMarket('${market.name}')">
-                    <div class="market-header"><span class="market-name">${market.name}</span><span class="market-numbers">${market.numbers}</span></div>
-                    <div class="market-time">Open Bids : ${market.openBid} &nbsp;|&nbsp; Close Bids : ${market.closeBid}</div>
-                    <div><span class="market-status ${getStatusClass(market.status)}">${getStatusText(market.status)}</span></div>
-                </div>
-            `;
+            container.innerHTML += `<div class="market-card" onclick="openMarket('${market.name}')"><div class="market-header"><span class="market-name">${market.name}</span><span class="market-numbers">${market.numbers}</span></div><div class="market-time">Open Bids : ${market.openBid} &nbsp;|&nbsp; Close Bids : ${market.closeBid}</div><div><span class="market-status ${getStatusClass(market.status)}">${getStatusText(market.status)}</span></div></div>`;
         });
     }
     
@@ -133,6 +109,8 @@
         const doc = await db.collection('users').doc(user.uid).get();
         if (doc.exists) {
             document.getElementById('userBalance').innerText = doc.data().balance || 0;
+            document.getElementById('profileName').innerHTML = doc.data().name || 'User';
+            document.getElementById('profilePhone').innerHTML = doc.data().phone || '';
             document.getElementById('noticeText').innerHTML = `Welcome ${doc.data().name || 'User'}! Play big · Win big · Unlimited`;
         }
     }
