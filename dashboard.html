@@ -3,217 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WIN77 - Dashboard</title>
+    <title>WIN777 - Dashboard</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-        }
-        body {
-            background: #0a0a0f;
-            padding-bottom: 70px;
-        }
-        .app-container {
-            max-width: 500px;
-            margin: 0 auto;
-            background: #0a0a0f;
-            min-height: 100vh;
-        }
-        .header {
-            background: #1a1a2e;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #ff9800;
-        }
-        .logo {
-            color: #ff9800;
-            font-size: 20px;
-            font-weight: bold;
-        }
-        .balance {
-            background: #ff9800;
-            padding: 5px 12px;
-            border-radius: 20px;
-            color: black;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        .welcome-text {
-            color: #ff9800;
-            font-size: 13px;
-            text-align: center;
-            padding: 10px;
-            background: #1a1a2e;
-            margin: 10px;
-            border-radius: 10px;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+        body { background: #0a0a0f; padding-bottom: 70px; }
+        .app-container { max-width: 500px; margin: 0 auto; background: #0a0a0f; min-height: 100vh; }
+        /* Header - Light Blue */
+        .header { background: #0a0a0f; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #00b4ff; }
+        .logo { color: #00b4ff; font-size: 22px; font-weight: bold; }
+        .balance { background: #00b4ff; padding: 5px 12px; border-radius: 20px; color: #000; font-weight: bold; font-size: 14px; }
+        .welcome-text { color: #00b4ff; font-size: 13px; text-align: center; padding: 10px; background: #1a1a2e; margin: 10px; border-radius: 10px; }
         /* Notice Board */
-        .notice-board {
-            background: linear-gradient(135deg, #ff9800, #ff5722);
-            margin: 10px;
-            padding: 12px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-        .notice-icon {
-            font-size: 24px;
-        }
-        .notice-text {
-            flex: 1;
-            color: black;
-            font-weight: bold;
-            font-size: 13px;
-        }
-        .close-notice {
-            background: none;
-            border: none;
-            color: black;
-            font-size: 18px;
-            cursor: pointer;
-        }
-        .games-row {
-            display: flex;
-            justify-content: space-around;
-            background: #1a1a2e;
-            margin: 10px;
-            padding: 12px;
-            border-radius: 12px;
-        }
-        .game-icon {
-            text-align: center;
-            color: #aaa;
-            font-size: 12px;
-            cursor: pointer;
-        }
-        .game-icon span {
-            font-size: 24px;
-            display: block;
-            margin-bottom: 4px;
-        }
-        .market-card {
-            background: #1a1a2e;
-            margin: 12px;
-            border-radius: 16px;
-            padding: 16px;
-            border: 1px solid #ff9800;
-            cursor: pointer;
-        }
-        .market-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-        .market-name {
-            color: #ff9800;
-            font-size: 16px;
-            font-weight: bold;
-        }
-        .market-numbers {
-            color: white;
-            font-size: 14px;
-            font-family: monospace;
-        }
-        .market-time {
-            color: #888;
-            font-size: 11px;
-            margin-bottom: 8px;
-        }
-        .market-status {
-            font-size: 11px;
-            padding: 4px 8px;
-            border-radius: 12px;
-            display: inline-block;
-        }
-        .status-closed {
-            background: #f4433620;
-            color: #f44336;
-            border: 1px solid #f44336;
-        }
-        .status-close {
-            background: #ff980020;
-            color: #ff9800;
-            border: 1px solid #ff9800;
-        }
-        .status-open {
-            background: #4caf5020;
-            color: #4caf50;
-            border: 1px solid #4caf50;
-        }
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            max-width: 500px;
-            margin: 0 auto;
-            background: #1a1a2e;
-            display: flex;
-            justify-content: space-around;
-            padding: 12px;
-            border-top: 1px solid #ff9800;
-        }
-        .nav-item {
-            text-align: center;
-            color: #aaa;
-            cursor: pointer;
-            font-size: 11px;
-        }
-        .nav-item.active {
-            color: #ff9800;
-        }
-        .nav-item span {
-            font-size: 22px;
-            display: block;
-        }
-        .hidden {
-            display: none;
-        }
+        .notice-board { background: linear-gradient(135deg, #00b4ff, #0099cc); margin: 10px; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; }
+        .notice-icon { font-size: 24px; }
+        .notice-text { flex: 1; color: #000; font-weight: bold; font-size: 13px; }
+        .close-notice { background: none; border: none; color: #000; font-size: 18px; cursor: pointer; }
+        /* Games Row */
+        .games-row { display: flex; justify-content: space-around; background: #1a1a2e; margin: 10px; padding: 12px; border-radius: 12px; }
+        .game-icon { text-align: center; color: #aaa; font-size: 12px; cursor: pointer; }
+        .game-icon span { font-size: 24px; display: block; margin-bottom: 4px; }
+        /* Market Card */
+        .market-card { background: #1a1a2e; margin: 12px; border-radius: 16px; padding: 16px; border: 1px solid #00b4ff; cursor: pointer; }
+        .market-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .market-name { color: #00b4ff; font-size: 16px; font-weight: bold; }
+        .market-numbers { color: white; font-size: 14px; font-family: monospace; }
+        .market-time { color: #888; font-size: 11px; margin-bottom: 8px; }
+        .market-status { font-size: 11px; padding: 4px 8px; border-radius: 12px; display: inline-block; }
+        .status-closed { background: #f4433620; color: #f44336; border: 1px solid #f44336; }
+        .status-close { background: #00b4ff20; color: #00b4ff; border: 1px solid #00b4ff; }
+        .status-open { background: #4caf5020; color: #4caf50; border: 1px solid #4caf50; }
+        /* Bottom Navigation */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #1a1a2e; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #00b4ff; }
+        .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 11px; }
+        .nav-item.active { color: #00b4ff; }
+        .nav-item span { font-size: 22px; display: block; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 <div class="app-container">
     <div class="header">
-        <div class="logo">WIN77</div>
-        <div class="balance">₹<span id="userBalance">0.00</span></div>
+        <div class="logo">WIN777</div>
+        <div class="balance">₹<span id="userBalance">0</span></div>
     </div>
     
     <!-- Notice Board -->
     <div id="noticeBoard" class="notice-board">
         <div class="notice-icon">📢</div>
-        <div class="notice-text" id="noticeText">Welcome to WIN77! Play big · Win big · Unlimited</div>
+        <div class="notice-text" id="noticeText">Welcome to WIN777! Play big · Win big · Unlimited</div>
         <button class="close-notice" onclick="closeNotice()">✕</button>
     </div>
     
     <div class="games-row">
         <div class="game-icon" onclick="showGames()"><span>🎮</span><p>Games</p></div>
         <div class="game-icon" onclick="showCharts()"><span>📊</span><p>Charts</p></div>
-        <div class="game-icon" onclick="showFunds()"><span>🏦</span><p>Funds</p></div>
-        <div class="game-icon" onclick="showMyBids()"><span>📋</span><p>My Bids</p></div>
+        <div class="game-icon" onclick="window.location.href='funds.html'"><span>🏦</span><p>Funds</p></div>
+        <div class="game-icon" onclick="window.location.href='mybids.html'"><span>📋</span><p>My Bids</p></div>
     </div>
     
     <div id="marketsList"></div>
     
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="showPage('home')"><span>🏠</span><p>Home</p></div>
-        <div class="nav-item" onclick="showPage('passbook')"><span>📘</span><p>Passbook</p></div>
-        <div class="nav-item" onclick="showPage('mybids')"><span>📋</span><p>My Bids</p></div>
-        <div class="nav-item" onclick="showPage('fund')"><span>🏦</span><p>Fund</p></div>
-        <div class="nav-item" onclick="showPage('support')"><span>💬</span><p>Chat Support</p></div>
+        <div class="nav-item active" onclick="location.reload()"><span>🏠</span><p>Home</p></div>
+        <div class="nav-item" onclick="window.location.href='mybids.html'"><span>📘</span><p>Passbook</p></div>
+        <div class="nav-item" onclick="window.location.href='mybids.html'"><span>📋</span><p>My Bids</p></div>
+        <div class="nav-item" onclick="window.location.href='funds.html'"><span>🏦</span><p>Fund</p></div>
+        <div class="nav-item" onclick="alert('Chat Support: WhatsApp +919876543210')"><span>💬</span><p>Support</p></div>
     </div>
 </div>
 
@@ -231,9 +89,6 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
     
-    let currentUser = null;
-    let userData = null;
-    
     const markets = [
         { name: 'INDRA MORNING', numbers: '440-8*-***', openTime: '9:10 AM', closeTime: '10:10 AM', status: 'closed', openBid: '9:10 AM', closeBid: '10:10 AM' },
         { name: 'MAYA MORNING', numbers: '177-5*-***', openTime: '09:40 AM', closeTime: '10:40 AM', status: 'close', openBid: '09:40 AM', closeBid: '10:40 AM' },
@@ -241,8 +96,7 @@
         { name: 'TIME BAZAR', numbers: '***-***-***', openTime: '12:50 PM', closeTime: '01:50 PM', status: 'open', openBid: '12:50 PM', closeBid: '01:50 PM' },
         { name: 'MADHUR DAY', numbers: '***-***-***', openTime: '01:25 PM', closeTime: '02:25 PM', status: 'open', openBid: '01:25 PM', closeBid: '02:25 PM' },
         { name: 'MAYA DAY', numbers: '***-***-***', openTime: '2:10 PM', closeTime: '4:10 PM', status: 'open', openBid: '2:10 PM', closeBid: '4:10 PM' },
-        { name: 'KALYAN', numbers: '***-***-***', openTime: '3:40 PM', closeTime: '5:40 PM', status: 'open', openBid: '3:40 PM', closeBid: '5:40 PM' },
-        { name: 'MILAN NIGHT', numbers: '***-***-***', openTime: '9:05 PM', closeTime: '11:05 PM', status: 'open', openBid: '9:05 PM', closeBid: '11:05 PM' }
+        { name: 'KALYAN', numbers: '***-***-***', openTime: '3:40 PM', closeTime: '5:40 PM', status: 'open', openBid: '3:40 PM', closeBid: '5:40 PM' }
     ];
     
     function getStatusText(status) {
@@ -263,64 +117,31 @@
         markets.forEach(market => {
             container.innerHTML += `
                 <div class="market-card" onclick="openMarket('${market.name}')">
-                    <div class="market-header">
-                        <span class="market-name">${market.name}</span>
-                        <span class="market-numbers">${market.numbers}</span>
-                    </div>
-                    <div class="market-time">
-                        Open Bids : ${market.openBid} &nbsp;|&nbsp; Close Bids : ${market.closeBid}
-                    </div>
-                    <div>
-                        <span class="market-status ${getStatusClass(market.status)}">${getStatusText(market.status)}</span>
-                    </div>
+                    <div class="market-header"><span class="market-name">${market.name}</span><span class="market-numbers">${market.numbers}</span></div>
+                    <div class="market-time">Open Bids : ${market.openBid} &nbsp;|&nbsp; Close Bids : ${market.closeBid}</div>
+                    <div><span class="market-status ${getStatusClass(market.status)}">${getStatusText(market.status)}</span></div>
                 </div>
             `;
         });
     }
     
-    function openMarket(name) {
-        window.location.href = `betting.html?market=${encodeURIComponent(name)}`;
-    }
+    function openMarket(name) { alert(`Opening ${name} - Betting page coming soon!`); }
     
     async function loadUserData() {
         const user = auth.currentUser;
-        if (!user) {
-            window.location.href = 'index.html';
-            return;
-        }
-        currentUser = user;
+        if (!user) { window.location.href = 'index.html'; return; }
         const doc = await db.collection('users').doc(user.uid).get();
         if (doc.exists) {
-            userData = doc.data();
-            document.getElementById('userBalance').innerText = userData.balance || 0;
-            // Update notice board with user name
-            document.getElementById('noticeText').innerHTML = `Welcome ${userData.name || 'User'}! Play big · Win big · Unlimited`;
-            
-            // Send welcome notification
-            if (userData.notificationsEnabled && Notification.permission === 'granted') {
-                new Notification('Welcome to WIN77!', { body: 'Start playing and win big!' });
-            }
+            document.getElementById('userBalance').innerText = doc.data().balance || 0;
+            document.getElementById('noticeText').innerHTML = `Welcome ${doc.data().name || 'User'}! Play big · Win big · Unlimited`;
         }
     }
     
-    function closeNotice() {
-        document.getElementById('noticeBoard').style.display = 'none';
-    }
-    
-    function showPage(page) {
-        if(page === 'home') location.reload();
-        else if(page === 'passbook') window.location.href = 'mybids.html';
-        else if(page === 'mybids') window.location.href = 'mybids.html';
-        else if(page === 'fund') window.location.href = 'funds.html';
-        else if(page === 'support') alert('Chat Support: WhatsApp +919876543210');
-    }
-    
+    function closeNotice() { document.getElementById('noticeBoard').style.display = 'none'; }
     function showGames() { alert('Games coming soon!'); }
     function showCharts() { alert('Charts coming soon!'); }
-    function showFunds() { window.location.href = 'funds.html'; }
-    function showMyBids() { window.location.href = 'mybids.html'; }
     
-    loadUserData();
+    auth.onAuthStateChanged(user => { if (!user) window.location.href = 'index.html'; else loadUserData(); });
     renderMarkets();
 </script>
 </body>
