@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>WIN777 - My Bids</title>
+    <title>WIN777 - Funds</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -14,25 +14,67 @@
         .header { background: #0a0a0f; padding: 15px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #00b4ff; }
         .logo { color: #00b4ff; font-size: 20px; font-weight: bold; flex: 1; text-align: center; }
         .back-btn { background: none; border: none; color: #00b4ff; font-size: 24px; cursor: pointer; }
-        .passbook-item { background: #1a1a2e; margin: 12px; padding: 15px; border-radius: 16px; border-left: 4px solid #00b4ff; }
-        .passbook-number { color: #00b4ff; font-size: 14px; font-weight: bold; margin-bottom: 8px; }
-        .passbook-detail { display: flex; justify-content: space-between; margin: 8px 0; color: #ddd; font-size: 13px; }
-        .passbook-label { color: #888; }
-        .passbook-value { color: white; font-weight: bold; }
-        .no-data { text-align: center; color: #888; padding: 40px; }
+        .user-card { background: #1a1a2e; margin: 15px; padding: 15px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #00b4ff; }
+        .user-name { color: white; font-size: 16px; font-weight: bold; }
+        .user-phone { color: #888; font-size: 12px; margin-top: 4px; }
+        .balance-amount { color: #00b4ff; font-size: 20px; font-weight: bold; }
+        .balance-card { background: linear-gradient(135deg, #00b4ff, #0099cc); margin: 15px; padding: 20px; border-radius: 20px; text-align: center; }
+        .balance-card .label { color: rgba(0,0,0,0.7); font-size: 14px; }
+        .balance-card .amount { color: white; font-size: 36px; font-weight: bold; }
+        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 15px; }
+        .menu-card { background: #1a1a2e; border-radius: 16px; padding: 15px; text-align: center; border: 1px solid #00b4ff; cursor: pointer; }
+        .menu-icon { font-size: 32px; margin-bottom: 8px; }
+        .menu-title { color: #00b4ff; font-size: 14px; font-weight: bold; }
+        .menu-desc { color: #888; font-size: 10px; margin-top: 4px; }
+        .input-field { width: calc(100% - 30px); margin: 15px; padding: 14px; background: #1a1a2e; border: 1px solid #00b4ff; border-radius: 12px; color: white; }
+        .btn { width: calc(100% - 30px); margin: 15px; padding: 14px; background: #00b4ff; border: none; border-radius: 12px; color: black; font-weight: bold; cursor: pointer; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #1a1a2e; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #00b4ff; }
         .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 11px; }
         .nav-item span { font-size: 22px; display: block; }
+        .hidden { display: none; }
+        .error-text { color: #ff4444; font-size: 12px; text-align: center; margin: 10px; }
     </style>
 </head>
 <body>
 <div class="app-container">
     <div class="header">
         <button class="back-btn" onclick="location.href='dashboard.html'">←</button>
-        <div class="logo">PASSBOOK</div>
+        <div class="logo">FUNDS</div>
         <div style="width: 30px;"></div>
     </div>
-    <div id="bidsList"></div>
+    
+    <div id="mainMenu">
+        <div class="user-card"><div><div class="user-name" id="userName">Loading...</div><div class="user-phone" id="userPhone">Loading...</div></div><div><div class="balance-amount">₹<span id="userBalance">0</span></div></div></div>
+        <div class="balance-card"><div class="label">Available Balance</div><div class="amount">₹<span id="balanceAmount">0</span></div></div>
+        <div class="menu-grid">
+            <div class="menu-card" onclick="showAddFund()"><div class="menu-icon">💰</div><div class="menu-title">Add Fund</div><div class="menu-desc">You can add fund to your wallet</div></div>
+            <div class="menu-card" onclick="showWithdraw()"><div class="menu-icon">💸</div><div class="menu-title">Withdraw Fund</div><div class="menu-desc">You can withdraw winnings</div></div>
+            <div class="menu-card" onclick="showAddBank()"><div class="menu-icon">🏦</div><div class="menu-title">Add Bank Details</div><div class="menu-desc">You can add your bank details for withdrawal</div></div>
+            <div class="menu-card" onclick="showBankHistory()"><div class="menu-icon">📋</div><div class="menu-title">Bank Details History</div><div class="menu-desc">You can see your bank details history here</div></div>
+            <div class="menu-card" onclick="window.location.href='transactions.html?type=deposit'"><div class="menu-icon">📊</div><div class="menu-title">Deposit History</div><div class="menu-desc">You can see your deposit history here</div></div>
+            <div class="menu-card" onclick="window.location.href='transactions.html?type=withdraw'"><div class="menu-icon">📉</div><div class="menu-title">Withdrawal History</div><div class="menu-desc">You can see history of your withdrawal</div></div>
+        </div>
+    </div>
+    
+    <div id="addFundScreen" class="hidden">
+        <div class="user-card"><div><div class="user-name" id="afUserName">Loading...</div><div class="user-phone" id="afUserPhone">Loading...</div></div><div><div class="balance-amount">₹<span id="afBalance">0</span></div></div></div>
+        <div class="balance-card"><div class="label">Available Balance</div><div class="amount">₹<span id="afBalanceAmount">0</span></div></div>
+        <input type="number" id="depositAmount" class="input-field" placeholder="Enter amount (Min ₹100)">
+        <button class="btn" id="depositBtn">Add Fund</button>
+        <div id="depositMsg" class="error-text"></div>
+    </div>
+    
+    <div id="addBankScreen" class="hidden">
+        <div class="user-card"><div><div class="user-name" id="bkUserName">Loading...</div><div class="user-phone" id="bkUserPhone">Loading...</div></div><div><div class="balance-amount">₹<span id="bkBalance">0</span></div></div></div>
+        <div class="balance-card"><div class="label">Available Balance</div><div class="amount">₹<span id="bkBalanceAmount">0</span></div></div>
+        <input type="text" id="accountNumber" class="input-field" placeholder="Account Number">
+        <input type="text" id="ifscCode" class="input-field" placeholder="IFSC Code">
+        <input type="text" id="bankName" class="input-field" placeholder="Bank Name">
+        <input type="text" id="accountHolder" class="input-field" placeholder="Account Holder Name">
+        <button class="btn" id="saveBankBtn">Save Bank Details</button>
+        <div id="bankMsg" class="error-text"></div>
+    </div>
+    
     <div class="bottom-nav">
         <div class="nav-item" onclick="location.href='dashboard.html'"><span>🏠</span><p>Home</p></div>
         <div class="nav-item" onclick="location.href='mybids.html'"><span>📘</span><p>Passbook</p></div>
@@ -55,43 +97,71 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
     
-    async function loadBids() {
+    let currentUser = null;
+    let userData = null;
+    
+    async function loadUserData() {
         const user = auth.currentUser;
         if (!user) { window.location.href = 'index.html'; return; }
-        
-        const bids = await db.collection('bids').where('userId', '==', user.uid).get();
-        const container = document.getElementById('bidsList');
-        
-        if(bids.empty) {
-            container.innerHTML = '<div class="no-data">No bids placed yet</div>';
-            return;
+        currentUser = user;
+        const doc = await db.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+            userData = doc.data();
+            const balance = userData.balance || 0;
+            document.querySelectorAll('#userBalance, #afBalance, #bkBalance').forEach(el => el.innerText = balance);
+            document.querySelectorAll('#balanceAmount, #afBalanceAmount, #bkBalanceAmount').forEach(el => el.innerText = balance);
+            document.getElementById('userName').innerHTML = userData.name || 'User';
+            document.getElementById('userPhone').innerHTML = userData.phone || '';
+            ['afUserName', 'bkUserName'].forEach(id => {
+                if(document.getElementById(id)) document.getElementById(id).innerHTML = userData.name || 'User';
+            });
+            ['afUserPhone', 'bkUserPhone'].forEach(id => {
+                if(document.getElementById(id)) document.getElementById(id).innerHTML = userData.phone || '';
+            });
+            if(userData.bankDetails) {
+                document.getElementById('accountNumber').value = userData.bankDetails.accountNumber || '';
+                document.getElementById('ifscCode').value = userData.bankDetails.ifscCode || '';
+                document.getElementById('bankName').value = userData.bankDetails.bankName || '';
+                document.getElementById('accountHolder').value = userData.bankDetails.accountHolder || '';
+            }
         }
-        
-        let html = '';
-        let index = 1;
-        let runningTotal = 0;
-        
-        for(const doc of bids.docs) {
-            const b = doc.data();
-            const amount = b.points || 0;
-            const previousAmount = runningTotal;
-            runningTotal += amount;
-            
-            html += `
-                <div class="passbook-item">
-                    <div class="passbook-number">${index} ${b.market || 'Unknown'} (${b.gameType || 'Unknown'}, ${b.bidType || ''}) : ${b.value || '-'}</div>
-                    <div class="passbook-detail"><span class="passbook-label">Date:-</span><span class="passbook-value">${new Date(b.createdAt?.toDate()).toLocaleDateString() || 'Pending'}</span></div>
-                    <div class="passbook-detail"><span class="passbook-label">Amount</span><span class="passbook-value">₹${amount}</span></div>
-                    <div class="passbook-detail"><span class="passbook-label">Previous Amount</span><span class="passbook-value">₹${previousAmount}</span></div>
-                    <div class="passbook-detail"><span class="passbook-label">Current Amount</span><span class="passbook-value">₹${runningTotal}</span></div>
-                </div>
-            `;
-            index++;
-        }
-        container.innerHTML = html;
     }
     
-    auth.onAuthStateChanged(user => { if(!user) window.location.href = 'index.html'; else loadBids(); });
+    async function createDepositRequest(amount) {
+        await db.collection('transactions').add({
+            userId: currentUser.uid, type: 'credit', amount: amount, status: 'Pending', date: new Date(), description: 'Deposit Request'
+        });
+    }
+    
+    document.getElementById('depositBtn').onclick = async () => {
+        const amount = parseInt(document.getElementById('depositAmount').value);
+        if (amount < 100) { document.getElementById('depositMsg').innerHTML = 'Minimum deposit is ₹100'; return; }
+        await createDepositRequest(amount);
+        document.getElementById('depositMsg').innerHTML = `✅ Deposit request of ₹${amount} created! Admin will approve.`;
+        setTimeout(() => location.href = 'dashboard.html', 2000);
+    };
+    
+    document.getElementById('saveBankBtn').onclick = async () => {
+        const bankDetails = {
+            accountNumber: document.getElementById('accountNumber').value,
+            ifscCode: document.getElementById('ifscCode').value,
+            bankName: document.getElementById('bankName').value,
+            accountHolder: document.getElementById('accountHolder').value
+        };
+        if (!bankDetails.accountNumber || !bankDetails.ifscCode || !bankDetails.bankName || !bankDetails.accountHolder) {
+            document.getElementById('bankMsg').innerHTML = 'Please fill all fields'; return;
+        }
+        await db.collection('users').doc(currentUser.uid).update({ bankDetails: bankDetails });
+        document.getElementById('bankMsg').innerHTML = '✅ Bank details saved!';
+        setTimeout(() => location.href = 'dashboard.html', 1500);
+    };
+    
+    function showAddFund() { document.getElementById('mainMenu').classList.add('hidden'); document.getElementById('addFundScreen').classList.remove('hidden'); }
+    function showAddBank() { document.getElementById('mainMenu').classList.add('hidden'); document.getElementById('addBankScreen').classList.remove('hidden'); }
+    function showWithdraw() { alert('Withdraw - Coming Soon'); }
+    function showBankHistory() { alert('Bank History - Coming Soon'); }
+    
+    auth.onAuthStateChanged(user => { if (!user) window.location.href = 'index.html'; else loadUserData(); });
 </script>
 </body>
 </html>
