@@ -46,7 +46,7 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
     
-    let currentUser = null, userData = null, currentMarket = '', currentStatus = 'open', currentGameType = 'Single Digit', bids = [], selectedNumbers = new Set(), selectionMode = 'multiple';
+    let currentUser = null, userData = null, currentMarket = '', currentMarketId = '', currentStatus = 'open', currentGameType = 'Single Digit', bids = [], selectedNumbers = new Set(), selectionMode = 'multiple';
     const gameTypes = ['Single Digit', 'Jodi', 'Single Pana', 'Double Pana', 'Triple Pana'];
     const singlePanaList = ['127','136','145','190','235','280','370','389','460','479','569','578','128','137','146','236','245','290','380','470','489','560','579','678','129','138','147','156','237','246','345','390','480','570','589','679','120','139','148','157','238','247','256','346','490','580','670','689','130','149','158','167','239','248','257','347','356','590','680','789'];
     const doublePanaList = ['100','119','155','227','335','344','399','588','669','110','200','228','255','366','499','660','688','778','166','229','300','337','355','445','599','779','788','112','220','266','338','400','446','455','699','770'];
@@ -73,7 +73,7 @@
     function toggleSelectionMode() { selectionMode = selectionMode === 'multiple' ? 'single' : 'multiple'; selectedNumbers.clear(); renderGamePanel(); }
     function toggleNumber(value) { if(selectionMode === 'single') { selectedNumbers.clear(); selectedNumbers.add(value); } else { if(selectedNumbers.has(value)) selectedNumbers.delete(value); else selectedNumbers.add(value); } renderGamePanel(); }
     function addManualNumber() { const v = document.getElementById('manualValue')?.value.trim(); if(v && !selectedNumbers.has(v)) { selectedNumbers.add(v); document.getElementById('manualValue').value = ''; renderGamePanel(); } }
-    function addSelectedToBids() { if(selectedNumbers.size === 0) return; const pts = parseInt(document.getElementById('pointsInput')?.value || 10); for(let v of selectedNumbers) { bids.push({ type: currentGameType, bidType: currentStatus, value: v, points: pts, market: currentMarket }); } selectedNumbers.clear(); updateSummary(); renderGamePanel(); }
+    function addSelectedToBids() { if(selectedNumbers.size === 0) return; const pts = parseInt(document.getElementById('pointsInput')?.value || 10); for(let v of selectedNumbers) { bids.push({ type: currentGameType, bidType: currentStatus, value: v, points: pts, market: currentMarket, marketId: currentMarketId }); } selectedNumbers.clear(); updateSummary(); renderGamePanel(); }
     function removeBid(i) { bids.splice(i,1); updateSummary(); renderGamePanel(); }
     function showMessage(msg, isError) { const d = document.getElementById('message'); d.innerText = msg; d.className = `message ${isError ? 'error' : 'success'}`; d.classList.remove('hidden'); setTimeout(() => d.classList.add('hidden'), 3000); }
     
@@ -85,7 +85,7 @@
         const newBalance = userData.balance - total;
         try {
             await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
-            for(let b of bids) { await db.collection('bids').add({ userId: currentUser.uid, market: b.market, gameType: b.type, bidType: b.bidType, value: b.value, points: b.points, status: 'pending', createdAt: new Date() }); }
+            for(let b of bids) { await db.collection('bids').add({ userId: currentUser.uid, market: b.market, marketId: b.marketId, gameType: b.type, bidType: b.bidType, value: b.value, points: b.points, status: 'pending', createdAt: new Date() }); }
             await db.collection('transactions').add({ userId: currentUser.uid, type: 'debit', amount: total, description: `Bid on ${currentMarket}`, date: new Date() });
             showMessage(`✅ ₹${total} bids placed!`, false);
             bids = []; selectedNumbers.clear(); updateSummary(); renderGamePanel();
@@ -99,6 +99,7 @@
     
     const urlParams = new URLSearchParams(window.location.search);
     currentMarket = decodeURIComponent(urlParams.get('market') || 'Main Bazar');
+    currentMarketId = urlParams.get('marketId') || '';
     currentStatus = urlParams.get('status') || 'open';
     document.getElementById('marketName').innerHTML = currentMarket;
     document.getElementById('bidTypeBadge').innerHTML = currentStatus === 'open' ? '🎲 OPEN BIDDING' : '🔒 CLOSE BIDDING';
