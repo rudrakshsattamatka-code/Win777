@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WIN777 - Database Setup</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #0a0a0f; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .setup-card { background: #1a1a2e; padding: 40px; border-radius: 20px; max-width: 600px; width: 100%; border: 1px solid #00b4ff; }
+        h1 { color: #00b4ff; margin-bottom: 20px; text-align: center; }
+        h2 { color: #ccc; font-size: 18px; margin: 20px 0 10px; }
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #0a0a0f; border: 1px solid #00b4ff; border-radius: 8px; color: white; }
+        button { width: 100%; padding: 14px; background: #00b4ff; border: none; border-radius: 8px; color: black; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        button:hover { background: #0099cc; }
+        .status { margin-top: 20px; padding: 12px; border-radius: 8px; display: none; }
+        .success { background: #00b4ff22; border: 1px solid #00b4ff; color: #00b4ff; display: block; }
+        .error { background: #ff000022; border: 1px solid #ff0000; color: #ff0000; display: block; }
+        .log { background: #0a0a0f; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 12px; max-height: 200px; overflow-y: auto; }
+        .log p { color: #888; margin: 5px 0; }
+    </style>
+</head>
+<body>
+<div class="setup-card">
+    <h1>🔧 WIN777 Database Setup</h1>
+    <p style="color: #888; text-align: center; margin-bottom: 20px;">Create collections, indexes, and admin account</p>
+
+    <h2>📁 Firebase Configuration</h2>
+    <input type="text" id="apiKey" placeholder="API Key" value="">
+    <input type="text" id="authDomain" placeholder="Auth Domain (project-id.firebaseapp.com)" value="">
+    <input type="text" id="projectId" placeholder="Project ID" value="win777-ed482">
+    
+    <h2>👑 Create Admin Account</h2>
+    <input type="email" id="adminEmail" placeholder="Admin Email" value="">
+    <input type="password" id="adminPassword" placeholder="Admin Password" value="">
+    
+    <h2>📜 Firestore Security Rules</h2>
+    <textarea id="rules" rows="8">rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Only authenticated users can read/write
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Admins collection - only admins can modify
+    match /admins/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth.token.admin == true;
+    }
+    
+    // Users collection - users can read/write their own data
+    match /users/{userId} {
+      allow read, write: if request.auth.uid == userId;
+    }
+  }
+}</textarea>
+    
+    <button id="setupBtn">🚀 Run Setup</button>
+    <div id="status" class="status"></div>
+    <div id="log" class="log"></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<script>
+const logDiv = document.getElementById('log');
+const statusDiv = document.getElementById('status');
+
+function addLog(message, isError = false) {
+    const p = document.createElement('p');
+    p.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+    p.style.color = isError ? '#ff6666' : '#00b4ff';
+    logDiv.appendChild(p);
+    logDiv.scrollTop = logDiv.scrollHeight;
+    console.log(message);
+}
+
+function showStatus(message, isError = false) {
+    statusDiv.textContent = message;
+    statusDiv.className = `status ${isError ? 'error' : 'success'}`;
+}
+
+document.getElementById('setupBtn').addEventListener('click', async () => {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const authDomain = document.getElementById('authDomain').value.trim();
+    const projectId = document.getElementById('projectId').value.trim();
+    const adminEmail = document.getElementById('adminEmail').value.trim();
+    const adminPassword = document.getElementById('adminPassword').value.trim();
+    const rules = document.getElementById('rules').value;
+    
+    if (!apiKey || !authDomain || !projectId) {
+        showStatus('❌ Please fill in Firebase configuration fields', true);
+        return;
+    }
+    
+    if (!adminEmail || !adminPassword) {
+        showStatus('❌ Please enter admin email and password', true);
+        return;
+    }
+    
+    if (adminPassword.length < 6) {
+        showStatus('❌ Password must be at least 6 characters', true);
+        return;
+    }
+    
+    statusDiv.className = 'status';
+    logDiv.innerHTML = '';
+    addLog('🚀 Starting setup...');
+    
+    try {
+        // Initialize Firebase
+        const firebaseConfig = { apiKey, authDomain, projectId };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        
+        addLog('✅ Firebase initialized');
+        
+        // Create admin user
+        addLog(`📝 Creating admin user: ${adminEmail}`);
+        let userCredential;
+        try {
+            userCredential = await auth.createUserWithEmailAndPassword(adminEmail, adminPassword);
+            addLog('✅ Admin user created');
+        } catch (err) {
+            if (err.code === 'auth/email-already-in-use') {
+                addLog('⚠️ Admin user already exists, signing in...');
+                userCredential = await auth.signInWithEmailAndPassword(adminEmail, adminPassword);
+                addLog('✅ Signed in as existing admin');
+            } else {
+                throw err;
+            }
+        }
+        
+        const adminUid = userCredential.user.uid;
+        
+        // Create admins collection
+        addLog('📁 Creating admins collection...');
+        await db.collection('admins').doc(adminUid).set({
+            email: adminEmail,
+            role: 'super_admin',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            permissions: ['all']
+        });
+        addLog('✅ Admins collection created');
+        
+        // Create users collection (empty shell)
+        addLog('📁 Creating users collection...');
+        await db.collection('users').doc('_template').set({
+            _note: 'Template document - you can delete this',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        addLog('✅ Users collection shell created');
+        
+        // Create settings collection
+        addLog('📁 Creating settings collection...');
+        await db.collection('settings').doc('general').set({
+            siteName: 'WIN777',
+            maintenanceMode: false,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        addLog('✅ Settings collection created');
+        
+        // Apply security rules (requires Firebase CLI or manual update)
+        addLog('⚠️ Security rules cannot be applied automatically from browser');
+        addLog('📋 Copy the rules below and paste in Firebase Console > Firestore > Rules');
+        
+        showStatus('✅ Setup complete! Admin account created. Apply rules manually.', false);
+        
+    } catch (error) {
+        addLog(`❌ Error: ${error.message}`, true);
+        showStatus(`❌ Setup failed: ${error.message}`, true);
+    }
+});
+</script>
+</body>
+</html>
