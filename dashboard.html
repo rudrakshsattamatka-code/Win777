@@ -26,8 +26,7 @@
         .games-row { display: flex; justify-content: space-around; background: #1a1a2e; margin: 10px; padding: 12px; border-radius: 12px; }
         .game-icon { text-align: center; color: #aaa; font-size: 12px; cursor: pointer; }
         .game-icon span { font-size: 24px; display: block; margin-bottom: 4px; }
-        .market-card { background: #1a1a2e; margin: 12px; border-radius: 16px; padding: 16px; border: 1px solid #00b4ff; cursor: pointer; transition: 0.2s; }
-        .market-card:active { transform: scale(0.98); }
+        .market-card { background: #1a1a2e; margin: 12px; border-radius: 16px; padding: 16px; border: 1px solid #00b4ff; }
         .market-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .market-name { color: #00b4ff; font-size: 16px; font-weight: bold; }
         .market-numbers { color: white; font-size: 14px; font-family: monospace; }
@@ -37,7 +36,7 @@
         .status-close { background: #00b4ff20; color: #00b4ff; border: 1px solid #00b4ff; }
         .status-open { background: #4caf5020; color: #4caf50; border: 1px solid #4caf50; }
         .play-btn { width: 100%; margin-top: 12px; padding: 10px; background: #00b4ff; border: none; border-radius: 12px; color: #000; font-weight: bold; cursor: pointer; }
-        .play-btn:active { transform: scale(0.98); }
+        .play-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #1a1a2e; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #00b4ff; }
         .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 11px; }
         .nav-item span { font-size: 22px; display: block; }
@@ -102,7 +101,7 @@
     }
     
     function openBetting(market) {
-        window.location.href = `betting.html?market=${encodeURIComponent(market.name)}&status=${market.status}`;
+        window.location.href = `betting.html?market=${encodeURIComponent(market.name)}&status=${market.status}&marketId=${market.id}`;
     }
     
     function renderMarkets() {
@@ -119,7 +118,7 @@
                     <div class="market-header"><span class="market-name">${market.name}</span><span class="market-numbers">${market.numbers || '***-***-***'}</span></div>
                     <div class="market-time">Open Bids : ${market.openBid || '--:--'} &nbsp;|&nbsp; Close Bids : ${market.closeBid || '--:--'}</div>
                     <div><span class="market-status ${getStatusClass(market.status)}">${getStatusText(market.status)}</span></div>
-                    <button class="play-btn" onclick="openBetting(${JSON.stringify(market).replace(/"/g, '&quot;')})" ${!isPlayable ? 'disabled style="opacity:0.5;"' : ''}>${isPlayable ? '🎲 PLAY NOW' : '🔒 CLOSED'}</button>
+                    <button class="play-btn" onclick='openBetting(${JSON.stringify(market)})' ${!isPlayable ? 'disabled' : ''}>${isPlayable ? '🎲 PLAY NOW' : '🔒 CLOSED'}</button>
                 </div>
             `;
         });
