@@ -40,7 +40,7 @@
             color: #888;
             margin-top: 5px;
         }
-        .login-screen {
+        .login-screen, .phone-screen, .otp-screen, .register-screen {
             padding: 20px;
         }
         .mpin-input {
@@ -73,37 +73,20 @@
             font-size: 13px;
             cursor: pointer;
         }
-        .otp-screen {
-            padding: 20px;
-            text-align: center;
-        }
         .otp-welcome {
             color: #ff9800;
             font-size: 14px;
             margin-bottom: 20px;
+            text-align: center;
         }
         .timer {
             color: #ff9800;
             font-size: 24px;
             font-weight: bold;
             margin: 20px 0;
-        }
-        .otp-input {
-            background: #1a1a2e;
-            border: 1px solid #ff9800;
-            border-radius: 12px;
-            padding: 15px;
-            width: 100%;
-            color: white;
-            font-size: 20px;
             text-align: center;
-            letter-spacing: 4px;
-            margin-bottom: 20px;
         }
-        .phone-screen {
-            padding: 20px;
-        }
-        .phone-input {
+        .otp-input, .phone-input, .register-input {
             background: #1a1a2e;
             border: 1px solid #ff9800;
             border-radius: 12px;
@@ -113,16 +96,7 @@
             font-size: 16px;
             margin-bottom: 20px;
         }
-        .register-screen {
-            padding: 20px;
-        }
         .register-input {
-            background: #1a1a2e;
-            border: 1px solid #ff9800;
-            border-radius: 12px;
-            padding: 14px;
-            width: 100%;
-            color: white;
             margin-bottom: 15px;
         }
         .error-text {
@@ -134,7 +108,7 @@
         .hidden {
             display: none;
         }
-        /* Notification Permission Popup */
+        /* Notification Popup */
         .notification-popup {
             position: fixed;
             bottom: 0;
@@ -203,7 +177,7 @@
         <div class="tagline">India's best Satta Matka Application</div>
     </div>
 
-    <!-- Notification Permission Popup -->
+    <!-- Notification Popup -->
     <div id="overlay" class="overlay"></div>
     <div id="notificationPopup" class="notification-popup">
         <div class="notification-title">🔔 Allow Notifications</div>
@@ -228,14 +202,14 @@
         <div class="timer" id="timer">Second Remaining 60</div>
         <input type="text" id="otpCode" class="otp-input" placeholder="Enter OTP" maxlength="6">
         <button class="login-btn" onclick="verifyOTP()">SUBMIT</button>
-        <div class="forgot-link" onclick="resendOTP()">FORGOT PIN</div>
+        <div class="forgot-link" onclick="resendOTP()">Resend OTP</div>
         <div id="otpError" class="error-text"></div>
     </div>
 
     <!-- PIN Login Screen -->
     <div id="pinLoginScreen" class="login-screen hidden">
-        <input type="password" id="pinInput" class="mpin-input" placeholder="●●●●" maxlength="4">
-        <button class="login-btn" onclick="verifyPin()">Login with MPIN</button>
+        <input type="password" id="pinInput" class="mpin-input" placeholder="Enter 4-digit MPIN" maxlength="4">
+        <button class="login-btn" onclick="verifyPinAndLogin()">Login with MPIN</button>
         <div class="forgot-link" onclick="showPhoneLogin()">Forgot MPIN?</div>
         <div id="pinError" class="error-text"></div>
     </div>
@@ -300,9 +274,60 @@
                 clearInterval(timerInterval);
                 timerInterval = null;
             }
-            document.getElementById('timer').innerText = `Second Remaining ${countdown}`;
+            const timerEl = document.getElementById('timer');
+            if (timerEl) timerEl.innerText = `Second Remaining ${countdown}`;
             countdown--;
         }, 1000);
+    }
+    
+    // Navigation Functions
+    function showPhoneScreen() {
+        document.getElementById('phoneScreen').classList.remove('hidden');
+        document.getElementById('otpScreen').classList.add('hidden');
+        document.getElementById('pinLoginScreen').classList.add('hidden');
+        document.getElementById('registerScreen').classList.add('hidden');
+    }
+    
+    function showOtpScreen() {
+        document.getElementById('phoneScreen').classList.add('hidden');
+        document.getElementById('otpScreen').classList.remove('hidden');
+        document.getElementById('pinLoginScreen').classList.add('hidden');
+        document.getElementById('registerScreen').classList.add('hidden');
+    }
+    
+    function showPinLoginScreen() {
+        document.getElementById('phoneScreen').classList.add('hidden');
+        document.getElementById('otpScreen').classList.add('hidden');
+        document.getElementById('pinLoginScreen').classList.remove('hidden');
+        document.getElementById('registerScreen').classList.add('hidden');
+    }
+    
+    function showRegisterScreen() {
+        document.getElementById('phoneScreen').classList.add('hidden');
+        document.getElementById('otpScreen').classList.add('hidden');
+        document.getElementById('pinLoginScreen').classList.add('hidden');
+        document.getElementById('registerScreen').classList.remove('hidden');
+    }
+    
+    function showPhoneLogin() {
+        showPhoneScreen();
+        document.getElementById('pinInput').value = '';
+    }
+    
+    function showPinLogin() {
+        // Check if user exists before showing PIN login
+        const user = auth.currentUser;
+        if (!user) {
+            showPhoneScreen();
+            return;
+        }
+        db.collection('users').doc(user.uid).get().then(doc => {
+            if (doc.exists && doc.data().pin) {
+                showPinLoginScreen();
+            } else {
+                showPhoneScreen();
+            }
+        }).catch(() => showPhoneScreen());
     }
     
     // Notification Functions
@@ -310,22 +335,18 @@
         document.getElementById('notificationPopup').classList.remove('show');
         document.getElementById('overlay').style.display = 'none';
         if (Notification.permission === 'default') {
-            Notification.requestPermission().then(perm => {
-                if (perm === 'granted') {
-                    new Notification('WIN77', { body: 'Notifications enabled! You will get updates.' });
-                }
-            });
+            Notification.requestPermission();
         }
-        if (currentUser && isNewUser) {
-            db.collection('users').doc(currentUser.uid).update({ notificationsEnabled: true });
+        if (auth.currentUser) {
+            db.collection('users').doc(auth.currentUser.uid).update({ notificationsEnabled: true });
         }
     }
     
     function denyNotification() {
         document.getElementById('notificationPopup').classList.remove('show');
         document.getElementById('overlay').style.display = 'none';
-        if (currentUser && isNewUser) {
-            db.collection('users').doc(currentUser.uid).update({ notificationsEnabled: false });
+        if (auth.currentUser) {
+            db.collection('users').doc(auth.currentUser.uid).update({ notificationsEnabled: false });
         }
     }
     
@@ -334,10 +355,11 @@
         document.getElementById('overlay').style.display = 'block';
     }
     
+    // Send OTP
     function sendOTP() {
         const phone = document.getElementById('phoneNumber').value.replace(/\D/g, '');
         if (!phone || phone.length < 10) {
-            showError('phoneError', 'Enter valid mobile number');
+            showError('phoneError', 'Enter valid 10-digit mobile number');
             return;
         }
         currentPhone = '+91' + phone;
@@ -350,8 +372,7 @@
             auth.signInWithPhoneNumber(currentPhone, verifier)
                 .then(confirmation => {
                     confirmationResult = confirmation;
-                    document.getElementById('phoneScreen').classList.add('hidden');
-                    document.getElementById('otpScreen').classList.remove('hidden');
+                    showOtpScreen();
                     startTimer(60);
                     btn.disabled = false;
                     btn.innerText = 'Login with OTP';
@@ -368,10 +389,11 @@
         }
     }
     
+    // Verify OTP
     function verifyOTP() {
         const code = document.getElementById('otpCode').value;
         if (!code || code.length !== 6) {
-            showError('otpError', 'Enter valid OTP');
+            showError('otpError', 'Enter 6-digit OTP');
             return;
         }
         const btn = event.target;
@@ -381,16 +403,21 @@
         confirmationResult.confirm(code)
             .then(result => {
                 const user = result.user;
-                currentUser = user;
                 db.collection('users').doc(user.uid).get()
                     .then(doc => {
                         if (doc.exists && doc.data().pin) {
+                            // User has PIN - go to dashboard directly
                             window.location.href = 'dashboard.html';
                         } else {
+                            // New user - show registration
                             isNewUser = true;
-                            document.getElementById('otpScreen').classList.add('hidden');
-                            document.getElementById('registerScreen').classList.remove('hidden');
+                            showRegisterScreen();
                         }
+                        btn.disabled = false;
+                        btn.innerText = 'SUBMIT';
+                    })
+                    .catch(() => {
+                        showRegisterScreen();
                         btn.disabled = false;
                         btn.innerText = 'SUBMIT';
                     });
@@ -402,6 +429,7 @@
             });
     }
     
+    // Resend OTP
     function resendOTP() {
         const verifier = initRecaptcha();
         auth.signInWithPhoneNumber(currentPhone, verifier)
@@ -413,6 +441,7 @@
             .catch(error => showError('otpError', error.message));
     }
     
+    // Register New User
     function registerUser() {
         const name = document.getElementById('regName').value.trim();
         const pin = document.getElementById('regPin').value;
@@ -440,8 +469,6 @@
             createdAt: new Date()
         }).then(() => {
             showNotificationPopup();
-            btn.disabled = false;
-            btn.innerText = 'Register';
             setTimeout(() => {
                 window.location.href = 'dashboard.html';
             }, 2000);
@@ -452,47 +479,59 @@
         });
     }
     
-    function verifyPin() {
+    // Verify PIN and Login
+    function verifyPinAndLogin() {
         const pin = document.getElementById('pinInput').value;
         if (!pin || pin.length !== 4) {
             showError('pinError', 'Enter 4-digit MPIN');
             return;
         }
+        
         const user = auth.currentUser;
         if (!user) {
-            showPhoneLogin();
+            showPhoneScreen();
             return;
         }
+        
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerText = 'Verifying...';
+        
         db.collection('users').doc(user.uid).get()
             .then(doc => {
                 if (doc.exists && doc.data().pin === pin) {
+                    // Correct PIN - go to dashboard
                     window.location.href = 'dashboard.html';
                 } else {
                     showError('pinError', 'Invalid MPIN');
+                    btn.disabled = false;
+                    btn.innerText = 'Login with MPIN';
                 }
+            })
+            .catch(error => {
+                showError('pinError', 'Error verifying PIN');
+                btn.disabled = false;
+                btn.innerText = 'Login with MPIN';
             });
     }
     
-    function showPhoneLogin() {
-        document.getElementById('pinLoginScreen').classList.add('hidden');
-        document.getElementById('phoneScreen').classList.remove('hidden');
-        document.getElementById('otpScreen').classList.add('hidden');
-        document.getElementById('registerScreen').classList.add('hidden');
-    }
-    
-    function showPinLogin() {
-        document.getElementById('phoneScreen').classList.add('hidden');
-        document.getElementById('pinLoginScreen').classList.remove('hidden');
-    }
-    
+    // Check existing session on page load
     auth.onAuthStateChanged(user => {
         if (user) {
             db.collection('users').doc(user.uid).get().then(doc => {
                 if (doc.exists && doc.data().pin) {
-                    document.getElementById('phoneScreen').classList.add('hidden');
-                    document.getElementById('pinLoginScreen').classList.remove('hidden');
+                    // User is logged in and has PIN - show PIN login
+                    showPinLoginScreen();
+                } else if (doc.exists && !doc.data().pin) {
+                    // User exists but no PIN - show registration
+                    showRegisterScreen();
+                } else {
+                    // No user document - show phone login
+                    showPhoneScreen();
                 }
-            });
+            }).catch(() => showPhoneScreen());
+        } else {
+            showPhoneScreen();
         }
     });
 </script>
