@@ -42,111 +42,612 @@
 </head>
 <body>
 
-<div id="loginScreen" class="login-screen"><div class="login-card"><h2>WIN77 ADMIN</h2><input type="password" id="adminPass" placeholder="Enter Password"><button onclick="login()">Login</button><div id="loginError" style="color:red; margin-top:10px;"></div></div></div>
+<div id="loginScreen" class="login-screen">
+    <div class="login-card">
+        <h2>WIN77 ADMIN</h2>
+        <input type="password" id="adminPass" placeholder="Enter Password">
+        <button onclick="login()">Login</button>
+        <div id="loginError" style="color:red; margin-top:10px;"></div>
+    </div>
+</div>
 
 <div id="adminPanel" class="admin-panel">
-    <div class="sidebar"><h2>WIN77</h2><div class="sidebar-item" onclick="showSection('markets')">🎮 Markets</div><div class="sidebar-item" onclick="showSection('users')">👥 Users</div><div class="sidebar-item" onclick="showSection('deposits')">💰 Deposits</div><div class="sidebar-item" onclick="showSection('withdrawals')">💸 Withdrawals</div><div class="sidebar-item" onclick="showSection('notice')">📢 Notice Board</div><div class="sidebar-item" onclick="showSection('settings')">⚙️ Settings</div><div class="sidebar-item" onclick="logout()">🚪 Logout</div></div>
+    <div class="sidebar">
+        <h2>WIN77</h2>
+        <div class="sidebar-item" onclick="showSection('markets')">🎮 Markets</div>
+        <div class="sidebar-item" onclick="showSection('users')">👥 Users</div>
+        <div class="sidebar-item" onclick="showSection('deposits')">💰 Deposits</div>
+        <div class="sidebar-item" onclick="showSection('withdrawals')">💸 Withdrawals</div>
+        <div class="sidebar-item" onclick="showSection('notice')">📢 Notice Board</div>
+        <div class="sidebar-item" onclick="showSection('settings')">⚙️ Settings</div>
+        <div class="sidebar-item" onclick="logout()">🚪 Logout</div>
+    </div>
 
     <div class="main-content">
-        <div id="marketsSection"><div class="card"><h3>➕ Add New Market</h3><input type="text" id="marketName" placeholder="Market Name"><input type="text" id="marketNumbers" placeholder="Numbers (e.g., 440-8*-***)"><input type="time" id="openBid" placeholder="Open Bid Time"><input type="time" id="closeBid" placeholder="Close Bid Time"><select id="marketStatus"><option value="open">🟢 OPEN</option><option value="close">🟡 CLOSE</option><option value="closed">🔴 CLOSED</option></select><button onclick="addMarket()">Add Market</button></div>
-        <div class="card"><h3>📋 Markets (Click Status to Change)</h3><div id="marketsList"></div></div></div>
+        <!-- Markets Section -->
+        <div id="marketsSection">
+            <div class="card">
+                <h3>➕ Add New Market</h3>
+                <input type="text" id="marketName" placeholder="Market Name">
+                <input type="text" id="marketNumbers" placeholder="Numbers (e.g., 440-8*-***)">
+                <input type="time" id="openBid" placeholder="Open Bid Time">
+                <input type="time" id="closeBid" placeholder="Close Bid Time">
+                <select id="marketStatus">
+                    <option value="open">🟢 OPEN</option>
+                    <option value="close">🟡 CLOSE</option>
+                    <option value="closed">🔴 CLOSED</option>
+                </select>
+                <button onclick="addMarket()">Add Market</button>
+            </div>
+            <div class="card">
+                <h3>📋 Markets (Click Status to Change)</h3>
+                <div id="marketsList">Loading...</div>
+            </div>
+        </div>
         
-        <div id="usersSection" class="hidden"><div class="card"><h3>👥 Users Management</h3><div id="usersList"></div></div></div>
+        <!-- Users Section -->
+        <div id="usersSection" class="hidden">
+            <div class="card">
+                <h3>👥 Users Management</h3>
+                <div id="usersList">Loading...</div>
+            </div>
+        </div>
         
-        <div id="depositsSection" class="hidden"><div class="card"><h3>💰 Deposit Requests</h3><div id="depositsList"></div></div></div>
+        <!-- Deposits Section -->
+        <div id="depositsSection" class="hidden">
+            <div class="card">
+                <h3>💰 Deposit Requests</h3>
+                <div id="depositsList">Loading...</div>
+            </div>
+        </div>
         
-        <div id="withdrawalsSection" class="hidden"><div class="card"><h3>💸 Withdrawal Requests</h3><div id="withdrawalsList"></div></div></div>
+        <!-- Withdrawals Section -->
+        <div id="withdrawalsSection" class="hidden">
+            <div class="card">
+                <h3>💸 Withdrawal Requests</h3>
+                <div id="withdrawalsList">Loading...</div>
+            </div>
+        </div>
         
-        <div id="noticeSection" class="hidden"><div class="card"><div class="notice-edit"><h3>📢 Notice Board</h3><textarea id="noticeText" rows="3"></textarea><button onclick="updateNotice()">Update Notice</button><div id="noticeMsg" style="margin-top:10px;"></div></div></div></div>
+        <!-- Notice Board Section -->
+        <div id="noticeSection" class="hidden">
+            <div class="card">
+                <div class="notice-edit">
+                    <h3>📢 Notice Board</h3>
+                    <textarea id="noticeText" rows="3" placeholder="Enter notice text..."></textarea>
+                    <button onclick="updateNotice()">Update Notice</button>
+                    <div id="noticeMsg" style="margin-top:10px;"></div>
+                </div>
+            </div>
+        </div>
         
-        <div id="settingsSection" class="hidden"><div class="card"><h3>🔐 Change Password</h3><input type="password" id="oldPass" placeholder="Old Password"><input type="password" id="newPass" placeholder="New Password"><button onclick="changePassword()">Update</button><div id="passMsg"></div></div><div class="card"><h3>🏧 UPI ID Settings</h3><input type="text" id="upiId" placeholder="UPI ID"><button onclick="updateUPI()">Update UPI ID</button><div id="upiMsg"></div></div></div>
+        <!-- Settings Section -->
+        <div id="settingsSection" class="hidden">
+            <div class="card">
+                <h3>🔐 Change Password</h3>
+                <input type="password" id="oldPass" placeholder="Old Password">
+                <input type="password" id="newPass" placeholder="New Password">
+                <button onclick="changePassword()">Update</button>
+                <div id="passMsg"></div>
+            </div>
+            <div class="card">
+                <h3>🏧 UPI ID Settings</h3>
+                <input type="text" id="upiId" placeholder="UPI ID" value="ganeshpatil99@slc">
+                <button onclick="updateUPI()">Update UPI ID</button>
+                <div id="upiMsg"></div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    const firebaseConfig = { apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38", authDomain: "win777-ed482.firebaseapp.com", projectId: "win777-ed482", storageBucket: "win777-ed482.firebasestorage.app", messagingSenderId: "843686112399", appId: "1:843686112399:web:9c20a96831e6a94cd814fa" };
+    const firebaseConfig = {
+        apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
+        authDomain: "win777-ed482.firebaseapp.com",
+        projectId: "win777-ed482",
+        storageBucket: "win777-ed482.firebasestorage.app",
+        messagingSenderId: "843686112399",
+        appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
+    };
+    
     firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     const db = firebase.firestore();
+    
     let adminPassword = "Gani99@@";
+    let currentAdminUser = null;
     
     // Game Rates for Auto-Winning
-    const gameRates = { 'Single Digit': 10, 'Jodi': 100, 'Single Pana': 160, 'Double Pana': 320, 'Triple Pana': 1000, 'Half Sangam A': 1600, 'Half Sangam B': 1600, 'Full Sangam': 25000 };
+    const gameRates = {
+        'Single Digit': 10,
+        'Jodi': 100,
+        'Single Pana': 160,
+        'Double Pana': 320,
+        'Triple Pana': 1000,
+        'Half Sangam A': 1600,
+        'Half Sangam B': 1600,
+        'Full Sangam': 25000
+    };
     
-    async function login() { const pwd = document.getElementById('adminPass').value; if (pwd === adminPassword) { document.getElementById('loginScreen').style.display = 'none'; document.getElementById('adminPanel').style.display = 'block'; loadMarkets(); loadUsers(); loadDeposits(); loadWithdrawals(); loadNotice(); } else { document.getElementById('loginError').innerText = 'Wrong password'; } }
+    async function login() {
+        const pwd = document.getElementById('adminPass').value;
+        if (pwd === adminPassword) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            
+            // Load all data with real-time listeners
+            loadMarkets();
+            loadUsers();
+            loadDeposits();
+            loadWithdrawals();
+            loadNotice();
+        } else {
+            document.getElementById('loginError').innerText = 'Wrong password!';
+        }
+    }
     
-    // Real-time listeners
-    function loadMarkets() { db.collection('markets').onSnapshot((snap) => { let html = ''; snap.forEach(doc => { const m = doc.data(); let statusClass = '', statusText = ''; if (m.status === 'open') { statusClass = 'status-open'; statusText = 'OPEN'; } else if (m.status === 'close') { statusClass = 'status-close'; statusText = 'CLOSE'; } else { statusClass = 'status-closed'; statusText = 'CLOSED'; } html += `<div class="market-item"><div><b>${m.name}</b><br>Numbers: ${m.numbers || '***'}<br>Time: ${m.openBid} - ${m.closeBid}<br>Current Result: ${m.result || '***-**-***'}</div><div><span class="status-badge ${statusClass}" onclick="changeStatus('${doc.id}','${m.status}')">${statusText} ▼</span><div class="result-input"><input type="text" id="result_${doc.id}" placeholder="Enter Result (e.g., 123-61-560)"><button onclick="declareResult('${doc.id}', '${m.name}')">Declare Result</button></div><button onclick="editMarket('${doc.id}','${m.name}','${m.numbers||''}','${m.openBid||''}','${m.closeBid||''}')">Edit</button><button onclick="deleteMarket('${doc.id}')" class="btn-danger">Delete</button></div></div>`; }); document.getElementById('marketsList').innerHTML = html || '<p>No markets</p>'; }); }
-    async function changeStatus(id, current) { let newStatus = current === 'open' ? 'close' : (current === 'close' ? 'closed' : 'open'); await db.collection('markets').doc(id).update({ status: newStatus }); }
-    async function addMarket() { const name = document.getElementById('marketName').value, numbers = document.getElementById('marketNumbers').value || '***-**-***', openBid = document.getElementById('openBid').value, closeBid = document.getElementById('closeBid').value, status = document.getElementById('marketStatus').value; if (!name) { alert('Enter market name'); return; } await db.collection('markets').add({ name, numbers, openBid, closeBid, status, result: '***-**-***' }); alert('Market added!'); }
-    async function editMarket(id, oldName, oldNumbers, oldOpen, oldClose) { const newName = prompt('New name', oldName), newNumbers = prompt('New numbers', oldNumbers), newOpen = prompt('Open Bid Time', oldOpen), newClose = prompt('Close Bid Time', oldClose); if (newName) await db.collection('markets').doc(id).update({ name: newName, numbers: newNumbers, openBid: newOpen, closeBid: newClose }); }
-    async function deleteMarket(id) { if (confirm('Delete?')) { await db.collection('markets').doc(id).delete(); } }
-    
-    // AUTO-WINNING FUNCTION
-    async function declareResult(marketId, marketName) {
-        const resultInput = document.getElementById(`result_${marketId}`); const result = resultInput.value.trim();
-        if (!result) { alert('Enter result in format: 123-61-560'); return; }
-        if (!result.match(/^\d{3}-\d{2}-\d{3}$/)) { alert('Invalid format! Use: 123-61-560'); return; }
-        if (confirm(`Declare result "${result}" for ${marketName}? This will automatically credit winners.`)) {
-            await db.collection('markets').doc(marketId).update({ result: result });
-            const bids = await db.collection('bids').where('market', '==', marketName).where('status', '==', 'pending').get();
-            let winners = 0;
-            for (const bidDoc of bids.docs) {
-                const bid = bidDoc.data(); const isWinning = checkIfWinning(bid.value, result, bid.gameType);
-                if (isWinning) {
-                    await bidDoc.ref.update({ status: 'won' });
-                    const multiplier = gameRates[bid.gameType] || 10; const winningAmount = bid.points * multiplier;
-                    const userRef = db.collection('users').doc(bid.userId);
-                    const userDoc = await userRef.get(); const newBalance = (userDoc.data().balance || 0) + winningAmount;
-                    await userRef.update({ balance: newBalance });
-                    await db.collection('transactions').add({ userId: bid.userId, type: 'credit', amount: winningAmount, status: 'Completed', description: `Won on ${bid.gameType}: ${bid.value}`, date: new Date() });
-                    winners++;
-                } else { await bidDoc.ref.update({ status: 'lost' }); }
+    // ============ MARKETS (Real-time) ============
+    function loadMarkets() {
+        db.collection('markets').onSnapshot((snapshot) => {
+            let html = '';
+            snapshot.forEach(doc => {
+                const m = doc.data();
+                let statusClass = '', statusText = '';
+                if (m.status === 'open') {
+                    statusClass = 'status-open';
+                    statusText = 'OPEN';
+                } else if (m.status === 'close') {
+                    statusClass = 'status-close';
+                    statusText = 'CLOSE';
+                } else {
+                    statusClass = 'status-closed';
+                    statusText = 'CLOSED';
+                }
+                html += `
+                    <div class="market-item">
+                        <div>
+                            <b>${m.name || 'No name'}</b><br>
+                            Numbers: ${m.numbers || '***'}<br>
+                            Time: ${m.openBid || '--:--'} - ${m.closeBid || '--:--'}<br>
+                            Current Result: ${m.result || '***-**-***'}
+                        </div>
+                        <div>
+                            <span class="status-badge ${statusClass}" onclick="changeStatus('${doc.id}', '${m.status}')">${statusText} ▼</span>
+                            <div class="result-input">
+                                <input type="text" id="result_${doc.id}" placeholder="Enter Result (e.g., 123-61-560)">
+                                <button onclick="declareResult('${doc.id}', '${m.name}')">Declare Result</button>
+                            </div>
+                            <button onclick="editMarket('${doc.id}', '${m.name}', '${m.numbers || ''}', '${m.openBid || ''}', '${m.closeBid || ''}')">Edit</button>
+                            <button onclick="deleteMarket('${doc.id}')" class="btn-danger">Delete</button>
+                        </div>
+                    </div>
+                `;
+            });
+            if (snapshot.empty) {
+                html = '<p style="color: #888;">No markets. Add one above!</p>';
             }
-            alert(`✅ Result declared! ${winners} winners credited.`);
+            document.getElementById('marketsList').innerHTML = html;
+        }, (error) => {
+            console.error("Markets error:", error);
+            document.getElementById('marketsList').innerHTML = '<p style="color: red;">Error loading markets. Check Firebase rules.</p>';
+        });
+    }
+    
+    async function changeStatus(id, current) {
+        let newStatus = current === 'open' ? 'close' : (current === 'close' ? 'closed' : 'open');
+        await db.collection('markets').doc(id).update({ status: newStatus });
+    }
+    
+    async function addMarket() {
+        const name = document.getElementById('marketName').value;
+        const numbers = document.getElementById('marketNumbers').value || '***-**-***';
+        const openBid = document.getElementById('openBid').value;
+        const closeBid = document.getElementById('closeBid').value;
+        const status = document.getElementById('marketStatus').value;
+        
+        if (!name) {
+            alert('Enter market name');
+            return;
+        }
+        await db.collection('markets').add({
+            name,
+            numbers,
+            openBid,
+            closeBid,
+            status,
+            result: '***-**-***'
+        });
+        document.getElementById('marketName').value = '';
+        document.getElementById('marketNumbers').value = '';
+        document.getElementById('openBid').value = '';
+        document.getElementById('closeBid').value = '';
+        alert('Market added!');
+    }
+    
+    async function editMarket(id, oldName, oldNumbers, oldOpen, oldClose) {
+        const newName = prompt('New name', oldName);
+        const newNumbers = prompt('New numbers', oldNumbers);
+        const newOpen = prompt('Open Bid Time', oldOpen);
+        const newClose = prompt('Close Bid Time', oldClose);
+        if (newName) {
+            await db.collection('markets').doc(id).update({
+                name: newName,
+                numbers: newNumbers,
+                openBid: newOpen,
+                closeBid: newClose
+            });
+        }
+    }
+    
+    async function deleteMarket(id) {
+        if (confirm('Delete this market permanently?')) {
+            await db.collection('markets').doc(id).delete();
+        }
+    }
+    
+    // ============ AUTO-WINNING BALANCE ============
+    async function declareResult(marketId, marketName) {
+        const resultInput = document.getElementById(`result_${marketId}`);
+        const result = resultInput.value.trim();
+        
+        if (!result) {
+            alert('Enter result in format: 123-61-560');
+            return;
+        }
+        if (!result.match(/^\d{3}-\d{2}-\d{3}$/)) {
+            alert('Invalid format! Use: 123-61-560 (e.g., 127-45-789)');
+            return;
+        }
+        
+        if (confirm(`Declare result "${result}" for ${marketName}? This will automatically credit winners.`)) {
+            try {
+                // Update market result
+                await db.collection('markets').doc(marketId).update({ result: result });
+                
+                // Get all pending bids for this market
+                const bids = await db.collection('bids')
+                    .where('market', '==', marketName)
+                    .where('status', '==', 'pending')
+                    .get();
+                
+                let winners = 0;
+                let totalWon = 0;
+                
+                for (const bidDoc of bids.docs) {
+                    const bid = bidDoc.data();
+                    const isWinning = checkIfWinning(bid.value, result, bid.gameType);
+                    
+                    if (isWinning) {
+                        // Update bid status to won
+                        await bidDoc.ref.update({ status: 'won' });
+                        
+                        // Calculate winning amount
+                        const multiplier = gameRates[bid.gameType] || 10;
+                        const winningAmount = bid.points * multiplier;
+                        totalWon += winningAmount;
+                        
+                        // Add winning amount to user balance
+                        const userRef = db.collection('users').doc(bid.userId);
+                        const userDoc = await userRef.get();
+                        const newBalance = (userDoc.data().balance || 0) + winningAmount;
+                        await userRef.update({ balance: newBalance });
+                        
+                        // Add winning transaction
+                        await db.collection('transactions').add({
+                            userId: bid.userId,
+                            type: 'credit',
+                            amount: winningAmount,
+                            status: 'Completed',
+                            description: `Won on ${bid.gameType}: ${bid.value}`,
+                            date: new Date()
+                        });
+                        
+                        winners++;
+                    } else {
+                        await bidDoc.ref.update({ status: 'lost' });
+                    }
+                }
+                
+                alert(`✅ Result declared!\n\nWinners: ${winners}\nTotal Won: ₹${totalWon}`);
+                resultInput.value = '';
+                
+            } catch (error) {
+                console.error('Error declaring result:', error);
+                alert('Error declaring result: ' + error.message);
+            }
         }
     }
     
     function checkIfWinning(bidValue, result, gameType) {
-        const parts = result.split('-'); const openDigit = parts[1][0]; const closeDigit = parts[1][1];
-        if (gameType === 'Single Digit') return bidValue === openDigit || bidValue === closeDigit;
-        if (gameType === 'Jodi') return bidValue === parts[1];
-        if (gameType === 'Single Pana' || gameType === 'Double Pana' || gameType === 'Triple Pana') return bidValue === parts[0] || bidValue === parts[2];
-        if (gameType === 'Half Sangam A') return bidValue === `${parts[0]}-${closeDigit}`;
-        if (gameType === 'Half Sangam B') return bidValue === `${openDigit}-${parts[2]}`;
-        if (gameType === 'Full Sangam') return bidValue === `${parts[0]}-${parts[2]}`;
-        return false;
+        const parts = result.split('-');
+        const openPana = parts[0];
+        const closePana = parts[2];
+        const openDigit = parts[1][0];
+        const closeDigit = parts[1][1];
+        
+        switch(gameType) {
+            case 'Single Digit':
+                return bidValue === openDigit || bidValue === closeDigit;
+            case 'Jodi':
+                return bidValue === parts[1];
+            case 'Single Pana':
+            case 'Double Pana':
+            case 'Triple Pana':
+                return bidValue === openPana || bidValue === closePana;
+            case 'Half Sangam A':
+                return bidValue === `${openPana}-${closeDigit}`;
+            case 'Half Sangam B':
+                return bidValue === `${openDigit}-${closePana}`;
+            case 'Full Sangam':
+                return bidValue === `${openPana}-${closePana}`;
+            default:
+                return false;
+        }
     }
     
-    // USERS - Real-time
-    function loadUsers() { db.collection('users').onSnapshot(async (snap) => { let html = ''; for (const doc of snap.docs) { const u = doc.data(); html += `<div class="user-item"><div><b>${u.name}</b><br>${u.phone}<br>Balance: ₹${u.balance || 0}</div><div><button onclick="addBalance('${doc.id}')">Add ₹</button><button onclick="blockUser('${doc.id}', '${u.blocked || false}')" class="btn-warning">${u.blocked ? 'Unblock' : 'Block'}</button><button onclick="deleteUser('${doc.id}')" class="btn-danger">Delete</button><button onclick="viewUserBids('${doc.id}')">View Bids</button></div></div>`; } document.getElementById('usersList').innerHTML = html || '<p>No users</p>'; }); }
-    async function addBalance(uid) { const amt = prompt('Enter amount:'); if(amt && !isNaN(amt)) { const user = await db.collection('users').doc(uid).get(); const newBalance = (user.data().balance || 0) + parseInt(amt); await db.collection('users').doc(uid).update({ balance: newBalance }); alert(`Added ₹${amt}`); } }
-    async function blockUser(uid, current) { await db.collection('users').doc(uid).update({ blocked: !current }); alert(!current ? 'User Blocked' : 'User Unblocked'); }
-    async function deleteUser(uid) { if(confirm('Delete user?')) { await db.collection('users').doc(uid).delete(); alert('User deleted'); } }
-    async function viewUserBids(uid) { const bids = await db.collection('bids').where('userId','==',uid).get(); if(bids.empty) { alert('No bids'); return; } let msg = ''; bids.forEach(d => msg += `${d.data().market}: ${d.data().value} (${d.data().points} pts) - ${d.data().status}\n`); alert(msg); }
+    // ============ USERS (Real-time) ============
+    function loadUsers() {
+        db.collection('users').onSnapshot(async (snapshot) => {
+            let html = '';
+            for (const doc of snapshot.docs) {
+                const u = doc.data();
+                html += `
+                    <div class="user-item">
+                        <div>
+                            <b>${u.name || 'Unknown'}</b><br>
+                            ${u.phone || 'No phone'}<br>
+                            Balance: ₹${u.balance || 0}
+                        </div>
+                        <div>
+                            <button onclick="addBalance('${doc.id}')">Add ₹</button>
+                            <button onclick="viewUserBids('${doc.id}')">View Bids</button>
+                            <button onclick="deleteUser('${doc.id}')" class="btn-danger">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }
+            if (snapshot.empty) {
+                html = '<p style="color: #888;">No users yet</p>';
+            }
+            document.getElementById('usersList').innerHTML = html;
+        }, (error) => {
+            console.error("Users error:", error);
+            document.getElementById('usersList').innerHTML = '<p style="color: red;">Error loading users. Check Firebase rules.</p>';
+        });
+    }
     
-    // DEPOSITS - Real-time
-    function loadDeposits() { db.collection('transactions').where('type','==','credit').where('status','==','Pending').onSnapshot(async (snap) => { let html = ''; for (const doc of snap.docs) { const d = doc.data(); const user = await db.collection('users').doc(d.userId).get(); html += `<div class="request-item"><div><b>${user.data()?.name || 'User'}</b><br>Amount: ₹${d.amount}<br>Date: ${d.date?.toDate().toLocaleString() || 'Pending'}</div><div><button class="btn-success" onclick="approveDeposit('${doc.id}','${d.amount}','${d.userId}')">Approve</button><button class="btn-danger" onclick="rejectDeposit('${doc.id}')">Reject</button></div></div>`; } document.getElementById('depositsList').innerHTML = html || '<p>No pending deposits</p>'; }); }
-    async function approveDeposit(id, amount, userId) { const user = await db.collection('users').doc(userId).get(); const newBalance = (user.data().balance || 0) + amount; await db.collection('users').doc(userId).update({ balance: newBalance }); await db.collection('transactions').doc(id).update({ status: 'Completed' }); alert('Deposit approved!'); }
-    async function rejectDeposit(id) { await db.collection('transactions').doc(id).update({ status: 'Rejected' }); alert('Deposit rejected'); }
+    async function addBalance(uid) {
+        const amount = prompt('Enter amount to add:');
+        if (amount && !isNaN(amount) && parseInt(amount) > 0) {
+            const userDoc = await db.collection('users').doc(uid).get();
+            const currentBalance = userDoc.data().balance || 0;
+            const newBalance = currentBalance + parseInt(amount);
+            await db.collection('users').doc(uid).update({ balance: newBalance });
+            alert(`✅ ₹${amount} added! New balance: ₹${newBalance}`);
+        }
+    }
     
-    // WITHDRAWALS - Real-time
-    function loadWithdrawals() { db.collection('withdrawRequests').where('status','==','Pending').onSnapshot(async (snap) => { let html = ''; for (const doc of snap.docs) { const d = doc.data(); const user = await db.collection('users').doc(d.userId).get(); html += `<div class="request-item"><div><b>${user.data()?.name || 'User'}</b><br>Amount: ₹${d.amount}<br>Bank: ${d.bankDetails?.bankName || 'N/A'}</div><div><button class="btn-success" onclick="approveWithdraw('${doc.id}','${d.amount}','${d.userId}')">Approve</button><button class="btn-danger" onclick="rejectWithdraw('${doc.id}')">Reject</button></div></div>`; } document.getElementById('withdrawalsList').innerHTML = html || '<p>No pending withdrawals</p>'; }); }
-    async function approveWithdraw(id, amount, userId) { const user = await db.collection('users').doc(userId).get(); if((user.data().balance||0)<amount) { alert('Insufficient balance'); return; } const newBalance = (user.data().balance||0)-amount; await db.collection('users').doc(userId).update({ balance: newBalance }); await db.collection('withdrawRequests').doc(id).update({ status: 'Completed' }); await db.collection('transactions').add({ userId, type: 'debit', amount, status: 'Completed', date: new Date() }); alert('Withdrawal approved!'); }
-    async function rejectWithdraw(id) { await db.collection('withdrawRequests').doc(id).update({ status: 'Rejected' }); alert('Withdrawal rejected'); }
+    async function viewUserBids(uid) {
+        const bids = await db.collection('bids').where('userId', '==', uid).get();
+        if (bids.empty) {
+            alert('No bids from this user');
+            return;
+        }
+        let message = '📋 Bid History:\n\n';
+        bids.forEach(doc => {
+            const b = doc.data();
+            message += `${b.market}: ${b.value} (${b.points} pts) - ${b.status}\n`;
+        });
+        alert(message);
+    }
     
-    // NOTICE BOARD - Real-time update
-    function loadNotice() { db.collection('settings').doc('notice').onSnapshot((doc) => { if(doc.exists) document.getElementById('noticeText').value = doc.data().text; else document.getElementById('noticeText').value = 'Welcome to WIN777! Play big · Win big · Unlimited'; }); }
-    async function updateNotice() { const text = document.getElementById('noticeText').value; await db.collection('settings').doc('notice').set({ text: text, updatedAt: new Date() }); document.getElementById('noticeMsg').innerHTML = '✅ Notice updated! Users will see instantly.'; setTimeout(()=>document.getElementById('noticeMsg').innerHTML='',3000); }
+    async function deleteUser(uid) {
+        if (confirm('Delete this user permanently? This cannot be undone!')) {
+            await db.collection('users').doc(uid).delete();
+            alert('User deleted');
+        }
+    }
     
-    // SETTINGS
-    function changePassword() { const old = document.getElementById('oldPass').value, newP = document.getElementById('newPass').value; if(old === adminPassword) { adminPassword = newP; document.getElementById('passMsg').innerHTML = '✅ Password changed!'; } else { document.getElementById('passMsg').innerHTML = '❌ Wrong password'; } setTimeout(()=>document.getElementById('passMsg').innerHTML='',2000); }
-    async function updateUPI() { const upi = document.getElementById('upiId').value; await db.collection('settings').doc('upi').set({ upiId: upi }); alert('UPI ID updated!'); }
+    // ============ DEPOSITS (Real-time) ============
+    function loadDeposits() {
+        db.collection('transactions')
+            .where('type', '==', 'credit')
+            .where('status', '==', 'Pending')
+            .onSnapshot(async (snapshot) => {
+                let html = '';
+                for (const doc of snapshot.docs) {
+                    const d = doc.data();
+                    const user = await db.collection('users').doc(d.userId).get();
+                    const userName = user.exists ? user.data().name : 'Unknown';
+                    html += `
+                        <div class="request-item">
+                            <div>
+                                <b>👤 User:</b> ${userName}<br>
+                                <b>💰 Amount:</b> ₹${d.amount}<br>
+                                <b>📅 Date:</b> ${d.date?.toDate().toLocaleString() || 'Pending'}
+                            </div>
+                            <div>
+                                <button onclick="approveDeposit('${doc.id}', ${d.amount}, '${d.userId}')" class="btn-success">✅ Approve</button>
+                                <button onclick="rejectDeposit('${doc.id}')" class="btn-danger">❌ Reject</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                if (snapshot.empty) {
+                    html = '<p style="color: #888;">No pending deposits</p>';
+                }
+                document.getElementById('depositsList').innerHTML = html;
+            }, (error) => {
+                console.error("Deposits error:", error);
+                document.getElementById('depositsList').innerHTML = '<p style="color: red;">Error loading deposits</p>';
+            });
+    }
     
-    function showSection(section) { document.querySelectorAll('#marketsSection, #usersSection, #depositsSection, #withdrawalsSection, #noticeSection, #settingsSection').forEach(el => el.classList.add('hidden')); document.getElementById(`${section}Section`).classList.remove('hidden'); }
-    function logout() { document.getElementById('loginScreen').style.display = 'flex'; document.getElementById('adminPanel').style.display = 'none'; }
+    async function approveDeposit(id, amount, userId) {
+        if (confirm(`Approve deposit of ₹${amount}?`)) {
+            const user = await db.collection('users').doc(userId).get();
+            const newBalance = (user.data().balance || 0) + amount;
+            await db.collection('users').doc(userId).update({ balance: newBalance });
+            await db.collection('transactions').doc(id).update({ status: 'Completed' });
+            alert(`✅ Deposit approved! ₹${amount} added.`);
+        }
+    }
     
-    async function loadUPI() { const doc = await db.collection('settings').doc('upi').get(); if(doc.exists) document.getElementById('upiId').value = doc.data().upiId; else document.getElementById('upiId').value = 'ganeshpatil99@slc'; }
-    loadUPI();
+    async function rejectDeposit(id) {
+        if (confirm('Reject this deposit?')) {
+            await db.collection('transactions').doc(id).update({ status: 'Rejected' });
+            alert('Deposit rejected');
+        }
+    }
+    
+    // ============ WITHDRAWALS (Real-time) ============
+    function loadWithdrawals() {
+        db.collection('withdrawRequests')
+            .where('status', '==', 'Pending')
+            .onSnapshot(async (snapshot) => {
+                let html = '';
+                for (const doc of snapshot.docs) {
+                    const d = doc.data();
+                    const user = await db.collection('users').doc(d.userId).get();
+                    const userName = user.exists ? user.data().name : 'Unknown';
+                    html += `
+                        <div class="request-item">
+                            <div>
+                                <b>👤 User:</b> ${userName}<br>
+                                <b>💰 Amount:</b> ₹${d.amount}<br>
+                                <b>🏦 Bank:</b> ${d.bankDetails?.bankName || 'N/A'}<br>
+                                <b>📋 Account:</b> ${d.bankDetails?.accountNumber || 'N/A'}
+                            </div>
+                            <div>
+                                <button onclick="approveWithdraw('${doc.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button>
+                                <button onclick="rejectWithdraw('${doc.id}')" class="btn-danger">Reject</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                if (snapshot.empty) {
+                    html = '<p style="color: #888;">No pending withdrawals</p>';
+                }
+                document.getElementById('withdrawalsList').innerHTML = html;
+            }, (error) => {
+                console.error("Withdrawals error:", error);
+                document.getElementById('withdrawalsList').innerHTML = '<p style="color: red;">Error loading withdrawals</p>';
+            });
+    }
+    
+    async function approveWithdraw(id, amount, userId) {
+        if (confirm(`Approve withdrawal of ₹${amount}?`)) {
+            const user = await db.collection('users').doc(userId).get();
+            if ((user.data().balance || 0) < amount) {
+                alert('Insufficient balance!');
+                return;
+            }
+            const newBalance = (user.data().balance || 0) - amount;
+            await db.collection('users').doc(userId).update({ balance: newBalance });
+            await db.collection('withdrawRequests').doc(id).update({ status: 'Completed' });
+            await db.collection('transactions').add({
+                userId: userId,
+                type: 'debit',
+                amount: amount,
+                status: 'Completed',
+                description: 'Withdrawal Approved',
+                date: new Date()
+            });
+            alert(`✅ Withdrawal approved! ₹${amount} deducted.`);
+        }
+    }
+    
+    async function rejectWithdraw(id) {
+        if (confirm('Reject this withdrawal?')) {
+            await db.collection('withdrawRequests').doc(id).update({ status: 'Rejected' });
+            alert('Withdrawal rejected');
+        }
+    }
+    
+    // ============ NOTICE BOARD ============
+    function loadNotice() {
+        db.collection('settings').doc('notice').onSnapshot((doc) => {
+            if (doc.exists) {
+                document.getElementById('noticeText').value = doc.data().text;
+            } else {
+                document.getElementById('noticeText').value = 'Welcome to WIN777! Play big · Win big · Unlimited';
+            }
+        });
+    }
+    
+    async function updateNotice() {
+        const text = document.getElementById('noticeText').value;
+        await db.collection('settings').doc('notice').set({ text: text, updatedAt: new Date() });
+        document.getElementById('noticeMsg').innerHTML = '✅ Notice updated!';
+        document.getElementById('noticeMsg').style.color = '#4caf50';
+        setTimeout(() => {
+            document.getElementById('noticeMsg').innerHTML = '';
+        }, 3000);
+    }
+    
+    // ============ SETTINGS ============
+    function changePassword() {
+        const old = document.getElementById('oldPass').value;
+        const newP = document.getElementById('newPass').value;
+        if (old === adminPassword) {
+            adminPassword = newP;
+            document.getElementById('passMsg').innerHTML = '✅ Password changed successfully!';
+            document.getElementById('passMsg').style.color = '#4caf50';
+        } else {
+            document.getElementById('passMsg').innerHTML = '❌ Wrong current password!';
+            document.getElementById('passMsg').style.color = '#f44336';
+        }
+        setTimeout(() => {
+            document.getElementById('passMsg').innerHTML = '';
+        }, 3000);
+    }
+    
+    async function updateUPI() {
+        const upi = document.getElementById('upiId').value;
+        await db.collection('settings').doc('upi').set({ upiId: upi });
+        document.getElementById('upiMsg').innerHTML = '✅ UPI ID updated!';
+        document.getElementById('upiMsg').style.color = '#4caf50';
+        setTimeout(() => {
+            document.getElementById('upiMsg').innerHTML = '';
+        }, 3000);
+    }
+    
+    // ============ NAVIGATION ============
+    function showSection(section) {
+        document.getElementById('marketsSection').classList.add('hidden');
+        document.getElementById('usersSection').classList.add('hidden');
+        document.getElementById('depositsSection').classList.add('hidden');
+        document.getElementById('withdrawalsSection').classList.add('hidden');
+        document.getElementById('noticeSection').classList.add('hidden');
+        document.getElementById('settingsSection').classList.add('hidden');
+        document.getElementById(`${section}Section`).classList.remove('hidden');
+    }
+    
+    function logout() {
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('adminPanel').style.display = 'none';
+        document.getElementById('adminPass').value = '';
+    }
+    
+    // Make functions global for onclick
+    window.login = login;
+    window.changeStatus = changeStatus;
+    window.addMarket = addMarket;
+    window.editMarket = editMarket;
+    window.deleteMarket = deleteMarket;
+    window.declareResult = declareResult;
+    window.addBalance = addBalance;
+    window.viewUserBids = viewUserBids;
+    window.deleteUser = deleteUser;
+    window.approveDeposit = approveDeposit;
+    window.rejectDeposit = rejectDeposit;
+    window.approveWithdraw = approveWithdraw;
+    window.rejectWithdraw = rejectWithdraw;
+    window.updateNotice = updateNotice;
+    window.changePassword = changePassword;
+    window.updateUPI = updateUPI;
+    window.showSection = showSection;
+    window.logout = logout;
 </script>
 </body>
 </html>
