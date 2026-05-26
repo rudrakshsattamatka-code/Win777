@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>WIN77 - My Bids</title>
+    <title>WIN777 - My Bids</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -11,23 +11,34 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #0a0a0f; padding-bottom: 70px; }
         .app-container { max-width: 500px; margin: 0 auto; background: #0a0a0f; min-height: 100vh; }
-        .status-bar { padding: 12px 16px; display: flex; justify-content: space-between; color: white; font-size: 14px; }
-        .header { background: #1a1a2e; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ff9800; }
-        .logo { color: #ff9800; font-size: 20px; font-weight: bold; }
-        .back-btn { background: none; border: none; color: #ff9800; font-size: 20px; cursor: pointer; }
-        .passbook-item { background: #1a1a2e; margin: 12px; padding: 15px; border-radius: 16px; border-left: 4px solid #ff9800; }
-        .passbook-number { color: #ff9800; font-size: 14px; font-weight: bold; margin-bottom: 8px; }
+        .header { background: #0a0a0f; padding: 15px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #00b4ff; }
+        .logo { color: #00b4ff; font-size: 20px; font-weight: bold; flex: 1; text-align: center; }
+        .back-btn { background: none; border: none; color: #00b4ff; font-size: 24px; cursor: pointer; }
+        .passbook-item { background: #1a1a2e; margin: 12px; padding: 15px; border-radius: 16px; border-left: 4px solid #00b4ff; }
+        .passbook-number { color: #00b4ff; font-size: 14px; font-weight: bold; margin-bottom: 8px; }
         .passbook-detail { display: flex; justify-content: space-between; margin: 8px 0; color: #ddd; font-size: 13px; }
         .passbook-label { color: #888; }
         .passbook-value { color: white; font-weight: bold; }
         .no-data { text-align: center; color: #888; padding: 40px; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #1a1a2e; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #00b4ff; }
+        .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 11px; }
+        .nav-item span { font-size: 22px; display: block; }
     </style>
 </head>
 <body>
 <div class="app-container">
-    <div class="status-bar"><span>10:15</span><span>📶 🔋 91%</span></div>
-    <div class="header"><button class="back-btn" onclick="goBack()">←</button><div class="logo">PASSBOOK</div><div></div></div>
+    <div class="header">
+        <button class="back-btn" onclick="location.href='dashboard.html'">←</button>
+        <div class="logo">PASSBOOK</div>
+        <div style="width: 30px;"></div>
+    </div>
     <div id="bidsList"></div>
+    <div class="bottom-nav">
+        <div class="nav-item" onclick="location.href='dashboard.html'"><span>🏠</span><p>Home</p></div>
+        <div class="nav-item" onclick="location.href='mybids.html'"><span>📘</span><p>Passbook</p></div>
+        <div class="nav-item" onclick="location.href='funds.html'"><span>🏦</span><p>Fund</p></div>
+        <div class="nav-item" onclick="alert('Chat Support: WhatsApp +919876543210')"><span>💬</span><p>Support</p></div>
+    </div>
 </div>
 
 <script>
@@ -48,7 +59,7 @@
         const user = auth.currentUser;
         if (!user) { window.location.href = 'index.html'; return; }
         
-        const bids = await db.collection('bids').where('userId', '==', user.uid).orderBy('createdAt', 'desc').get();
+        const bids = await db.collection('bids').where('userId', '==', user.uid).get();
         const container = document.getElementById('bidsList');
         
         if(bids.empty) {
@@ -79,8 +90,6 @@
         }
         container.innerHTML = html;
     }
-    
-    function goBack() { window.location.href = 'dashboard.html'; }
     
     auth.onAuthStateChanged(user => { if(!user) window.location.href = 'index.html'; else loadBids(); });
 </script>
