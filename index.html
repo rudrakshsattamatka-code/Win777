@@ -59,7 +59,7 @@
 <body>
 <div class="app-container">
     <div class="header">
-        <div class="logo">WIN777</div>
+        <div class="logo">WIN77</div>
         <div class="tagline">India's best Satta Matka Application</div>
     </div>
 
@@ -95,7 +95,7 @@
     <div id="pinScreen" class="screen hidden">
         <input type="password" id="pinInput" class="mpin-input" placeholder="●●●●" maxlength="4">
         <button class="login-btn" onclick="verifyPin()">Login with MPIN</button>
-        <div class="forgot-link" onclick="showPhoneScreen()">Forgot MPIN?</div>
+        <div class="forgot-link" onclick="goToPhone()">Forgot MPIN?</div>
         <div id="pinError" class="error-text"></div>
     </div>
 
@@ -120,15 +120,30 @@
     };
     
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    const auth = FirebaseAuth.getInstance();
+    const db = FirebaseFirestore.getInstance();
+    auth.setPersistence(FirebaseAuth.Auth.Persistence.LOCAL);
     
     let confirmationResult = null;
     let currentPhone = null;
     let countdown = 0;
     let timerInterval = null;
     let recaptchaVerifier = null;
+    let currentUserData = null;
+    
+    // DOM Elements
+    const phoneScreen = document.getElementById('phoneScreen');
+    const otpScreen = document.getElementById('otpScreen');
+    const pinScreen = document.getElementById('pinScreen');
+    const registerScreen = document.getElementById('registerScreen');
+    
+    function showScreen(screen) {
+        phoneScreen.classList.add('hidden');
+        otpScreen.classList.add('hidden');
+        pinScreen.classList.add('hidden');
+        registerScreen.classList.add('hidden');
+        screen.classList.remove('hidden');
+    }
     
     function initRecaptcha() {
         if (!recaptchaVerifier) {
@@ -137,7 +152,7 @@
             container.style.position = 'absolute';
             container.style.left = '-9999px';
             document.body.appendChild(container);
-            recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { size: 'invisible' });
+            recaptchaVerifier = new FirebaseAuth.RecaptchaVerifier('recaptcha-container', { size: 'invisible' });
         }
         return recaptchaVerifier;
     }
@@ -162,35 +177,6 @@
             if (timerEl) timerEl.innerText = `Second Remaining ${countdown}`;
             countdown--;
         }, 1000);
-    }
-    
-    // Screen Navigation
-    function showPhoneScreen() {
-        document.getElementById('phoneScreen').classList.remove('hidden');
-        document.getElementById('otpScreen').classList.add('hidden');
-        document.getElementById('pinScreen').classList.add('hidden');
-        document.getElementById('registerScreen').classList.add('hidden');
-    }
-    
-    function showOtpScreen() {
-        document.getElementById('phoneScreen').classList.add('hidden');
-        document.getElementById('otpScreen').classList.remove('hidden');
-        document.getElementById('pinScreen').classList.add('hidden');
-        document.getElementById('registerScreen').classList.add('hidden');
-    }
-    
-    function showPinScreen() {
-        document.getElementById('phoneScreen').classList.add('hidden');
-        document.getElementById('otpScreen').classList.add('hidden');
-        document.getElementById('pinScreen').classList.remove('hidden');
-        document.getElementById('registerScreen').classList.add('hidden');
-    }
-    
-    function showRegisterScreen() {
-        document.getElementById('phoneScreen').classList.add('hidden');
-        document.getElementById('otpScreen').classList.add('hidden');
-        document.getElementById('pinScreen').classList.add('hidden');
-        document.getElementById('registerScreen').classList.remove('hidden');
     }
     
     // Notification
@@ -225,7 +211,7 @@
             auth.signInWithPhoneNumber(currentPhone, verifier)
                 .then(confirmation => {
                     confirmationResult = confirmation;
-                    showOtpScreen();
+                    showScreen(otpScreen);
                     startTimer(60);
                     btn.disabled = false;
                     btn.innerText = 'Login with OTP';
@@ -259,16 +245,17 @@
                 db.collection('users').doc(user.uid).get()
                     .then(doc => {
                         if (doc.exists && doc.data().pin) {
-                            // User has PIN - check session and go to dashboard
-                            window.location.replace('dashboard.html');
+                            // User exists - redirect to dashboard directly
+                            window.location.href = 'dashboard.html';
                         } else {
-                            showRegisterScreen();
+                            // New user - show registration
+                            showScreen(registerScreen);
                         }
                         btn.disabled = false;
                         btn.innerText = 'SUBMIT';
                     })
                     .catch(() => {
-                        showRegisterScreen();
+                        showScreen(registerScreen);
                         btn.disabled = false;
                         btn.innerText = 'SUBMIT';
                     });
@@ -320,7 +307,7 @@
         }).then(() => {
             showNotificationPopup();
             setTimeout(() => {
-                window.location.replace('dashboard.html');
+                window.location.href = 'dashboard.html';
             }, 2000);
         }).catch(error => {
             showError('regError', error.message);
@@ -329,7 +316,7 @@
         });
     }
     
-    // Verify PIN (FIXED - No Loop)
+    // Verify PIN
     function verifyPin() {
         const pin = document.getElementById('pinInput').value;
         if (!pin || pin.length !== 4) {
@@ -339,7 +326,7 @@
         
         const user = auth.currentUser;
         if (!user) {
-            showPhoneScreen();
+            showScreen(phoneScreen);
             return;
         }
         
@@ -350,8 +337,8 @@
         db.collection('users').doc(user.uid).get()
             .then(doc => {
                 if (doc.exists && doc.data().pin === pin) {
-                    // CORRECT PIN - Redirect to dashboard using replace (prevents back button loop)
-                    window.location.replace('dashboard.html');
+                    // PIN matched - redirect to dashboard
+                    window.location.href = 'dashboard.html';
                 } else {
                     showError('pinError', 'Invalid MPIN');
                     btn.disabled = false;
@@ -369,36 +356,47 @@
     function showPinLogin() {
         const user = auth.currentUser;
         if (!user) {
-            showPhoneScreen();
+            showScreen(phoneScreen);
             return;
         }
         db.collection('users').doc(user.uid).get()
             .then(doc => {
                 if (doc.exists && doc.data().pin) {
-                    showPinScreen();
+                    showScreen(pinScreen);
+                    document.getElementById('pinInput').value = '';
+                    document.getElementById('pinError').innerText = '';
                 } else {
-                    showPhoneScreen();
+                    showScreen(phoneScreen);
                 }
             })
-            .catch(() => showPhoneScreen());
+            .catch(() => showScreen(phoneScreen));
     }
     
-    // Initial check
+    function goToPhone() {
+        auth.signOut().then(() => {
+            showScreen(phoneScreen);
+        }).catch(() => {
+            showScreen(phoneScreen);
+        });
+    }
+    
+    // Check session on page load
     auth.onAuthStateChanged(user => {
         if (user) {
             db.collection('users').doc(user.uid).get()
                 .then(doc => {
                     if (doc.exists && doc.data().pin) {
-                        showPinScreen();
+                        showScreen(pinScreen);
+                        document.getElementById('pinInput').value = '';
                     } else if (doc.exists && !doc.data().pin) {
-                        showRegisterScreen();
+                        showScreen(registerScreen);
                     } else {
-                        showPhoneScreen();
+                        showScreen(phoneScreen);
                     }
                 })
-                .catch(() => showPhoneScreen());
+                .catch(() => showScreen(phoneScreen));
         } else {
-            showPhoneScreen();
+            showScreen(phoneScreen);
         }
     });
 </script>
