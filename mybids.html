@@ -26,38 +26,13 @@
     </style>
 </head>
 <body>
-<div class="app-container">
-    <div class="header"><button class="back-btn" onclick="location.href='dashboard.html'">←</button><div class="logo">PASSBOOK</div><div style="width: 30px;"></div></div>
-    <div id="bidsList"></div>
-    <div class="bottom-nav">
-        <div class="nav-item" onclick="location.href='dashboard.html'"><span>🏠</span><p>Home</p></div>
-        <div class="nav-item" onclick="location.href='mybids.html'"><span>📘</span><p>Passbook</p></div>
-        <div class="nav-item" onclick="location.href='funds.html'"><span>🏦</span><p>Fund</p></div>
-        <div class="nav-item" onclick="alert('Chat Support: WhatsApp +919876543210')"><span>💬</span><p>Support</p></div>
-    </div>
-</div>
-
+<div class="app-container"><div class="header"><button class="back-btn" onclick="location.href='dashboard.html'">←</button><div class="logo">PASSBOOK</div><div style="width:30px;"></div></div><div id="bidsList"></div>
+<div class="bottom-nav"><div class="nav-item" onclick="location.href='dashboard.html'"><span>🏠</span><p>Home</p></div><div class="nav-item" onclick="location.href='mybids.html'"><span>📘</span><p>Passbook</p></div><div class="nav-item" onclick="location.href='funds.html'"><span>🏦</span><p>Fund</p></div><div class="nav-item" onclick="alert('Support: WhatsApp +919876543210')"><span>💬</span><p>Support</p></div></div></div>
 <script>
     const firebaseConfig = { apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38", authDomain: "win777-ed482.firebaseapp.com", projectId: "win777-ed482", storageBucket: "win777-ed482.firebasestorage.app", messagingSenderId: "843686112399", appId: "1:843686112399:web:9c20a96831e6a94cd814fa" };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    
-    async function loadBids() {
-        const user = auth.currentUser;
-        if (!user) { window.location.href = 'index.html'; return; }
-        const bids = await db.collection('bids').where('userId', '==', user.uid).get();
-        const container = document.getElementById('bidsList');
-        if(bids.empty) { container.innerHTML = '<div class="no-data">No bids placed yet</div>'; return; }
-        let html = '', index = 1, runningTotal = 0;
-        for(const doc of bids.docs) {
-            const b = doc.data(); const amount = b.points || 0; const previousAmount = runningTotal; runningTotal += amount;
-            html += `<div class="passbook-item"><div class="passbook-number">${index} ${b.market || 'Unknown'} (${b.gameType || 'Unknown'}, ${b.bidType || ''}) : ${b.value || '-'}</div><div class="passbook-detail"><span class="passbook-label">Date:-</span><span class="passbook-value">${new Date(b.createdAt?.toDate()).toLocaleDateString() || 'Pending'}</span></div><div class="passbook-detail"><span class="passbook-label">Amount</span><span class="passbook-value">₹${amount}</span></div><div class="passbook-detail"><span class="passbook-label">Previous Amount</span><span class="passbook-value">₹${previousAmount}</span></div><div class="passbook-detail"><span class="passbook-label">Current Amount</span><span class="passbook-value">₹${runningTotal}</span></div></div>`;
-            index++;
-        }
-        container.innerHTML = html;
-    }
-    auth.onAuthStateChanged(user => { if(!user) window.location.href = 'index.html'; else loadBids(); });
+    firebase.initializeApp(firebaseConfig); const auth = firebase.auth(); const db = firebase.firestore();
+    async function loadBids() { const user = auth.currentUser; if(!user) { window.location.href='index.html'; return; } const bids = await db.collection('bids').where('userId','==',user.uid).get(); const container = document.getElementById('bidsList'); if(bids.empty) { container.innerHTML='<div class="no-data">No bids placed yet</div>'; return; } let html='', index=1, runningTotal=0; for(const doc of bids.docs) { const b=doc.data(); const amount=b.points||0; const prev=runningTotal; runningTotal+=amount; html+=`<div class="passbook-item"><div class="passbook-number">${index} ${b.market||'Unknown'} (${b.gameType||'Unknown'}) : ${b.value||'-'}</div><div class="passbook-detail"><span class="passbook-label">Date:-</span><span class="passbook-value">${new Date(b.createdAt?.toDate()).toLocaleDateString()||'Pending'}</span></div><div class="passbook-detail"><span class="passbook-label">Amount</span><span class="passbook-value">₹${amount}</span></div><div class="passbook-detail"><span class="passbook-label">Previous Amount</span><span class="passbook-value">₹${prev}</span></div><div class="passbook-detail"><span class="passbook-label">Current Amount</span><span class="passbook-value">₹${runningTotal}</span></div></div>`; index++; } container.innerHTML=html; }
+    auth.onAuthStateChanged(user=>{ if(!user) window.location.href='index.html'; else loadBids(); });
 </script>
 </body>
 </html>
