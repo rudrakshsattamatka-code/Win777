@@ -32,229 +32,87 @@
         .status-closed { background: #f4433620; color: #f44336; border: 1px solid #f44336; }
         .btn-success { background: #28a745; color: white; }
         .btn-danger { background: #dc3545; color: white; }
+        .btn-warning { background: #ff9800; color: black; }
         .hidden { display: none; }
+        .notice-edit { background: #fff3e0; padding: 15px; border-radius: 10px; margin-bottom: 15px; }
+        textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; }
         @media (max-width: 768px) { .sidebar { width: 70px; } .sidebar h2 { font-size: 14px; } .sidebar-item { padding: 12px; text-align: center; } .sidebar-item span { display: none; } .main-content { margin-left: 70px; } }
     </style>
 </head>
 <body>
 
 <div id="loginScreen" class="login-screen">
-    <div class="login-card">
-        <h2>WIN77 ADMIN</h2>
-        <input type="password" id="adminPass" placeholder="Enter Password">
-        <button onclick="login()">Login</button>
-        <div id="loginError" style="color:red; margin-top:10px;"></div>
-    </div>
+    <div class="login-card"><h2>WIN77 ADMIN</h2><input type="password" id="adminPass" placeholder="Enter Password"><button onclick="login()">Login</button><div id="loginError" style="color:red; margin-top:10px;"></div></div>
 </div>
 
 <div id="adminPanel" class="admin-panel">
-    <div class="sidebar">
-        <h2>WIN77</h2>
-        <div class="sidebar-item" onclick="showSection('markets')">🎮 Markets</div>
-        <div class="sidebar-item" onclick="showSection('users')">👥 Users</div>
-        <div class="sidebar-item" onclick="showSection('deposits')">💰 Deposits</div>
-        <div class="sidebar-item" onclick="showSection('withdrawals')">💸 Withdrawals</div>
-        <div class="sidebar-item" onclick="showSection('settings')">⚙️ Settings</div>
-        <div class="sidebar-item" onclick="logout()">🚪 Logout</div>
-    </div>
+    <div class="sidebar"><h2>WIN77</h2><div class="sidebar-item" onclick="showSection('markets')">🎮 Markets</div><div class="sidebar-item" onclick="showSection('users')">👥 Users</div><div class="sidebar-item" onclick="showSection('deposits')">💰 Deposits</div><div class="sidebar-item" onclick="showSection('withdrawals')">💸 Withdrawals</div><div class="sidebar-item" onclick="showSection('notice')">📢 Notice Board</div><div class="sidebar-item" onclick="showSection('settings')">⚙️ Settings</div><div class="sidebar-item" onclick="logout()">🚪 Logout</div></div>
 
     <div class="main-content">
-        <div id="marketsSection">
-            <div class="card"><h3>➕ Add New Market</h3><input type="text" id="marketName" placeholder="Market Name"><input type="text" id="marketNumbers" placeholder="Numbers"><input type="time" id="openBid" placeholder="Open Bid"><input type="time" id="closeBid" placeholder="Close Bid"><select id="marketStatus"><option value="open">🟢 OPEN</option><option value="close">🟡 CLOSE</option><option value="closed">🔴 CLOSED</option></select><button onclick="addMarket()">Add Market</button></div>
-            <div class="card"><h3>📋 Markets (Click Status to Change)</h3><div id="marketsList"></div></div>
-        </div>
-        <div id="usersSection" class="hidden"><div class="card"><h3>👥 Users</h3><div id="usersList"></div></div></div>
+        <!-- Markets Section -->
+        <div id="marketsSection"><div class="card"><h3>➕ Add New Market</h3><input type="text" id="marketName" placeholder="Market Name"><input type="text" id="marketNumbers" placeholder="Numbers"><input type="time" id="openBid" placeholder="Open Bid"><input type="time" id="closeBid" placeholder="Close Bid"><select id="marketStatus"><option value="open">🟢 OPEN</option><option value="close">🟡 CLOSE</option><option value="closed">🔴 CLOSED</option></select><button onclick="addMarket()">Add Market</button></div><div class="card"><h3>📋 Markets (Click Status to Change)</h3><div id="marketsList"></div></div></div>
+        
+        <!-- Users Section -->
+        <div id="usersSection" class="hidden"><div class="card"><h3>👥 Users Management</h3><div id="usersList"></div></div></div>
+        
+        <!-- Deposits Section -->
         <div id="depositsSection" class="hidden"><div class="card"><h3>💰 Deposit Requests</h3><div id="depositsList"></div></div></div>
+        
+        <!-- Withdrawals Section -->
         <div id="withdrawalsSection" class="hidden"><div class="card"><h3>💸 Withdrawal Requests</h3><div id="withdrawalsList"></div></div></div>
+        
+        <!-- Notice Board Section -->
+        <div id="noticeSection" class="hidden"><div class="card"><h3>📢 Notice Board Settings</h3><div class="notice-edit"><label>Notice Text:</label><textarea id="noticeText" rows="3"></textarea><button onclick="updateNotice()">Update Notice</button><div id="noticeMsg"></div></div></div></div>
+        
+        <!-- Settings Section -->
         <div id="settingsSection" class="hidden"><div class="card"><h3>🔐 Change Password</h3><input type="password" id="oldPass" placeholder="Old Password"><input type="password" id="newPass" placeholder="New Password"><button onclick="changePassword()">Update</button><div id="passMsg"></div></div><div class="card"><h3>🏧 UPI ID Settings</h3><input type="text" id="upiId" placeholder="UPI ID"><button onclick="updateUPI()">Update UPI ID</button><div id="upiMsg"></div></div></div>
     </div>
 </div>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
-        authDomain: "win777-ed482.firebaseapp.com",
-        projectId: "win777-ed482",
-        storageBucket: "win777-ed482.firebasestorage.app",
-        messagingSenderId: "843686112399",
-        appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
-    };
-    
+    const firebaseConfig = { apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38", authDomain: "win777-ed482.firebaseapp.com", projectId: "win777-ed482", storageBucket: "win777-ed482.firebasestorage.app", messagingSenderId: "843686112399", appId: "1:843686112399:web:9c20a96831e6a94cd814fa" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     let adminPassword = "Gani99@@";
     
-    async function login() {
-        const pwd = document.getElementById('adminPass').value;
-        if (pwd === adminPassword) {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('adminPanel').style.display = 'block';
-            loadMarkets(); loadUsers(); loadDeposits(); loadWithdrawals();
-        } else { document.getElementById('loginError').innerText = 'Wrong password'; }
-    }
+    async function login() { const pwd = document.getElementById('adminPass').value; if (pwd === adminPassword) { document.getElementById('loginScreen').style.display = 'none'; document.getElementById('adminPanel').style.display = 'block'; loadMarkets(); loadUsers(); loadDeposits(); loadWithdrawals(); loadNotice(); } else { document.getElementById('loginError').innerText = 'Wrong password'; } }
     
-    async function loadMarkets() {
-        const snap = await db.collection('markets').get();
-        let html = '';
-        snap.forEach(doc => {
-            const m = doc.data();
-            let statusClass = '', statusText = '';
-            if (m.status === 'open') { statusClass = 'status-open'; statusText = 'OPEN'; }
-            else if (m.status === 'close') { statusClass = 'status-close'; statusText = 'CLOSE'; }
-            else { statusClass = 'status-closed'; statusText = 'CLOSED'; }
-            html += `<div class="market-item"><div><b>${m.name}</b><br>Numbers: ${m.numbers || '***'}<br>Time: ${m.openBid} - ${m.closeBid}</div><div><span class="status-badge ${statusClass}" onclick="changeStatus('${doc.id}','${m.status}')">${statusText} ▼</span><button onclick="editMarket('${doc.id}','${m.name}','${m.numbers||''}','${m.openBid||''}','${m.closeBid||''}')">Edit</button><button onclick="deleteMarket('${doc.id}')" class="btn-danger">Delete</button></div></div>`;
-        });
-        document.getElementById('marketsList').innerHTML = html || '<p>No markets</p>';
-    }
+    // MARKETS
+    async function loadMarkets() { const snap = await db.collection('markets').get(); let html = ''; snap.forEach(doc => { const m = doc.data(); let statusClass = '', statusText = ''; if (m.status === 'open') { statusClass = 'status-open'; statusText = 'OPEN'; } else if (m.status === 'close') { statusClass = 'status-close'; statusText = 'CLOSE'; } else { statusClass = 'status-closed'; statusText = 'CLOSED'; } html += `<div class="market-item"><div><b>${m.name}</b><br>Numbers: ${m.numbers || '***'}<br>Time: ${m.openBid} - ${m.closeBid}</div><div><span class="status-badge ${statusClass}" onclick="changeStatus('${doc.id}','${m.status}')">${statusText} ▼</span><button onclick="editMarket('${doc.id}','${m.name}','${m.numbers||''}','${m.openBid||''}','${m.closeBid||''}')">Edit</button><button onclick="deleteMarket('${doc.id}')" class="btn-danger">Delete</button></div></div>`; }); document.getElementById('marketsList').innerHTML = html || '<p>No markets</p>'; }
+    async function changeStatus(id, current) { let newStatus = current === 'open' ? 'close' : (current === 'close' ? 'closed' : 'open'); await db.collection('markets').doc(id).update({ status: newStatus }); loadMarkets(); }
+    async function addMarket() { const name = document.getElementById('marketName').value, numbers = document.getElementById('marketNumbers').value || '***-**-***', openBid = document.getElementById('openBid').value, closeBid = document.getElementById('closeBid').value, status = document.getElementById('marketStatus').value; if (!name) { alert('Enter market name'); return; } await db.collection('markets').add({ name, numbers, openBid, closeBid, status }); loadMarkets(); alert('Market added!'); }
+    async function editMarket(id, oldName, oldNumbers, oldOpen, oldClose) { const newName = prompt('New name', oldName), newNumbers = prompt('New numbers', oldNumbers), newOpen = prompt('Open Bid Time', oldOpen), newClose = prompt('Close Bid Time', oldClose); if (newName) await db.collection('markets').doc(id).update({ name: newName, numbers: newNumbers, openBid: newOpen, closeBid: newClose }); loadMarkets(); }
+    async function deleteMarket(id) { if (confirm('Delete?')) { await db.collection('markets').doc(id).delete(); loadMarkets(); } }
     
-    async function changeStatus(id, current) {
-        let newStatus = current === 'open' ? 'close' : (current === 'close' ? 'closed' : 'open');
-        await db.collection('markets').doc(id).update({ status: newStatus });
-        loadMarkets();
-    }
+    // USERS - Full Management
+    async function loadUsers() { const users = await db.collection('users').get(); let html = ''; for (const doc of users.docs) { const u = doc.data(); html += `<div class="user-item"><div><b>${u.name}</b><br>${u.phone}<br>Balance: ₹${u.balance || 0}<br>Role: ${u.role || 'user'}</div><div><button onclick="addBalance('${doc.id}')">Add ₹</button><button onclick="blockUser('${doc.id}', '${u.blocked || false}')" class="btn-warning">${u.blocked ? 'Unblock' : 'Block'}</button><button onclick="deleteUser('${doc.id}')" class="btn-danger">Delete</button><button onclick="viewUserBids('${doc.id}')" class="btn">View Bids</button></div></div>`; } document.getElementById('usersList').innerHTML = html || '<p>No users</p>'; }
+    async function addBalance(uid) { const amt = prompt('Enter amount to add:'); if (amt && !isNaN(amt)) { const user = await db.collection('users').doc(uid).get(); const newBalance = (user.data().balance || 0) + parseInt(amt); await db.collection('users').doc(uid).update({ balance: newBalance }); loadUsers(); alert(`Added ₹${amt}`); } }
+    async function blockUser(uid, current) { const newStatus = !current; await db.collection('users').doc(uid).update({ blocked: newStatus }); loadUsers(); alert(newStatus ? 'User Blocked' : 'User Unblocked'); }
+    async function deleteUser(uid) { if (confirm('Delete user permanently? This cannot be undone!')) { await db.collection('users').doc(uid).delete(); loadUsers(); alert('User deleted'); } }
+    async function viewUserBids(uid) { const bids = await db.collection('bids').where('userId', '==', uid).get(); if (bids.empty) { alert('No bids from this user'); return; } let msg = ''; bids.forEach(d => msg += `${d.data().market}: ${d.data().value} (${d.data().points} pts)\n`); alert(msg); }
     
-    async function addMarket() {
-        const name = document.getElementById('marketName').value;
-        const numbers = document.getElementById('marketNumbers').value || '***-**-***';
-        const openBid = document.getElementById('openBid').value;
-        const closeBid = document.getElementById('closeBid').value;
-        const status = document.getElementById('marketStatus').value;
-        if (!name) { alert('Enter market name'); return; }
-        await db.collection('markets').add({ name, numbers, openBid, closeBid, status });
-        loadMarkets();
-        document.getElementById('marketName').value = '';
-        alert('Market added!');
-    }
+    // DEPOSITS
+    async function loadDeposits() { const reqs = await db.collection('transactions').where('type', '==', 'credit').where('status', '==', 'Pending').get(); let html = ''; for (const doc of reqs.docs) { const d = doc.data(); const user = await db.collection('users').doc(d.userId).get(); html += `<div class="request-item"><div><b>${user.data()?.name || 'User'}</b><br>Amount: ₹${d.amount}<br>Date: ${d.date?.toDate().toLocaleString() || 'Pending'}</div><div><button class="btn-success" onclick="approveDeposit('${doc.id}','${d.amount}','${d.userId}')">Approve</button><button class="btn-danger" onclick="rejectDeposit('${doc.id}')">Reject</button></div></div>`; } document.getElementById('depositsList').innerHTML = html || '<p>No pending deposits</p>'; }
+    async function approveDeposit(id, amount, userId) { const user = await db.collection('users').doc(userId).get(); const newBalance = (user.data().balance || 0) + amount; await db.collection('users').doc(userId).update({ balance: newBalance }); await db.collection('transactions').doc(id).update({ status: 'Completed' }); alert('Deposit approved!'); loadDeposits(); loadUsers(); }
+    async function rejectDeposit(id) { await db.collection('transactions').doc(id).update({ status: 'Rejected' }); alert('Deposit rejected'); loadDeposits(); }
     
-    async function editMarket(id, oldName, oldNumbers, oldOpen, oldClose) {
-        const newName = prompt('New name', oldName);
-        const newNumbers = prompt('New numbers', oldNumbers);
-        const newOpen = prompt('Open Bid Time', oldOpen);
-        const newClose = prompt('Close Bid Time', oldClose);
-        if (newName) await db.collection('markets').doc(id).update({ name: newName, numbers: newNumbers, openBid: newOpen, closeBid: newClose });
-        loadMarkets();
-    }
+    // WITHDRAWALS
+    async function loadWithdrawals() { const reqs = await db.collection('withdrawRequests').where('status', '==', 'Pending').get(); let html = ''; for (const doc of reqs.docs) { const d = doc.data(); const user = await db.collection('users').doc(d.userId).get(); html += `<div class="request-item"><div><b>${user.data()?.name || 'User'}</b><br>Amount: ₹${d.amount}<br>Bank: ${d.bankDetails?.bankName || 'N/A'}</div><div><button class="btn-success" onclick="approveWithdraw('${doc.id}','${d.amount}','${d.userId}')">Approve</button><button class="btn-danger" onclick="rejectWithdraw('${doc.id}')">Reject</button></div></div>`; } document.getElementById('withdrawalsList').innerHTML = html || '<p>No pending withdrawals</p>'; }
+    async function approveWithdraw(id, amount, userId) { const user = await db.collection('users').doc(userId).get(); if ((user.data().balance || 0) < amount) { alert('Insufficient balance'); return; } const newBalance = (user.data().balance || 0) - amount; await db.collection('users').doc(userId).update({ balance: newBalance }); await db.collection('withdrawRequests').doc(id).update({ status: 'Completed' }); await db.collection('transactions').add({ userId, type: 'debit', amount, status: 'Completed', date: new Date() }); alert('Withdrawal approved!'); loadWithdrawals(); loadUsers(); }
+    async function rejectWithdraw(id) { await db.collection('withdrawRequests').doc(id).update({ status: 'Rejected' }); alert('Withdrawal rejected'); loadWithdrawals(); }
     
-    async function deleteMarket(id) {
-        if (confirm('Delete?')) { await db.collection('markets').doc(id).delete(); loadMarkets(); }
-    }
+    // NOTICE BOARD
+    async function loadNotice() { const doc = await db.collection('settings').doc('notice').get(); document.getElementById('noticeText').value = doc.exists ? doc.data().text : 'Welcome to WIN777! Play big · Win big · Unlimited'; }
+    async function updateNotice() { const text = document.getElementById('noticeText').value; await db.collection('settings').doc('notice').set({ text: text, updatedAt: new Date() }); document.getElementById('noticeMsg').innerHTML = '✅ Notice updated!'; setTimeout(() => document.getElementById('noticeMsg').innerHTML = '', 2000); }
     
-    async function loadUsers() {
-        const users = await db.collection('users').get();
-        let html = '';
-        for (const doc of users.docs) {
-            const u = doc.data();
-            html += `<div class="user-item"><div><b>${u.name}</b><br>${u.phone}<br>Balance: ₹${u.balance || 0}</div><div><button onclick="addBalance('${doc.id}')">Add ₹</button><button onclick="clearUserBids('${doc.id}')" class="btn-danger">Clear Bids</button></div></div>`;
-        }
-        document.getElementById('usersList').innerHTML = html || '<p>No users</p>';
-    }
+    // SETTINGS
+    function changePassword() { const old = document.getElementById('oldPass').value, newP = document.getElementById('newPass').value; if (old === adminPassword) { adminPassword = newP; document.getElementById('passMsg').innerHTML = '✅ Password changed!'; } else { document.getElementById('passMsg').innerHTML = '❌ Wrong password'; } setTimeout(() => document.getElementById('passMsg').innerHTML = '', 2000); }
+    async function updateUPI() { const upi = document.getElementById('upiId').value; await db.collection('settings').doc('upi').set({ upiId: upi }); alert('UPI ID updated!'); }
     
-    async function addBalance(uid) {
-        const amt = prompt('Enter amount to add:');
-        if (amt && !isNaN(amt)) {
-            const user = await db.collection('users').doc(uid).get();
-            const newBalance = (user.data().balance || 0) + parseInt(amt);
-            await db.collection('users').doc(uid).update({ balance: newBalance });
-            loadUsers();
-            alert(`Added ₹${amt}`);
-        }
-    }
+    function showSection(section) { document.querySelectorAll('#marketsSection, #usersSection, #depositsSection, #withdrawalsSection, #noticeSection, #settingsSection').forEach(el => el.classList.add('hidden')); document.getElementById(`${section}Section`).classList.remove('hidden'); }
+    function logout() { document.getElementById('loginScreen').style.display = 'flex'; document.getElementById('adminPanel').style.display = 'none'; }
     
-    async function clearUserBids(uid) {
-        if (confirm('Clear all bids?')) {
-            const bids = await db.collection('bids').where('userId', '==', uid).get();
-            bids.forEach(d => d.ref.delete());
-            alert('Bids cleared');
-        }
-    }
-    
-    async function loadDeposits() {
-        const reqs = await db.collection('transactions').where('type', '==', 'credit').where('status', '==', 'Pending').get();
-        let html = '';
-        for (const doc of reqs.docs) {
-            const d = doc.data();
-            const user = await db.collection('users').doc(d.userId).get();
-            html += `<div class="request-item"><div><b>${user.data()?.name || 'User'}</b><br>Amount: ₹${d.amount}<br>Date: ${d.date?.toDate().toLocaleString() || 'Pending'}</div><div><button class="btn-success" onclick="approveDeposit('${doc.id}','${d.amount}','${d.userId}')">Approve</button><button class="btn-danger" onclick="rejectDeposit('${doc.id}')">Reject</button></div></div>`;
-        }
-        document.getElementById('depositsList').innerHTML = html || '<p>No pending deposits</p>';
-    }
-    
-    async function approveDeposit(id, amount, userId) {
-        const user = await db.collection('users').doc(userId).get();
-        const newBalance = (user.data().balance || 0) + amount;
-        await db.collection('users').doc(userId).update({ balance: newBalance });
-        await db.collection('transactions').doc(id).update({ status: 'Completed' });
-        alert('Deposit approved!');
-        loadDeposits(); loadUsers();
-    }
-    
-    async function rejectDeposit(id) {
-        await db.collection('transactions').doc(id).update({ status: 'Rejected' });
-        alert('Deposit rejected');
-        loadDeposits();
-    }
-    
-    async function loadWithdrawals() {
-        const reqs = await db.collection('withdrawRequests').where('status', '==', 'Pending').get();
-        let html = '';
-        for (const doc of reqs.docs) {
-            const d = doc.data();
-            const user = await db.collection('users').doc(d.userId).get();
-            html += `<div class="request-item"><div><b>${user.data()?.name || 'User'}</b><br>Amount: ₹${d.amount}<br>Bank: ${d.bankDetails?.bankName || 'N/A'}</div><div><button class="btn-success" onclick="approveWithdraw('${doc.id}','${d.amount}','${d.userId}')">Approve</button><button class="btn-danger" onclick="rejectWithdraw('${doc.id}')">Reject</button></div></div>`;
-        }
-        document.getElementById('withdrawalsList').innerHTML = html || '<p>No pending withdrawals</p>';
-    }
-    
-    async function approveWithdraw(id, amount, userId) {
-        const user = await db.collection('users').doc(userId).get();
-        if ((user.data().balance || 0) < amount) { alert('Insufficient balance'); return; }
-        const newBalance = (user.data().balance || 0) - amount;
-        await db.collection('users').doc(userId).update({ balance: newBalance });
-        await db.collection('withdrawRequests').doc(id).update({ status: 'Completed' });
-        await db.collection('transactions').add({ userId, type: 'debit', amount, status: 'Completed', date: new Date() });
-        alert('Withdrawal approved!');
-        loadWithdrawals(); loadUsers();
-    }
-    
-    async function rejectWithdraw(id) {
-        await db.collection('withdrawRequests').doc(id).update({ status: 'Rejected' });
-        alert('Withdrawal rejected');
-        loadWithdrawals();
-    }
-    
-    function changePassword() {
-        const old = document.getElementById('oldPass').value;
-        const newP = document.getElementById('newPass').value;
-        if (old === adminPassword) {
-            adminPassword = newP;
-            document.getElementById('passMsg').innerHTML = '✅ Password changed!';
-        } else {
-            document.getElementById('passMsg').innerHTML = '❌ Wrong password';
-        }
-        setTimeout(() => document.getElementById('passMsg').innerHTML = '', 2000);
-    }
-    
-    async function updateUPI() {
-        const upi = document.getElementById('upiId').value;
-        await db.collection('settings').doc('upi').set({ upiId: upi });
-        alert('UPI ID updated!');
-    }
-    
-    function showSection(section) {
-        document.querySelectorAll('#marketsSection, #usersSection, #depositsSection, #withdrawalsSection, #settingsSection').forEach(el => el.classList.add('hidden'));
-        document.getElementById(`${section}Section`).classList.remove('hidden');
-    }
-    
-    function logout() {
-        document.getElementById('loginScreen').style.display = 'flex';
-        document.getElementById('adminPanel').style.display = 'none';
-    }
-    
-    async function loadUPI() {
-        const doc = await db.collection('settings').doc('upi').get();
-        if (doc.exists) document.getElementById('upiId').value = doc.data().upiId;
-        else document.getElementById('upiId').value = 'win777@okhdfcbank';
-    }
+    async function loadUPI() { const doc = await db.collection('settings').doc('upi').get(); if (doc.exists) document.getElementById('upiId').value = doc.data().upiId; else document.getElementById('upiId').value = 'win777@okhdfcbank'; }
     loadUPI();
 </script>
 </body>
