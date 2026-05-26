@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WIN777 - Withdraw</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #0a0a0f; min-height: 100vh; padding: 20px; }
+        .container { max-width: 450px; margin: 0 auto; }
+        .header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .back-btn { background: #1a1a2e; border: none; color: #00b4ff; font-size: 24px; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; border: 1px solid #00b4ff; }
+        .header h1 { color: #00b4ff; font-size: 24px; flex: 1; text-align: center; }
+        .user-card { background: #1a1a2e; border-radius: 20px; padding: 15px 20px; margin-bottom: 20px; border: 1px solid #00b4ff; display: flex; justify-content: space-between; align-items: center; }
+        .user-name { color: white; font-size: 16px; font-weight: bold; }
+        .user-phone { color: #888; font-size: 12px; margin-top: 4px; }
+        .balance-amount { color: #00b4ff; font-size: 20px; font-weight: bold; }
+        .balance-card { background: linear-gradient(135deg, #00b4ff, #0099cc); border-radius: 20px; padding: 20px; text-align: center; margin-bottom: 25px; }
+        .balance-card .amount { color: white; font-size: 36px; font-weight: bold; }
+        .input-field { width: 100%; padding: 14px; background: #1a1a2e; border: 1px solid #00b4ff; border-radius: 16px; color: white; font-size: 16px; margin-bottom: 15px; }
+        .bank-select { width: 100%; padding: 14px; background: #1a1a2e; border: 1px solid #00b4ff; border-radius: 16px; color: white; margin-bottom: 15px; }
+        .withdraw-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, #00b4ff, #0099cc); border: none; border-radius: 24px; color: #1a1a2e; font-size: 20px; font-weight: bold; cursor: pointer; margin-bottom: 15px; }
+        .terms-box { background: #1a1a2e; border-radius: 16px; padding: 15px; margin-bottom: 20px; border: 1px solid #00b4ff; }
+        .terms-title { color: #00b4ff; margin-bottom: 10px; font-weight: bold; }
+        .terms-text { color: #aaa; font-size: 12px; line-height: 1.5; }
+        .message { padding: 12px; border-radius: 12px; text-align: center; margin-top: 15px; font-size: 13px; }
+        .message-success { background: #4caf5020; color: #4caf50; border: 1px solid #4caf50; }
+        .message-error { background: #f4433620; color: #f44336; border: 1px solid #f44336; }
+        .hidden { display: none; }
+        .add-bank-link { color: #00b4ff; text-align: center; margin-top: 10px; cursor: pointer; font-size: 13px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header"><button class="back-btn" onclick="goBack()">←</button><h1>WITHDRAW</h1></div>
+
+    <div class="user-card"><div><div class="user-name" id="userName">Loading...</div><div class="user-phone" id="userPhone">Loading...</div></div><div><div class="balance-amount">₹<span id="userBalance">0</span></div></div></div>
+    <div class="balance-card"><div class="amount">₹<span id="balanceAmount">0</span></div></div>
+
+    <div class="terms-box"><div class="terms-title">📋 Terms and Conditions</div><div class="terms-text">• Minimum Withdraw is ₹500<br>• Maximum Withdraw is ₹50,000<br>• Withdraw request timing 10AM To 6PM<br>• Process Time 1-24 Hours</div></div>
+
+    <select id="bankSelect" class="bank-select"><option value="">Select Bank Account</option></select>
+    <div class="add-bank-link" onclick="addBankDetails()">+ Add New Bank Account</div>
+    <input type="number" id="withdrawAmount" class="input-field" placeholder="Enter amount (Min ₹500)">
+
+    <button class="withdraw-btn" id="withdrawBtn">REQUEST WITHDRAWAL</button>
+    <div id="message" class="message hidden"></div>
+</div>
+
+<script>
+    const firebaseConfig = { apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38", authDomain: "win777-ed482.firebaseapp.com", projectId: "win777-ed482", storageBucket: "win777-ed482.firebasestorage.app", messagingSenderId: "843686112399", appId: "1:843686112399:web:9c20a96831e6a94cd814fa" };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    let currentUser = null, userData = null;
+    
+    auth.onAuthStateChanged(async (user) => { if (!user) window.location.href = 'index.html'; else { currentUser = user; await loadUserData(); } });
+    
+    async function loadUserData() {
+        const doc = await db.collection('users').doc(currentUser.uid).get();
+        if(doc.exists) {
+            userData = doc.data();
+            const balance = userData.balance || 0;
+            document.getElementById('userBalance').innerText = balance;
+            document.getElementById('balanceAmount').innerText = balance;
+            document.getElementById('userName').innerHTML = userData.name || 'User';
+            document.getElementById('userPhone').innerHTML = userData.phone || '';
+            loadBankDetails();
+        }
+    }
+    
+    function loadBankDetails() {
+        const select = document.getElementById('bankSelect');
+        select.innerHTML = '<option value="">Select Bank Account</option>';
+        if(userData.bankDetails) {
+            select.innerHTML += `<option value="saved">${userData.bankDetails.bankName} - ${userData.bankDetails.accountNumber}</option>`;
+        }
+        select.innerHTML += `<option value="new">+ Add New Bank</option>`;
+    }
+    
+    function addBankDetails() {
+        const bankName = prompt('Enter Bank Name');
+        const accountNumber = prompt('Enter Account Number');
+        const ifscCode = prompt('Enter IFSC Code');
+        const accountHolder = prompt('Enter Account Holder Name');
+        if(bankName && accountNumber && ifscCode && accountHolder) {
+            const bankDetails = { bankName, accountNumber, ifscCode, accountHolder };
+            db.collection('users').doc(currentUser.uid).update({ bankDetails: bankDetails }).then(() => {
+                userData.bankDetails = bankDetails;
+                loadBankDetails();
+                alert('Bank details saved!');
+            });
+        }
+    }
+    
+    document.getElementById('withdrawBtn').onclick = async () => {
+        const amount = parseInt(document.getElementById('withdrawAmount').value);
+        if(amount < 500) { document.getElementById('message').innerHTML = 'Minimum withdrawal is ₹500'; document.getElementById('message').className = 'message message-error'; setTimeout(() => document.getElementById('message').className = 'message hidden', 3000); return; }
+        if(amount > (userData.balance || 0)) { document.getElementById('message').innerHTML = 'Insufficient balance!'; document.getElementById('message').className = 'message message-error'; setTimeout(() => document.getElementById('message').className = 'message hidden', 3000); return; }
+        
+        let bankDetails = userData.bankDetails;
+        if(document.getElementById('bankSelect').value === 'new') {
+            const bankName = prompt('Enter Bank Name');
+            const accountNumber = prompt('Enter Account Number');
+            const ifscCode = prompt('Enter IFSC Code');
+            const accountHolder = prompt('Enter Account Holder Name');
+            if(!bankName) return;
+            bankDetails = { bankName, accountNumber, ifscCode, accountHolder };
+            await db.collection('users').doc(currentUser.uid).update({ bankDetails: bankDetails });
+            userData.bankDetails = bankDetails;
+        }
+        if(!bankDetails) { alert('Please add bank details first'); return; }
+        
+        await db.collection('withdrawRequests').add({ userId: currentUser.uid, amount: amount, bankDetails: bankDetails, status: 'Pending', date: new Date() });
+        await db.collection('transactions').add({ userId: currentUser.uid, type: 'debit', amount: amount, status: 'Pending', date: new Date(), description: 'Withdrawal Request' });
+        document.getElementById('message').innerHTML = '✅ Withdrawal request sent! Admin will approve.'; document.getElementById('message').className = 'message message-success';
+        setTimeout(() => { document.getElementById('message').className = 'message hidden'; window.location.href = 'dashboard.html'; }, 2000);
+    };
+    
+    function goBack() { window.location.href = 'dashboard.html'; }
+</script>
+</body>
+</html>
