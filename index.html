@@ -3,108 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WIN77 - Login</title>
+    <title>WIN777 - Login</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
-        body { background: #0a0a0f; min-height: 100vh; }
-        .app-container { max-width: 450px; margin: 0 auto; background: #0a0a0f; min-height: 100vh; }
-        .header { padding: 30px 20px 20px; text-align: center; }
-        .logo { font-size: 32px; font-weight: bold; color: #ff9800; letter-spacing: 2px; }
-        .tagline { font-size: 11px; color: #888; margin-top: 5px; }
-        .screen { padding: 20px; }
-        .mpin-input, .phone-input, .otp-input, .register-input {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #0a0a0f;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .app-container {
+            max-width: 420px;
+            width: 100%;
+            background: #0a0a0f;
+            min-height: 100vh;
+            position: relative;
+            margin: 0 auto;
+        }
+        /* Header - Light Blue */
+        .header {
+            background: #0a0a0f;
+            padding: 40px 20px 20px;
+            text-align: center;
+        }
+        .logo {
+            font-size: 36px;
+            font-weight: bold;
+            color: #00b4ff;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(0,180,255,0.3);
+        }
+        .tagline {
+            font-size: 11px;
+            color: #fff;
+            margin-top: 8px;
+            opacity: 0.7;
+        }
+        /* Screens */
+        .screen {
+            padding: 20px;
+        }
+        /* Input Fields */
+        .input-field {
             background: #1a1a2e;
-            border: 1px solid #ff9800;
+            border: 1px solid #00b4ff;
             border-radius: 12px;
             padding: 15px;
             width: 100%;
             color: white;
             font-size: 16px;
             margin-bottom: 20px;
+            outline: none;
+            transition: all 0.3s;
         }
-        .mpin-input { font-size: 24px; text-align: center; letter-spacing: 8px; }
-        .login-btn {
+        .input-field:focus {
+            border-color: #fff;
+            box-shadow: 0 0 10px rgba(0,180,255,0.3);
+        }
+        .pin-input {
+            font-size: 24px;
+            text-align: center;
+            letter-spacing: 8px;
+        }
+        /* Buttons */
+        .btn {
             width: 100%;
             padding: 14px;
-            background: #ff9800;
+            background: #00b4ff;
             border: none;
             border-radius: 12px;
-            color: black;
+            color: #000;
             font-weight: bold;
             font-size: 16px;
             cursor: pointer;
+            transition: all 0.3s;
         }
-        .forgot-link { text-align: center; margin-top: 15px; color: #ff9800; font-size: 13px; cursor: pointer; }
-        .otp-welcome { color: #ff9800; font-size: 14px; margin-bottom: 20px; text-align: center; }
-        .timer { color: #ff9800; font-size: 24px; font-weight: bold; margin: 20px 0; text-align: center; }
-        .error-text { color: #f44336; font-size: 12px; text-align: center; margin-top: 10px; }
-        .hidden { display: none; }
-        .notification-popup {
-            position: fixed; bottom: 0; left: 0; right: 0; background: #1a1a2e;
-            border-radius: 20px 20px 0 0; padding: 25px; z-index: 1000;
-            border-top: 1px solid #ff9800; transform: translateY(100%); transition: transform 0.3s ease;
+        .btn:active {
+            transform: scale(0.98);
         }
-        .notification-popup.show { transform: translateY(0); }
-        .notification-title { color: white; font-size: 18px; margin-bottom: 10px; }
-        .notification-text { color: #aaa; font-size: 13px; margin-bottom: 20px; }
-        .notification-buttons { display: flex; gap: 15px; }
-        .notify-allow { flex: 1; padding: 12px; background: #ff9800; border: none; border-radius: 12px; color: black; font-weight: bold; cursor: pointer; }
-        .notify-deny { flex: 1; padding: 12px; background: transparent; border: 1px solid #ff9800; border-radius: 12px; color: #ff9800; cursor: pointer; }
-        .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 999; display: none; }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #00b4ff;
+            color: #00b4ff;
+            margin-top: 10px;
+        }
+        /* Links */
+        .link {
+            text-align: center;
+            margin-top: 15px;
+            color: #00b4ff;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        /* Timer */
+        .timer {
+            color: #00b4ff;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .welcome-text {
+            color: #00b4ff;
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        /* Error Message */
+        .error-text {
+            color: #ff4444;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        /* Popup Modal - Centered */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 25px;
+            width: 85%;
+            max-width: 320px;
+            text-align: center;
+            border: 1px solid #00b4ff;
+        }
+        .modal-title {
+            color: #00b4ff;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+        .modal-text {
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        .modal-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal-btn-allow {
+            background: #00b4ff;
+            border: none;
+            color: #000;
+        }
+        .modal-btn-deny {
+            background: transparent;
+            border: 1px solid #00b4ff;
+            color: #00b4ff;
+        }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
 <div class="app-container">
     <div class="header">
-        <div class="logo">WIN77</div>
+        <div class="logo">WIN777</div>
         <div class="tagline">India's best Satta Matka Application</div>
     </div>
 
-    <div id="overlay" class="overlay"></div>
-    <div id="notificationPopup" class="notification-popup">
-        <div class="notification-title">🔔 Allow Notifications</div>
-        <div class="notification-text">Stay updated with your bets, results, and offers. Get instant alerts!</div>
-        <div class="notification-buttons">
-            <button class="notify-deny" onclick="denyNotification()">Don't Allow</button>
-            <button class="notify-allow" onclick="allowNotification()">Allow</button>
+    <!-- Centered Popup Modal -->
+    <div id="modalOverlay" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-title" id="modalTitle">🔔 Allow Notifications</div>
+            <div class="modal-text" id="modalText">Stay updated with your bets, results, and offers. Get instant alerts!</div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-deny" id="modalDenyBtn">Don't Allow</button>
+                <button class="modal-btn modal-btn-allow" id="modalAllowBtn">Allow</button>
+            </div>
         </div>
     </div>
 
-    <!-- Phone Screen -->
+    <!-- Phone Login Screen -->
     <div id="phoneScreen" class="screen">
-        <input type="tel" id="phoneNumber" class="phone-input" placeholder="Enter Mobile Number">
-        <button class="login-btn" id="sendOtpBtn">Login with OTP</button>
-        <div class="forgot-link" id="showPinBtn">Login with MPIN</div>
+        <input type="tel" id="phoneNumber" class="input-field" placeholder="Enter Mobile Number">
+        <button class="btn" id="sendOtpBtn">Login with OTP</button>
+        <div class="link" id="showPinBtn">Login with MPIN</div>
         <div id="phoneError" class="error-text"></div>
     </div>
 
     <!-- OTP Screen -->
     <div id="otpScreen" class="screen hidden">
-        <div class="otp-welcome">India's best Satta Matka Application Welcomes You !!!</div>
+        <div class="welcome-text">India's best Satta Matka Application Welcomes You !!!</div>
         <div class="timer" id="timer">Second Remaining 60</div>
-        <input type="text" id="otpCode" class="otp-input" placeholder="Enter OTP" maxlength="6">
-        <button class="login-btn" id="verifyOtpBtn">SUBMIT</button>
-        <div class="forgot-link" id="resendOtpBtn">Resend OTP</div>
+        <input type="text" id="otpCode" class="input-field" placeholder="Enter OTP" maxlength="6">
+        <button class="btn" id="verifyOtpBtn">SUBMIT</button>
+        <div class="link" id="resendOtpBtn">Resend OTP</div>
         <div id="otpError" class="error-text"></div>
     </div>
 
-    <!-- PIN Screen -->
+    <!-- PIN Login Screen -->
     <div id="pinScreen" class="screen hidden">
-        <input type="password" id="pinInput" class="mpin-input" placeholder="●●●●" maxlength="4">
-        <button class="login-btn" id="verifyPinBtn">Login with MPIN</button>
-        <div class="forgot-link" id="forgotPinBtn">Forgot MPIN?</div>
+        <input type="password" id="pinInput" class="input-field pin-input" placeholder="●●●●" maxlength="4">
+        <button class="btn" id="verifyPinBtn">Login with MPIN</button>
+        <div class="link" id="forgotPinBtn">Forgot MPIN?</div>
         <div id="pinError" class="error-text"></div>
     </div>
 
     <!-- Register Screen -->
     <div id="registerScreen" class="screen hidden">
-        <input type="text" id="regName" class="register-input" placeholder="Full Name">
-        <input type="password" id="regPin" class="register-input" placeholder="Create MPIN" maxlength="4">
-        <input type="password" id="regConfirmPin" class="register-input" placeholder="Confirm MPIN" maxlength="4">
-        <button class="login-btn" id="registerBtn">Register</button>
+        <input type="text" id="regName" class="input-field" placeholder="Full Name">
+        <input type="password" id="regPin" class="input-field" placeholder="Create MPIN" maxlength="4">
+        <input type="password" id="regConfirmPin" class="input-field" placeholder="Confirm MPIN" maxlength="4">
+        <button class="btn" id="registerBtn">Register</button>
         <div id="regError" class="error-text"></div>
     </div>
 </div>
@@ -135,6 +265,7 @@
     const otpScreen = document.getElementById('otpScreen');
     const pinScreen = document.getElementById('pinScreen');
     const registerScreen = document.getElementById('registerScreen');
+    const modalOverlay = document.getElementById('modalOverlay');
     
     function showScreen(screen) {
         phoneScreen.classList.add('hidden');
@@ -142,6 +273,32 @@
         pinScreen.classList.add('hidden');
         registerScreen.classList.add('hidden');
         screen.classList.remove('hidden');
+    }
+    
+    function showModal(title, text, onAllow, onDeny) {
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalText').innerHTML = text;
+        modalOverlay.style.display = 'flex';
+        
+        const allowBtn = document.getElementById('modalAllowBtn');
+        const denyBtn = document.getElementById('modalDenyBtn');
+        
+        allowBtn.onclick = () => {
+            modalOverlay.style.display = 'none';
+            if (onAllow) onAllow();
+        };
+        denyBtn.onclick = () => {
+            modalOverlay.style.display = 'none';
+            if (onDeny) onDeny();
+        };
+    }
+    
+    function showError(elementId, message) {
+        const el = document.getElementById(elementId);
+        if (el) {
+            el.innerText = message;
+            setTimeout(() => el.innerText = '', 4000);
+        }
     }
     
     function initRecaptcha() {
@@ -152,17 +309,8 @@
             container.style.left = '-9999px';
             document.body.appendChild(container);
             recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { size: 'invisible' });
-            console.log('reCAPTCHA initialized');
         }
         return recaptchaVerifier;
-    }
-    
-    function showError(elementId, message) {
-        const el = document.getElementById(elementId);
-        if (el) {
-            el.innerText = message;
-            setTimeout(() => el.innerText = '', 5000);
-        }
     }
     
     function startTimer(seconds) {
@@ -179,21 +327,6 @@
         }, 1000);
     }
     
-    // Notification
-    function allowNotification() {
-        document.getElementById('notificationPopup').classList.remove('show');
-        document.getElementById('overlay').style.display = 'none';
-        if (Notification.permission === 'default') Notification.requestPermission();
-    }
-    function denyNotification() {
-        document.getElementById('notificationPopup').classList.remove('show');
-        document.getElementById('overlay').style.display = 'none';
-    }
-    function showNotificationPopup() {
-        document.getElementById('notificationPopup').classList.add('show');
-        document.getElementById('overlay').style.display = 'block';
-    }
-    
     // Send OTP
     document.getElementById('sendOtpBtn').onclick = function() {
         const phone = document.getElementById('phoneNumber').value.replace(/\D/g, '');
@@ -206,29 +339,20 @@
         btn.disabled = true;
         btn.innerText = 'Sending...';
         
-        try {
-            const verifier = initRecaptcha();
-            auth.signInWithPhoneNumber(currentPhone, verifier)
-                .then(confirmation => {
-                    confirmationResult = confirmation;
-                    showScreen(otpScreen);
-                    startTimer(60);
-                    btn.disabled = false;
-                    btn.innerText = 'Login with OTP';
-                    showError('otpError', 'OTP sent! Check your phone');
-                })
-                .catch(error => {
-                    console.error('OTP Error:', error);
-                    showError('phoneError', error.message);
-                    btn.disabled = false;
-                    btn.innerText = 'Login with OTP';
-                });
-        } catch(e) {
-            console.error('Exception:', e);
-            showError('phoneError', e.message);
-            btn.disabled = false;
-            btn.innerText = 'Login with OTP';
-        }
+        const verifier = initRecaptcha();
+        auth.signInWithPhoneNumber(currentPhone, verifier)
+            .then(confirmation => {
+                confirmationResult = confirmation;
+                showScreen(otpScreen);
+                startTimer(60);
+                btn.disabled = false;
+                btn.innerText = 'Login with OTP';
+            })
+            .catch(error => {
+                showError('phoneError', error.message);
+                btn.disabled = false;
+                btn.innerText = 'Login with OTP';
+            });
     };
     
     // Verify OTP
@@ -248,8 +372,11 @@
                 db.collection('users').doc(user.uid).get()
                     .then(doc => {
                         if (doc.exists && doc.data().pin) {
-                            window.location.href = 'dashboard.html';
+                            // Existing user - go to PIN login
+                            showScreen(pinScreen);
+                            document.getElementById('pinInput').value = '';
                         } else {
+                            // New user - register
                             showScreen(registerScreen);
                         }
                         btn.disabled = false;
@@ -262,7 +389,6 @@
                     });
             })
             .catch(error => {
-                console.error('Verification Error:', error);
                 showError('otpError', 'Invalid OTP. Try again.');
                 btn.disabled = false;
                 btn.innerText = 'SUBMIT';
@@ -282,9 +408,7 @@
                 startTimer(60);
                 showError('otpError', 'OTP resent!');
             })
-            .catch(error => {
-                showError('otpError', error.message);
-            });
+            .catch(error => showError('otpError', error.message));
     };
     
     // Register User
@@ -313,10 +437,18 @@
             role: 'user',
             createdAt: new Date()
         }).then(() => {
-            showNotificationPopup();
-            setTimeout(() => {
-                window.location.href = 'dashboard.html';
-            }, 2000);
+            // Show notification permission popup
+            showModal('🔔 Allow Notifications', 'Stay updated with your bets, results, and offers. Get instant alerts!',
+                () => {
+                    if (Notification.permission === 'default') Notification.requestPermission();
+                    window.location.href = 'dashboard.html';
+                },
+                () => {
+                    window.location.href = 'dashboard.html';
+                }
+            );
+            btn.disabled = false;
+            btn.innerText = 'Register';
         }).catch(error => {
             showError('regError', error.message);
             btn.disabled = false;
@@ -378,7 +510,7 @@
             .catch(() => showScreen(phoneScreen));
     };
     
-    // Forgot PIN - logout
+    // Forgot PIN - sign out
     document.getElementById('forgotPinBtn').onclick = function() {
         auth.signOut().then(() => {
             showScreen(phoneScreen);
