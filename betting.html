@@ -33,12 +33,24 @@
         .selection-mode { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; }
         .mode-btn { background: #1a1a2e; border: 1px solid #00b4ff; padding: 6px 20px; border-radius: 30px; color: #00b4ff; cursor: pointer; }
         .selected-count { text-align: center; color: #00b4ff; margin-bottom: 10px; }
+        .game-type-options { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; justify-content: center; }
+        .game-type-btn { background: #1a1a2e; border: 1px solid #00b4ff; padding: 8px 16px; border-radius: 30px; color: #ccc; cursor: pointer; font-size: 13px; }
+        .game-type-btn.active { background: #00b4ff; color: #000; }
+        .open-close-row { display: flex; justify-content: center; gap: 20px; margin-bottom: 20px; }
+        .open-close-label { display: flex; align-items: center; gap: 8px; color: white; cursor: pointer; }
+        .bid-items { max-height: 250px; overflow-y: auto; margin-bottom: 15px; }
     </style>
 </head>
 <body>
 <div class="header"><button class="back-btn" onclick="goBack()">←</button><h1 id="marketName" style="color:#00b4ff">Loading...</h1><div id="bidTypeBadge" style="color:#ff9800; font-size:12px;"></div></div>
 <div class="balance-bar"><span>Your Balance</span><span style="color:#00b4ff; font-weight:bold">₹<span id="userBalance">0</span></span></div>
-<div class="container"><div id="gamePanel"></div><div class="summary-bar"><div>Total Bids: <span id="totalBids">0</span></div><div>Total Points: <span id="totalPoints">0</span></div></div><button class="submit-btn" id="submitBtn" onclick="submitBids()">Place Bets</button><div id="message" class="message hidden"></div></div>
+<div class="container">
+    <div class="game-type-options" id="gameTypeOptions"></div>
+    <div id="gamePanel"></div>
+    <div class="summary-bar"><div>Total Bids: <span id="totalBids">0</span></div><div>Total Points: <span id="totalPoints">0</span></div></div>
+    <button class="submit-btn" id="submitBtn" onclick="submitBids()">Place Bets</button>
+    <div id="message" class="message hidden"></div>
+</div>
 
 <script>
     const firebaseConfig = { apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38", authDomain: "win777-ed482.firebaseapp.com", projectId: "win777-ed482", storageBucket: "win777-ed482.firebasestorage.app", messagingSenderId: "843686112399", appId: "1:843686112399:web:9c20a96831e6a94cd814fa" };
@@ -47,33 +59,149 @@
     const db = firebase.firestore();
     
     let currentUser = null, userData = null, currentMarket = '', currentMarketId = '', currentStatus = 'open', currentGameType = 'Single Digit', bids = [], selectedNumbers = new Set(), selectionMode = 'multiple';
-    const gameTypes = ['Single Digit', 'Jodi', 'Single Pana', 'Double Pana', 'Triple Pana'];
+    
+    // All Game Types with Open/Close availability
+    const allGameTypes = [
+        { name: 'Single Digit', hasOpenClose: true, showInClose: true },
+        { name: 'Jodi', hasOpenClose: false, showInClose: false },
+        { name: 'Single Pana', hasOpenClose: true, showInClose: true },
+        { name: 'Double Pana', hasOpenClose: true, showInClose: true },
+        { name: 'Triple Pana', hasOpenClose: true, showInClose: true },
+        { name: 'Half Sangam A', hasOpenClose: false, showInClose: false },
+        { name: 'Half Sangam B', hasOpenClose: false, showInClose: false },
+        { name: 'Full Sangam', hasOpenClose: false, showInClose: false }
+    ];
+    
+    // Available game types based on market status
+    let availableGameTypes = [];
+    let selectedOpenClose = 'Open';
+    
+    // Data Lists
     const singlePanaList = ['127','136','145','190','235','280','370','389','460','479','569','578','128','137','146','236','245','290','380','470','489','560','579','678','129','138','147','156','237','246','345','390','480','570','589','679','120','139','148','157','238','247','256','346','490','580','670','689','130','149','158','167','239','248','257','347','356','590','680','789'];
     const doublePanaList = ['100','119','155','227','335','344','399','588','669','110','200','228','255','366','499','660','688','778','166','229','300','337','355','445','599','779','788','112','220','266','338','400','446','455','699','770'];
     const triplePanaList = ['111','222','333','444','555','666','777','888','999','000'];
     const jodiList = []; for(let i=0;i<=99;i++) jodiList.push(i.toString().padStart(2,'0'));
     
+    function renderGameTypeSelector() {
+        const container = document.getElementById('gameTypeOptions');
+        container.innerHTML = availableGameTypes.map(type => `<button class="game-type-btn ${currentGameType === type.name ? 'active' : ''}" onclick="selectGameType('${type.name}')">${type.name}</button>`).join('');
+    }
+    
+    function selectGameType(type) {
+        currentGameType = type;
+        selectedNumbers.clear();
+        renderGameTypeSelector();
+        renderGamePanel();
+    }
+    
     function renderGamePanel() {
         const panel = document.getElementById('gamePanel');
-        if(currentGameType === 'Single Digit') {
-            panel.innerHTML = `<div class="game-card"><div class="game-title">${currentMarket} - ${currentGameType}</div><input type="number" id="pointsInput" class="points-input" value="10" placeholder="Points"><div class="manual-entry"><input type="text" id="manualValue" class="manual-input" placeholder="Enter digit (0-9)"><button class="add-btn" onclick="addManualNumber()">+ Add Manual</button></div><div class="selection-mode"><button class="mode-btn" onclick="toggleSelectionMode()">${selectionMode === 'multiple' ? 'Multiple Select' : 'Single Select'}</button></div><div class="selected-count">Selected: ${selectedNumbers.size}</div><div class="number-grid" id="digitsGrid"></div><button class="add-btn" onclick="addSelectedToBids()">Add to Bids</button>${renderBidItems()}</div>`;
+        const gameType = allGameTypes.find(g => g.name === currentGameType);
+        
+        if (currentGameType === 'Single Digit') {
+            panel.innerHTML = `
+                <div class="game-card">
+                    <div class="game-title">${currentMarket} - ${currentGameType}</div>
+                    ${currentStatus === 'open' ? `<div class="open-close-row"><label class="open-close-label"><input type="radio" name="openClose" value="Open" ${selectedOpenClose === 'Open' ? 'checked' : ''} onchange="setOpenClose('Open')"> Open</label><label class="open-close-label"><input type="radio" name="openClose" value="Close" ${selectedOpenClose === 'Close' ? 'checked' : ''} onchange="setOpenClose('Close')"> Close</label></div>` : '<div class="open-close-row"><span style="color:#ff9800;">🔒 Close Only Bidding</span></div>'}
+                    <input type="number" id="pointsInput" class="points-input" value="10" placeholder="Points (Min ₹5)" min="5">
+                    <div class="manual-entry"><input type="text" id="manualValue" class="manual-input" placeholder="Enter digit (0-9)"><button class="add-btn" onclick="addManualNumber()">+ Add Manual</button></div>
+                    <div class="selection-mode"><button class="mode-btn" onclick="toggleSelectionMode()">${selectionMode === 'multiple' ? 'Multiple Select' : 'Single Select'}</button></div>
+                    <div class="selected-count">Selected: ${selectedNumbers.size}</div>
+                    <div class="number-grid" id="digitsGrid"></div>
+                    <button class="add-btn" onclick="addSelectedToBids()">Add to Bids</button>
+                    ${renderBidItems()}
+                </div>
+            `;
             const digits = ['0','1','2','3','4','5','6','7','8','9']; const grid = document.getElementById('digitsGrid'); if(grid) grid.innerHTML = digits.map(d => `<div class="number-btn ${selectedNumbers.has(d) ? 'selected' : ''}" onclick="toggleNumber('${d}')">${d}</div>`).join('');
-        } else if(currentGameType === 'Jodi') {
-            panel.innerHTML = `<div class="game-card"><div class="game-title">${currentMarket} - ${currentGameType}</div><input type="number" id="pointsInput" class="points-input" value="10"><div class="manual-entry"><input type="text" id="manualValue" class="manual-input" placeholder="Enter Jodi (00-99)"><button class="add-btn" onclick="addManualNumber()">+ Add Manual</button></div><div class="selection-mode"><button class="mode-btn" onclick="toggleSelectionMode()">${selectionMode === 'multiple' ? 'Multiple Select' : 'Single Select'}</button></div><div class="selected-count">Selected: ${selectedNumbers.size}</div><div class="number-grid" id="jodiGrid"></div><button class="add-btn" onclick="addSelectedToBids()">Add to Bids</button>${renderBidItems()}</div>`;
+        }
+        else if (currentGameType === 'Jodi' && (currentStatus === 'open')) {
+            panel.innerHTML = `
+                <div class="game-card">
+                    <div class="game-title">${currentMarket} - ${currentGameType}</div>
+                    <input type="number" id="pointsInput" class="points-input" value="10" placeholder="Points (Min ₹5)" min="5">
+                    <div class="manual-entry"><input type="text" id="manualValue" class="manual-input" placeholder="Enter Jodi (00-99)"><button class="add-btn" onclick="addManualNumber()">+ Add Manual</button></div>
+                    <div class="selection-mode"><button class="mode-btn" onclick="toggleSelectionMode()">${selectionMode === 'multiple' ? 'Multiple Select' : 'Single Select'}</button></div>
+                    <div class="selected-count">Selected: ${selectedNumbers.size}</div>
+                    <div class="number-grid" id="jodiGrid"></div>
+                    <button class="add-btn" onclick="addSelectedToBids()">Add to Bids</button>
+                    ${renderBidItems()}
+                </div>
+            `;
             const grid = document.getElementById('jodiGrid'); if(grid) grid.innerHTML = jodiList.map(j => `<div class="number-btn ${selectedNumbers.has(j) ? 'selected' : ''}" onclick="toggleNumber('${j}')">${j}</div>`).join('');
-        } else {
+        }
+        else if (currentGameType === 'Single Pana' || currentGameType === 'Double Pana' || currentGameType === 'Triple Pana') {
             let panaList = currentGameType === 'Single Pana' ? singlePanaList : (currentGameType === 'Double Pana' ? doublePanaList : triplePanaList);
-            panel.innerHTML = `<div class="game-card"><div class="game-title">${currentMarket} - ${currentGameType}</div><input type="number" id="pointsInput" class="points-input" value="10"><div class="manual-entry"><input type="text" id="manualValue" class="manual-input" placeholder="Enter Pana"><button class="add-btn" onclick="addManualNumber()">+ Add Manual</button></div><div class="selection-mode"><button class="mode-btn" onclick="toggleSelectionMode()">${selectionMode === 'multiple' ? 'Multiple Select' : 'Single Select'}</button></div><div class="selected-count">Selected: ${selectedNumbers.size}</div><div class="number-grid" id="panaGrid"></div><button class="add-btn" onclick="addSelectedToBids()">Add to Bids</button>${renderBidItems()}</div>`;
+            panel.innerHTML = `
+                <div class="game-card">
+                    <div class="game-title">${currentMarket} - ${currentGameType}</div>
+                    ${currentStatus === 'open' ? `<div class="open-close-row"><label class="open-close-label"><input type="radio" name="openClose" value="Open" ${selectedOpenClose === 'Open' ? 'checked' : ''} onchange="setOpenClose('Open')"> Open</label><label class="open-close-label"><input type="radio" name="openClose" value="Close" ${selectedOpenClose === 'Close' ? 'checked' : ''} onchange="setOpenClose('Close')"> Close</label></div>` : '<div class="open-close-row"><span style="color:#ff9800;">🔒 Close Only Bidding</span></div>'}
+                    <input type="number" id="pointsInput" class="points-input" value="10" placeholder="Points (Min ₹5)" min="5">
+                    <div class="manual-entry"><input type="text" id="manualValue" class="manual-input" placeholder="Enter Pana"><button class="add-btn" onclick="addManualNumber()">+ Add Manual</button></div>
+                    <div class="selection-mode"><button class="mode-btn" onclick="toggleSelectionMode()">${selectionMode === 'multiple' ? 'Multiple Select' : 'Single Select'}</button></div>
+                    <div class="selected-count">Selected: ${selectedNumbers.size}</div>
+                    <div class="number-grid" id="panaGrid"></div>
+                    <button class="add-btn" onclick="addSelectedToBids()">Add to Bids</button>
+                    ${renderBidItems()}
+                </div>
+            `;
             const grid = document.getElementById('panaGrid'); if(grid) grid.innerHTML = panaList.map(p => `<div class="number-btn ${selectedNumbers.has(p) ? 'selected' : ''}" onclick="toggleNumber('${p}')">${p}</div>`).join('');
+        }
+        else if (currentGameType === 'Half Sangam A' && currentStatus === 'open') {
+            panel.innerHTML = `
+                <div class="game-card">
+                    <div class="game-title">${currentMarket} - ${currentGameType}</div>
+                    <div class="game-subtitle" style="color:#aaa; text-align:center; margin-bottom:15px;">Open Pana (3 digits) + Close Digit (1 digit)</div>
+                    <input type="number" id="pointsInput" class="points-input" value="10" placeholder="Points (Min ₹5)" min="5">
+                    <div class="manual-entry"><input type="text" id="halfSangamAOpen" class="manual-input" placeholder="Open Pana (3 digits)"><input type="text" id="halfSangamAClose" class="manual-input" placeholder="Close Digit (1 digit)"><button class="add-btn" onclick="addHalfSangamA()">+ Add Half Sangam A</button></div>
+                    <div class="selected-count">Selected: ${selectedNumbers.size}</div>
+                    <button class="add-btn" onclick="addSelectedToBids()">Add to Bids</button>
+                    ${renderBidItems()}
+                </div>
+            `;
+        }
+        else if (currentGameType === 'Half Sangam B' && currentStatus === 'open') {
+            panel.innerHTML = `
+                <div class="game-card">
+                    <div class="game-title">${currentMarket} - ${currentGameType}</div>
+                    <div class="game-subtitle" style="color:#aaa; text-align:center; margin-bottom:15px;">Open Digit (1 digit) + Close Pana (3 digits)</div>
+                    <input type="number" id="pointsInput" class="points-input" value="10" placeholder="Points (Min ₹5)" min="5">
+                    <div class="manual-entry"><input type="text" id="halfSangamBOpen" class="manual-input" placeholder="Open Digit (1 digit)"><input type="text" id="halfSangamBClose" class="manual-input" placeholder="Close Pana (3 digits)"><button class="add-btn" onclick="addHalfSangamB()">+ Add Half Sangam B</button></div>
+                    <div class="selected-count">Selected: ${selectedNumbers.size}</div>
+                    <button class="add-btn" onclick="addSelectedToBids()">Add to Bids</button>
+                    ${renderBidItems()}
+                </div>
+            `;
+        }
+        else if (currentGameType === 'Full Sangam' && currentStatus === 'open') {
+            panel.innerHTML = `
+                <div class="game-card">
+                    <div class="game-title">${currentMarket} - ${currentGameType}</div>
+                    <div class="game-subtitle" style="color:#aaa; text-align:center; margin-bottom:15px;">Open Pana (3 digits) + Close Pana (3 digits)</div>
+                    <input type="number" id="pointsInput" class="points-input" value="10" placeholder="Points (Min ₹5)" min="5">
+                    <div class="manual-entry"><input type="text" id="fullSangamOpen" class="manual-input" placeholder="Open Pana (3 digits)"><input type="text" id="fullSangamClose" class="manual-input" placeholder="Close Pana (3 digits)"><button class="add-btn" onclick="addFullSangam()">+ Add Full Sangam</button></div>
+                    <div class="selected-count">Selected: ${selectedNumbers.size}</div>
+                    <button class="add-btn" onclick="addSelectedToBids()">Add to Bids</button>
+                    ${renderBidItems()}
+                </div>
+            `;
+        }
+        else {
+            panel.innerHTML = `<div class="game-card"><div class="game-title">${currentMarket} - ${currentGameType}</div><div style="color:#ff9800; text-align:center; padding:20px;">Not available in ${currentStatus === 'open' ? 'Open' : 'Close'} bidding</div></div>`;
         }
     }
     
-    function renderBidItems() { if(bids.length === 0) return '<div style="color:#888; text-align:center; padding:20px;">No bids added</div>'; return `<div class="bid-items">${bids.map((b,i)=>`<div class="bid-item"><div><strong>${b.type}</strong>: ${b.value}<br><small>Points: ${b.points}</small></div><button class="remove-bid" onclick="removeBid(${i})">✕</button></div>`).join('')}</div>`; }
+    function setOpenClose(value) { selectedOpenClose = value; renderGamePanel(); }
+    
+    function addHalfSangamA() { const open = document.getElementById('halfSangamAOpen')?.value.trim(); const close = document.getElementById('halfSangamAClose')?.value.trim(); if(open && close) { const val = `${open}-${close}`; if(!selectedNumbers.has(val)) selectedNumbers.add(val); document.getElementById('halfSangamAOpen').value = ''; document.getElementById('halfSangamAClose').value = ''; renderGamePanel(); } }
+    function addHalfSangamB() { const open = document.getElementById('halfSangamBOpen')?.value.trim(); const close = document.getElementById('halfSangamBClose')?.value.trim(); if(open && close) { const val = `${open}-${close}`; if(!selectedNumbers.has(val)) selectedNumbers.add(val); document.getElementById('halfSangamBOpen').value = ''; document.getElementById('halfSangamBClose').value = ''; renderGamePanel(); } }
+    function addFullSangam() { const open = document.getElementById('fullSangamOpen')?.value.trim(); const close = document.getElementById('fullSangamClose')?.value.trim(); if(open && close) { const val = `${open}-${close}`; if(!selectedNumbers.has(val)) selectedNumbers.add(val); document.getElementById('fullSangamOpen').value = ''; document.getElementById('fullSangamClose').value = ''; renderGamePanel(); } }
+    
+    function renderBidItems() { if(bids.length === 0) return '<div style="color:#888; text-align:center; padding:20px;">No bids added</div>'; return `<div class="bid-items">${bids.map((b,i)=>`<div class="bid-item"><div><strong>${b.type}</strong>${b.option ? ` (${b.option})` : ''}: ${b.value}<br><small>Points: ${b.points}</small></div><button class="remove-bid" onclick="removeBid(${i})">✕</button></div>`).join('')}</div>`; }
     function updateSummary() { const total = bids.reduce((s,b)=>s+b.points,0); document.getElementById('totalBids').innerText = bids.length; document.getElementById('totalPoints').innerText = total; }
     function toggleSelectionMode() { selectionMode = selectionMode === 'multiple' ? 'single' : 'multiple'; selectedNumbers.clear(); renderGamePanel(); }
     function toggleNumber(value) { if(selectionMode === 'single') { selectedNumbers.clear(); selectedNumbers.add(value); } else { if(selectedNumbers.has(value)) selectedNumbers.delete(value); else selectedNumbers.add(value); } renderGamePanel(); }
     function addManualNumber() { const v = document.getElementById('manualValue')?.value.trim(); if(v && !selectedNumbers.has(v)) { selectedNumbers.add(v); document.getElementById('manualValue').value = ''; renderGamePanel(); } }
-    function addSelectedToBids() { if(selectedNumbers.size === 0) return; const pts = parseInt(document.getElementById('pointsInput')?.value || 10); for(let v of selectedNumbers) { bids.push({ type: currentGameType, bidType: currentStatus, value: v, points: pts, market: currentMarket, marketId: currentMarketId }); } selectedNumbers.clear(); updateSummary(); renderGamePanel(); }
+    function addSelectedToBids() { if(selectedNumbers.size === 0) return; let pts = parseInt(document.getElementById('pointsInput')?.value || 10); if(pts < 5) { alert('Minimum points is ₹5'); return; } for(let v of selectedNumbers) { bids.push({ type: currentGameType, option: (currentGameType !== 'Jodi' && currentGameType !== 'Half Sangam A' && currentGameType !== 'Half Sangam B' && currentGameType !== 'Full Sangam') ? selectedOpenClose : null, value: v, points: pts, market: currentMarket, marketId: currentMarketId }); } selectedNumbers.clear(); updateSummary(); renderGamePanel(); }
     function removeBid(i) { bids.splice(i,1); updateSummary(); renderGamePanel(); }
     function showMessage(msg, isError) { const d = document.getElementById('message'); d.innerText = msg; d.className = `message ${isError ? 'error' : 'success'}`; d.classList.remove('hidden'); setTimeout(() => d.classList.add('hidden'), 3000); }
     
@@ -85,7 +213,7 @@
         const newBalance = userData.balance - total;
         try {
             await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
-            for(let b of bids) { await db.collection('bids').add({ userId: currentUser.uid, market: b.market, marketId: b.marketId, gameType: b.type, bidType: b.bidType, value: b.value, points: b.points, status: 'pending', createdAt: new Date() }); }
+            for(let b of bids) { await db.collection('bids').add({ userId: currentUser.uid, market: b.market, marketId: b.marketId, gameType: b.type, bidType: b.option || (currentStatus === 'open' ? 'Open' : 'Close'), value: b.value, points: b.points, status: 'pending', createdAt: new Date() }); }
             await db.collection('transactions').add({ userId: currentUser.uid, type: 'debit', amount: total, description: `Bid on ${currentMarket}`, date: new Date() });
             showMessage(`✅ ₹${total} bids placed!`, false);
             bids = []; selectedNumbers.clear(); updateSummary(); renderGamePanel();
@@ -102,11 +230,18 @@
     currentMarketId = urlParams.get('marketId') || '';
     currentStatus = urlParams.get('status') || 'open';
     document.getElementById('marketName').innerHTML = currentMarket;
-    document.getElementById('bidTypeBadge').innerHTML = currentStatus === 'open' ? '🎲 OPEN BIDDING' : '🔒 CLOSE BIDDING';
+    document.getElementById('bidTypeBadge').innerHTML = currentStatus === 'open' ? '🎲 OPEN BIDDING - All Games Available' : '🔒 CLOSE BIDDING - Close Bets Only';
     
-    window.toggleNumber = toggleNumber; window.addManualNumber = addManualNumber; window.addSelectedToBids = addSelectedToBids; window.removeBid = removeBid; window.toggleSelectionMode = toggleSelectionMode; window.submitBids = submitBids;
+    // Set available game types based on market status
+    if (currentStatus === 'open') {
+        availableGameTypes = allGameTypes;
+    } else {
+        availableGameTypes = allGameTypes.filter(g => g.showInClose === true);
+    }
     
-    auth.onAuthStateChanged(async (user) => { if(!user) window.location.href = 'index.html'; else { await loadUserData(); renderGamePanel(); } });
+    window.selectGameType = selectGameType; window.setOpenClose = setOpenClose; window.toggleNumber = toggleNumber; window.addManualNumber = addManualNumber; window.addSelectedToBids = addSelectedToBids; window.removeBid = removeBid; window.toggleSelectionMode = toggleSelectionMode; window.addHalfSangamA = addHalfSangamA; window.addHalfSangamB = addHalfSangamB; window.addFullSangam = addFullSangam; window.submitBids = submitBids;
+    
+    auth.onAuthStateChanged(async (user) => { if(!user) window.location.href = 'index.html'; else { await loadUserData(); renderGameTypeSelector(); renderGamePanel(); } });
 </script>
 </body>
 </html>
