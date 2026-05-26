@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>WIN77 - Login</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #0a0a0f;
+            min-height: 100vh;
+        }
+        /* Permission Popup */
+        .permission-popup {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1a1a2e;
+            border-radius: 20px 20px 0 0;
+            padding: 20px;
+            z-index: 1000;
+            border-top: 1px solid #ff9800;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        .permission-popup.show {
+            transform: translateY(0);
+        }
+        .permission-title {
+            color: white;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .permission-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .permit-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .allow-btn {
+            background: #ff9800;
+            border: none;
+            color: #000;
+        }
+        .dont-allow-btn {
+            background: transparent;
+            border: 1px solid #ff9800;
+            color: #ff9800;
+        }
+        /* Permission Overlay */
+        .permission-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 999;
+            display: none;
+        }
+        /* Main Container */
+        .app-container {
+            max-width: 450px;
+            margin: 0 auto;
+            background: #0a0a0f;
+            min-height: 100vh;
+            position: relative;
+        }
+        /* Status Bar */
+        .status-bar {
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-size: 14px;
+            background: #0a0a0f;
+        }
+        /* Header */
+        .header {
+            padding: 20px;
+            text-align: center;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #ff9800;
+            letter-spacing: 2px;
+        }
+        .tagline {
+            font-size: 11px;
+            color: #888;
+            margin-top: 5px;
+        }
+        /* Login Screen */
+        .login-screen {
+            padding: 20px;
+        }
+        .mpin-input {
+            background: #1a1a2e;
+            border: 1px solid #ff9800;
+            border-radius: 12px;
+            padding: 15px;
+            width: 100%;
+            color: white;
+            font-size: 24px;
+            text-align: center;
+            letter-spacing: 8px;
+            margin-bottom: 20px;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #ff9800;
+            border: none;
+            border-radius: 12px;
+            color: black;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .forgot-link {
+            text-align: center;
+            margin-top: 15px;
+            color: #ff9800;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        /* OTP Screen */
+        .otp-screen {
+            padding: 20px;
+            text-align: center;
+        }
+        .otp-welcome {
+            color: #ff9800;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .timer {
+            color: #ff9800;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .otp-input {
+            background: #1a1a2e;
+            border: 1px solid #ff9800;
+            border-radius: 12px;
+            padding: 15px;
+            width: 100%;
+            color: white;
+            font-size: 20px;
+            text-align: center;
+            letter-spacing: 4px;
+            margin-bottom: 20px;
+        }
+        /* Phone Login Screen */
+        .phone-screen {
+            padding: 20px;
+        }
+        .phone-input {
+            background: #1a1a2e;
+            border: 1px solid #ff9800;
+            border-radius: 12px;
+            padding: 15px;
+            width: 100%;
+            color: white;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        /* Register Screen */
+        .register-screen {
+            padding: 20px;
+        }
+        .register-input {
+            background: #1a1a2e;
+            border: 1px solid #ff9800;
+            border-radius: 12px;
+            padding: 14px;
+            width: 100%;
+            color: white;
+            margin-bottom: 15px;
+        }
+        .error-text {
+            color: #f44336;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="status-bar">
+        <span>10:10</span>
+        <span>📶 🔋 91%</span>
+    </div>
+    
+    <div class="header">
+        <div class="logo">WIN77</div>
+        <div class="tagline">India's best Satta Matka Application</div>
+    </div>
+
+    <!-- Permission Overlay -->
+    <div id="permissionOverlay" class="permission-overlay"></div>
+
+    <!-- Permission Popups -->
+    <div id="permissionPopup" class="permission-popup">
+        <div class="permission-title" id="permissionTitle">Allow WIN77 to record audio?</div>
+        <div class="permission-buttons">
+            <button class="dont-allow-btn" onclick="declinePermission()">Don't allow</button>
+            <button class="allow-btn" onclick="allowPermission()">Allow</button>
+        </div>
+    </div>
+
+    <!-- Phone Login Screen -->
+    <div id="phoneScreen" class="phone-screen">
+        <input type="tel" id="phoneNumber" class="phone-input" placeholder="Enter Mobile Number">
+        <button class="login-btn" onclick="sendOTP()">Login with OTP</button>
+        <div class="forgot-link" onclick="showPinLogin()">Login with MPIN</div>
+        <div id="phoneError" class="error-text"></div>
+    </div>
+
+    <!-- OTP Screen -->
+    <div id="otpScreen" class="otp-screen hidden">
+        <div class="otp-welcome">India's best Satta Matka Application Welcomes You !!!</div>
+        <div class="timer" id="timer">Second Remaining 60</div>
+        <input type="text" id="otpCode" class="otp-input" placeholder="Enter OTP" maxlength="6">
+        <button class="login-btn" onclick="verifyOTP()">SUBMIT</button>
+        <div class="forgot-link" onclick="resendOTP()">FORGOT PIN</div>
+        <div id="otpError" class="error-text"></div>
+    </div>
+
+    <!-- PIN Login Screen -->
+    <div id="pinLoginScreen" class="login-screen hidden">
+        <input type="password" id="pinInput" class="mpin-input" placeholder="●●●●" maxlength="4">
+        <button class="login-btn" onclick="verifyPin()">Login with MPIN</button>
+        <div class="forgot-link" onclick="showPhoneLogin()">Forgot MPIN?</div>
+        <div id="pinError" class="error-text"></div>
+    </div>
+
+    <!-- Register Screen -->
+    <div id="registerScreen" class="register-screen hidden">
+        <input type="text" id="regName" class="register-input" placeholder="Full Name">
+        <input type="password" id="regPin" class="register-input" placeholder="Create MPIN" maxlength="4">
+        <input type="password" id="regConfirmPin" class="register-input" placeholder="Confirm MPIN" maxlength="4">
+        <button class="login-btn" onclick="registerUser()">Register</button>
+        <div id="regError" class="error-text"></div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
+        authDomain: "win777-ed482.firebaseapp.com",
+        projectId: "win777-ed482",
+        storageBucket: "win777-ed482.firebasestorage.app",
+        messagingSenderId: "843686112399",
+        appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    
+    let confirmationResult = null;
+    let currentPhone = null;
+    let countdown = 0;
+    let timerInterval = null;
+    let recaptchaVerifier = null;
+    let currentPermissions = 0;
+    const permissionsList = [
+        "Allow WIN77 to record audio?",
+        "Allow WIN77 to send you notifications?",
+        "Allow WIN77 to make and manage phone calls?",
+        "Allow WIN77 to access music and audio on this device?",
+        "Allow WIN77 to access photos and videos on this device?"
+    ];
+    
+    function showNextPermission() {
+        if (currentPermissions < permissionsList.length) {
+            document.getElementById('permissionTitle').innerText = permissionsList[currentPermissions];
+            document.getElementById('permissionPopup').classList.add('show');
+            document.getElementById('permissionOverlay').style.display = 'block';
+        } else {
+            document.getElementById('permissionPopup').classList.remove('show');
+            document.getElementById('permissionOverlay').style.display = 'none';
+        }
+    }
+    
+    function allowPermission() {
+        currentPermissions++;
+        document.getElementById('permissionPopup').classList.remove('show');
+        document.getElementById('permissionOverlay').style.display = 'none';
+        setTimeout(() => showNextPermission(), 500);
+    }
+    
+    function declinePermission() {
+        currentPermissions++;
+        document.getElementById('permissionPopup').classList.remove('show');
+        document.getElementById('permissionOverlay').style.display = 'none';
+        setTimeout(() => showNextPermission(), 500);
+    }
+    
+    function initRecaptcha() {
+        if (!recaptchaVerifier) {
+            const container = document.createElement('div');
+            container.id = 'recaptcha-container';
+            container.style.position = 'absolute';
+            container.style.left = '-9999px';
+            document.body.appendChild(container);
+            recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { size: 'invisible' });
+        }
+        return recaptchaVerifier;
+    }
+    
+    function showError(elementId, message) {
+        const el = document.getElementById(elementId);
+        if (el) {
+            el.innerText = message;
+            setTimeout(() => el.innerText = '', 4000);
+        }
+    }
+    
+    function startTimer(seconds) {
+        countdown = seconds;
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            if (countdown <= 1) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            document.getElementById('timer').innerText = `Second Remaining ${countdown}`;
+            countdown--;
+        }, 1000);
+    }
+    
+    function sendOTP() {
+        const phone = document.getElementById('phoneNumber').value.replace(/\D/g, '');
+        if (!phone || phone.length < 10) {
+            showError('phoneError', 'Enter valid mobile number');
+            return;
+        }
+        currentPhone = '+91' + phone;
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerText = 'Sending...';
+        
+        try {
+            const verifier = initRecaptcha();
+            auth.signInWithPhoneNumber(currentPhone, verifier)
+                .then(confirmation => {
+                    confirmationResult = confirmation;
+                    document.getElementById('phoneScreen').classList.add('hidden');
+                    document.getElementById('otpScreen').classList.remove('hidden');
+                    startTimer(60);
+                    btn.disabled = false;
+                    btn.innerText = 'Login with OTP';
+                })
+                .catch(error => {
+                    showError('phoneError', error.message);
+                    btn.disabled = false;
+                    btn.innerText = 'Login with OTP';
+                });
+        } catch(e) {
+            showError('phoneError', e.message);
+            btn.disabled = false;
+            btn.innerText = 'Login with OTP';
+        }
+    }
+    
+    function verifyOTP() {
+        const code = document.getElementById('otpCode').value;
+        if (!code || code.length !== 6) {
+            showError('otpError', 'Enter valid OTP');
+            return;
+        }
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerText = 'Verifying...';
+        
+        confirmationResult.confirm(code)
+            .then(result => {
+                const user = result.user;
+                db.collection('users').doc(user.uid).get()
+                    .then(doc => {
+                        if (doc.exists && doc.data().pin) {
+                            window.location.href = 'dashboard.html';
+                        } else {
+                            document.getElementById('otpScreen').classList.add('hidden');
+                            document.getElementById('registerScreen').classList.remove('hidden');
+                        }
+                        btn.disabled = false;
+                        btn.innerText = 'SUBMIT';
+                    });
+            })
+            .catch(error => {
+                showError('otpError', 'Invalid OTP');
+                btn.disabled = false;
+                btn.innerText = 'SUBMIT';
+            });
+    }
+    
+    function resendOTP() {
+        const verifier = initRecaptcha();
+        auth.signInWithPhoneNumber(currentPhone, verifier)
+            .then(confirmation => {
+                confirmationResult = confirmation;
+                startTimer(60);
+                showError('otpError', 'OTP resent!');
+            })
+            .catch(error => showError('otpError', error.message));
+    }
+    
+    function registerUser() {
+        const name = document.getElementById('regName').value.trim();
+        const pin = document.getElementById('regPin').value;
+        const confirmPin = document.getElementById('regConfirmPin').value;
+        
+        if (!name) { showError('regError', 'Enter your name'); return; }
+        if (!pin || pin.length !== 4) { showError('regError', 'MPIN must be 4 digits'); return; }
+        if (pin !== confirmPin) { showError('regError', 'MPINs do not match'); return; }
+        
+        const user = auth.currentUser;
+        if (!user) { showError('regError', 'Session expired'); return; }
+        
+        const btn = event.target;
+        btn.disabled = true;
+        btn.innerText = 'Creating...';
+        
+        db.collection('users').doc(user.uid).set({
+            uid: user.uid,
+            phone: user.phoneNumber,
+            name: name,
+            pin: pin,
+            balance: 0,
+            role: 'user'
+        }).then(() => {
+            window.location.href = 'dashboard.html';
+        }).catch(error => {
+            showError('regError', error.message);
+            btn.disabled = false;
+            btn.innerText = 'Register';
+        });
+    }
+    
+    function verifyPin() {
+        const pin = document.getElementById('pinInput').value;
+        if (!pin || pin.length !== 4) {
+            showError('pinError', 'Enter 4-digit MPIN');
+            return;
+        }
+        const user = auth.currentUser;
+        if (!user) {
+            showPhoneLogin();
+            return;
+        }
+        db.collection('users').doc(user.uid).get()
+            .then(doc => {
+                if (doc.exists && doc.data().pin === pin) {
+                    window.location.href = 'dashboard.html';
+                } else {
+                    showError('pinError', 'Invalid MPIN');
+                }
+            });
+    }
+    
+    function showPhoneLogin() {
+        document.getElementById('pinLoginScreen').classList.add('hidden');
+        document.getElementById('phoneScreen').classList.remove('hidden');
+        document.getElementById('otpScreen').classList.add('hidden');
+        document.getElementById('registerScreen').classList.add('hidden');
+    }
+    
+    function showPinLogin() {
+        document.getElementById('phoneScreen').classList.add('hidden');
+        document.getElementById('pinLoginScreen').classList.remove('hidden');
+    }
+    
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            db.collection('users').doc(user.uid).get().then(doc => {
+                if (doc.exists && doc.data().pin) {
+                    document.getElementById('phoneScreen').classList.add('hidden');
+                    document.getElementById('pinLoginScreen').classList.remove('hidden');
+                } else if (doc.exists && !doc.data().pin) {
+                    document.getElementById('phoneScreen').classList.add('hidden');
+                    document.getElementById('registerScreen').classList.remove('hidden');
+                }
+            });
+        }
+    });
+    
+    setTimeout(() => showNextPermission(), 500);
+</script>
+</body>
+</html>
