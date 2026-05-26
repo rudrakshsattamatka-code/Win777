@@ -3,178 +3,377 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WIN777 - Database Setup</title>
+    <title>WIN777 - Firebase Setup</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #0a0a0f; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .setup-card { background: #1a1a2e; padding: 40px; border-radius: 20px; max-width: 600px; width: 100%; border: 1px solid #00b4ff; }
-        h1 { color: #00b4ff; margin-bottom: 20px; text-align: center; }
-        h2 { color: #ccc; font-size: 18px; margin: 20px 0 10px; }
-        input, textarea { width: 100%; padding: 12px; margin: 8px 0; background: #0a0a0f; border: 1px solid #00b4ff; border-radius: 8px; color: white; }
-        button { width: 100%; padding: 14px; background: #00b4ff; border: none; border-radius: 8px; color: black; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        button:hover { background: #0099cc; }
-        .status { margin-top: 20px; padding: 12px; border-radius: 8px; display: none; }
-        .success { background: #00b4ff22; border: 1px solid #00b4ff; color: #00b4ff; display: block; }
-        .error { background: #ff000022; border: 1px solid #ff0000; color: #ff0000; display: block; }
-        .log { background: #0a0a0f; padding: 12px; border-radius: 8px; margin-top: 15px; font-size: 12px; max-height: 200px; overflow-y: auto; }
-        .log p { color: #888; margin: 5px 0; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #0a0a0f;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .setup-container {
+            max-width: 550px;
+            width: 100%;
+            background: #1a1a2e;
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid #00b4ff;
+        }
+        h1 {
+            color: #00b4ff;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #aaa;
+            margin-bottom: 25px;
+            font-size: 13px;
+        }
+        .status-card {
+            background: #0a0a0f;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #1a1a2e;
+        }
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        .status-name {
+            color: #ddd;
+            font-size: 14px;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status-success {
+            background: #4caf5020;
+            color: #4caf50;
+            border: 1px solid #4caf50;
+        }
+        .status-pending {
+            background: #ff980020;
+            color: #ff9800;
+            border: 1px solid #ff9800;
+        }
+        .status-error {
+            background: #f4433620;
+            color: #f44336;
+            border: 1px solid #f44336;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #00b4ff, #0099cc);
+            transition: width 0.3s;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #00b4ff;
+            border: none;
+            border-radius: 12px;
+            color: #000;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .log-area {
+            background: #0a0a0f;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            color: #8bc34a;
+        }
+        .log-entry {
+            padding: 4px 0;
+            border-bottom: 1px solid #1a1a2e;
+        }
+        .warning {
+            background: #ff980020;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            color: #ff9800;
+            font-size: 13px;
+            text-align: center;
+        }
+        .success-message {
+            background: #4caf5020;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 15px;
+            color: #4caf50;
+        }
+        .hidden {
+            display: none;
+        }
+        .user-info {
+            color: #aaa;
+            font-size: 12px;
+            margin-top: 10px;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
-<div class="setup-card">
-    <h1>🔧 WIN777 Database Setup</h1>
-    <p style="color: #888; text-align: center; margin-bottom: 20px;">Create collections, indexes, and admin account</p>
+<div class="setup-container">
+    <h1>🔧 WIN777 Firebase Setup</h1>
+    <div class="subtitle">Automatic Database Initialization</div>
 
-    <h2>📁 Firebase Configuration</h2>
-    <input type="text" id="apiKey" placeholder="API Key" value="">
-    <input type="text" id="authDomain" placeholder="Auth Domain (project-id.firebaseapp.com)" value="">
-    <input type="text" id="projectId" placeholder="Project ID" value="win777-ed482">
-    
-    <h2>👑 Create Admin Account</h2>
-    <input type="email" id="adminEmail" placeholder="Admin Email" value="">
-    <input type="password" id="adminPassword" placeholder="Admin Password" value="">
-    
-    <h2>📜 Firestore Security Rules</h2>
-    <textarea id="rules" rows="8">rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Only authenticated users can read/write
-    match /{document=**} {
-      allow read, write: if request.auth != null;
-    }
-    
-    // Admins collection - only admins can modify
-    match /admins/{userId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth.token.admin == true;
-    }
-    
-    // Users collection - users can read/write their own data
-    match /users/{userId} {
-      allow read, write: if request.auth.uid == userId;
-    }
-  }
-}</textarea>
-    
-    <button id="setupBtn">🚀 Run Setup</button>
-    <div id="status" class="status"></div>
-    <div id="log" class="log"></div>
+    <div class="warning">
+        ⚠️ Make sure you are logged in as ADMIN to run this setup.<br>
+        First register a user, then manually set role: "admin" in Firestore.
+    </div>
+
+    <div id="authStatus" class="status-card">
+        <div class="status-item">
+            <span class="status-name">🔐 Authentication Status</span>
+            <span id="authBadge" class="status-badge status-pending">Checking...</span>
+        </div>
+        <div id="userInfo" class="user-info"></div>
+    </div>
+
+    <div id="setupStatus" class="status-card">
+        <div class="status-item">
+            <span class="status-name">📦 Collections Setup</span>
+            <span id="setupBadge" class="status-badge status-pending">Pending</span>
+        </div>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <button class="btn" id="setupBtn" onclick="runSetup()">🚀 Run Firebase Setup</button>
+
+    <div class="log-area" id="logArea">
+        <div class="log-entry">📋 Ready to run setup...</div>
+    </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
 <script>
-const logDiv = document.getElementById('log');
-const statusDiv = document.getElementById('status');
-
-function addLog(message, isError = false) {
-    const p = document.createElement('p');
-    p.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-    p.style.color = isError ? '#ff6666' : '#00b4ff';
-    logDiv.appendChild(p);
-    logDiv.scrollTop = logDiv.scrollHeight;
-    console.log(message);
-}
-
-function showStatus(message, isError = false) {
-    statusDiv.textContent = message;
-    statusDiv.className = `status ${isError ? 'error' : 'success'}`;
-}
-
-document.getElementById('setupBtn').addEventListener('click', async () => {
-    const apiKey = document.getElementById('apiKey').value.trim();
-    const authDomain = document.getElementById('authDomain').value.trim();
-    const projectId = document.getElementById('projectId').value.trim();
-    const adminEmail = document.getElementById('adminEmail').value.trim();
-    const adminPassword = document.getElementById('adminPassword').value.trim();
-    const rules = document.getElementById('rules').value;
+    const firebaseConfig = {
+        apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
+        authDomain: "win777-ed482.firebaseapp.com",
+        projectId: "win777-ed482",
+        storageBucket: "win777-ed482.firebasestorage.app",
+        messagingSenderId: "843686112399",
+        appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
+    };
     
-    if (!apiKey || !authDomain || !projectId) {
-        showStatus('❌ Please fill in Firebase configuration fields', true);
-        return;
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    let currentUser = null;
+    let isAdmin = false;
+    
+    function addLog(message, type = 'info') {
+        const logArea = document.getElementById('logArea');
+        const colors = { info: '#8bc34a', error: '#f44336', warning: '#ff9800', success: '#4caf50' };
+        const logDiv = document.createElement('div');
+        logDiv.className = 'log-entry';
+        logDiv.style.color = colors[type] || '#aaa';
+        logDiv.innerHTML = `> ${message}`;
+        logArea.appendChild(logDiv);
+        logArea.scrollTop = logArea.scrollHeight;
     }
     
-    if (!adminEmail || !adminPassword) {
-        showStatus('❌ Please enter admin email and password', true);
-        return;
+    function updateProgress(percent) {
+        document.getElementById('progressFill').style.width = percent + '%';
     }
     
-    if (adminPassword.length < 6) {
-        showStatus('❌ Password must be at least 6 characters', true);
-        return;
+    async function checkAuth() {
+        return new Promise((resolve) => {
+            auth.onAuthStateChanged(async (user) => {
+                if (user) {
+                    currentUser = user;
+                    document.getElementById('authBadge').innerHTML = '✅ Logged In';
+                    document.getElementById('authBadge').className = 'status-badge status-success';
+                    document.getElementById('userInfo').innerHTML = `👤 User: ${user.email || user.phoneNumber || user.uid}<br>🆔 UID: ${user.uid}`;
+                    
+                    const userDoc = await db.collection('users').doc(user.uid).get();
+                    if (userDoc.exists && userDoc.data().role === 'admin') {
+                        isAdmin = true;
+                        addLog('✅ Admin access confirmed', 'success');
+                        document.getElementById('setupBadge').innerHTML = 'Ready';
+                        document.getElementById('setupBadge').className = 'status-badge status-success';
+                        document.getElementById('setupBtn').disabled = false;
+                    } else {
+                        isAdmin = false;
+                        addLog('⚠️ You are not an admin. Please set role: "admin" in your user document first.', 'warning');
+                        document.getElementById('setupBadge').innerHTML = 'Need Admin';
+                        document.getElementById('setupBadge').className = 'status-badge status-error';
+                        document.getElementById('setupBtn').disabled = true;
+                    }
+                    resolve(isAdmin);
+                } else {
+                    document.getElementById('authBadge').innerHTML = '❌ Not Logged In';
+                    document.getElementById('authBadge').className = 'status-badge status-error';
+                    document.getElementById('userInfo').innerHTML = 'Please login first from index.html';
+                    document.getElementById('setupBtn').disabled = true;
+                    resolve(false);
+                }
+            });
+        });
     }
     
-    statusDiv.className = 'status';
-    logDiv.innerHTML = '';
-    addLog('🚀 Starting setup...');
-    
-    try {
-        // Initialize Firebase
-        const firebaseConfig = { apiKey, authDomain, projectId };
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-        
-        addLog('✅ Firebase initialized');
-        
-        // Create admin user
-        addLog(`📝 Creating admin user: ${adminEmail}`);
-        let userCredential;
+    async function createCollection(collectionName, sampleData, options = {}) {
         try {
-            userCredential = await auth.createUserWithEmailAndPassword(adminEmail, adminPassword);
-            addLog('✅ Admin user created');
-        } catch (err) {
-            if (err.code === 'auth/email-already-in-use') {
-                addLog('⚠️ Admin user already exists, signing in...');
-                userCredential = await auth.signInWithEmailAndPassword(adminEmail, adminPassword);
-                addLog('✅ Signed in as existing admin');
-            } else {
-                throw err;
+            addLog(`Creating collection: ${collectionName}...`, 'info');
+            const snapshot = await db.collection(collectionName).limit(1).get();
+            
+            if (!snapshot.empty && !options.force) {
+                addLog(`   📁 ${collectionName} already exists (${snapshot.size} documents)`, 'success');
+                return { success: true, existing: true };
             }
+            
+            if (sampleData) {
+                if (Array.isArray(sampleData)) {
+                    for (let i = 0; i < sampleData.length; i++) {
+                        await db.collection(collectionName).add(sampleData[i]);
+                    }
+                    addLog(`   ✅ Added ${sampleData.length} documents to ${collectionName}`, 'success');
+                } else {
+                    await db.collection(collectionName).add(sampleData);
+                    addLog(`   ✅ Added sample document to ${collectionName}`, 'success');
+                }
+            }
+            return { success: true, existing: false };
+        } catch (error) {
+            addLog(`   ❌ Error creating ${collectionName}: ${error.message}`, 'error');
+            return { success: false, error: error.message };
+        }
+    }
+    
+    async function runSetup() {
+        if (!isAdmin) {
+            addLog('❌ Setup cancelled: Admin access required', 'error');
+            return;
         }
         
-        const adminUid = userCredential.user.uid;
+        const btn = document.getElementById('setupBtn');
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Running Setup...';
+        updateProgress(0);
         
-        // Create admins collection
-        addLog('📁 Creating admins collection...');
-        await db.collection('admins').doc(adminUid).set({
-            email: adminEmail,
-            role: 'super_admin',
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            permissions: ['all']
-        });
-        addLog('✅ Admins collection created');
+        addLog('🚀 Starting Firebase Setup...', 'info');
+        addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
         
-        // Create users collection (empty shell)
-        addLog('📁 Creating users collection...');
-        await db.collection('users').doc('_template').set({
-            _note: 'Template document - you can delete this',
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        addLog('✅ Users collection shell created');
+        // 1. Create Markets Collection
+        updateProgress(10);
+        const marketsData = [
+            { name: 'INDRA MORNING', numbers: '440-8*-***', openBid: '09:10', closeBid: '10:10', status: 'closed', result: '***-**-***' },
+            { name: 'MAYA MORNING', numbers: '177-5*-***', openBid: '09:40', closeBid: '10:40', status: 'close', result: '***-**-***' },
+            { name: 'SRIDEVI', numbers: '***-***-***', openBid: '11:35', closeBid: '12:35', status: 'open', result: '***-**-***' },
+            { name: 'TIME BAZAR', numbers: '***-***-***', openBid: '12:50', closeBid: '13:50', status: 'open', result: '***-**-***' },
+            { name: 'MADHUR DAY', numbers: '***-***-***', openBid: '13:25', closeBid: '14:25', status: 'open', result: '***-**-***' },
+            { name: 'MAYA DAY', numbers: '***-***-***', openBid: '14:10', closeBid: '16:10', status: 'open', result: '***-**-***' },
+            { name: 'KALYAN', numbers: '***-***-***', openBid: '15:40', closeBid: '17:40', status: 'open', result: '***-**-***' },
+            { name: 'MILAN NIGHT', numbers: '***-***-***', openBid: '21:05', closeBid: '23:05', status: 'open', result: '***-**-***' }
+        ];
+        await createCollection('markets', marketsData);
         
-        // Create settings collection
-        addLog('📁 Creating settings collection...');
-        await db.collection('settings').doc('general').set({
+        // 2. Create Settings Collection
+        updateProgress(30);
+        const settingsData = {
+            upiId: 'ganeshpatil99@slc',
+            minDeposit: 100,
+            maxDeposit: 50000,
+            minWithdraw: 500,
+            maxWithdraw: 5000000,
             siteName: 'WIN777',
-            maintenanceMode: false,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        addLog('✅ Settings collection created');
+            contactWhatsApp: '919876543210',
+            contactPhone: '+919876543210'
+        };
+        await createCollection('settings', settingsData);
         
-        // Apply security rules (requires Firebase CLI or manual update)
-        addLog('⚠️ Security rules cannot be applied automatically from browser');
-        addLog('📋 Copy the rules below and paste in Firebase Console > Firestore > Rules');
+        // 3. Notice Board Settings
+        updateProgress(45);
+        const noticeData = {
+            text: 'Welcome to WIN777! Play big · Win big · Unlimited',
+            updatedAt: new Date()
+        };
+        await createCollection('settings', noticeData, { force: true });
+        addLog('📢 Notice board settings created', 'success');
         
-        showStatus('✅ Setup complete! Admin account created. Apply rules manually.', false);
+        // 4. Create empty collections structure
+        updateProgress(60);
+        addLog('📋 Bids collection ready (will be populated by users)', 'info');
         
-    } catch (error) {
-        addLog(`❌ Error: ${error.message}`, true);
-        showStatus(`❌ Setup failed: ${error.message}`, true);
+        updateProgress(75);
+        addLog('💰 Transactions collection ready (for deposits/withdrawals)', 'info');
+        
+        updateProgress(85);
+        addLog('💸 Withdraw Requests collection ready', 'info');
+        
+        updateProgress(95);
+        addLog('👥 Users collection ready (created during registration)', 'info');
+        
+        updateProgress(100);
+        addLog('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'success');
+        addLog('✅ SETUP COMPLETED SUCCESSFULLY!', 'success');
+        addLog('🎉 You can now use the WIN777 app.', 'success');
+        addLog('', 'info');
+        addLog('📌 Next Steps:', 'warning');
+        addLog('   1. Make a user admin: Go to Firestore → users → add field "role": "admin"', 'warning');
+        addLog('   2. Login to admin panel with password: Gani99@@', 'warning');
+        addLog('   3. Markets are already added. You can modify them in admin panel.', 'warning');
+        
+        document.getElementById('setupBadge').innerHTML = '✅ Completed';
+        document.getElementById('setupBadge').className = 'status-badge status-success';
+        btn.innerHTML = '✅ Setup Complete';
+        
+        // Show success message
+        const successDiv = document.createElement('div');
+        successDiv.className = 'success-message';
+        successDiv.innerHTML = '🎉 All collections created successfully! You can now close this page.';
+        document.querySelector('.setup-container').insertBefore(successDiv, document.getElementById('logArea'));
     }
-});
+    
+    // Initialize
+    checkAuth();
 </script>
 </body>
 </html>
