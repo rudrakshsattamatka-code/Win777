@@ -19,7 +19,7 @@
         .profile-info { flex: 1; }
         .profile-name { color: white; font-size: 16px; font-weight: bold; }
         .profile-phone { color: #888; font-size: 12px; }
-        .notice-board { background: linear-gradient(135deg, #00b4ff, #0099cc); margin: 10px; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; }
+        .notice-board { background: linear-gradient(135deg, #00b4ff, #0099cc); margin: 10px; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
         .notice-icon { font-size: 24px; }
         .notice-text { flex: 1; color: #000; font-weight: bold; font-size: 13px; }
         .close-notice { background: none; border: none; color: #000; font-size: 18px; cursor: pointer; }
@@ -41,6 +41,12 @@
         .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 11px; }
         .nav-item span { font-size: 22px; display: block; }
         .hidden { display: none; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: #1a1a2e; border-radius: 24px; padding: 25px; width: 90%; max-width: 350px; border: 1px solid #00b4ff; }
+        .modal-content h3 { color: #00b4ff; margin-bottom: 15px; text-align: center; }
+        .modal-content input, .modal-content select { width: 100%; padding: 12px; margin: 10px 0; background: #0a0a0f; border: 1px solid #00b4ff; border-radius: 12px; color: white; }
+        .modal-btn { width: 100%; padding: 12px; background: #00b4ff; border: none; border-radius: 12px; color: #000; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .close-modal { background: #333; }
     </style>
 </head>
 <body>
@@ -53,12 +59,16 @@
         <div style="color:#00b4ff; font-size:12px; cursor:pointer;" onclick="viewProfile()">View Profile →</div>
     </div>
     
-    <div id="noticeBoard" class="notice-board"><div class="notice-icon">📢</div><div class="notice-text" id="noticeText">Welcome to WIN777! Play big · Win big · Unlimited</div><button class="close-notice" onclick="closeNotice()">✕</button></div>
+    <div id="noticeBoard" class="notice-board" onclick="showNoticeModal()">
+        <div class="notice-icon">📢</div>
+        <div class="notice-text" id="noticeText">Welcome to WIN777! Play big · Win big · Unlimited</div>
+        <button class="close-notice" onclick="event.stopPropagation(); closeNotice()">✕</button>
+    </div>
     
     <div class="games-row">
         <div class="game-icon" onclick="showGames()"><span>🎮</span><p>Games</p></div>
-        <div class="game-icon" onclick="showCharts()"><span>📊</span><p>Charts</p></div>
-        <div class="game-icon" onclick="window.location.href='funds.html'"><span>🏦</span><p>Funds</p></div>
+        <div class="game-icon" onclick="window.location.href='deposit.html'"><span>💰</span><p>Deposit</p></div>
+        <div class="game-icon" onclick="window.location.href='withdraw.html'"><span>💸</span><p>Withdraw</p></div>
         <div class="game-icon" onclick="window.location.href='mybids.html'"><span>📋</span><p>My Bids</p></div>
     </div>
     
@@ -73,6 +83,15 @@
     </div>
 </div>
 
+<!-- Notice Modal -->
+<div id="noticeModal" class="modal">
+    <div class="modal-content">
+        <h3>📢 Notice Board</h3>
+        <div id="noticeModalText" style="color:white; margin-bottom:15px; line-height:1.5;"></div>
+        <button class="modal-btn close-modal" onclick="closeNoticeModal()">Close</button>
+    </div>
+</div>
+
 <script>
     const firebaseConfig = { apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38", authDomain: "win777-ed482.firebaseapp.com", projectId: "win777-ed482", storageBucket: "win777-ed482.firebasestorage.app", messagingSenderId: "843686112399", appId: "1:843686112399:web:9c20a96831e6a94cd814fa" };
     firebase.initializeApp(firebaseConfig);
@@ -81,11 +100,23 @@
     
     let marketsData = [];
     
-    async function loadMarkets() {
-        const snapshot = await db.collection('markets').get();
-        marketsData = [];
-        snapshot.forEach(doc => marketsData.push({ id: doc.id, ...doc.data() }));
-        renderMarkets();
+    // Real-time listener for markets
+    function listenToMarkets() {
+        db.collection('markets').onSnapshot((snapshot) => {
+            marketsData = [];
+            snapshot.forEach(doc => marketsData.push({ id: doc.id, ...doc.data() }));
+            renderMarkets();
+        });
+    }
+    
+    // Real-time listener for notice board
+    function listenToNotice() {
+        db.collection('settings').doc('notice').onSnapshot((doc) => {
+            if (doc.exists) {
+                document.getElementById('noticeText').innerHTML = doc.data().text || 'Welcome to WIN777! Play big · Win big · Unlimited';
+                document.getElementById('noticeModalText').innerHTML = doc.data().text || 'Welcome to WIN777! Play big · Win big · Unlimited';
+            }
+        });
     }
     
     function getStatusText(status) {
@@ -132,7 +163,6 @@
             document.getElementById('userBalance').innerText = doc.data().balance || 0;
             document.getElementById('profileName').innerHTML = doc.data().name || 'User';
             document.getElementById('profilePhone').innerHTML = doc.data().phone || '';
-            document.getElementById('noticeText').innerHTML = `Welcome ${doc.data().name || 'User'}! Play big · Win big · Unlimited`;
         }
     }
     
@@ -147,11 +177,14 @@
         }
     }
     
+    function showNoticeModal() {
+        document.getElementById('noticeModal').style.display = 'flex';
+    }
+    function closeNoticeModal() { document.getElementById('noticeModal').style.display = 'none'; }
     function closeNotice() { document.getElementById('noticeBoard').style.display = 'none'; }
     function showGames() { alert('Games coming soon!'); }
-    function showCharts() { alert('Charts coming soon!'); }
     
-    auth.onAuthStateChanged(user => { if (!user) window.location.href = 'index.html'; else { loadUserData(); loadMarkets(); } });
+    auth.onAuthStateChanged(user => { if (!user) window.location.href = 'index.html'; else { loadUserData(); listenToMarkets(); listenToNotice(); } });
 </script>
 </body>
 </html>
