@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WIN77 - My Bids</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #0a0a0f; padding-bottom: 70px; }
+        .app-container { max-width: 500px; margin: 0 auto; background: #0a0a0f; min-height: 100vh; }
+        .status-bar { padding: 12px 16px; display: flex; justify-content: space-between; color: white; font-size: 14px; }
+        .header { background: #1a1a2e; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ff9800; }
+        .logo { color: #ff9800; font-size: 20px; font-weight: bold; }
+        .back-btn { background: none; border: none; color: #ff9800; font-size: 20px; cursor: pointer; }
+        .passbook-item { background: #1a1a2e; margin: 12px; padding: 15px; border-radius: 16px; border-left: 4px solid #ff9800; }
+        .passbook-number { color: #ff9800; font-size: 14px; font-weight: bold; margin-bottom: 8px; }
+        .passbook-detail { display: flex; justify-content: space-between; margin: 8px 0; color: #ddd; font-size: 13px; }
+        .passbook-label { color: #888; }
+        .passbook-value { color: white; font-weight: bold; }
+        .no-data { text-align: center; color: #888; padding: 40px; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="status-bar"><span>10:15</span><span>📶 🔋 91%</span></div>
+    <div class="header"><button class="back-btn" onclick="goBack()">←</button><div class="logo">PASSBOOK</div><div></div></div>
+    <div id="bidsList"></div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
+        authDomain: "win777-ed482.firebaseapp.com",
+        projectId: "win777-ed482",
+        storageBucket: "win777-ed482.firebasestorage.app",
+        messagingSenderId: "843686112399",
+        appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    async function loadBids() {
+        const user = auth.currentUser;
+        if (!user) { window.location.href = 'index.html'; return; }
+        
+        const bids = await db.collection('bids').where('userId', '==', user.uid).orderBy('createdAt', 'desc').get();
+        const container = document.getElementById('bidsList');
+        
+        if(bids.empty) {
+            container.innerHTML = '<div class="no-data">No bids placed yet</div>';
+            return;
+        }
+        
+        let html = '';
+        let index = 1;
+        let runningTotal = 0;
+        
+        for(const doc of bids.docs) {
+            const b = doc.data();
+            const amount = b.points || 0;
+            const previousAmount = runningTotal;
+            runningTotal += amount;
+            
+            html += `
+                <div class="passbook-item">
+                    <div class="passbook-number">${index} ${b.market || 'Unknown'} (${b.gameType || 'Unknown'}, ${b.bidType || ''}) : ${b.value || '-'}</div>
+                    <div class="passbook-detail"><span class="passbook-label">Date:-</span><span class="passbook-value">${new Date(b.createdAt?.toDate()).toLocaleDateString() || 'Pending'}</span></div>
+                    <div class="passbook-detail"><span class="passbook-label">Amount</span><span class="passbook-value">₹${amount}</span></div>
+                    <div class="passbook-detail"><span class="passbook-label">Previous Amount</span><span class="passbook-value">₹${previousAmount}</span></div>
+                    <div class="passbook-detail"><span class="passbook-label">Current Amount</span><span class="passbook-value">₹${runningTotal}</span></div>
+                </div>
+            `;
+            index++;
+        }
+        container.innerHTML = html;
+    }
+    
+    function goBack() { window.location.href = 'dashboard.html'; }
+    
+    auth.onAuthStateChanged(user => { if(!user) window.location.href = 'index.html'; else loadBids(); });
+</script>
+</body>
+</html>
