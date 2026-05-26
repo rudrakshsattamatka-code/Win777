@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WIN77 - Transactions</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #0a0a0f; padding-bottom: 70px; }
+        .app-container { max-width: 500px; margin: 0 auto; background: #0a0a0f; min-height: 100vh; }
+        .status-bar { padding: 12px 16px; display: flex; justify-content: space-between; color: white; font-size: 14px; }
+        .header { background: #1a1a2e; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ff9800; }
+        .logo { color: #ff9800; font-size: 20px; font-weight: bold; }
+        .back-btn { background: none; border: none; color: #ff9800; font-size: 20px; cursor: pointer; }
+        .history-item { background: #1a1a2e; margin: 12px; padding: 15px; border-radius: 16px; border-left: 4px solid #ff9800; }
+        .history-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .history-id { color: #ff9800; font-size: 12px; font-family: monospace; }
+        .history-amount { font-size: 18px; font-weight: bold; color: white; }
+        .history-type { font-size: 12px; padding: 2px 8px; border-radius: 12px; display: inline-block; }
+        .type-deposit { background: #4caf5020; color: #4caf50; }
+        .type-withdraw { background: #ff980020; color: #ff9800; }
+        .status-approved { color: #4caf50; }
+        .status-rejected { color: #f44336; }
+        .status-pending { color: #ff9800; }
+        .history-date { color: #888; font-size: 11px; margin-top: 8px; }
+        .no-data { text-align: center; color: #888; padding: 40px; }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="status-bar"><span>10:15</span><span>📶 🔋 91%</span></div>
+    <div class="header"><button class="back-btn" onclick="goBack()">←</button><div class="logo">HISTORY</div><div></div></div>
+    <div id="historyList"></div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
+        authDomain: "win777-ed482.firebaseapp.com",
+        projectId: "win777-ed482",
+        storageBucket: "win777-ed482.firebasestorage.app",
+        messagingSenderId: "843686112399",
+        appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    async function loadHistory() {
+        const user = auth.currentUser;
+        if (!user) { window.location.href = 'index.html'; return; }
+        
+        const transactions = await db.collection('transactions').where('userId', '==', user.uid).orderBy('date', 'desc').get();
+        const withdrawals = await db.collection('withdrawRequests').where('userId', '==', user.uid).orderBy('date', 'desc').get();
+        
+        const container = document.getElementById('historyList');
+        let html = '';
+        
+        // Show withdrawal requests first
+        for(const doc of withdrawals.docs) {
+            const w = doc.data();
+            html += `
+                <div class="history-item">
+                    <div class="history-header">
+                        <span class="history-id">Fund Id ${doc.id.substring(0, 20)}...</span>
+                        <span class="history-amount">₹${w.amount}</span>
+                    </div>
+                    <div><span class="history-type type-withdraw">Request Type Withdrawal</span></div>
+                    <div>Status: <span class="status-${w.status?.toLowerCase()}">${w.status || 'PENDING'}</span></div>
+                    <div class="history-date">Date ${new Date(w.date?.toDate()).toLocaleDateString() || 'Pending'}</div>
+                </div>
+            `;
+        }
+        
+        // Show deposit requests
+        for(const doc of transactions.docs) {
+            const t = doc.data();
+            if(t.type === 'credit') {
+                html += `
+                    <div class="history-item">
+                        <div class="history-header">
+                            <span class="history-id">Fund Id ${doc.id.substring(0, 20)}...</span>
+                            <span class="history-amount">₹${t.amount}</span>
+                        </div>
+                        <div><span class="history-type type-deposit">Request Type Deposit</span></div>
+                        <div>Status: <span class="status-${t.status?.toLowerCase()}">${t.status || 'PENDING'}</span></div>
+                        <div class="history-date">Date ${new Date(t.date?.toDate()).toLocaleDateString() || 'Pending'}</div>
+                    </div>
+                `;
+            }
+        }
+        
+        if(html === '') {
+            container.innerHTML = '<div class="no-data">No transactions found</div>';
+        } else {
+            container.innerHTML = html;
+        }
+    }
+    
+    function goBack() { window.location.href = 'dashboard.html'; }
+    
+    auth.onAuthStateChanged(user => { if(!user) window.location.href = 'index.html'; else loadHistory(); });
+</script>
+</body>
+</html>
