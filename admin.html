@@ -10,11 +10,15 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #0a0a0f; }
+        
+        /* Login Screen */
         .login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a0f; display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .login-card { background: #1a1a2e; padding: 40px; border-radius: 20px; width: 320px; text-align: center; border: 1px solid #00b4ff; }
         .login-card h2 { color: #00b4ff; margin-bottom: 20px; }
         .login-card input { width: 100%; padding: 12px; margin: 10px 0; background: #0a0a0f; border: 1px solid #00b4ff; border-radius: 8px; color: white; }
         .login-card button { width: 100%; padding: 12px; background: #00b4ff; border: none; border-radius: 8px; color: black; font-weight: bold; cursor: pointer; }
+        
+        /* Admin Panel */
         .admin-panel { display: none; }
         .sidebar { width: 260px; background: #1a1a2e; min-height: 100vh; position: fixed; border-right: 1px solid #00b4ff; }
         .sidebar h2 { color: #00b4ff; padding: 25px; text-align: center; border-bottom: 1px solid #00b4ff; }
@@ -25,8 +29,10 @@
         .card h3 { margin-bottom: 15px; color: #00b4ff; border-left: 3px solid #00b4ff; padding-left: 12px; }
         input, select { padding: 10px; margin: 5px; background: #0a0a0f; border: 1px solid #00b4ff; border-radius: 8px; color: white; width: calc(100% - 10px); }
         button { background: #00b4ff; border: none; padding: 8px 16px; border-radius: 8px; color: black; font-weight: bold; cursor: pointer; margin: 5px; }
-        .market-item, .user-item, .request-item { background: #0a0a0f; padding: 12px; margin: 8px 0; border-radius: 10px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; }
-        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; }
+        .market-item, .user-item, .request-item { background: #0a0a0f; padding: 15px; margin: 10px 0; border-radius: 12px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px; border: 1px solid #00b4ff30; }
+        .market-info { flex: 1; }
+        .market-actions { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+        .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; display: inline-block; }
         .status-open { background: #4caf5020; color: #4caf50; border: 1px solid #4caf50; }
         .status-close { background: #00b4ff20; color: #00b4ff; border: 1px solid #00b4ff; }
         .status-closed { background: #f4433620; color: #f44336; border: 1px solid #f44336; }
@@ -35,11 +41,26 @@
         .btn-warning { background: #ff9800; color: black; }
         .hidden { display: none; }
         .result-input { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
-        .result-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-        .result-row input { width: 100px; }
-        .open-box { border-left: 3px solid #00b4ff; padding-left: 10px; margin: 5px 0; }
-        .close-box { border-left: 3px solid #ff9800; padding-left: 10px; margin: 5px 0; }
-        @media (max-width: 768px) { .sidebar { width: 70px; } .sidebar h2 { font-size: 14px; } .sidebar-item { padding: 12px; text-align: center; } .main-content { margin-left: 70px; } }
+        .result-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+        .result-row input { width: 110px; margin: 0; }
+        .open-box { background: #00b4ff10; border-left: 3px solid #00b4ff; padding: 8px 12px; margin: 5px 0; border-radius: 8px; }
+        .close-box { background: #ff980010; border-left: 3px solid #ff9800; padding: 8px 12px; margin: 5px 0; border-radius: 8px; }
+        .market-name-text { color: #00b4ff; font-size: 16px; font-weight: bold; }
+        .market-numbers-text { color: #aaa; font-size: 13px; }
+        .market-time-text { color: #888; font-size: 12px; margin: 5px 0; }
+        .result-display { font-size: 14px; margin-top: 8px; }
+        .open-label { color: #00b4ff; font-weight: bold; }
+        .close-label { color: #ff9800; font-weight: bold; }
+        .jodi-label { color: #aaa; }
+        @media (max-width: 768px) { 
+            .sidebar { width: 70px; } 
+            .sidebar h2 { font-size: 14px; } 
+            .sidebar-item { padding: 12px; text-align: center; } 
+            .main-content { margin-left: 70px; } 
+            .market-item { flex-direction: column; }
+            .market-actions { align-items: stretch; }
+            .result-row { justify-content: flex-start; }
+        }
     </style>
 </head>
 <body>
@@ -151,13 +172,11 @@
     const db = firebase.firestore();
     
     let adminPassword = "Gani99@@";
-    let isLoggedIn = false;
     
     // Check if already logged in (sessionStorage)
     if (sessionStorage.getItem('adminLoggedIn') === 'true') {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('adminPanel').style.display = 'block';
-        isLoggedIn = true;
         loadMarkets();
         loadUsers();
         loadDeposits();
@@ -183,7 +202,6 @@
             sessionStorage.setItem('adminLoggedIn', 'true');
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('adminPanel').style.display = 'block';
-            isLoggedIn = true;
             loadMarkets();
             loadUsers();
             loadDeposits();
@@ -232,36 +250,50 @@
                 
                 html += `
                     <div class="market-item">
-                        <div style="flex:1;">
-                            <b style="color:#00b4ff;">${m.name || 'No name'}</b><br>
-                            Numbers: ${m.numbers || '***'}<br>
-                            Time: ${m.openBid || '--:--'} - ${m.closeBid || '--:--'}<br>
+                        <div class="market-info">
+                            <div class="market-name-text">📊 ${m.name || 'No name'}</div>
+                            <div class="market-numbers-text">🎲 Numbers: ${m.numbers || '***'}</div>
+                            <div class="market-time-text">⏰ Time: ${m.openBid || '--:--'} - ${m.closeBid || '--:--'}</div>
+                            
                             <div class="open-box">
-                                🔓 OPEN: <span style="color:#00b4ff;">Pana: ${openPana}</span> | <span style="color:#00b4ff;">Digit: ${openDigit}</span>
+                                <span class="open-label">🔓 OPEN RESULT</span><br>
+                                <span style="color:#00b4ff; font-size:18px; font-weight:bold;">${openPana}</span>
+                                <span style="color:#00b4ff;"> | Open Digit: ${openDigit}</span>
                             </div>
+                            
                             <div class="close-box">
-                                🔒 CLOSE: <span style="color:#ff9800;">Pana: ${closePana}</span> | <span style="color:#ff9800;">Digit: ${closeDigit}</span>
+                                <span class="close-label">🔒 CLOSE RESULT</span><br>
+                                <span style="color:#ff9800; font-size:18px; font-weight:bold;">${closePana}</span>
+                                <span style="color:#ff9800;"> | Close Digit: ${closeDigit}</span>
                             </div>
-                            <div>🎲 JODI: ${jodi}</div>
+                            
+                            <div class="result-display">
+                                🎲 <span class="jodi-label">JODI:</span> <span style="color:#00ffaa; font-weight:bold;">${jodi}</span>
+                            </div>
                         </div>
-                        <div>
+                        
+                        <div class="market-actions">
                             <span class="status-badge ${statusClass}" onclick="changeStatus('${doc.id}', '${m.status}')">${statusText} ▼</span>
+                            
                             <div class="result-input">
                                 <div class="result-row">
                                     <input type="text" id="openPana_${doc.id}" placeholder="Open Pana (3 digits)" style="width:120px;" value="${openPana !== '***' ? openPana : ''}">
-                                    <button onclick="setOpenResult('${doc.id}', '${m.name}')" style="background:#00b4ff;">Set Open</button>
+                                    <button onclick="setOpenResult('${doc.id}', '${m.name}')" style="background:#00b4ff;">📢 Set Open</button>
                                 </div>
                                 <div class="result-row">
                                     <input type="text" id="closePana_${doc.id}" placeholder="Close Pana (3 digits)" style="width:120px;" value="${closePana !== '***' ? closePana : ''}">
-                                    <button onclick="setCloseResult('${doc.id}', '${m.name}')" style="background:#ff9800;">Set Close</button>
+                                    <button onclick="setCloseResult('${doc.id}', '${m.name}')" style="background:#ff9800;">📢 Set Close</button>
                                 </div>
                                 <div class="result-row">
                                     <input type="text" id="jodi_${doc.id}" placeholder="Jodi (2 digits)" style="width:80px;" value="${jodi !== '**' ? jodi : ''}">
-                                    <button onclick="setFullResult('${doc.id}', '${m.name}')" class="btn-success">Set Full</button>
+                                    <button onclick="setFullResult('${doc.id}', '${m.name}')" class="btn-success">⭐ Set Full</button>
                                 </div>
                             </div>
-                            <button onclick="editMarket('${doc.id}', '${m.name}', '${m.numbers || ''}', '${m.openBid || ''}', '${m.closeBid || ''}')">Edit</button>
-                            <button onclick="deleteMarket('${doc.id}')" class="btn-danger">Delete</button>
+                            
+                            <div>
+                                <button onclick="editMarket('${doc.id}', '${m.name}', '${m.numbers || ''}', '${m.openBid || ''}', '${m.closeBid || ''}')">✏️ Edit</button>
+                                <button onclick="deleteMarket('${doc.id}')" class="btn-danger">🗑️ Delete</button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -285,7 +317,7 @@
         
         const confirmMsg = `📢 DECLARE OPEN RESULT for ${marketName}\n\n` +
             `🔓 Open Pana: ${openPana}\n` +
-            `🔢 Open Single Digit: ${openDigit}\n\n` +
+            `🔢 Open Digit: ${openDigit}\n\n` +
             `⚠️ Close result will be declared later!\n\n` +
             `Continue?`;
         
@@ -372,10 +404,8 @@
         const fullResult = `${openPana}-${jodi}-${closePana}`;
         
         const confirmMsg = `📢 DECLARE FULL RESULT for ${marketName}\n\n` +
-            `🔓 Open Pana: ${openPana}\n` +
-            `🔢 Open Digit: ${openDigit}\n` +
-            `🔒 Close Pana: ${closePana}\n` +
-            `🔢 Close Digit: ${closeDigit}\n` +
+            `🔓 Open Pana: ${openPana} (Digit: ${openDigit})\n` +
+            `🔒 Close Pana: ${closePana} (Digit: ${closeDigit})\n` +
             `🎲 JODI: ${jodi}\n\n` +
             `Continue?`;
         
