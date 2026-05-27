@@ -74,6 +74,9 @@
         .bank-details { background: #f8f9fa; padding: 10px; border-radius: 8px; margin-top: 5px; font-size: 12px; }
         .bank-details span { color: #333; font-weight: bold; }
         
+        .time-group { display: flex; gap: 10px; align-items: center; margin: 5px 0; flex-wrap: wrap; }
+        .time-group input { width: 110px; }
+        
         @media (max-width: 768px) { 
             .sidebar { width: 70px; } 
             .sidebar h2 { font-size: 12px; padding: 15px 5px; } 
@@ -113,8 +116,20 @@
                 <h3>➕ Add New Market</h3>
                 <input type="text" id="marketName" placeholder="Market Name">
                 <input type="text" id="marketNumbers" placeholder="Numbers (e.g., 440-8*-***)">
-                <input type="time" id="openBid" placeholder="Open Bid Time">
-                <input type="time" id="closeBid" placeholder="Close Bid Time">
+                
+                <div class="time-group">
+                    <label>🟢 Open Bid Time:</label>
+                    <input type="time" id="openBid" step="60">
+                </div>
+                <div class="time-group">
+                    <label>🟡 Close Bid Time:</label>
+                    <input type="time" id="closeBid" step="60">
+                </div>
+                <div class="time-group">
+                    <label>🔴 Closed Time:</label>
+                    <input type="time" id="closedTime" step="60">
+                </div>
+                
                 <select id="marketStatus">
                     <option value="open">🟢 OPEN</option>
                     <option value="close">🟡 CLOSE</option>
@@ -123,7 +138,7 @@
                 <button onclick="addMarket()">Add Market</button>
             </div>
             <div class="card">
-                <h3>📋 Manage Markets</h3>
+                <h3>📋 Manage Markets (Auto Status Change)</h3>
                 <div id="marketsList">Loading...</div>
             </div>
         </div>
@@ -191,6 +206,7 @@
     const db = firebase.firestore();
     
     let adminPassword = "Gani99@@";
+    let autoStatusInterval = null;
     
     if (sessionStorage.getItem('adminLoggedIn') === 'true') {
         document.getElementById('loginScreen').style.display = 'none';
@@ -200,17 +216,13 @@
         loadDeposits();
         loadWithdrawals();
         loadNotice();
+        startAutoStatusChecker();
     }
     
     const gameRates = {
-        'Single Digit': 10,
-        'Jodi': 100,
-        'Single Pana': 160,
-        'Double Pana': 320,
-        'Triple Pana': 1000,
-        'Half Sangam A': 1600,
-        'Half Sangam B': 1600,
-        'Full Sangam': 25000
+        'Single Digit': 10, 'Jodi': 100, 'Single Pana': 160,
+        'Double Pana': 320, 'Triple Pana': 1000,
+        'Half Sangam A': 1600, 'Half Sangam B': 1600, 'Full Sangam': 25000
     };
     
     async function login() {
@@ -224,12 +236,71 @@
             loadDeposits();
             loadWithdrawals();
             loadNotice();
+            startAutoStatusChecker();
         } else {
             document.getElementById('loginError').innerText = 'Wrong password!';
         }
     }
     
-    // ============ MARKETS MANAGEMENT ============
+    // Auto status checker based on time
+    function startAutoStatusChecker() {
+        if (autoStatusInterval) clearInterval(autoStatusInterval);
+        autoStatusInterval = setInterval(() => {
+            checkAndUpdateMarketStatus();
+        }, 60000); // Check every minute
+    }
+    
+    async function checkAndUpdateMarketStatus() {
+        const now = new Date();
+        const currentTime = now.getHours() * 60 + now.getMinutes();
+        
+        const markets = await db.collection('markets').get();
+        
+        for (const doc of markets.docs) {
+            const market = doc.data();
+            const openTime = convertTimeToMinutes(market.openBid);
+            const closeTime = convertTimeToMinutes(market.closeBid);
+            const closedTime = convertTimeToMinutes(market.closedTime);
+            
+            let newStatus = market.status;
+            
+            if (closedTime && currentTime >= closedTime) {
+                newStatus = 'closed';
+            } else if (closeTime && currentTime >= closeTime && (!closedTime || currentTime < closedTime)) {
+                newStatus = 'close';
+            } else if (openTime && currentTime >= openTime && (!closeTime || currentTime < closeTime)) {
+                newStatus = 'open';
+            } else {
+                newStatus = 'closed';
+            }
+            
+            if (newStatus !== market.status) {
+                await db.collection('markets').doc(doc.id).update({ status: newStatus });
+                console.log(`Market ${market.name} status changed to ${newStatus}`);
+            }
+        }
+    }
+    
+    function convertTimeToMinutes(timeStr) {
+        if (!timeStr) return null;
+        const parts = timeStr.split(':');
+        if (parts.length === 2) {
+            return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        }
+        return null;
+    }
+    
+    function formatTimeTo12Hour(timeStr) {
+        if (!timeStr) return '--:--';
+        const parts = timeStr.split(':');
+        let hours = parseInt(parts[0]);
+        const minutes = parts[1];
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        return `${hours}:${minutes} ${ampm}`;
+    }
+    
     function loadMarkets() {
         db.collection('markets').onSnapshot((snapshot) => {
             let html = '';
@@ -259,12 +330,18 @@
                     jodiDisplay = openDigit + '*';
                 }
                 
+                const openBid12 = formatTimeTo12Hour(m.openBid);
+                const closeBid12 = formatTimeTo12Hour(m.closeBid);
+                const closedTime12 = formatTimeTo12Hour(m.closedTime);
+                
                 html += `
                     <div class="market-item">
                         <div class="market-info">
                             <div class="market-name-text">📊 ${m.name || 'No name'}</div>
                             <div class="market-numbers-text">🎲 Numbers: ${m.numbers || '***'}</div>
-                            <div class="market-time-text">⏰ Time: ${m.openBid || '--:--'} - ${m.closeBid || '--:--'}</div>
+                            <div class="market-time-text">
+                                ⏰ Open: ${openBid12} | Close: ${closeBid12} | Closed: ${closedTime12}
+                            </div>
                             
                             <div class="results-container">
                                 <div class="result-card">
@@ -284,6 +361,23 @@
                             
                             ${!isCloseDeclared && openPana !== '***' ? '<div class="warning-box">⚠️ OPEN declared. Pending CLOSE.</div>' : ''}
                             ${isCloseDeclared ? '<div class="success-box">✅ FULL result declared!</div>' : ''}
+                            
+                            <div class="section-title">📝 Timings (24-hour format)</div>
+                            <div class="input-group">
+                                <label>🟢 Open Time:</label>
+                                <input type="time" id="openTime_${doc.id}" value="${m.openBid || ''}" step="60">
+                                <button onclick="updateMarketTime('${doc.id}', 'openBid', document.getElementById('openTime_${doc.id}').value)">Set Open</button>
+                            </div>
+                            <div class="input-group">
+                                <label>🟡 Close Time:</label>
+                                <input type="time" id="closeTime_${doc.id}" value="${m.closeBid || ''}" step="60">
+                                <button onclick="updateMarketTime('${doc.id}', 'closeBid', document.getElementById('closeTime_${doc.id}').value)">Set Close</button>
+                            </div>
+                            <div class="input-group">
+                                <label>🔴 Closed Time:</label>
+                                <input type="time" id="closedTime_${doc.id}" value="${m.closedTime || ''}" step="60">
+                                <button onclick="updateMarketTime('${doc.id}', 'closedTime', document.getElementById('closedTime_${doc.id}').value)">Set Closed</button>
+                            </div>
                             
                             <div class="section-title">📝 STEP 1: Declare OPEN Result</div>
                             <div class="input-group">
@@ -307,7 +401,7 @@
                         <div class="market-actions">
                             <span class="status-badge ${statusClass}" onclick="changeStatus('${doc.id}', '${m.status}')">${statusText} ▼</span>
                             <div>
-                                <button onclick="editMarket('${doc.id}', '${m.name}', '${m.numbers || ''}', '${m.openBid || ''}', '${m.closeBid || ''}')">✏️ Edit</button>
+                                <button onclick="editMarket('${doc.id}', '${m.name}', '${m.numbers || ''}', '${m.openBid || ''}', '${m.closeBid || ''}', '${m.closedTime || ''}')">✏️ Edit</button>
                                 <button onclick="resetMarketResult('${doc.id}', '${m.name}')" class="btn-reset">⟳ Reset</button>
                                 <button onclick="deleteMarket('${doc.id}')" class="btn-danger">🗑️ Delete</button>
                             </div>
@@ -320,6 +414,11 @@
             }
             document.getElementById('marketsList').innerHTML = html;
         });
+    }
+    
+    async function updateMarketTime(marketId, field, value) {
+        await db.collection('markets').doc(marketId).update({ [field]: value });
+        alert(`✅ ${field} updated to ${value || 'Not set'}`);
     }
     
     async function declareOpenResult(marketId, marketName) {
@@ -454,29 +553,38 @@
         const numbers = document.getElementById('marketNumbers').value || '***-**-***';
         const openBid = document.getElementById('openBid').value;
         const closeBid = document.getElementById('closeBid').value;
+        const closedTime = document.getElementById('closedTime').value;
         const status = document.getElementById('marketStatus').value;
+        
         if (!name) { alert('Enter market name'); return; }
-        await db.collection('markets').add({ name, numbers, openBid, closeBid, status, openPana: '***', openDigit: '*', closePana: '***', closeDigit: '*', jodi: '**', closeDeclared: false });
+        await db.collection('markets').add({ 
+            name, numbers, openBid, closeBid, closedTime, status, 
+            openPana: '***', openDigit: '*', closePana: '***', closeDigit: '*', jodi: '**', closeDeclared: false 
+        });
         document.getElementById('marketName').value = '';
         document.getElementById('marketNumbers').value = '';
         document.getElementById('openBid').value = '';
         document.getElementById('closeBid').value = '';
+        document.getElementById('closedTime').value = '';
         alert('Market added!');
     }
     
-    async function editMarket(id, oldName, oldNumbers, oldOpen, oldClose) {
+    async function editMarket(id, oldName, oldNumbers, oldOpen, oldClose, oldClosed) {
         const newName = prompt('New name', oldName);
         const newNumbers = prompt('New numbers', oldNumbers);
-        const newOpen = prompt('Open Bid Time', oldOpen);
-        const newClose = prompt('Close Bid Time', oldClose);
-        if (newName) await db.collection('markets').doc(id).update({ name: newName, numbers: newNumbers, openBid: newOpen, closeBid: newClose });
+        const newOpen = prompt('Open Bid Time (24hr format, e.g., 09:30)', oldOpen);
+        const newClose = prompt('Close Bid Time (24hr format, e.g., 17:30)', oldClose);
+        const newClosed = prompt('Closed Time (24hr format, e.g., 20:00)', oldClosed);
+        if (newName) await db.collection('markets').doc(id).update({ 
+            name: newName, numbers: newNumbers, openBid: newOpen, closeBid: newClose, closedTime: newClosed 
+        });
     }
     
     async function deleteMarket(id) {
         if (confirm('Delete this market permanently?')) await db.collection('markets').doc(id).delete();
     }
     
-    // ============ USER MANAGEMENT WITH ADD/REMOVE BALANCE ============
+    // ============ USER MANAGEMENT ============
     function loadUsers() {
         db.collection('users').onSnapshot(async (snapshot) => {
             let html = '';
@@ -509,7 +617,6 @@
         });
     }
     
-    // Add or Remove Balance from User
     async function updateBalance(uid, action) {
         const amount = prompt(`Enter amount to ${action === 'add' ? 'ADD' : 'REMOVE'}:`);
         if (!amount || isNaN(amount) || parseInt(amount) <= 0) {
@@ -542,12 +649,8 @@
         if (confirm(`${action === 'add' ? 'Add' : 'Remove'} ₹${amountNum}?\n\nCurrent Balance: ₹${currentBalance}\nNew Balance: ₹${newBalance}`)) {
             await db.collection('users').doc(uid).update({ balance: newBalance });
             await db.collection('transactions').add({
-                userId: uid,
-                type: transactionType,
-                amount: amountNum,
-                status: 'Completed',
-                description: description,
-                date: new Date()
+                userId: uid, type: transactionType, amount: amountNum, status: 'Completed',
+                description: description, date: new Date()
             });
             alert(`✅ ₹${amountNum} ${action === 'add' ? 'added to' : 'removed from'} user balance!\nNew Balance: ₹${newBalance}`);
         }
@@ -556,15 +659,10 @@
     async function viewUserBids(uid, name) {
         try {
             const bids = await db.collection('bids').where('userId', '==', uid).get();
-            if (bids.empty) { 
-                alert(`📋 No bids found for ${name}`); 
-                return; 
-            }
+            if (bids.empty) { alert(`📋 No bids found for ${name}`); return; }
             
             let message = `📋 BID HISTORY FOR ${name.toUpperCase()}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-            let totalBids = 0;
-            let totalAmount = 0;
-            let wonAmount = 0;
+            let totalBids = 0, totalAmount = 0, wonAmount = 0;
             
             for (const doc of bids.docs) {
                 const b = doc.data();
@@ -572,70 +670,47 @@
                 totalAmount += b.points || 0;
                 const multiplier = gameRates[b.gameType] || 10;
                 const possibleWin = (b.points || 0) * multiplier;
-                
-                if (b.status === 'won') {
-                    wonAmount += possibleWin;
-                }
+                if (b.status === 'won') wonAmount += possibleWin;
                 
                 const bidDate = b.createdAt?.toDate() ? b.createdAt.toDate().toLocaleString() : 'Pending';
-                
-                message += `🎲 BID #${totalBids}\n`;
-                message += `📊 Market: ${b.market || 'Unknown'}\n`;
-                message += `🎯 Game: ${b.gameType || 'Unknown'}\n`;
-                message += `🔢 Number: ${b.value || 'N/A'}\n`;
-                message += `💰 Amount: ₹${b.points}\n`;
-                message += `🎯 Rate: ${multiplier}x\n`;
-                message += `📌 Status: ${b.status.toUpperCase()}\n`;
-                if (b.status === 'won') {
-                    message += `🏆 Win Amount: ₹${possibleWin}\n`;
-                }
-                message += `📅 Date: ${bidDate}\n`;
-                message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+                message += `🎲 #${totalBids}: ${b.market} | ${b.gameType} | ${b.value}\n💰 ₹${b.points} | Status: ${b.status.toUpperCase()}\n📅 ${bidDate}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
             }
-            
-            message += `\n📊 SUMMARY\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            message += `Total Bids: ${totalBids}\n`;
-            message += `Total Spent: ₹${totalAmount}\n`;
-            message += `Total Won: ₹${wonAmount}\n`;
-            message += `Net Profit: ₹${wonAmount - totalAmount}\n`;
-            
+            message += `\n📊 SUMMARY\nTotal: ${totalBids} bids | Spent: ₹${totalAmount} | Won: ₹${wonAmount} | Net: ₹${wonAmount - totalAmount}`;
             alert(message);
-        } catch (error) {
-            alert(`Error loading bids: ${error.message}`);
-        }
+        } catch (error) { alert(`Error: ${error.message}`); }
     }
     
     async function toggleBlockUser(uid, name, isBlocked) {
         const action = isBlocked ? 'unblock' : 'block';
-        if (confirm(`${action.toUpperCase()} user "${name}"?\n\nBlocked users cannot place bets.`)) {
+        if (confirm(`${action.toUpperCase()} user "${name}"?`)) {
             await db.collection('users').doc(uid).update({ blocked: !isBlocked });
             alert(`✅ User ${action}ed!`);
         }
     }
     
     async function clearUserBids(uid, name) {
-        if (confirm(`⚠️ Clear ALL bid history for "${name}"?\n\nThis action cannot be undone!`)) {
+        if (confirm(`Clear ALL bid history for "${name}"? This cannot be undone!`)) {
             const bids = await db.collection('bids').where('userId', '==', uid).get();
             const batch = db.batch();
             bids.forEach(doc => batch.delete(doc.ref));
             await batch.commit();
-            alert(`✅ Cleared ${bids.size} bids for ${name}`);
+            alert(`✅ Cleared ${bids.size} bids`);
         }
     }
     
     async function clearUserTransactions(uid, name) {
-        if (confirm(`⚠️ Clear ALL transaction history for "${name}"?\n\nThis action cannot be undone!`)) {
+        if (confirm(`Clear ALL transaction history for "${name}"? This cannot be undone!`)) {
             const transactions = await db.collection('transactions').where('userId', '==', uid).get();
             const batch = db.batch();
             transactions.forEach(doc => batch.delete(doc.ref));
             await batch.commit();
-            alert(`✅ Cleared ${transactions.size} transactions for ${name}`);
+            alert(`✅ Cleared ${transactions.size} transactions`);
         }
     }
     
     async function deleteUser(uid, name) {
-        if (confirm(`⚠️ PERMANENT DELETE\n\nDelete user "${name}" completely?\n\nThis will remove all user data.\n\nType "${name}" to confirm:`)) {
-            const confirmText = prompt(`Type "${name}" to confirm deletion:`);
+        if (confirm(`Delete user "${name}" permanently? Type "${name}" to confirm:`)) {
+            const confirmText = prompt(`Type "${name}" to confirm:`);
             if (confirmText === name) {
                 const bids = await db.collection('bids').where('userId', '==', uid).get();
                 bids.forEach(doc => doc.ref.delete());
@@ -644,21 +719,19 @@
                 const withdraws = await db.collection('withdrawRequests').where('userId', '==', uid).get();
                 withdraws.forEach(doc => doc.ref.delete());
                 await db.collection('users').doc(uid).delete();
-                alert(`✅ User "${name}" deleted permanently!`);
-            } else {
-                alert(`❌ Confirmation failed.`);
-            }
+                alert(`✅ User "${name}" deleted!`);
+            } else { alert(`❌ Confirmation failed.`); }
         }
     }
     
-    // ============ DEPOSITS MANAGEMENT ============
+    // ============ DEPOSITS ============
     function loadDeposits() {
         db.collection('transactions').where('type', '==', 'credit').where('status', '==', 'Pending').onSnapshot(async (snapshot) => {
             let html = '';
             for (const doc of snapshot.docs) {
                 const d = doc.data();
                 const user = await db.collection('users').doc(d.userId).get();
-                html += `<div class="request-item" style="display:flex; justify-content:space-between; flex-wrap:wrap;"><div><b>👤 ${user.data()?.name || 'Unknown'}</b><br>💰 ₹${d.amount}<br>📅 ${d.date?.toDate().toLocaleString() || 'Pending'}<br>📱 UPI: ${d.upiId || 'N/A'}</div><div><button onclick="approveDeposit('${doc.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button><button onclick="rejectDeposit('${doc.id}')" class="btn-danger">Reject</button></div></div>`;
+                html += `<div class="request-item" style="display:flex; justify-content:space-between; flex-wrap:wrap;"><div><b>👤 ${user.data()?.name || 'Unknown'}</b><br>💰 ₹${d.amount}<br>📅 ${d.date?.toDate().toLocaleString() || 'Pending'}</div><div><button onclick="approveDeposit('${doc.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button><button onclick="rejectDeposit('${doc.id}')" class="btn-danger">Reject</button></div></div>`;
             }
             document.getElementById('depositsList').innerHTML = html || '<p style="color: #888;">No pending deposits</p>';
         });
@@ -677,7 +750,7 @@
         if (confirm('Reject this deposit?')) await db.collection('transactions').doc(id).update({ status: 'Rejected' });
     }
     
-    // ============ WITHDRAWALS MANAGEMENT WITH FULL BANK DETAILS ============
+    // ============ WITHDRAWALS ============
     function loadWithdrawals() {
         db.collection('withdrawRequests').where('status', '==', 'Pending').onSnapshot(async (snapshot) => {
             let html = '';
@@ -768,7 +841,6 @@
         document.getElementById('adminPass').value = '';
     }
     
-    // Make all functions global
     window.login = login;
     window.declareOpenResult = declareOpenResult;
     window.declareCloseResult = declareCloseResult;
@@ -777,6 +849,7 @@
     window.addMarket = addMarket;
     window.editMarket = editMarket;
     window.deleteMarket = deleteMarket;
+    window.updateMarketTime = updateMarketTime;
     window.updateBalance = updateBalance;
     window.viewUserBids = viewUserBids;
     window.toggleBlockUser = toggleBlockUser;
