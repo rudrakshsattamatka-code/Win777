@@ -43,15 +43,27 @@
         .result-input { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
         .result-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
         .result-row input { width: 110px; margin: 0; }
-        .open-box { background: #00b4ff10; border-left: 3px solid #00b4ff; padding: 8px 12px; margin: 5px 0; border-radius: 8px; }
-        .close-box { background: #ff980010; border-left: 3px solid #ff9800; padding: 8px 12px; margin: 5px 0; border-radius: 8px; }
+        
+        /* Result Display Boxes */
+        .results-container { display: flex; gap: 15px; flex-wrap: wrap; margin: 10px 0; }
+        .open-result-box { background: linear-gradient(135deg, #00b4ff20, #0088cc20); border: 2px solid #00b4ff; border-radius: 16px; padding: 12px 20px; min-width: 140px; text-align: center; box-shadow: 0 0 15px rgba(0,180,255,0.2); }
+        .open-result-box .label { color: #00b4ff; font-size: 12px; letter-spacing: 1px; margin-bottom: 5px; }
+        .open-result-box .pana { color: #00b4ff; font-size: 28px; font-weight: bold; }
+        .open-result-box .digit { color: #00b4ff; font-size: 14px; margin-top: 5px; }
+        
+        .close-result-box { background: linear-gradient(135deg, #ff980020, #cc770020); border: 2px solid #ff9800; border-radius: 16px; padding: 12px 20px; min-width: 140px; text-align: center; box-shadow: 0 0 15px rgba(255,152,0,0.2); }
+        .close-result-box .label { color: #ff9800; font-size: 12px; letter-spacing: 1px; margin-bottom: 5px; }
+        .close-result-box .pana { color: #ff9800; font-size: 28px; font-weight: bold; }
+        .close-result-box .digit { color: #ff9800; font-size: 14px; margin-top: 5px; }
+        
+        .jodi-result-box { background: linear-gradient(135deg, #00ffaa20, #00cc8820); border: 2px solid #00ffaa; border-radius: 16px; padding: 12px 20px; min-width: 140px; text-align: center; box-shadow: 0 0 15px rgba(0,255,170,0.2); }
+        .jodi-result-box .label { color: #00ffaa; font-size: 12px; letter-spacing: 1px; margin-bottom: 5px; }
+        .jodi-result-box .value { color: #00ffaa; font-size: 32px; font-weight: bold; }
+        
         .market-name-text { color: #00b4ff; font-size: 16px; font-weight: bold; }
         .market-numbers-text { color: #aaa; font-size: 13px; }
         .market-time-text { color: #888; font-size: 12px; margin: 5px 0; }
-        .result-display { font-size: 14px; margin-top: 8px; }
-        .open-label { color: #00b4ff; font-weight: bold; }
-        .close-label { color: #ff9800; font-weight: bold; }
-        .jodi-label { color: #aaa; }
+        
         @media (max-width: 768px) { 
             .sidebar { width: 70px; } 
             .sidebar h2 { font-size: 14px; } 
@@ -60,6 +72,7 @@
             .market-item { flex-direction: column; }
             .market-actions { align-items: stretch; }
             .result-row { justify-content: flex-start; }
+            .results-container { justify-content: center; }
         }
     </style>
 </head>
@@ -255,20 +268,24 @@
                             <div class="market-numbers-text">🎲 Numbers: ${m.numbers || '***'}</div>
                             <div class="market-time-text">⏰ Time: ${m.openBid || '--:--'} - ${m.closeBid || '--:--'}</div>
                             
-                            <div class="open-box">
-                                <span class="open-label">🔓 OPEN RESULT</span><br>
-                                <span style="color:#00b4ff; font-size:18px; font-weight:bold;">${openPana}</span>
-                                <span style="color:#00b4ff;"> | Open Digit: ${openDigit}</span>
-                            </div>
-                            
-                            <div class="close-box">
-                                <span class="close-label">🔒 CLOSE RESULT</span><br>
-                                <span style="color:#ff9800; font-size:18px; font-weight:bold;">${closePana}</span>
-                                <span style="color:#ff9800;"> | Close Digit: ${closeDigit}</span>
-                            </div>
-                            
-                            <div class="result-display">
-                                🎲 <span class="jodi-label">JODI:</span> <span style="color:#00ffaa; font-weight:bold;">${jodi}</span>
+                            <!-- Separate Decorated Result Boxes -->
+                            <div class="results-container">
+                                <div class="open-result-box">
+                                    <div class="label">🔓 OPEN RESULT</div>
+                                    <div class="pana">${openPana}</div>
+                                    <div class="digit">Open Digit: ${openDigit}</div>
+                                </div>
+                                
+                                <div class="close-result-box">
+                                    <div class="label">🔒 CLOSE RESULT</div>
+                                    <div class="pana">${closePana}</div>
+                                    <div class="digit">Close Digit: ${closeDigit}</div>
+                                </div>
+                                
+                                <div class="jodi-result-box">
+                                    <div class="label">🎲 JODI</div>
+                                    <div class="value">${jodi}</div>
+                                </div>
                             </div>
                         </div>
                         
@@ -309,7 +326,7 @@
         const openPana = document.getElementById(`openPana_${marketId}`).value.trim();
         
         if (!openPana || !openPana.match(/^\d{3}$/)) {
-            alert('Enter valid 3-digit Open Pana (e.g., 127)');
+            alert('Enter valid 3-digit Open Pana (e.g., 123)');
             return;
         }
         
@@ -344,7 +361,7 @@
         const closePana = document.getElementById(`closePana_${marketId}`).value.trim();
         
         if (!closePana || !closePana.match(/^\d{3}$/)) {
-            alert('Enter valid 3-digit Close Pana (e.g., 560)');
+            alert('Enter valid 3-digit Close Pana (e.g., 230)');
             return;
         }
         
