@@ -44,7 +44,7 @@
         .nav-item span { font-size: 22px; display: block; }
         
         .hidden { display: none; }
-        .error-box { background: #f8d7da; color: #721c24; padding: 15px; margin: 12px; border-radius: 12px; text-align: center; }
+        .debug-info { background: #f0f0f0; padding: 10px; margin: 10px; border-radius: 8px; font-size: 12px; color: #666; }
     </style>
 </head>
 <body>
@@ -77,14 +77,14 @@
         <div class="bid-card">
             <div class="bid-header"><span class="market-name">🎲 GAME RATES</span></div>
             <div class="bid-body">
-                <div class="bid-row"><span class="bid-label">Single Digit</span><span class="bid-value">10x (Win ₹10 per ₹1)</span></div>
-                <div class="bid-row"><span class="bid-label">Jodi</span><span class="bid-value">100x (Win ₹100 per ₹1)</span></div>
-                <div class="bid-row"><span class="bid-label">Single Pana</span><span class="bid-value">160x (Win ₹160 per ₹1)</span></div>
-                <div class="bid-row"><span class="bid-label">Double Pana</span><span class="bid-value">320x (Win ₹320 per ₹1)</span></div>
-                <div class="bid-row"><span class="bid-label">Triple Pana</span><span class="bid-value">1000x (Win ₹1000 per ₹1)</span></div>
-                <div class="bid-row"><span class="bid-label">Half Sangam A</span><span class="bid-value">1600x (Win ₹1600 per ₹1)</span></div>
-                <div class="bid-row"><span class="bid-label">Half Sangam B</span><span class="bid-value">1600x (Win ₹1600 per ₹1)</span></div>
-                <div class="bid-row"><span class="bid-label">Full Sangam</span><span class="bid-value">25000x (Win ₹25000 per ₹1)</span></div>
+                <div class="bid-row"><span class="bid-label">Single Digit</span><span class="bid-value">10x</span></div>
+                <div class="bid-row"><span class="bid-label">Jodi</span><span class="bid-value">100x</span></div>
+                <div class="bid-row"><span class="bid-label">Single Pana</span><span class="bid-value">160x</span></div>
+                <div class="bid-row"><span class="bid-label">Double Pana</span><span class="bid-value">320x</span></div>
+                <div class="bid-row"><span class="bid-label">Triple Pana</span><span class="bid-value">1000x</span></div>
+                <div class="bid-row"><span class="bid-label">Half Sangam A</span><span class="bid-value">1600x</span></div>
+                <div class="bid-row"><span class="bid-label">Half Sangam B</span><span class="bid-value">1600x</span></div>
+                <div class="bid-row"><span class="bid-label">Full Sangam</span><span class="bid-value">25000x</span></div>
             </div>
         </div>
     </div>
@@ -118,6 +118,8 @@
         'Half Sangam A': 1600, 'Half Sangam B': 1600, 'Full Sangam': 25000
     };
     
+    let currentUserId = null;
+    
     function showTab(tab) {
         document.getElementById('bidsTab').classList.add('hidden');
         document.getElementById('transactionsTab').classList.add('hidden');
@@ -128,6 +130,7 @@
         event.target.classList.add('active');
         
         if (tab === 'transactions') loadTransactions();
+        if (tab === 'bids') loadBids();
     }
     
     async function loadBids() {
@@ -137,28 +140,52 @@
             return; 
         }
         
+        currentUserId = user.uid;
         const container = document.getElementById('bidsList');
         const summaryDiv = document.getElementById('summary');
         
-        container.innerHTML = '<div style="text-align:center; color:#888; padding:40px;">Loading bids...</div>';
+        container.innerHTML = '<div style="text-align:center; color:#888; padding:40px;">🔄 Loading bids...</div>';
         
         try {
-            const bids = await db.collection('bids')
-                .where('userId', '==', user.uid)
-                .orderBy('createdAt', 'desc')
+            console.log("Fetching bids for user:", currentUserId);
+            
+            // Try to get bids
+            const bidsSnapshot = await db.collection('bids')
+                .where('userId', '==', currentUserId)
                 .get();
             
-            if (bids.empty) {
-                container.innerHTML = '<div class="no-data">📭 No bids placed yet<br><small>Go to dashboard and place your first bid!</small></div>';
+            console.log("Bids found:", bidsSnapshot.size);
+            
+            if (bidsSnapshot.empty) {
+                container.innerHTML = `
+                    <div class="no-data">
+                        📭 No bids placed yet<br>
+                        <small>Go to dashboard and place your first bid!</small>
+                        <br><br>
+                        <small style="color:#999;">User ID: ${currentUserId.substring(0, 10)}...</small>
+                    </div>
+                `;
                 summaryDiv.classList.add('hidden');
                 return;
             }
             
+            // Convert to array and sort by date (Firestore doesn't support orderBy without index)
+            let bids = [];
+            bidsSnapshot.forEach(doc => {
+                bids.push({ id: doc.id, ...doc.data() });
+            });
+            
+            // Sort manually by createdAt
+            bids.sort((a, b) => {
+                const dateA = a.createdAt?.toDate() || new Date(0);
+                const dateB = b.createdAt?.toDate() || new Date(0);
+                return dateB - dateA;
+            });
+            
             let totalWonAmount = 0;
             let html = '';
             
-            for (const doc of bids.docs) {
-                const b = doc.data();
+            for (const b of bids) {
                 const bidAmount = b.points || 0;
                 const multiplier = gameRates[b.gameType] || 10;
                 const possibleWin = bidAmount * multiplier;
@@ -216,7 +243,12 @@
             
         } catch (error) {
             console.error("Error loading bids:", error);
-            container.innerHTML = `<div class="error-box">❌ Error loading bids: ${error.message}<br><br>Please check your internet connection and Firebase rules.</div>`;
+            container.innerHTML = `
+                <div class="no-data" style="color:#dc3545;">
+                    ❌ Error loading bids: ${error.message}<br><br>
+                    <small>Please check Firebase Security Rules</small>
+                </div>
+            `;
         }
     }
     
@@ -225,22 +257,32 @@
         if (!user) return;
         
         const container = document.getElementById('transactionsList');
-        container.innerHTML = '<div style="text-align:center; color:#888; padding:40px;">Loading transactions...</div>';
+        container.innerHTML = '<div style="text-align:center; color:#888; padding:40px;">🔄 Loading transactions...</div>';
         
         try {
-            const transactions = await db.collection('transactions')
+            const transactionsSnapshot = await db.collection('transactions')
                 .where('userId', '==', user.uid)
-                .orderBy('date', 'desc')
                 .get();
             
-            if (transactions.empty) {
+            if (transactionsSnapshot.empty) {
                 container.innerHTML = '<div class="no-data">📭 No transactions yet</div>';
                 return;
             }
             
+            // Convert to array and sort
+            let transactions = [];
+            transactionsSnapshot.forEach(doc => {
+                transactions.push({ id: doc.id, ...doc.data() });
+            });
+            
+            transactions.sort((a, b) => {
+                const dateA = a.date?.toDate() || new Date(0);
+                const dateB = b.date?.toDate() || new Date(0);
+                return dateB - dateA;
+            });
+            
             let html = '';
-            for (const doc of transactions.docs) {
-                const t = doc.data();
+            for (const t of transactions) {
                 const date = t.date?.toDate().toLocaleString() || 'Pending';
                 const isCredit = t.type === 'credit';
                 let statusColor = '#ff9800', statusText = '⏳ Pending';
@@ -271,13 +313,18 @@
             
         } catch (error) {
             console.error("Error loading transactions:", error);
-            container.innerHTML = `<div class="error-box">❌ Error loading transactions: ${error.message}</div>`;
+            container.innerHTML = `<div class="no-data" style="color:#dc3545;">❌ Error loading transactions: ${error.message}</div>`;
         }
     }
     
+    // Listen to auth state
     auth.onAuthStateChanged(user => {
-        if (!user) window.location.href = 'index.html';
-        else { loadBids(); }
+        if (!user) {
+            window.location.href = 'index.html';
+        } else {
+            console.log("User logged in:", user.uid);
+            loadBids();
+        }
     });
     
     window.showTab = showTab;
