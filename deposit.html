@@ -31,13 +31,14 @@
         .bonus-box input { width: 20px; height: 20px; cursor: pointer; }
         .bonus-text { color: #28a745; font-size: 12px; margin-top: 5px; }
         
-        .upi-id-box { background: #fff; border-radius: 16px; padding: 15px; text-align: center; margin: 15px 0; border: 1px solid #d4eaf5; }
-        .upi-id { color: #00b4ff; font-size: 18px; font-weight: bold; letter-spacing: 1px; }
-        .upi-label { color: #888; font-size: 12px; margin-bottom: 8px; }
-        
-        .deposit-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, #00b4ff, #0099cc); border: none; border-radius: 24px; color: #fff; font-size: 20px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
-        .deposit-btn:hover { transform: scale(1.02); }
-        .deposit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .upi-apps { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+        .app-btn { display: flex; align-items: center; gap: 15px; padding: 15px; border: none; border-radius: 16px; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.3s; width: 100%; }
+        .app-btn:hover { transform: scale(1.02); }
+        .phonepe { background: #5b2d8e; color: #fff; }
+        .googlepay { background: #1a73e8; color: #fff; }
+        .paytm { background: #00baf2; color: #fff; }
+        .upiapp { background: #333; color: #fff; }
+        .app-icon { font-size: 24px; }
         
         .timer-box { background: #fff; border-radius: 16px; padding: 15px; text-align: center; margin-top: 20px; border: 1px solid #ffe0b3; }
         .timer-text { color: #ff9800; font-size: 32px; font-weight: bold; font-family: monospace; }
@@ -50,6 +51,7 @@
         
         .hidden { display: none; }
         .note-text { font-size: 11px; color: #888; text-align: center; margin-top: 15px; }
+        .summary-box { background: #f0f8ff; padding: 10px; border-radius: 12px; margin: 10px 0; text-align: center; }
     </style>
 </head>
 <body>
@@ -80,15 +82,31 @@
             <label>🎁 Apply 10% Bonus</label>
             <div class="bonus-text">Get 10% extra on deposit above ₹500</div>
         </div>
-        <input type="checkbox" id="applyBonus">
+        <input type="checkbox" id="applyBonus" onchange="updateSummary()">
     </div>
     
-    <div class="upi-id-box">
-        <div class="upi-label">📱 Send payment to this UPI ID</div>
-        <div class="upi-id" id="upiIdDisplay">ganeshpatil99@slc</div>
+    <div class="summary-box" id="summaryBox">
+        You will get: ₹<span id="totalAmount">100</span>
     </div>
     
-    <button class="deposit-btn" id="depositBtn">💳 PROCEED TO PAY</button>
+    <div class="upi-apps">
+        <button class="app-btn phonepe" onclick="payWithPhonePe()">
+            <span class="app-icon">📱</span>
+            Pay with PhonePe
+        </button>
+        <button class="app-btn googlepay" onclick="payWithGooglePay()">
+            <span class="app-icon">💳</span>
+            Pay with Google Pay
+        </button>
+        <button class="app-btn paytm" onclick="payWithPaytm()">
+            <span class="app-icon">🏦</span>
+            Pay with Paytm
+        </button>
+        <button class="app-btn upiapp" onclick="payWithAnyUpi()">
+            <span class="app-icon">🔄</span>
+            Pay with Any UPI App
+        </button>
+    </div>
     
     <div id="message" class="message hidden"></div>
     <div id="timerBox" class="timer-box hidden">
@@ -117,12 +135,12 @@
     let currentTransactionId = null;
     let timerInterval = null;
     let upiId = "ganeshpatil99@slc";
+    let upiName = "Ganesh Siddharth Patil";
     
     async function loadUpiId() {
         const doc = await db.collection('settings').doc('upi').get();
         if (doc.exists) {
             upiId = doc.data().upiId;
-            document.getElementById('upiIdDisplay').innerText = upiId;
         }
     }
     
@@ -140,6 +158,40 @@
         document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
         event.target.classList.add('active');
         document.getElementById('customAmount').value = '';
+        updateSummary();
+    }
+    
+    function updateSummary() {
+        let amount = selectedAmount;
+        const custom = parseInt(document.getElementById('customAmount').value);
+        if (custom && custom >= 100) amount = custom;
+        
+        const applyBonus = document.getElementById('applyBonus').checked;
+        let bonus = 0;
+        if (applyBonus && amount >= 500) {
+            bonus = Math.floor(amount * 0.10);
+        }
+        const total = amount + bonus;
+        document.getElementById('totalAmount').innerText = total;
+    }
+    
+    document.getElementById('customAmount').addEventListener('input', function() {
+        updateSummary();
+    });
+    
+    function getAmount() {
+        let amount = selectedAmount;
+        const custom = parseInt(document.getElementById('customAmount').value);
+        if (custom && custom >= 100) amount = custom;
+        return amount;
+    }
+    
+    function getBonusAmount(amount) {
+        const applyBonus = document.getElementById('applyBonus').checked;
+        if (applyBonus && amount >= 500) {
+            return Math.floor(amount * 0.10);
+        }
+        return 0;
     }
     
     function showMessage(msg, type) {
@@ -186,10 +238,11 @@
         }, 1000);
         
         if (currentTransactionId) {
-            db.collection('transactions').doc(currentTransactionId).onSnapshot((doc) => {
+            const unsubscribe = db.collection('transactions').doc(currentTransactionId).onSnapshot((doc) => {
                 if (doc.exists && doc.data().status === 'Completed') {
                     clearInterval(timerInterval);
                     timerBox.classList.add('hidden');
+                    unsubscribe();
                     const data = doc.data();
                     showMessage(`✅ ₹${data.amount} added successfully!${data.bonusAmount > 0 ? ` (Including ₹${data.bonusAmount} bonus)` : ''}`, 'success');
                     setTimeout(() => window.location.href = 'dashboard.html', 2000);
@@ -198,55 +251,39 @@
         }
     }
     
-    document.getElementById('depositBtn').onclick = async () => {
-        let amount = selectedAmount;
-        const custom = parseInt(document.getElementById('customAmount').value);
-        if (custom && custom >= 100) amount = custom;
+    async function payWithUPI(appName) {
+        const amount = getAmount();
         
         if (amount < 100) {
             showMessage('Minimum deposit amount is ₹100', 'error');
-            return;
+            return false;
         }
         if (amount > 50000) {
             showMessage('Maximum deposit amount is ₹50,000', 'error');
-            return;
+            return false;
         }
         
-        let bonusAmount = 0;
-        const applyBonus = document.getElementById('applyBonus').checked;
-        if (applyBonus && amount >= 500) {
-            bonusAmount = Math.floor(amount * 0.10);
-        }
-        
+        const bonusAmount = getBonusAmount(amount);
         const totalAmount = amount + bonusAmount;
         
-        const confirmMsg = `💰 DEPOSIT SUMMARY\n\n` +
-            `Deposit Amount: ₹${amount}\n` +
-            `${bonusAmount > 0 ? `Bonus (10%): +₹${bonusAmount}\n` : ``}` +
-            `Total to add: ₹${totalAmount}\n\n` +
-            `UPI ID: ${upiId}\n\n` +
-            `Click OK to proceed with payment`;
-        
-        if (!confirm(confirmMsg)) return;
-        
-        const btn = document.getElementById('depositBtn');
-        btn.disabled = true;
-        btn.innerText = 'Processing...';
-        
-        showMessage(`Creating deposit request for ₹${amount}...`, 'pending');
+        // Create deposit request first
         await createDepositRequest(amount, bonusAmount);
-        showMessage(`✅ Request created! Pay ₹${amount} to ${upiId}`, 'success');
+        
+        // Build the UPI URL with all parameters
+        // Format: upi://pay?pa=UPI_ID&pn=NAME&am=AMOUNT&cu=INR&tn=NOTE
+        const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(`Deposit to WIN777 - ₹${amount}`)}`;
+        
+        console.log("UPI URL:", upiUrl);
+        
+        // Show payment details
+        alert(`💰 PAYMENT DETAILS\n━━━━━━━━━━━━━━━━━━━\n\n💵 Amount: ₹${amount}\n🎁 Bonus: +₹${bonusAmount}\n💰 Total: ₹${totalAmount}\n\n📱 UPI ID: ${upiId}\n👤 Payee: ${upiName}\n━━━━━━━━━━━━━━━━━━━\n\nClick OK to open ${appName} and complete payment.\n\nAmount will be pre-filled automatically.`);
         
         // Open UPI app
-        const upiIntent = `upi://pay?pa=${upiId}&pn=WIN777&am=${amount}&cu=INR`;
-        setTimeout(() => {
-            window.location.href = upiIntent;
-        }, 1000);
+        window.location.href = upiUrl;
         
+        // Start timer for confirmation after user returns
         setTimeout(() => {
-            btn.disabled = false;
-            btn.innerText = '💳 PROCEED TO PAY';
-            if (confirm(`Did you successfully pay ₹${amount}?\n\nClick OK after completing payment.`)) {
+            if (confirm(`✅ Did you successfully pay ₹${amount} to ${upiId}?\n\nClick OK after completing the payment.`)) {
                 showMessage(`✅ Payment recorded! Waiting for admin confirmation...`, 'success');
                 startTimerAndWait();
             } else {
@@ -254,13 +291,39 @@
                 startTimerAndWait();
             }
         }, 8000);
-    };
+        
+        return true;
+    }
+    
+    function payWithPhonePe() {
+        payWithUPI("PhonePe");
+    }
+    
+    function payWithGooglePay() {
+        payWithUPI("Google Pay");
+    }
+    
+    function payWithPaytm() {
+        payWithUPI("Paytm");
+    }
+    
+    function payWithAnyUpi() {
+        payWithUPI("UPI App");
+    }
     
     function goBack() {
         window.location.href = 'dashboard.html';
     }
     
+    // Initialize summary
+    updateSummary();
+    
     window.selectAmount = selectAmount;
+    window.updateSummary = updateSummary;
+    window.payWithPhonePe = payWithPhonePe;
+    window.payWithGooglePay = payWithGooglePay;
+    window.payWithPaytm = payWithPaytm;
+    window.payWithAnyUpi = payWithAnyUpi;
 </script>
 </body>
 </html>
