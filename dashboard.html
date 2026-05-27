@@ -12,10 +12,12 @@
         body { background: #0a0a0f; padding-bottom: 70px; }
         .app-container { max-width: 500px; margin: 0 auto; background: #0a0a0f; min-height: 100vh; }
         
+        /* Header */
         .header { background: #0a0a0f; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #00b4ff; }
         .logo { color: #00b4ff; font-size: 22px; font-weight: bold; }
         .balance { background: #00b4ff; padding: 5px 12px; border-radius: 20px; color: #000; font-weight: bold; font-size: 14px; }
         
+        /* Profile Row */
         .profile-row { display: flex; align-items: center; gap: 12px; background: #1a1a2e; margin: 10px; padding: 12px 15px; border-radius: 16px; border: 1px solid #00b4ff; }
         .profile-avatar { width: 50px; height: 50px; background: linear-gradient(135deg, #00b4ff, #0099cc); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #000; }
         .profile-info { flex: 1; }
@@ -23,38 +25,47 @@
         .profile-phone { color: #888; font-size: 12px; }
         .view-profile { color: #00b4ff; font-size: 12px; cursor: pointer; }
         
+        /* Notice Board */
         .notice-board { background: linear-gradient(135deg, #00b4ff, #0099cc); margin: 10px; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
         .notice-icon { font-size: 24px; }
         .notice-text { flex: 1; color: #000; font-weight: bold; font-size: 13px; }
         .close-notice { background: none; border: none; color: #000; font-size: 18px; cursor: pointer; }
         
+        /* Games Row */
         .games-row { display: flex; justify-content: space-around; background: #1a1a2e; margin: 10px; padding: 12px; border-radius: 12px; }
         .game-icon { text-align: center; color: #aaa; font-size: 12px; cursor: pointer; }
         .game-icon span { font-size: 24px; display: block; margin-bottom: 4px; }
         
+        /* Market Card */
         .market-card { background: #1a1a2e; margin: 12px; border-radius: 16px; padding: 16px; border: 1px solid #00b4ff; }
-        .market-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .market-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
         .market-name { color: #00b4ff; font-size: 16px; font-weight: bold; }
-        .market-numbers { color: white; font-size: 14px; font-family: monospace; }
+        .market-numbers { color: #888; font-size: 12px; font-family: monospace; background: #0a0a0f; padding: 4px 8px; border-radius: 8px; }
         .market-time { color: #888; font-size: 11px; margin-bottom: 8px; }
         
-        /* Result Display - Clean numbers only */
+        /* Result Display */
         .result-box { background: #0a0a0f; border-radius: 12px; padding: 15px; margin: 10px 0; text-align: center; border: 1px solid #00b4ff30; }
-        .result-numbers { color: #00b4ff; font-size: 24px; font-weight: bold; letter-spacing: 2px; }
+        .result-numbers { color: #00b4ff; font-size: 22px; font-weight: bold; letter-spacing: 2px; }
         
+        /* Status Badge */
         .market-status { font-size: 11px; padding: 4px 8px; border-radius: 12px; display: inline-block; }
         .status-closed { background: #f4433620; color: #f44336; border: 1px solid #f44336; }
         .status-close { background: #00b4ff20; color: #00b4ff; border: 1px solid #00b4ff; }
         .status-open { background: #4caf5020; color: #4caf50; border: 1px solid #4caf50; }
         
+        /* Buttons */
         .play-btn { width: 100%; margin-top: 12px; padding: 10px; background: #00b4ff; border: none; border-radius: 12px; color: #000; font-weight: bold; cursor: pointer; }
         .play-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .reset-btn { background: #dc3545; color: white; border: none; padding: 4px 10px; border-radius: 8px; font-size: 11px; cursor: pointer; }
+        .reset-btn:hover { background: #c82333; }
         
+        /* Bottom Navigation */
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #1a1a2e; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #00b4ff; }
         .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 11px; }
         .nav-item span { font-size: 22px; display: block; }
         .nav-item.active { color: #00b4ff; }
         
+        /* Modal */
         .hidden { display: none; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: #1a1a2e; border-radius: 24px; padding: 25px; width: 90%; max-width: 350px; border: 1px solid #00b4ff; }
@@ -65,11 +76,13 @@
 </head>
 <body>
 <div class="app-container">
+    <!-- Header -->
     <div class="header">
         <div class="logo">WIN777</div>
         <div class="balance">₹<span id="userBalance">0</span></div>
     </div>
     
+    <!-- Profile Row -->
     <div class="profile-row">
         <div class="profile-avatar">👤</div>
         <div class="profile-info">
@@ -79,12 +92,14 @@
         <div class="view-profile" onclick="viewProfile()">View Profile →</div>
     </div>
     
+    <!-- Notice Board -->
     <div id="noticeBoard" class="notice-board" onclick="showNoticeModal()">
         <div class="notice-icon">📢</div>
         <div class="notice-text" id="noticeText">Welcome to WIN777! Play big · Win big · Unlimited</div>
         <button class="close-notice" onclick="event.stopPropagation(); closeNotice()">✕</button>
     </div>
     
+    <!-- Games Row -->
     <div class="games-row">
         <div class="game-icon" onclick="showGames()"><span>🎮</span><p>Games</p></div>
         <div class="game-icon" onclick="window.location.href='deposit.html'"><span>💰</span><p>Deposit</p></div>
@@ -92,8 +107,10 @@
         <div class="game-icon" onclick="window.location.href='mybids.html'"><span>📋</span><p>My Bids</p></div>
     </div>
     
+    <!-- Markets List -->
     <div id="marketsList"></div>
     
+    <!-- Bottom Navigation -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="location.reload()"><span>🏠</span><p>Home</p></div>
         <div class="nav-item" onclick="window.location.href='mybids.html'"><span>📘</span><p>Passbook</p></div>
@@ -103,6 +120,7 @@
     </div>
 </div>
 
+<!-- Notice Modal -->
 <div id="noticeModal" class="modal">
     <div class="modal-content">
         <h3>📢 Notice Board</h3>
@@ -127,6 +145,7 @@
     
     let marketsData = [];
     
+    // Real-time listener for markets
     function listenToMarkets() {
         db.collection('markets').onSnapshot((snapshot) => {
             marketsData = [];
@@ -150,6 +169,7 @@
         });
     }
     
+    // Real-time listener for notice board
     function listenToNotice() {
         db.collection('settings').doc('notice').onSnapshot((doc) => {
             const text = doc.exists ? doc.data().text : 'Welcome to WIN777! Play big · Win big · Unlimited';
@@ -174,6 +194,27 @@
         window.location.href = `betting.html?market=${encodeURIComponent(market.name)}&status=${market.status}&marketId=${market.id}`;
     }
     
+    // Reset market result
+    async function resetMarketResult(marketId, marketName) {
+        if (confirm(`🔄 RESET MARKET\n\nAre you sure you want to reset "${marketName}"?\n\nThis will clear all declared results to:\n*** - ** - ***\n\n⚠️ WARNING: This will NOT refund any credits already given!\n\nContinue?`)) {
+            try {
+                await db.collection('markets').doc(marketId).update({
+                    openPana: '***',
+                    openDigit: '*',
+                    closePana: '***',
+                    closeDigit: '*',
+                    jodi: '**',
+                    result: '***-**-***',
+                    closeDeclared: false
+                });
+                alert(`✅ ${marketName} has been reset to *** - ** - ***`);
+            } catch (error) {
+                console.error("Reset error:", error);
+                alert("Error resetting market: " + error.message);
+            }
+        }
+    }
+    
     function renderMarkets() {
         const container = document.getElementById('marketsList');
         if (marketsData.length === 0) {
@@ -186,27 +227,40 @@
         marketsData.forEach(market => {
             const isPlayable = market.status === 'open' || market.status === 'close';
             
-            // Build result display
+            // Build result display based on declared status
             let resultDisplay = '';
-            if (market.closePana !== '***') {
-                // Full result declared
+            
+            // Check if full result declared (closePana is set and not ***)
+            if (market.closePana && market.closePana !== '***') {
+                // Full result: Open Pana - JODI - Close Pana
                 resultDisplay = `${market.openPana} - ${market.jodi} - ${market.closePana}`;
-            } else if (market.openPana !== '***') {
-                // Only open declared, show openDigit + *
+            } 
+            // Check if only open result declared
+            else if (market.openPana && market.openPana !== '***') {
+                // Only open declared: Open Pana - OpenDigit* - ***
                 resultDisplay = `${market.openPana} - ${market.openDigit}* - ***`;
-            } else {
-                // No result declared
+            } 
+            else {
+                // No result: *** - ** - ***
                 resultDisplay = `*** - ** - ***`;
             }
+            
+            // Clean numbers display (remove any labels if present)
+            let numbersDisplay = market.numbers || '***-***-***';
+            numbersDisplay = numbersDisplay.replace('Open Pana', '').replace('JODI', '').replace('Close Pana', '').trim();
             
             container.innerHTML += `
                 <div class="market-card">
                     <div class="market-header">
                         <span class="market-name">${market.name}</span>
-                        <span class="market-numbers">${market.numbers || '***-***-***'}</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="market-numbers">${numbersDisplay}</span>
+                            <button class="reset-btn" onclick="resetMarketResult('${market.id}', '${market.name}')">⟳ Reset</button>
+                        </div>
                     </div>
-                    <div class="market-time">Open Bids : ${market.openBid || '--:--'} &nbsp;|&nbsp; Close Bids : ${market.closeBid || '--:--'}</div>
+                    <div class="market-time">⏰ Open : ${market.openBid || '--:--'} &nbsp;|&nbsp; Close : ${market.closeBid || '--:--'}</div>
                     
+                    <!-- Result Display - Clean numbers only, no labels -->
                     <div class="result-box">
                         <div class="result-numbers">${resultDisplay}</div>
                     </div>
@@ -244,9 +298,9 @@
             db.collection('users').doc(user.uid).get().then(doc => {
                 if (doc.exists) {
                     const data = doc.data();
-                    alert(`📱 Profile\n\nName: ${data.name}\nPhone: ${data.phone}\nBalance: ₹${data.balance || 0}\nMPIN: ${data.pin}`);
+                    alert(`📱 PROFILE\n\n━━━━━━━━━━━━━━━━━━━\n👤 Name: ${data.name}\n📞 Phone: ${data.phone}\n💰 Balance: ₹${data.balance || 0}\n🔐 MPIN: ${data.pin}\n━━━━━━━━━━━━━━━━━━━`);
                 }
-            });
+            }).catch(err => console.error(err));
         }
     }
     
@@ -263,19 +317,24 @@
     }
     
     function showGames() { 
-        alert('Games coming soon!'); 
+        alert('🎮 Games coming soon!'); 
     }
     
+    // Make reset function global for onclick
+    window.resetMarketResult = resetMarketResult;
+    
+    // Refresh balance every 5 seconds
     setInterval(() => {
         if (auth.currentUser) {
             db.collection('users').doc(auth.currentUser.uid).get().then(doc => {
                 if (doc.exists) {
                     document.getElementById('userBalance').innerText = doc.data().balance || 0;
                 }
-            });
+            }).catch(err => console.error(err));
         }
     }, 5000);
     
+    // Auth state listener
     auth.onAuthStateChanged(user => { 
         if (!user) {
             window.location.href = 'index.html'; 
