@@ -22,7 +22,7 @@
         .admin-panel { display: none; }
         .sidebar { width: 260px; background: #fff; min-height: 100vh; position: fixed; border-right: 1px solid #ddd; box-shadow: 2px 0 10px rgba(0,0,0,0.05); }
         .sidebar h2 { color: #333; padding: 25px; text-align: center; border-bottom: 1px solid #eee; }
-        .sidebar-item { padding: 15px 25px; color: #555; cursor: pointer; border-bottom: 1px solid #eee; }
+        .sidebar-item { padding: 15px 25px; color: #555; cursor: pointer; border-bottom: 1px solid #eee; transition: all 0.3s; }
         .sidebar-item:hover { background: #f0f0f0; color: #000; }
         .main-content { margin-left: 260px; padding: 25px; }
         .card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
@@ -42,6 +42,7 @@
         .btn-danger { background: #dc3545; color: #fff; }
         .btn-warning { background: #ffc107; color: #333; }
         .btn-reset { background: #6c757d; color: #fff; }
+        .btn-info { background: #17a2b8; color: #fff; }
         .hidden { display: none; }
         
         .results-container { display: flex; gap: 20px; flex-wrap: wrap; margin: 15px 0; }
@@ -218,6 +219,7 @@
         }
     }
     
+    // ============ MARKETS MANAGEMENT ============
     function loadMarkets() {
         db.collection('markets').onSnapshot((snapshot) => {
             let html = '';
@@ -396,7 +398,7 @@
                 await userRef.update({ balance: (userDoc.data().balance || 0) + winAmount });
                 await db.collection('transactions').add({
                     userId: bid.userId, type: 'credit', amount: winAmount, status: 'Completed',
-                    description: `Won on ${marketName} (OPEN) - ${bid.gameType}: ${bid.value}`, date: new Date()
+                    description: `🎉 Won on ${marketName} (OPEN) - ${bid.gameType}: ${bid.value}`, date: new Date()
                 });
             }
         }
@@ -422,14 +424,49 @@
                 await userRef.update({ balance: (userDoc.data().balance || 0) + winAmount });
                 await db.collection('transactions').add({
                     userId: bid.userId, type: 'credit', amount: winAmount, status: 'Completed',
-                    description: `Won on ${marketName} - ${bid.gameType}: ${bid.value}`, date: new Date()
+                    description: `🎉 Won on ${marketName} - ${bid.gameType}: ${bid.value}`, date: new Date()
                 });
             } else {
-                await bidDoc.ref.update({ status: 'lost' });
+                if (bid.status === 'pending') {
+                    await bidDoc.ref.update({ status: 'lost' });
+                }
             }
         }
     }
     
+    async function changeStatus(id, current) {
+        let newStatus = current === 'open' ? 'close' : (current === 'close' ? 'closed' : 'open');
+        await db.collection('markets').doc(id).update({ status: newStatus });
+    }
+    
+    async function addMarket() {
+        const name = document.getElementById('marketName').value;
+        const numbers = document.getElementById('marketNumbers').value || '***-**-***';
+        const openBid = document.getElementById('openBid').value;
+        const closeBid = document.getElementById('closeBid').value;
+        const status = document.getElementById('marketStatus').value;
+        if (!name) { alert('Enter market name'); return; }
+        await db.collection('markets').add({ name, numbers, openBid, closeBid, status, openPana: '***', openDigit: '*', closePana: '***', closeDigit: '*', jodi: '**', closeDeclared: false });
+        document.getElementById('marketName').value = '';
+        document.getElementById('marketNumbers').value = '';
+        document.getElementById('openBid').value = '';
+        document.getElementById('closeBid').value = '';
+        alert('Market added!');
+    }
+    
+    async function editMarket(id, oldName, oldNumbers, oldOpen, oldClose) {
+        const newName = prompt('New name', oldName);
+        const newNumbers = prompt('New numbers', oldNumbers);
+        const newOpen = prompt('Open Bid Time', oldOpen);
+        const newClose = prompt('Close Bid Time', oldClose);
+        if (newName) await db.collection('markets').doc(id).update({ name: newName, numbers: newNumbers, openBid: newOpen, closeBid: newClose });
+    }
+    
+    async function deleteMarket(id) {
+        if (confirm('Delete this market permanently?')) await db.collection('markets').doc(id).delete();
+    }
+    
+    // ============ USER MANAGEMENT ============
     function loadUsers() {
         db.collection('users').onSnapshot(async (snapshot) => {
             let html = '';
@@ -446,6 +483,7 @@
                         </div>
                         <div class="user-actions">
                             <button onclick="addBalance('${doc.id}')">Add ₹</button>
+                            <button onclick="viewUserBids('${doc.id}', '${u.name}')" class="btn-info">View Bids</button>
                             <button onclick="toggleBlockUser('${doc.id}', '${u.name}', ${isBlocked})" class="btn-warning">${isBlocked ? 'Unblock' : 'Block'}</button>
                             <button onclick="clearUserBids('${doc.id}', '${u.name}')" class="btn-warning">Clear Bids</button>
                             <button onclick="clearUserTransactions('${doc.id}', '${u.name}')" class="btn-warning">Clear History</button>
@@ -456,6 +494,53 @@
             }
             document.getElementById('usersList').innerHTML = html || '<p style="color: #888;">No users yet</p>';
         });
+    }
+    
+    // View user bids history
+    async function viewUserBids(uid, name) {
+        const bids = await db.collection('bids')
+            .where('userId', '==', uid)
+            .orderBy('createdAt', 'desc')
+            .get();
+        
+        if (bids.empty) { 
+            alert(`📋 No bids found for ${name}`); 
+            return; 
+        }
+        
+        let message = `📋 BID HISTORY FOR ${name}\n━━━━━━━━━━━━━━━━━━━\n\n`;
+        let totalBids = 0;
+        let totalAmount = 0;
+        let wonAmount = 0;
+        
+        for (const doc of bids.docs) {
+            const b = doc.data();
+            totalBids++;
+            totalAmount += b.points || 0;
+            const multiplier = gameRates[b.gameType] || 10;
+            const possibleWin = (b.points || 0) * multiplier;
+            
+            message += `📊 Market: ${b.market}\n`;
+            message += `🎲 Game: ${b.gameType}\n`;
+            message += `🔢 Number: ${b.value}\n`;
+            message += `💰 Amount: ₹${b.points}\n`;
+            message += `🎯 Rate: ${multiplier}x (Win: ₹${possibleWin})\n`;
+            message += `📌 Status: ${b.status.toUpperCase()}\n`;
+            message += `📅 Date: ${b.createdAt?.toDate().toLocaleString() || 'Pending'}\n`;
+            message += `━━━━━━━━━━━━━━━━━━━\n`;
+            
+            if (b.status === 'won') {
+                wonAmount += possibleWin;
+            }
+        }
+        
+        message += `\n📊 SUMMARY:\n`;
+        message += `Total Bids: ${totalBids}\n`;
+        message += `Total Amount Spent: ₹${totalAmount}\n`;
+        message += `Total Won: ₹${wonAmount}\n`;
+        message += `Net Profit/Loss: ₹${wonAmount - totalAmount}\n`;
+        
+        alert(message);
     }
     
     async function toggleBlockUser(uid, name, isBlocked) {
@@ -514,38 +599,7 @@
         }
     }
     
-    async function changeStatus(id, current) {
-        let newStatus = current === 'open' ? 'close' : (current === 'close' ? 'closed' : 'open');
-        await db.collection('markets').doc(id).update({ status: newStatus });
-    }
-    
-    async function addMarket() {
-        const name = document.getElementById('marketName').value;
-        const numbers = document.getElementById('marketNumbers').value || '***-**-***';
-        const openBid = document.getElementById('openBid').value;
-        const closeBid = document.getElementById('closeBid').value;
-        const status = document.getElementById('marketStatus').value;
-        if (!name) { alert('Enter market name'); return; }
-        await db.collection('markets').add({ name, numbers, openBid, closeBid, status, openPana: '***', openDigit: '*', closePana: '***', closeDigit: '*', jodi: '**', closeDeclared: false });
-        document.getElementById('marketName').value = '';
-        document.getElementById('marketNumbers').value = '';
-        document.getElementById('openBid').value = '';
-        document.getElementById('closeBid').value = '';
-        alert('Market added!');
-    }
-    
-    async function editMarket(id, oldName, oldNumbers, oldOpen, oldClose) {
-        const newName = prompt('New name', oldName);
-        const newNumbers = prompt('New numbers', oldNumbers);
-        const newOpen = prompt('Open Bid Time', oldOpen);
-        const newClose = prompt('Close Bid Time', oldClose);
-        if (newName) await db.collection('markets').doc(id).update({ name: newName, numbers: newNumbers, openBid: newOpen, closeBid: newClose });
-    }
-    
-    async function deleteMarket(id) {
-        if (confirm('Delete this market permanently?')) await db.collection('markets').doc(id).delete();
-    }
-    
+    // ============ DEPOSITS MANAGEMENT ============
     function loadDeposits() {
         db.collection('transactions').where('type', '==', 'credit').where('status', '==', 'Pending').onSnapshot(async (snapshot) => {
             let html = '';
@@ -571,6 +625,7 @@
         if (confirm('Reject this deposit?')) await db.collection('transactions').doc(id).update({ status: 'Rejected' });
     }
     
+    // ============ WITHDRAWALS MANAGEMENT ============
     function loadWithdrawals() {
         db.collection('withdrawRequests').where('status', '==', 'Pending').onSnapshot(async (snapshot) => {
             let html = '';
@@ -589,6 +644,10 @@
             if ((user.data().balance || 0) < amount) { alert('Insufficient balance!'); return; }
             await db.collection('users').doc(userId).update({ balance: (user.data().balance || 0) - amount });
             await db.collection('withdrawRequests').doc(id).update({ status: 'Completed' });
+            await db.collection('transactions').add({
+                userId: userId, type: 'debit', amount: amount, status: 'Completed',
+                description: 'Withdrawal Approved', date: new Date()
+            });
             alert(`✅ Withdrawal approved!`);
         }
     }
@@ -597,6 +656,7 @@
         if (confirm('Reject this withdrawal?')) await db.collection('withdrawRequests').doc(id).update({ status: 'Rejected' });
     }
     
+    // ============ NOTICE & SETTINGS ============
     function loadNotice() {
         db.collection('settings').doc('notice').onSnapshot((doc) => {
             document.getElementById('noticeText').value = doc.exists ? doc.data().text : 'Welcome to WIN777!';
@@ -635,6 +695,7 @@
         document.getElementById('adminPass').value = '';
     }
     
+    // Make all functions global
     window.login = login;
     window.declareOpenResult = declareOpenResult;
     window.declareCloseResult = declareCloseResult;
@@ -644,6 +705,7 @@
     window.editMarket = editMarket;
     window.deleteMarket = deleteMarket;
     window.addBalance = addBalance;
+    window.viewUserBids = viewUserBids;
     window.toggleBlockUser = toggleBlockUser;
     window.clearUserBids = clearUserBids;
     window.clearUserTransactions = clearUserTransactions;
