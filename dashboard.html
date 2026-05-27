@@ -228,6 +228,17 @@
     let marketsData = [];
     let currentUserData = null;
     
+    function formatTimeTo12Hour(timeStr) {
+        if (!timeStr || timeStr === '--:--') return '--:--';
+        const parts = timeStr.split(':');
+        let hours = parseInt(parts[0]);
+        const minutes = parts[1];
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        return `${hours}:${minutes} ${ampm}`;
+    }
+    
     function listenToMarkets() {
         db.collection('markets').onSnapshot((snapshot) => {
             marketsData = [];
@@ -300,13 +311,16 @@
             let numbersDisplay = market.numbers || '***-***-***';
             numbersDisplay = numbersDisplay.replace('Open Pana', '').replace('JODI', '').replace('Close Pana', '').trim();
             
+            const openBid12 = formatTimeTo12Hour(market.openBid);
+            const closeBid12 = formatTimeTo12Hour(market.closeBid);
+            
             container.innerHTML += `
                 <div class="market-card">
                     <div class="market-header">
                         <span class="market-name">${market.name}</span>
                         <span class="market-numbers">${numbersDisplay}</span>
                     </div>
-                    <div class="market-time">Open : ${market.openBid || '--:--'} | Close : ${market.closeBid || '--:--'}</div>
+                    <div class="market-time">⏰ Open: ${openBid12} | Close: ${closeBid12}</div>
                     <div class="result-box"><div class="result-numbers">${resultDisplay}</div></div>
                     <div><span class="market-status ${getStatusClass(market.status)}">${getStatusText(market.status)}</span></div>
                     <button class="play-btn" onclick='openBetting(${JSON.stringify(market)})' ${!isPlayable ? 'disabled' : ''}>${isPlayable ? 'PLAY NOW' : 'CLOSED'}</button>
