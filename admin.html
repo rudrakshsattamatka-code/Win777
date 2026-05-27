@@ -62,6 +62,8 @@
         .market-numbers-text { color: #aaa; font-size: 14px; margin: 5px 0; }
         .market-time-text { color: #888; font-size: 12px; }
         
+        .warning-box { background: #ff980020; border: 1px solid #ff9800; border-radius: 8px; padding: 8px; margin: 10px 0; color: #ff9800; font-size: 12px; text-align: center; }
+        
         @media (max-width: 768px) { 
             .sidebar { width: 70px; } 
             .sidebar h2 { font-size: 14px; } 
@@ -234,6 +236,7 @@
                 let jodi = '**';
                 let closePana = '***';
                 let closeDigit = '*';
+                let isCloseDeclared = false;
                 
                 if (m.result && m.result !== '***-**-***') {
                     const parts = m.result.split('-');
@@ -243,6 +246,7 @@
                         closePana = parts[2];
                         openDigit = m.openDigit || openPana.slice(-1);
                         closeDigit = m.closeDigit || closePana.slice(-1);
+                        isCloseDeclared = (closePana !== '***');
                     }
                 }
                 
@@ -272,14 +276,16 @@
                                 </div>
                             </div>
                             
-                            <div class="section-title">📝 Update Result (Manual Entry)</div>
+                            ${!isCloseDeclared && openPana !== '***' ? '<div class="warning-box">⚠️ Open result declared. Waiting for Close result to credit winners.</div>' : ''}
+                            
+                            <div class="section-title">📝 Update Result (Step by Step)</div>
                             
                             <div class="input-group">
                                 <label style="color:#00b4ff;">🔓 Open Pana:</label>
                                 <input type="text" id="openPana_${doc.id}" placeholder="3 digits" value="${openPana !== '***' ? openPana : ''}" style="width:100px;">
                                 <label style="color:#00b4ff;">Open Digit:</label>
                                 <input type="text" id="openDigit_${doc.id}" placeholder="1 digit" value="${openDigit !== '*' ? openDigit : ''}" style="width:60px;" maxlength="1">
-                                <button onclick="updateOpenResult('${doc.id}', '${m.name}')" style="background:#00b4ff;">✅ Update Open</button>
+                                <button onclick="updateOpenOnly('${doc.id}', '${m.name}')" style="background:#00b4ff;">✅ Update Open Only</button>
                             </div>
                             
                             <div class="input-group">
@@ -287,13 +293,9 @@
                                 <input type="text" id="closePana_${doc.id}" placeholder="3 digits" value="${closePana !== '***' ? closePana : ''}" style="width:100px;">
                                 <label style="color:#ff9800;">Close Digit:</label>
                                 <input type="text" id="closeDigit_${doc.id}" placeholder="1 digit" value="${closeDigit !== '*' ? closeDigit : ''}" style="width:60px;" maxlength="1">
-                                <button onclick="updateCloseResult('${doc.id}', '${m.name}')" style="background:#ff9800;">✅ Update Close</button>
-                            </div>
-                            
-                            <div class="input-group">
-                                <label style="color:#00ffaa;">🎲 JODI:</label>
-                                <input type="text" id="jodi_${doc.id}" placeholder="2 digits" value="${jodi !== '**' ? jodi : ''}" style="width:80px;" maxlength="2">
-                                <button onclick="updateFullResult('${doc.id}', '${m.name}')" class="btn-success">⭐ Update Full Result</button>
+                                <label style="color:#00ffaa;">JODI:</label>
+                                <input type="text" id="jodi_${doc.id}" placeholder="2 digits" value="${jodi !== '**' ? jodi : ''}" style="width:70px;" maxlength="2">
+                                <button onclick="updateCloseAndCredit('${doc.id}', '${m.name}')" style="background:#ff9800;">✅ Update Close & Credit Winners</button>
                             </div>
                         </div>
                         
@@ -314,13 +316,13 @@
         });
     }
     
-    // Update ONLY Open Result (keeps existing Close and JODI)
-    async function updateOpenResult(marketId, marketName) {
+    // STEP 1: Update ONLY Open Result (No winners credited yet)
+    async function updateOpenOnly(marketId, marketName) {
         const openPana = document.getElementById(`openPana_${marketId}`).value.trim();
         const openDigit = document.getElementById(`openDigit_${marketId}`).value.trim();
         
         if (!openPana || !openPana.match(/^\d{3}$/)) {
-            alert('Enter valid 3-digit Open Pana (e.g., 450)');
+            alert('Enter valid 3-digit Open Pana (e.g., 123)');
             return;
         }
         if (!openDigit || !openDigit.match(/^\d$/)) {
@@ -331,97 +333,73 @@
         const marketDoc = await db.collection('markets').doc(marketId).get();
         const currentResult = marketDoc.data().result || '***-**-***';
         const parts = currentResult.split('-');
-        const jodi = parts[1] || '**';
-        const closePana = parts[2] || '***';
+        const existingJodi = parts[1] || '**';
+        const existingClosePana = parts[2] || '***';
         
-        const fullResult = `${openPana}-${jodi}-${closePana}`;
+        // Keep existing close data if any, otherwise use ***
+        const fullResult = `${openPana}-${existingJodi}-${existingClosePana}`;
         
-        if (confirm(`Update OPEN RESULT for ${marketName}?\n\n🔓 Open Pana: ${openPana}\n🔢 Open Digit: ${openDigit}\n\nContinue?`)) {
+        if (confirm(`UPDATE OPEN RESULT ONLY for ${marketName}?\n\n🔓 Open Pana: ${openPana}\n🔢 Open Digit: ${openDigit}\n\n⚠️ Winners will NOT be credited yet.\n⚠️ Update Close result later to credit winners.\n\nContinue?`)) {
             await db.collection('markets').doc(marketId).update({ 
                 result: fullResult,
                 openDigit: openDigit,
+                openPana: openPana,
                 lastUpdated: new Date()
             });
-            alert(`✅ Open result updated!\n${openPana} | Open Digit: ${openDigit}`);
+            alert(`✅ Open result updated!\n\n${openPana} | Open Digit: ${openDigit}\n\n📌 Remember: Update Close result later to credit winners.`);
         }
     }
     
-    // Update ONLY Close Result (keeps existing Open and JODI)
-    async function updateCloseResult(marketId, marketName) {
-        const closePana = document.getElementById(`closePana_${marketId}`).value.trim();
-        const closeDigit = document.getElementById(`closeDigit_${marketId}`).value.trim();
-        
-        if (!closePana || !closePana.match(/^\d{3}$/)) {
-            alert('Enter valid 3-digit Close Pana (e.g., 123)');
-            return;
-        }
-        if (!closeDigit || !closeDigit.match(/^\d$/)) {
-            alert('Enter valid Close Digit (0-9)');
-            return;
-        }
-        
-        const marketDoc = await db.collection('markets').doc(marketId).get();
-        const currentResult = marketDoc.data().result || '***-**-***';
-        const parts = currentResult.split('-');
-        const openPana = parts[0] || '***';
-        const jodi = parts[1] || '**';
-        
-        const fullResult = `${openPana}-${jodi}-${closePana}`;
-        
-        if (confirm(`Update CLOSE RESULT for ${marketName}?\n\n🔒 Close Pana: ${closePana}\n🔢 Close Digit: ${closeDigit}\n\nContinue?`)) {
-            await db.collection('markets').doc(marketId).update({ 
-                result: fullResult,
-                closeDigit: closeDigit,
-                lastUpdated: new Date()
-            });
-            alert(`✅ Close result updated!\n${closePana} | Close Digit: ${closeDigit}`);
-        }
-    }
-    
-    // Update FULL Result (Open Pana, Close Pana, JODI, and digits)
-    async function updateFullResult(marketId, marketName) {
+    // STEP 2: Update Close Result, Auto-calculate JODI, and Credit Winners
+    async function updateCloseAndCredit(marketId, marketName) {
         const openPana = document.getElementById(`openPana_${marketId}`).value.trim();
         const openDigit = document.getElementById(`openDigit_${marketId}`).value.trim();
         const closePana = document.getElementById(`closePana_${marketId}`).value.trim();
         const closeDigit = document.getElementById(`closeDigit_${marketId}`).value.trim();
-        const jodi = document.getElementById(`jodi_${marketId}`).value.trim();
+        let jodi = document.getElementById(`jodi_${marketId}`).value.trim();
         
         if (!openPana || !openPana.match(/^\d{3}$/)) {
-            alert('Enter valid 3-digit Open Pana');
+            alert('Open Pana is required! Enter valid 3-digit Open Pana');
             return;
         }
         if (!openDigit || !openDigit.match(/^\d$/)) {
-            alert('Enter valid Open Digit (0-9)');
+            alert('Open Digit is required! Enter valid digit (0-9)');
             return;
         }
         if (!closePana || !closePana.match(/^\d{3}$/)) {
-            alert('Enter valid 3-digit Close Pana');
+            alert('Enter valid 3-digit Close Pana (e.g., 460)');
             return;
         }
         if (!closeDigit || !closeDigit.match(/^\d$/)) {
             alert('Enter valid Close Digit (0-9)');
             return;
         }
-        if (!jodi || !jodi.match(/^\d{2}$/)) {
-            alert('Enter valid JODI (2 digits, e.g., 96)');
-            return;
+        
+        // Auto-calculate JODI if not manually entered
+        if (!jodi || jodi === '**') {
+            jodi = openDigit + closeDigit;
         }
         
         const fullResult = `${openPana}-${jodi}-${closePana}`;
         
-        if (confirm(`Update FULL RESULT for ${marketName}?\n\n🔓 Open: ${openPana} (Digit: ${openDigit})\n🎲 JODI: ${jodi}\n🔒 Close: ${closePana} (Digit: ${closeDigit})\n\nThis will credit winners!`)) {
+        if (confirm(`UPDATE CLOSE RESULT & CREDIT WINNERS for ${marketName}?\n\n🔓 Open: ${openPana} (Digit: ${openDigit})\n🔒 Close: ${closePana} (Digit: ${closeDigit})\n🎲 JODI: ${jodi}\n\n⚠️ This will credit ALL winners!\n\nContinue?`)) {
             await db.collection('markets').doc(marketId).update({ 
                 result: fullResult,
                 openDigit: openDigit,
                 closeDigit: closeDigit,
+                jodi: jodi,
+                closePana: closePana,
                 lastUpdated: new Date()
             });
-            await processAllWinners(marketId, marketName, openPana, openDigit, closePana, closeDigit, jodi);
-            alert(`✅ Full result updated!\n${openPana} - ${jodi} - ${closePana}`);
+            
+            // Credit winners after full result is set
+            await creditAllWinners(marketId, marketName, openPana, openDigit, closePana, closeDigit, jodi);
+            
+            alert(`✅ CLOSE RESULT DECLARED & WINNERS CREDITED!\n\n${openPana} - ${jodi} - ${closePana}\n\n💰 Winners have been credited automatically.`);
         }
     }
     
-    async function processAllWinners(marketId, marketName, openPana, openDigit, closePana, closeDigit, jodi) {
+    async function creditAllWinners(marketId, marketName, openPana, openDigit, closePana, closeDigit, jodi) {
         const bids = await db.collection('bids')
             .where('marketId', '==', marketId)
             .where('status', '==', 'pending')
@@ -429,6 +407,7 @@
         
         let winnersCount = 0;
         let totalWon = 0;
+        let winnerDetails = [];
         
         for (const bidDoc of bids.docs) {
             const bid = bidDoc.data();
@@ -463,6 +442,7 @@
                 winAmount = bid.points * multiplier;
                 totalWon += winAmount;
                 winnersCount++;
+                winnerDetails.push(`${bid.gameType}: ${bid.value} (₹${winAmount})`);
                 
                 await bidDoc.ref.update({ status: 'won' });
                 
@@ -483,8 +463,9 @@
             }
         }
         
+        console.log(`✅ ${winnersCount} winners! Total: ₹${totalWon}`);
         if (winnersCount > 0) {
-            console.log(`✅ ${winnersCount} winners! Total: ₹${totalWon}`);
+            console.log(`Winners: ${winnerDetails.join(', ')}`);
         }
     }
     
@@ -684,9 +665,8 @@
     }
     
     window.login = login;
-    window.updateOpenResult = updateOpenResult;
-    window.updateCloseResult = updateCloseResult;
-    window.updateFullResult = updateFullResult;
+    window.updateOpenOnly = updateOpenOnly;
+    window.updateCloseAndCredit = updateCloseAndCredit;
     window.changeStatus = changeStatus;
     window.addMarket = addMarket;
     window.editMarket = editMarket;
