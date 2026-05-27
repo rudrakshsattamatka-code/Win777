@@ -35,12 +35,9 @@
         .status-closed { background: #f4433620; color: #f44336; border: 1px solid #f44336; }
         .status-close { background: #00b4ff20; color: #00b4ff; border: 1px solid #00b4ff; }
         .status-open { background: #4caf5020; color: #4caf50; border: 1px solid #4caf50; }
-        .result-box { background: #0a0a0f; border-radius: 12px; padding: 10px; margin: 10px 0; }
-        .result-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .open-label { color: #00b4ff; font-size: 12px; }
-        .close-label { color: #ff9800; font-size: 12px; }
-        .result-value { color: white; font-size: 18px; font-weight: bold; }
-        .jodi-value { color: #aaa; font-size: 11px; text-align: center; margin-top: 8px; }
+        .result-box { background: #0a0a0f; border-radius: 12px; padding: 15px; margin: 10px 0; text-align: center; }
+        .result-numbers { color: #00b4ff; font-size: 24px; font-weight: bold; letter-spacing: 2px; }
+        .result-label { color: #888; font-size: 11px; margin-top: 5px; }
         .play-btn { width: 100%; margin-top: 12px; padding: 10px; background: #00b4ff; border: none; border-radius: 12px; color: #000; font-weight: bold; cursor: pointer; }
         .play-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #1a1a2e; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #00b4ff; }
@@ -57,11 +54,17 @@
 </head>
 <body>
 <div class="app-container">
-    <div class="header"><div class="logo">WIN777</div><div class="balance">₹<span id="userBalance">0</span></div></div>
+    <div class="header">
+        <div class="logo">WIN777</div>
+        <div class="balance">₹<span id="userBalance">0</span></div>
+    </div>
     
     <div class="profile-row">
         <div class="profile-avatar">👤</div>
-        <div class="profile-info"><div class="profile-name" id="profileName">Loading...</div><div class="profile-phone" id="profilePhone">Loading...</div></div>
+        <div class="profile-info">
+            <div class="profile-name" id="profileName">Loading...</div>
+            <div class="profile-phone" id="profilePhone">Loading...</div>
+        </div>
         <div style="color:#00b4ff; font-size:12px; cursor:pointer;" onclick="viewProfile()">View Profile →</div>
     </div>
     
@@ -99,7 +102,15 @@
 </div>
 
 <script>
-    const firebaseConfig = { apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38", authDomain: "win777-ed482.firebaseapp.com", projectId: "win777-ed482", storageBucket: "win777-ed482.firebasestorage.app", messagingSenderId: "843686112399", appId: "1:843686112399:web:9c20a96831e6a94cd814fa" };
+    const firebaseConfig = {
+        apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
+        authDomain: "win777-ed482.firebaseapp.com",
+        projectId: "win777-ed482",
+        storageBucket: "win777-ed482.firebasestorage.app",
+        messagingSenderId: "843686112399",
+        appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
+    };
+    
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -110,18 +121,31 @@
     function listenToMarkets() {
         db.collection('markets').onSnapshot((snapshot) => {
             marketsData = [];
-            snapshot.forEach(doc => marketsData.push({ id: doc.id, ...doc.data() }));
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                marketsData.push({ 
+                    id: doc.id, 
+                    name: data.name,
+                    numbers: data.numbers,
+                    openBid: data.openBid,
+                    closeBid: data.closeBid,
+                    status: data.status,
+                    result: data.result || '***-**-***'
+                });
+            });
             renderMarkets();
+        }, (error) => {
+            console.error("Markets error:", error);
+            document.getElementById('marketsList').innerHTML = '<p style="color:red; text-align:center; padding:20px;">Error loading markets. Check connection.</p>';
         });
     }
     
     // Real-time listener for notice board
     function listenToNotice() {
         db.collection('settings').doc('notice').onSnapshot((doc) => {
-            if (doc.exists) {
-                document.getElementById('noticeText').innerHTML = doc.data().text || 'Welcome to WIN777! Play big · Win big · Unlimited';
-                document.getElementById('noticeModalText').innerHTML = doc.data().text || 'Welcome to WIN777! Play big · Win big · Unlimited';
-            }
+            const text = doc.exists ? doc.data().text : 'Welcome to WIN777! Play big · Win big · Unlimited';
+            document.getElementById('noticeText').innerHTML = text;
+            document.getElementById('noticeModalText').innerHTML = text;
         });
     }
     
@@ -147,16 +171,16 @@
             container.innerHTML = '<div style="text-align:center; color:#888; padding:40px;">No markets available. Admin will add soon.</div>';
             return;
         }
+        
         container.innerHTML = '';
+        
         marketsData.forEach(market => {
             const isPlayable = market.status === 'open' || market.status === 'close';
             
-            // Parse result to show Open and Close separately
+            // Parse result: format "openPana-jodi-closePana"
             let openPana = '***';
-            let openDigit = '*';
-            let closePana = '***';
-            let closeDigit = '*';
             let jodi = '**';
+            let closePana = '***';
             
             if (market.result && market.result !== '***-**-***') {
                 const parts = market.result.split('-');
@@ -164,8 +188,6 @@
                     openPana = parts[0];
                     jodi = parts[1];
                     closePana = parts[2];
-                    openDigit = openPana.slice(-1);
-                    closeDigit = closePana.slice(-1);
                 }
             }
             
@@ -177,21 +199,10 @@
                     </div>
                     <div class="market-time">Open Bids : ${market.openBid || '--:--'} &nbsp;|&nbsp; Close Bids : ${market.closeBid || '--:--'}</div>
                     
-                    <!-- LIVE RESULTS SECTION - Updates instantly from Firestore -->
+                    <!-- Result Display: Open Pana - JODI - Close Pana -->
                     <div class="result-box">
-                        <div class="result-row">
-                            <span class="open-label">🔓 OPEN RESULT</span>
-                            <span class="close-label">🔒 CLOSE RESULT</span>
-                        </div>
-                        <div class="result-row">
-                            <span class="result-value">${openPana}</span>
-                            <span class="result-value">${closePana}</span>
-                        </div>
-                        <div class="result-row">
-                            <span class="open-label" style="font-size:11px;">Open Digit: ${openDigit}</span>
-                            <span class="close-label" style="font-size:11px;">Close Digit: ${closeDigit}</span>
-                        </div>
-                        <div class="jodi-value">🎲 JODI: ${jodi}</div>
+                        <div class="result-numbers">${openPana} - ${jodi} - ${closePana}</div>
+                        <div class="result-label">Open Pana &nbsp;&nbsp;&nbsp; JODI &nbsp;&nbsp;&nbsp; Close Pana</div>
                     </div>
                     
                     <div><span class="market-status ${getStatusClass(market.status)}">${getStatusText(market.status)}</span></div>
@@ -203,12 +214,21 @@
     
     async function loadUserData() {
         const user = auth.currentUser;
-        if (!user) { window.location.href = 'index.html'; return; }
-        const doc = await db.collection('users').doc(user.uid).get();
-        if (doc.exists) {
-            document.getElementById('userBalance').innerText = doc.data().balance || 0;
-            document.getElementById('profileName').innerHTML = doc.data().name || 'User';
-            document.getElementById('profilePhone').innerHTML = doc.data().phone || '';
+        if (!user) { 
+            window.location.href = 'index.html'; 
+            return; 
+        }
+        
+        try {
+            const doc = await db.collection('users').doc(user.uid).get();
+            if (doc.exists) {
+                const data = doc.data();
+                document.getElementById('userBalance').innerText = data.balance || 0;
+                document.getElementById('profileName').innerHTML = data.name || 'User';
+                document.getElementById('profilePhone').innerHTML = data.phone || '';
+            }
+        } catch (error) {
+            console.error("Error loading user:", error);
         }
     }
     
@@ -217,18 +237,28 @@
         if (user) {
             db.collection('users').doc(user.uid).get().then(doc => {
                 if (doc.exists) {
-                    alert(`📱 Profile\nName: ${doc.data().name}\nPhone: ${doc.data().phone}\nBalance: ₹${doc.data().balance || 0}\nMPIN: ${doc.data().pin}`);
+                    const data = doc.data();
+                    alert(`📱 Profile\n\nName: ${data.name}\nPhone: ${data.phone}\nBalance: ₹${data.balance || 0}\nMPIN: ${data.pin}`);
                 }
-            });
+            }).catch(err => console.error(err));
         }
     }
     
     function showNoticeModal() {
         document.getElementById('noticeModal').style.display = 'flex';
     }
-    function closeNoticeModal() { document.getElementById('noticeModal').style.display = 'none'; }
-    function closeNotice() { document.getElementById('noticeBoard').style.display = 'none'; }
-    function showGames() { alert('Games coming soon!'); }
+    
+    function closeNoticeModal() { 
+        document.getElementById('noticeModal').style.display = 'none'; 
+    }
+    
+    function closeNotice() { 
+        document.getElementById('noticeBoard').style.display = 'none'; 
+    }
+    
+    function showGames() { 
+        alert('Games coming soon!'); 
+    }
     
     // Refresh balance every 5 seconds
     setInterval(() => {
@@ -237,13 +267,15 @@
                 if (doc.exists) {
                     document.getElementById('userBalance').innerText = doc.data().balance || 0;
                 }
-            });
+            }).catch(err => console.error(err));
         }
     }, 5000);
     
+    // Auth state listener
     auth.onAuthStateChanged(user => { 
-        if (!user) window.location.href = 'index.html'; 
-        else { 
+        if (!user) {
+            window.location.href = 'index.html'; 
+        } else { 
             loadUserData(); 
             listenToMarkets(); 
             listenToNotice(); 
