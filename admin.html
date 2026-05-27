@@ -11,14 +11,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #f5f5f5; }
         
-        /* Login Screen */
         .login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f5f5f5; display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .login-card { background: #fff; padding: 40px; border-radius: 20px; width: 320px; text-align: center; border: 1px solid #ddd; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
         .login-card h2 { color: #333; margin-bottom: 20px; }
         .login-card input { width: 100%; padding: 12px; margin: 10px 0; background: #fff; border: 1px solid #ddd; border-radius: 8px; color: #333; }
         .login-card button { width: 100%; padding: 12px; background: #333; border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; }
         
-        /* Admin Panel */
         .admin-panel { display: none; }
         .sidebar { width: 260px; background: #fff; min-height: 100vh; position: fixed; border-right: 1px solid #ddd; box-shadow: 2px 0 10px rgba(0,0,0,0.05); }
         .sidebar h2 { color: #333; padding: 25px; text-align: center; border-bottom: 1px solid #eee; }
@@ -198,9 +196,14 @@
     }
     
     const gameRates = {
-        'Single Digit': 10, 'Jodi': 100, 'Single Pana': 160,
-        'Double Pana': 320, 'Triple Pana': 1000,
-        'Half Sangam A': 1600, 'Half Sangam B': 1600, 'Full Sangam': 25000
+        'Single Digit': 10,
+        'Jodi': 100,
+        'Single Pana': 160,
+        'Double Pana': 320,
+        'Triple Pana': 1000,
+        'Half Sangam A': 1600,
+        'Half Sangam B': 1600,
+        'Full Sangam': 25000
     };
     
     async function login() {
@@ -466,7 +469,7 @@
         if (confirm('Delete this market permanently?')) await db.collection('markets').doc(id).delete();
     }
     
-    // ============ USER MANAGEMENT ============
+    // ============ USER MANAGEMENT WITH WORKING VIEW BIDS ============
     function loadUsers() {
         db.collection('users').onSnapshot(async (snapshot) => {
             let html = '';
@@ -483,11 +486,11 @@
                         </div>
                         <div class="user-actions">
                             <button onclick="addBalance('${doc.id}')">Add ₹</button>
-                            <button onclick="viewUserBids('${doc.id}', '${u.name}')" class="btn-info">View Bids</button>
+                            <button onclick="viewUserBids('${doc.id}', '${u.name}')" class="btn-info">📋 View Bids</button>
                             <button onclick="toggleBlockUser('${doc.id}', '${u.name}', ${isBlocked})" class="btn-warning">${isBlocked ? 'Unblock' : 'Block'}</button>
-                            <button onclick="clearUserBids('${doc.id}', '${u.name}')" class="btn-warning">Clear Bids</button>
-                            <button onclick="clearUserTransactions('${doc.id}', '${u.name}')" class="btn-warning">Clear History</button>
-                            <button onclick="deleteUser('${doc.id}', '${u.name}')" class="btn-danger">Delete User</button>
+                            <button onclick="clearUserBids('${doc.id}', '${u.name}')" class="btn-warning">🗑️ Clear Bids</button>
+                            <button onclick="clearUserTransactions('${doc.id}', '${u.name}')" class="btn-warning">🗑️ Clear History</button>
+                            <button onclick="deleteUser('${doc.id}', '${u.name}')" class="btn-danger">❌ Delete User</button>
                         </div>
                     </div>
                 `;
@@ -496,51 +499,90 @@
         });
     }
     
-    // View user bids history
+    // WORKING VIEW USER BIDS FUNCTION
     async function viewUserBids(uid, name) {
-        const bids = await db.collection('bids')
-            .where('userId', '==', uid)
-            .orderBy('createdAt', 'desc')
-            .get();
+        console.log("Viewing bids for user:", uid, name);
         
-        if (bids.empty) { 
-            alert(`📋 No bids found for ${name}`); 
-            return; 
-        }
-        
-        let message = `📋 BID HISTORY FOR ${name}\n━━━━━━━━━━━━━━━━━━━\n\n`;
-        let totalBids = 0;
-        let totalAmount = 0;
-        let wonAmount = 0;
-        
-        for (const doc of bids.docs) {
-            const b = doc.data();
-            totalBids++;
-            totalAmount += b.points || 0;
-            const multiplier = gameRates[b.gameType] || 10;
-            const possibleWin = (b.points || 0) * multiplier;
+        try {
+            // Get all bids for this user
+            const bidsSnapshot = await db.collection('bids')
+                .where('userId', '==', uid)
+                .get();
             
-            message += `📊 Market: ${b.market}\n`;
-            message += `🎲 Game: ${b.gameType}\n`;
-            message += `🔢 Number: ${b.value}\n`;
-            message += `💰 Amount: ₹${b.points}\n`;
-            message += `🎯 Rate: ${multiplier}x (Win: ₹${possibleWin})\n`;
-            message += `📌 Status: ${b.status.toUpperCase()}\n`;
-            message += `📅 Date: ${b.createdAt?.toDate().toLocaleString() || 'Pending'}\n`;
-            message += `━━━━━━━━━━━━━━━━━━━\n`;
+            console.log("Number of bids found:", bidsSnapshot.size);
             
-            if (b.status === 'won') {
-                wonAmount += possibleWin;
+            if (bidsSnapshot.empty) {
+                alert(`📋 No bids found for ${name}\n\nUser has not placed any bids yet.`);
+                return;
             }
+            
+            // Convert to array and sort by date
+            let bids = [];
+            bidsSnapshot.forEach(doc => {
+                bids.push({ id: doc.id, ...doc.data() });
+            });
+            
+            bids.sort((a, b) => {
+                const dateA = a.createdAt?.toDate() || new Date(0);
+                const dateB = b.createdAt?.toDate() || new Date(0);
+                return dateB - dateA;
+            });
+            
+            let message = `📋 BID HISTORY FOR ${name.toUpperCase()}\n`;
+            message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            let totalBids = 0;
+            let totalAmount = 0;
+            let wonAmount = 0;
+            let pendingBids = 0;
+            let lostBids = 0;
+            
+            for (const b of bids) {
+                totalBids++;
+                const bidAmount = b.points || 0;
+                totalAmount += bidAmount;
+                const multiplier = gameRates[b.gameType] || 10;
+                const possibleWin = bidAmount * multiplier;
+                
+                if (b.status === 'won') {
+                    wonAmount += possibleWin;
+                } else if (b.status === 'pending') {
+                    pendingBids++;
+                } else if (b.status === 'lost') {
+                    lostBids++;
+                }
+                
+                const bidDate = b.createdAt?.toDate() ? b.createdAt.toDate().toLocaleString() : 'Date not recorded';
+                
+                message += `🎲 BID #${totalBids}\n`;
+                message += `📊 Market: ${b.market || 'Unknown'}\n`;
+                message += `🎯 Game: ${b.gameType || 'Unknown'}\n`;
+                message += `🔢 Number: ${b.value || 'N/A'}\n`;
+                message += `💰 Amount: ₹${bidAmount}\n`;
+                message += `🎯 Rate: ${multiplier}x\n`;
+                message += `📌 Status: ${b.status.toUpperCase()}\n`;
+                if (b.status === 'won') {
+                    message += `🏆 Win Amount: ₹${possibleWin}\n`;
+                }
+                message += `📅 Date: ${bidDate}\n`;
+                message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            }
+            
+            message += `\n📊 SUMMARY STATISTICS\n`;
+            message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            message += `📌 Total Bids: ${totalBids}\n`;
+            message += `💰 Total Spent: ₹${totalAmount}\n`;
+            message += `🏆 Total Won: ₹${wonAmount}\n`;
+            message += `📈 Net Profit/Loss: ₹${wonAmount - totalAmount}\n`;
+            message += `⏳ Pending Bids: ${pendingBids}\n`;
+            message += `❌ Lost Bids: ${lostBids}\n`;
+            message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            
+            alert(message);
+            
+        } catch (error) {
+            console.error("Error in viewUserBids:", error);
+            alert(`❌ Error loading bids for ${name}\n\nError: ${error.message}\n\nPlease check:\n1. Firebase Security Rules\n2. Firestore Indexes\n3. Internet connection`);
         }
-        
-        message += `\n📊 SUMMARY:\n`;
-        message += `Total Bids: ${totalBids}\n`;
-        message += `Total Amount Spent: ₹${totalAmount}\n`;
-        message += `Total Won: ₹${wonAmount}\n`;
-        message += `Net Profit/Loss: ₹${wonAmount - totalAmount}\n`;
-        
-        alert(message);
     }
     
     async function toggleBlockUser(uid, name, isBlocked) {
@@ -552,7 +594,7 @@
     }
     
     async function clearUserBids(uid, name) {
-        if (confirm(`Clear ALL bid history for "${name}"?\n\nThis action cannot be undone!`)) {
+        if (confirm(`⚠️ Clear ALL bid history for "${name}"?\n\nThis action cannot be undone!\n\nAre you sure?`)) {
             const bids = await db.collection('bids').where('userId', '==', uid).get();
             const batch = db.batch();
             bids.forEach(doc => batch.delete(doc.ref));
@@ -562,7 +604,7 @@
     }
     
     async function clearUserTransactions(uid, name) {
-        if (confirm(`Clear ALL transaction history for "${name}"?\n\nThis action cannot be undone!`)) {
+        if (confirm(`⚠️ Clear ALL transaction history for "${name}"?\n\nThis action cannot be undone!\n\nAre you sure?`)) {
             const transactions = await db.collection('transactions').where('userId', '==', uid).get();
             const batch = db.batch();
             transactions.forEach(doc => batch.delete(doc.ref));
