@@ -44,14 +44,11 @@
         .result-card { background: #1a1a2e; border-radius: 16px; padding: 15px 25px; min-width: 160px; text-align: center; }
         .open-card { border: 2px solid #00b4ff; background: linear-gradient(135deg, #0a2a3e, #1a1a2e); }
         .close-card { border: 2px solid #ff9800; background: linear-gradient(135deg, #3a2a1e, #1a1a2e); }
-        .jodi-card { border: 2px solid #00ffaa; background: linear-gradient(135deg, #0a3a2e, #1a1a2e); }
         .result-label { font-size: 12px; letter-spacing: 2px; margin-bottom: 10px; }
         .open-card .result-label { color: #00b4ff; }
         .close-card .result-label { color: #ff9800; }
-        .jodi-card .result-label { color: #00ffaa; }
         .result-pana { font-size: 32px; font-weight: bold; color: white; }
         .result-digit { font-size: 14px; color: #ccc; margin-top: 5px; }
-        .result-jodi { font-size: 36px; font-weight: bold; color: #00ffaa; }
         
         .input-group { display: flex; gap: 15px; flex-wrap: wrap; margin: 10px 0; align-items: center; }
         .input-group label { color: white; min-width: 100px; }
@@ -231,24 +228,12 @@
                     statusText = 'CLOSED';
                 }
                 
-                let openPana = '***';
-                let openDigit = '*';
-                let jodi = '**';
-                let closePana = '***';
-                let closeDigit = '*';
-                let isCloseDeclared = false;
-                
-                if (m.result && m.result !== '***-**-***') {
-                    const parts = m.result.split('-');
-                    if (parts.length === 3) {
-                        openPana = parts[0];
-                        jodi = parts[1];
-                        closePana = parts[2];
-                        openDigit = m.openDigit || openPana.slice(-1);
-                        closeDigit = m.closeDigit || closePana.slice(-1);
-                        isCloseDeclared = (closePana !== '***');
-                    }
-                }
+                let openPana = m.openPana || '***';
+                let openDigit = m.openDigit || '*';
+                let closePana = m.closePana || '***';
+                let closeDigit = m.closeDigit || '*';
+                let jodi = m.jodi || '**';
+                let isCloseDeclared = m.closeDeclared || false;
                 
                 html += `
                     <div class="market-item">
@@ -269,33 +254,30 @@
                                     <div class="result-pana">${closePana}</div>
                                     <div class="result-digit">Close Digit: ${closeDigit}</div>
                                 </div>
-                                
-                                <div class="result-card jodi-card">
-                                    <div class="result-label">🎲 JODI</div>
-                                    <div class="result-jodi">${jodi}</div>
-                                </div>
                             </div>
                             
-                            ${!isCloseDeclared && openPana !== '***' ? '<div class="warning-box">⚠️ Open result declared. Waiting for Close result to credit winners.</div>' : ''}
+                            <div style="margin: 10px 0; padding: 10px; background: #0a0a0f; border-radius: 8px; text-align: center;">
+                                <span style="color: #00ffaa;">🎲 JODI: ${jodi}</span>
+                            </div>
                             
-                            <div class="section-title">📝 Update Result (Step by Step)</div>
+                            ${!isCloseDeclared && openPana !== '***' ? '<div class="warning-box">⚠️ Open result declared. Close result pending. Winners for OPEN games credited.</div>' : ''}
                             
+                            <div class="section-title">📝 STEP 1: Declare OPEN Result (Credits OPEN winners)</div>
                             <div class="input-group">
                                 <label style="color:#00b4ff;">🔓 Open Pana:</label>
                                 <input type="text" id="openPana_${doc.id}" placeholder="3 digits" value="${openPana !== '***' ? openPana : ''}" style="width:100px;">
                                 <label style="color:#00b4ff;">Open Digit:</label>
                                 <input type="text" id="openDigit_${doc.id}" placeholder="1 digit" value="${openDigit !== '*' ? openDigit : ''}" style="width:60px;" maxlength="1">
-                                <button onclick="updateOpenOnly('${doc.id}', '${m.name}')" style="background:#00b4ff;">✅ Update Open Only</button>
+                                <button onclick="declareOpenResult('${doc.id}', '${m.name}')" style="background:#00b4ff;">✅ Declare OPEN & Credit</button>
                             </div>
                             
+                            <div class="section-title">📝 STEP 2: Declare CLOSE Result (Credits JODI, CLOSE, HALF, FULL winners)</div>
                             <div class="input-group">
                                 <label style="color:#ff9800;">🔒 Close Pana:</label>
                                 <input type="text" id="closePana_${doc.id}" placeholder="3 digits" value="${closePana !== '***' ? closePana : ''}" style="width:100px;">
                                 <label style="color:#ff9800;">Close Digit:</label>
                                 <input type="text" id="closeDigit_${doc.id}" placeholder="1 digit" value="${closeDigit !== '*' ? closeDigit : ''}" style="width:60px;" maxlength="1">
-                                <label style="color:#00ffaa;">JODI:</label>
-                                <input type="text" id="jodi_${doc.id}" placeholder="2 digits" value="${jodi !== '**' ? jodi : ''}" style="width:70px;" maxlength="2">
-                                <button onclick="updateCloseAndCredit('${doc.id}', '${m.name}')" style="background:#ff9800;">✅ Update Close & Credit Winners</button>
+                                <button onclick="declareCloseResult('${doc.id}', '${m.name}')" style="background:#ff9800;">✅ Declare CLOSE & Credit</button>
                             </div>
                         </div>
                         
@@ -316,8 +298,8 @@
         });
     }
     
-    // STEP 1: Update ONLY Open Result (No winners credited yet)
-    async function updateOpenOnly(marketId, marketName) {
+    // STEP 1: Declare OPEN Result - Credits Open winners only
+    async function declareOpenResult(marketId, marketName) {
         const openPana = document.getElementById(`openPana_${marketId}`).value.trim();
         const openDigit = document.getElementById(`openDigit_${marketId}`).value.trim();
         
@@ -330,44 +312,33 @@
             return;
         }
         
-        const marketDoc = await db.collection('markets').doc(marketId).get();
-        const currentResult = marketDoc.data().result || '***-**-***';
-        const parts = currentResult.split('-');
-        const existingJodi = parts[1] || '**';
-        const existingClosePana = parts[2] || '***';
-        
-        // Keep existing close data if any, otherwise use ***
-        const fullResult = `${openPana}-${existingJodi}-${existingClosePana}`;
-        
-        if (confirm(`UPDATE OPEN RESULT ONLY for ${marketName}?\n\n🔓 Open Pana: ${openPana}\n🔢 Open Digit: ${openDigit}\n\n⚠️ Winners will NOT be credited yet.\n⚠️ Update Close result later to credit winners.\n\nContinue?`)) {
+        if (confirm(`DECLARE OPEN RESULT for ${marketName}?\n\n🔓 Open Pana: ${openPana}\n🔢 Open Digit: ${openDigit}\n\n⚠️ This will credit winners for:\n• Single Digit (Open)\n• Single/Double/Triple Pana (Open)\n\nClose result will be declared later.\n\nContinue?`)) {
+            
+            // Store open result, show JODI as openDigit + *
+            const jodiDisplay = openDigit + '*';
+            
             await db.collection('markets').doc(marketId).update({ 
-                result: fullResult,
-                openDigit: openDigit,
                 openPana: openPana,
+                openDigit: openDigit,
+                jodi: jodiDisplay,
+                closeDeclared: false,
                 lastUpdated: new Date()
             });
-            alert(`✅ Open result updated!\n\n${openPana} | Open Digit: ${openDigit}\n\n📌 Remember: Update Close result later to credit winners.`);
+            
+            // Credit OPEN winners only
+            await creditOpenWinners(marketId, marketName, openPana, openDigit);
+            
+            alert(`✅ OPEN RESULT DECLARED!\n\n${openPana} | Open Digit: ${openDigit}\n\n💰 OPEN winners have been credited!\n\n📌 Close result will be declared later.`);
         }
     }
     
-    // STEP 2: Update Close Result, Auto-calculate JODI, and Credit Winners
-    async function updateCloseAndCredit(marketId, marketName) {
-        const openPana = document.getElementById(`openPana_${marketId}`).value.trim();
-        const openDigit = document.getElementById(`openDigit_${marketId}`).value.trim();
+    // STEP 2: Declare CLOSE Result - Credits Close, JODI, Half, Full winners
+    async function declareCloseResult(marketId, marketName) {
         const closePana = document.getElementById(`closePana_${marketId}`).value.trim();
         const closeDigit = document.getElementById(`closeDigit_${marketId}`).value.trim();
-        let jodi = document.getElementById(`jodi_${marketId}`).value.trim();
         
-        if (!openPana || !openPana.match(/^\d{3}$/)) {
-            alert('Open Pana is required! Enter valid 3-digit Open Pana');
-            return;
-        }
-        if (!openDigit || !openDigit.match(/^\d$/)) {
-            alert('Open Digit is required! Enter valid digit (0-9)');
-            return;
-        }
         if (!closePana || !closePana.match(/^\d{3}$/)) {
-            alert('Enter valid 3-digit Close Pana (e.g., 460)');
+            alert('Enter valid 3-digit Close Pana (e.g., 570)');
             return;
         }
         if (!closeDigit || !closeDigit.match(/^\d$/)) {
@@ -375,31 +346,38 @@
             return;
         }
         
-        // Auto-calculate JODI if not manually entered
-        if (!jodi || jodi === '**') {
-            jodi = openDigit + closeDigit;
+        const marketDoc = await db.collection('markets').doc(marketId).get();
+        const market = marketDoc.data();
+        const openPana = market.openPana || '***';
+        const openDigit = market.openDigit || '*';
+        
+        if (openPana === '***') {
+            alert('Please declare OPEN result first before declaring CLOSE result!');
+            return;
         }
         
-        const fullResult = `${openPana}-${jodi}-${closePana}`;
+        // Calculate JODI = Open Digit + Close Digit
+        const jodi = openDigit + closeDigit;
         
-        if (confirm(`UPDATE CLOSE RESULT & CREDIT WINNERS for ${marketName}?\n\n🔓 Open: ${openPana} (Digit: ${openDigit})\n🔒 Close: ${closePana} (Digit: ${closeDigit})\n🎲 JODI: ${jodi}\n\n⚠️ This will credit ALL winners!\n\nContinue?`)) {
+        if (confirm(`DECLARE CLOSE RESULT for ${marketName}?\n\n🔓 Open: ${openPana} (Digit: ${openDigit})\n🔒 Close Pana: ${closePana}\n🔢 Close Digit: ${closeDigit}\n🎲 JODI: ${jodi}\n\n⚠️ This will credit winners for:\n• JODI\n• Close Digit\n• Close Pana\n• Half Sangam A (Open Pana + Close Digit)\n• Half Sangam B (Open Digit + Close Pana)\n• Full Sangam (Open Pana + Close Pana)\n\nContinue?`)) {
+            
             await db.collection('markets').doc(marketId).update({ 
-                result: fullResult,
-                openDigit: openDigit,
+                closePana: closePana,
                 closeDigit: closeDigit,
                 jodi: jodi,
-                closePana: closePana,
+                closeDeclared: true,
                 lastUpdated: new Date()
             });
             
-            // Credit winners after full result is set
-            await creditAllWinners(marketId, marketName, openPana, openDigit, closePana, closeDigit, jodi);
+            // Credit CLOSE winners
+            await creditCloseWinners(marketId, marketName, openPana, openDigit, closePana, closeDigit, jodi);
             
-            alert(`✅ CLOSE RESULT DECLARED & WINNERS CREDITED!\n\n${openPana} - ${jodi} - ${closePana}\n\n💰 Winners have been credited automatically.`);
+            alert(`✅ CLOSE RESULT DECLARED & WINNERS CREDITED!\n\n${openPana} - ${jodi} - ${closePana}\n\n💰 All winners have been credited!`);
         }
     }
     
-    async function creditAllWinners(marketId, marketName, openPana, openDigit, closePana, closeDigit, jodi) {
+    // Credit winners for OPEN results only
+    async function creditOpenWinners(marketId, marketName, openPana, openDigit) {
         const bids = await db.collection('bids')
             .where('marketId', '==', marketId)
             .where('status', '==', 'pending')
@@ -407,7 +385,59 @@
         
         let winnersCount = 0;
         let totalWon = 0;
-        let winnerDetails = [];
+        
+        for (const bidDoc of bids.docs) {
+            const bid = bidDoc.data();
+            let isWinning = false;
+            let winAmount = 0;
+            
+            // Only credit OPEN bets
+            switch(bid.gameType) {
+                case 'Single Digit':
+                    if (bid.bidType === 'Open' && bid.value === openDigit) isWinning = true;
+                    break;
+                case 'Single Pana':
+                case 'Double Pana':
+                case 'Triple Pana':
+                    if (bid.bidType === 'Open' && bid.value === openPana) isWinning = true;
+                    break;
+            }
+            
+            if (isWinning) {
+                const multiplier = gameRates[bid.gameType] || 10;
+                winAmount = bid.points * multiplier;
+                totalWon += winAmount;
+                winnersCount++;
+                
+                await bidDoc.ref.update({ status: 'won' });
+                
+                const userRef = db.collection('users').doc(bid.userId);
+                const userDoc = await userRef.get();
+                await userRef.update({ balance: (userDoc.data().balance || 0) + winAmount });
+                
+                await db.collection('transactions').add({
+                    userId: bid.userId,
+                    type: 'credit',
+                    amount: winAmount,
+                    status: 'Completed',
+                    description: `🎉 Won on ${marketName} (OPEN) - ${bid.gameType}: ${bid.value}`,
+                    date: new Date()
+                });
+            }
+        }
+        
+        console.log(`✅ OPEN RESULT - ${winnersCount} winners! Total: ₹${totalWon}`);
+    }
+    
+    // Credit winners for CLOSE results (including JODI, Half, Full)
+    async function creditCloseWinners(marketId, marketName, openPana, openDigit, closePana, closeDigit, jodi) {
+        const bids = await db.collection('bids')
+            .where('marketId', '==', marketId)
+            .where('status', '==', 'pending')
+            .get();
+        
+        let winnersCount = 0;
+        let totalWon = 0;
         
         for (const bidDoc of bids.docs) {
             const bid = bidDoc.data();
@@ -416,7 +446,7 @@
             
             switch(bid.gameType) {
                 case 'Single Digit':
-                    if (bid.value === openDigit || bid.value === closeDigit) isWinning = true;
+                    if (bid.bidType === 'Close' && bid.value === closeDigit) isWinning = true;
                     break;
                 case 'Jodi':
                     if (bid.value === jodi) isWinning = true;
@@ -424,7 +454,7 @@
                 case 'Single Pana':
                 case 'Double Pana':
                 case 'Triple Pana':
-                    if (bid.value === openPana || bid.value === closePana) isWinning = true;
+                    if (bid.bidType === 'Close' && bid.value === closePana) isWinning = true;
                     break;
                 case 'Half Sangam A':
                     if (bid.value === `${openPana}-${closeDigit}`) isWinning = true;
@@ -442,7 +472,6 @@
                 winAmount = bid.points * multiplier;
                 totalWon += winAmount;
                 winnersCount++;
-                winnerDetails.push(`${bid.gameType}: ${bid.value} (₹${winAmount})`);
                 
                 await bidDoc.ref.update({ status: 'won' });
                 
@@ -459,14 +488,14 @@
                     date: new Date()
                 });
             } else {
-                await bidDoc.ref.update({ status: 'lost' });
+                // Only mark as lost after close result is declared
+                if (bid.status === 'pending') {
+                    await bidDoc.ref.update({ status: 'lost' });
+                }
             }
         }
         
-        console.log(`✅ ${winnersCount} winners! Total: ₹${totalWon}`);
-        if (winnersCount > 0) {
-            console.log(`Winners: ${winnerDetails.join(', ')}`);
-        }
+        console.log(`✅ CLOSE RESULT - ${winnersCount} winners! Total: ₹${totalWon}`);
     }
     
     async function changeStatus(id, current) {
@@ -487,9 +516,12 @@
         }
         await db.collection('markets').add({
             name, numbers, openBid, closeBid, status,
-            result: '***-**-***',
+            openPana: '***',
             openDigit: '*',
-            closeDigit: '*'
+            closePana: '***',
+            closeDigit: '*',
+            jodi: '**',
+            closeDeclared: false
         });
         document.getElementById('marketName').value = '';
         document.getElementById('marketNumbers').value = '';
@@ -665,8 +697,8 @@
     }
     
     window.login = login;
-    window.updateOpenOnly = updateOpenOnly;
-    window.updateCloseAndCredit = updateCloseAndCredit;
+    window.declareOpenResult = declareOpenResult;
+    window.declareCloseResult = declareCloseResult;
     window.changeStatus = changeStatus;
     window.addMarket = addMarket;
     window.editMarket = editMarket;
