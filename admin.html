@@ -67,6 +67,13 @@
         .user-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
         .user-blocked { opacity: 0.7; background: #f8f9fa; }
         
+        .balance-buttons { display: flex; gap: 8px; align-items: center; }
+        .btn-add { background: #28a745; }
+        .btn-remove { background: #dc3545; }
+        
+        .bank-details { background: #f8f9fa; padding: 10px; border-radius: 8px; margin-top: 5px; font-size: 12px; }
+        .bank-details span { color: #333; font-weight: bold; }
+        
         @media (max-width: 768px) { 
             .sidebar { width: 70px; } 
             .sidebar h2 { font-size: 12px; padding: 15px 5px; } 
@@ -469,7 +476,7 @@
         if (confirm('Delete this market permanently?')) await db.collection('markets').doc(id).delete();
     }
     
-    // ============ USER MANAGEMENT WITH WORKING VIEW BIDS ============
+    // ============ USER MANAGEMENT WITH ADD/REMOVE BALANCE ============
     function loadUsers() {
         db.collection('users').onSnapshot(async (snapshot) => {
             let html = '';
@@ -485,7 +492,10 @@
                             ${isBlocked ? '<span style="color:#dc3545;">🚫 BLOCKED</span>' : ''}
                         </div>
                         <div class="user-actions">
-                            <button onclick="addBalance('${doc.id}')">Add ₹</button>
+                            <div class="balance-buttons">
+                                <button onclick="updateBalance('${doc.id}', 'add')" class="btn-add">➕ Add</button>
+                                <button onclick="updateBalance('${doc.id}', 'remove')" class="btn-remove">➖ Remove</button>
+                            </div>
                             <button onclick="viewUserBids('${doc.id}', '${u.name}')" class="btn-info">📋 View Bids</button>
                             <button onclick="toggleBlockUser('${doc.id}', '${u.name}', ${isBlocked})" class="btn-warning">${isBlocked ? 'Unblock' : 'Block'}</button>
                             <button onclick="clearUserBids('${doc.id}', '${u.name}')" class="btn-warning">🗑️ Clear Bids</button>
@@ -499,65 +509,81 @@
         });
     }
     
-    // WORKING VIEW USER BIDS FUNCTION
-    async function viewUserBids(uid, name) {
-        console.log("Viewing bids for user:", uid, name);
+    // Add or Remove Balance from User
+    async function updateBalance(uid, action) {
+        const amount = prompt(`Enter amount to ${action === 'add' ? 'ADD' : 'REMOVE'}:`);
+        if (!amount || isNaN(amount) || parseInt(amount) <= 0) {
+            alert('Please enter a valid amount');
+            return;
+        }
         
-        try {
-            // Get all bids for this user
-            const bidsSnapshot = await db.collection('bids')
-                .where('userId', '==', uid)
-                .get();
-            
-            console.log("Number of bids found:", bidsSnapshot.size);
-            
-            if (bidsSnapshot.empty) {
-                alert(`📋 No bids found for ${name}\n\nUser has not placed any bids yet.`);
+        const amountNum = parseInt(amount);
+        const userDoc = await db.collection('users').doc(uid).get();
+        const currentBalance = userDoc.data().balance || 0;
+        
+        let newBalance;
+        let transactionType;
+        let description;
+        
+        if (action === 'add') {
+            newBalance = currentBalance + amountNum;
+            transactionType = 'credit';
+            description = `Admin added ₹${amountNum}`;
+        } else {
+            if (amountNum > currentBalance) {
+                alert(`Cannot remove ₹${amountNum}. User only has ₹${currentBalance}`);
                 return;
             }
-            
-            // Convert to array and sort by date
-            let bids = [];
-            bidsSnapshot.forEach(doc => {
-                bids.push({ id: doc.id, ...doc.data() });
+            newBalance = currentBalance - amountNum;
+            transactionType = 'debit';
+            description = `Admin removed ₹${amountNum}`;
+        }
+        
+        if (confirm(`${action === 'add' ? 'Add' : 'Remove'} ₹${amountNum}?\n\nCurrent Balance: ₹${currentBalance}\nNew Balance: ₹${newBalance}`)) {
+            await db.collection('users').doc(uid).update({ balance: newBalance });
+            await db.collection('transactions').add({
+                userId: uid,
+                type: transactionType,
+                amount: amountNum,
+                status: 'Completed',
+                description: description,
+                date: new Date()
             });
+            alert(`✅ ₹${amountNum} ${action === 'add' ? 'added to' : 'removed from'} user balance!\nNew Balance: ₹${newBalance}`);
+        }
+    }
+    
+    async function viewUserBids(uid, name) {
+        try {
+            const bids = await db.collection('bids').where('userId', '==', uid).get();
+            if (bids.empty) { 
+                alert(`📋 No bids found for ${name}`); 
+                return; 
+            }
             
-            bids.sort((a, b) => {
-                const dateA = a.createdAt?.toDate() || new Date(0);
-                const dateB = b.createdAt?.toDate() || new Date(0);
-                return dateB - dateA;
-            });
-            
-            let message = `📋 BID HISTORY FOR ${name.toUpperCase()}\n`;
-            message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+            let message = `📋 BID HISTORY FOR ${name.toUpperCase()}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
             let totalBids = 0;
             let totalAmount = 0;
             let wonAmount = 0;
-            let pendingBids = 0;
-            let lostBids = 0;
             
-            for (const b of bids) {
+            for (const doc of bids.docs) {
+                const b = doc.data();
                 totalBids++;
-                const bidAmount = b.points || 0;
-                totalAmount += bidAmount;
+                totalAmount += b.points || 0;
                 const multiplier = gameRates[b.gameType] || 10;
-                const possibleWin = bidAmount * multiplier;
+                const possibleWin = (b.points || 0) * multiplier;
                 
                 if (b.status === 'won') {
                     wonAmount += possibleWin;
-                } else if (b.status === 'pending') {
-                    pendingBids++;
-                } else if (b.status === 'lost') {
-                    lostBids++;
                 }
                 
-                const bidDate = b.createdAt?.toDate() ? b.createdAt.toDate().toLocaleString() : 'Date not recorded';
+                const bidDate = b.createdAt?.toDate() ? b.createdAt.toDate().toLocaleString() : 'Pending';
                 
                 message += `🎲 BID #${totalBids}\n`;
                 message += `📊 Market: ${b.market || 'Unknown'}\n`;
                 message += `🎯 Game: ${b.gameType || 'Unknown'}\n`;
                 message += `🔢 Number: ${b.value || 'N/A'}\n`;
-                message += `💰 Amount: ₹${bidAmount}\n`;
+                message += `💰 Amount: ₹${b.points}\n`;
                 message += `🎯 Rate: ${multiplier}x\n`;
                 message += `📌 Status: ${b.status.toUpperCase()}\n`;
                 if (b.status === 'won') {
@@ -567,21 +593,15 @@
                 message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
             }
             
-            message += `\n📊 SUMMARY STATISTICS\n`;
-            message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-            message += `📌 Total Bids: ${totalBids}\n`;
-            message += `💰 Total Spent: ₹${totalAmount}\n`;
-            message += `🏆 Total Won: ₹${wonAmount}\n`;
-            message += `📈 Net Profit/Loss: ₹${wonAmount - totalAmount}\n`;
-            message += `⏳ Pending Bids: ${pendingBids}\n`;
-            message += `❌ Lost Bids: ${lostBids}\n`;
-            message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            message += `\n📊 SUMMARY\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+            message += `Total Bids: ${totalBids}\n`;
+            message += `Total Spent: ₹${totalAmount}\n`;
+            message += `Total Won: ₹${wonAmount}\n`;
+            message += `Net Profit: ₹${wonAmount - totalAmount}\n`;
             
             alert(message);
-            
         } catch (error) {
-            console.error("Error in viewUserBids:", error);
-            alert(`❌ Error loading bids for ${name}\n\nError: ${error.message}\n\nPlease check:\n1. Firebase Security Rules\n2. Firestore Indexes\n3. Internet connection`);
+            alert(`Error loading bids: ${error.message}`);
         }
     }
     
@@ -594,7 +614,7 @@
     }
     
     async function clearUserBids(uid, name) {
-        if (confirm(`⚠️ Clear ALL bid history for "${name}"?\n\nThis action cannot be undone!\n\nAre you sure?`)) {
+        if (confirm(`⚠️ Clear ALL bid history for "${name}"?\n\nThis action cannot be undone!`)) {
             const bids = await db.collection('bids').where('userId', '==', uid).get();
             const batch = db.batch();
             bids.forEach(doc => batch.delete(doc.ref));
@@ -604,7 +624,7 @@
     }
     
     async function clearUserTransactions(uid, name) {
-        if (confirm(`⚠️ Clear ALL transaction history for "${name}"?\n\nThis action cannot be undone!\n\nAre you sure?`)) {
+        if (confirm(`⚠️ Clear ALL transaction history for "${name}"?\n\nThis action cannot be undone!`)) {
             const transactions = await db.collection('transactions').where('userId', '==', uid).get();
             const batch = db.batch();
             transactions.forEach(doc => batch.delete(doc.ref));
@@ -613,18 +633,8 @@
         }
     }
     
-    async function addBalance(uid) {
-        const amount = prompt('Enter amount to add:');
-        if (amount && !isNaN(amount) && parseInt(amount) > 0) {
-            const userDoc = await db.collection('users').doc(uid).get();
-            const newBalance = (userDoc.data().balance || 0) + parseInt(amount);
-            await db.collection('users').doc(uid).update({ balance: newBalance });
-            alert(`✅ ₹${amount} added! New balance: ₹${newBalance}`);
-        }
-    }
-    
     async function deleteUser(uid, name) {
-        if (confirm(`⚠️ PERMANENT DELETE\n\nDelete user "${name}" completely?\n\nThis will remove all user data including:\n• Profile\n• Bid history\n• Transaction history\n\nThis action CANNOT be undone!\n\nType "${name}" to confirm:`)) {
+        if (confirm(`⚠️ PERMANENT DELETE\n\nDelete user "${name}" completely?\n\nThis will remove all user data.\n\nType "${name}" to confirm:`)) {
             const confirmText = prompt(`Type "${name}" to confirm deletion:`);
             if (confirmText === name) {
                 const bids = await db.collection('bids').where('userId', '==', uid).get();
@@ -636,7 +646,7 @@
                 await db.collection('users').doc(uid).delete();
                 alert(`✅ User "${name}" deleted permanently!`);
             } else {
-                alert(`❌ Confirmation failed. User not deleted.`);
+                alert(`❌ Confirmation failed.`);
             }
         }
     }
@@ -648,7 +658,7 @@
             for (const doc of snapshot.docs) {
                 const d = doc.data();
                 const user = await db.collection('users').doc(d.userId).get();
-                html += `<div class="request-item" style="display:flex; justify-content:space-between;"><div><b>👤 ${user.data()?.name || 'Unknown'}</b><br>💰 ₹${d.amount}<br>📅 ${d.date?.toDate().toLocaleString() || 'Pending'}</div><div><button onclick="approveDeposit('${doc.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button><button onclick="rejectDeposit('${doc.id}')" class="btn-danger">Reject</button></div></div>`;
+                html += `<div class="request-item" style="display:flex; justify-content:space-between; flex-wrap:wrap;"><div><b>👤 ${user.data()?.name || 'Unknown'}</b><br>💰 ₹${d.amount}<br>📅 ${d.date?.toDate().toLocaleString() || 'Pending'}<br>📱 UPI: ${d.upiId || 'N/A'}</div><div><button onclick="approveDeposit('${doc.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button><button onclick="rejectDeposit('${doc.id}')" class="btn-danger">Reject</button></div></div>`;
             }
             document.getElementById('depositsList').innerHTML = html || '<p style="color: #888;">No pending deposits</p>';
         });
@@ -667,14 +677,35 @@
         if (confirm('Reject this deposit?')) await db.collection('transactions').doc(id).update({ status: 'Rejected' });
     }
     
-    // ============ WITHDRAWALS MANAGEMENT ============
+    // ============ WITHDRAWALS MANAGEMENT WITH FULL BANK DETAILS ============
     function loadWithdrawals() {
         db.collection('withdrawRequests').where('status', '==', 'Pending').onSnapshot(async (snapshot) => {
             let html = '';
             for (const doc of snapshot.docs) {
                 const d = doc.data();
                 const user = await db.collection('users').doc(d.userId).get();
-                html += `<div class="request-item" style="display:flex; justify-content:space-between;"><div><b>👤 ${user.data()?.name || 'Unknown'}</b><br>💰 ₹${d.amount}<br>🏦 ${d.bankDetails?.bankName || 'N/A'}</div><div><button onclick="approveWithdraw('${doc.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button><button onclick="rejectWithdraw('${doc.id}')" class="btn-danger">Reject</button></div></div>`;
+                const bank = d.bankDetails || {};
+                html += `
+                    <div class="request-item">
+                        <div>
+                            <b>👤 ${user.data()?.name || 'Unknown'}</b><br>
+                            <b>📞 Phone:</b> ${user.data()?.phone || 'N/A'}<br>
+                            <b>💰 Amount:</b> ₹${d.amount}<br>
+                            <b>📅 Date:</b> ${d.date?.toDate().toLocaleString() || 'Pending'}<br>
+                            <div class="bank-details">
+                                <b>🏦 BANK DETAILS:</b><br>
+                                <span>Account Holder:</span> ${bank.accountHolder || 'N/A'}<br>
+                                <span>Bank Name:</span> ${bank.bankName || 'N/A'}<br>
+                                <span>Account Number:</span> ${bank.accountNumber || 'N/A'}<br>
+                                <span>IFSC Code:</span> ${bank.ifscCode || 'N/A'}<br>
+                            </div>
+                        </div>
+                        <div>
+                            <button onclick="approveWithdraw('${doc.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button>
+                            <button onclick="rejectWithdraw('${doc.id}')" class="btn-danger">Reject</button>
+                        </div>
+                    </div>
+                `;
             }
             document.getElementById('withdrawalsList').innerHTML = html || '<p style="color: #888;">No pending withdrawals</p>';
         });
@@ -746,7 +777,7 @@
     window.addMarket = addMarket;
     window.editMarket = editMarket;
     window.deleteMarket = deleteMarket;
-    window.addBalance = addBalance;
+    window.updateBalance = updateBalance;
     window.viewUserBids = viewUserBids;
     window.toggleBlockUser = toggleBlockUser;
     window.clearUserBids = clearUserBids;
