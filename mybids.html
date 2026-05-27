@@ -38,13 +38,16 @@
         .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-radius: 10px; transition: all 0.3s; color: #666; }
         .tab.active { background: #00b4ff; color: #fff; }
         
+        .clear-btn { background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 8px; margin: 10px; cursor: pointer; }
+        .clear-btn:hover { background: #c82333; }
+        
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #fff; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #d4eaf5; }
         .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 11px; transition: all 0.3s; }
         .nav-item.active { color: #00b4ff; }
         .nav-item span { font-size: 22px; display: block; }
         
         .hidden { display: none; }
-        .debug-info { background: #f0f0f0; padding: 10px; margin: 10px; border-radius: 8px; font-size: 12px; color: #666; }
+        .btn-warning { background: #ffc107; color: #333; margin: 5px; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -66,10 +69,16 @@
             <div class="summary-title">Total Winnings</div>
             <div class="summary-value">₹<span id="totalWon">0</span></div>
         </div>
+        <div style="text-align: center;">
+            <button class="clear-btn" onclick="clearAllBids()">🗑️ Clear All Bids</button>
+        </div>
         <div id="bidsList"></div>
     </div>
     
     <div id="transactionsTab" class="hidden">
+        <div style="text-align: center;">
+            <button class="clear-btn" onclick="clearAllTransactions()">🗑️ Clear All Transactions</button>
+        </div>
         <div id="transactionsList"></div>
     </div>
     
@@ -118,8 +127,6 @@
         'Half Sangam A': 1600, 'Half Sangam B': 1600, 'Full Sangam': 25000
     };
     
-    let currentUserId = null;
-    
     function showTab(tab) {
         document.getElementById('bidsTab').classList.add('hidden');
         document.getElementById('transactionsTab').classList.add('hidden');
@@ -133,6 +140,34 @@
         if (tab === 'bids') loadBids();
     }
     
+    async function clearAllBids() {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        if (confirm("⚠️ WARNING: This will delete ALL your bid history permanently!\n\nThis action cannot be undone!\n\nAre you sure?")) {
+            const bids = await db.collection('bids').where('userId', '==', user.uid).get();
+            const batch = db.batch();
+            bids.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+            alert(`✅ Deleted ${bids.size} bids!`);
+            loadBids();
+        }
+    }
+    
+    async function clearAllTransactions() {
+        const user = auth.currentUser;
+        if (!user) return;
+        
+        if (confirm("⚠️ WARNING: This will delete ALL your transaction history permanently!\n\nThis action cannot be undone!\n\nAre you sure?")) {
+            const transactions = await db.collection('transactions').where('userId', '==', user.uid).get();
+            const batch = db.batch();
+            transactions.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+            alert(`✅ Deleted ${transactions.size} transactions!`);
+            loadTransactions();
+        }
+    }
+    
     async function loadBids() {
         const user = auth.currentUser;
         if (!user) { 
@@ -140,42 +175,27 @@
             return; 
         }
         
-        currentUserId = user.uid;
         const container = document.getElementById('bidsList');
         const summaryDiv = document.getElementById('summary');
         
         container.innerHTML = '<div style="text-align:center; color:#888; padding:40px;">🔄 Loading bids...</div>';
         
         try {
-            console.log("Fetching bids for user:", currentUserId);
-            
-            // Try to get bids
             const bidsSnapshot = await db.collection('bids')
-                .where('userId', '==', currentUserId)
+                .where('userId', '==', user.uid)
                 .get();
             
-            console.log("Bids found:", bidsSnapshot.size);
-            
             if (bidsSnapshot.empty) {
-                container.innerHTML = `
-                    <div class="no-data">
-                        📭 No bids placed yet<br>
-                        <small>Go to dashboard and place your first bid!</small>
-                        <br><br>
-                        <small style="color:#999;">User ID: ${currentUserId.substring(0, 10)}...</small>
-                    </div>
-                `;
+                container.innerHTML = '<div class="no-data">📭 No bids placed yet</div>';
                 summaryDiv.classList.add('hidden');
                 return;
             }
             
-            // Convert to array and sort by date (Firestore doesn't support orderBy without index)
             let bids = [];
             bidsSnapshot.forEach(doc => {
                 bids.push({ id: doc.id, ...doc.data() });
             });
             
-            // Sort manually by createdAt
             bids.sort((a, b) => {
                 const dateA = a.createdAt?.toDate() || new Date(0);
                 const dateB = b.createdAt?.toDate() || new Date(0);
@@ -188,9 +208,9 @@
             for (const b of bids) {
                 const bidAmount = b.points || 0;
                 const multiplier = gameRates[b.gameType] || 10;
-                const possibleWin = bidAmount * multiplier;
                 
                 let statusClass = '', statusText = '', winAmount = 0, winAmountHtml = '';
+                let displayBidType = '';
                 
                 if (b.status === 'won') {
                     statusClass = 'status-won';
@@ -198,6 +218,10 @@
                     winAmount = bidAmount * multiplier;
                     totalWonAmount += winAmount;
                     winAmountHtml = `<div class="bid-row"><span class="bid-label">🏆 Winning Amount</span><span class="win-amount">+ ₹${winAmount}</span></div>`;
+                    // Show correct bid type based on win
+                    if (b.bidType) {
+                        displayBidType = `<div class="bid-row"><span class="bid-label">🎲 Won on</span><span class="bid-value">${b.bidType} Bid</span></div>`;
+                    }
                 } else if (b.status === 'lost') {
                     statusClass = 'status-lost';
                     statusText = '❌ LOST';
@@ -205,7 +229,7 @@
                 } else {
                     statusClass = 'status-pending';
                     statusText = '⏳ PENDING';
-                    winAmountHtml = `<div class="bid-row"><span class="bid-label">🎯 Possible Win</span><span class="bid-value">₹${possibleWin}</span></div>`;
+                    winAmountHtml = `<div class="bid-row"><span class="bid-label">🎯 Possible Win</span><span class="bid-value">₹${bidAmount * multiplier}</span></div>`;
                 }
                 
                 let bidDate = 'Pending';
@@ -223,8 +247,8 @@
                             <div class="bid-row"><span class="bid-label">🎲 Game Type</span><span class="bid-value">${b.gameType || '-'}</span></div>
                             <div class="bid-row"><span class="bid-label">🔢 Your Number</span><span class="bid-value" style="color:#00b4ff; font-size:16px;">${b.value || '-'}</span></div>
                             <div class="bid-row"><span class="bid-label">💰 Bid Amount</span><span class="bid-value">₹${bidAmount}</span></div>
+                            ${displayBidType}
                             ${winAmountHtml}
-                            ${b.bidType ? `<div class="bid-row"><span class="bid-label">🎲 Bid Type</span><span class="bid-value">${b.bidType}</span></div>` : ''}
                             <div class="bid-row"><span class="bid-label">📊 Rate</span><span class="bid-value">${multiplier}x</span></div>
                         </div>
                         <div class="bid-footer">📅 ${bidDate}</div>
@@ -243,12 +267,7 @@
             
         } catch (error) {
             console.error("Error loading bids:", error);
-            container.innerHTML = `
-                <div class="no-data" style="color:#dc3545;">
-                    ❌ Error loading bids: ${error.message}<br><br>
-                    <small>Please check Firebase Security Rules</small>
-                </div>
-            `;
+            container.innerHTML = `<div class="no-data" style="color:#dc3545;">❌ Error loading bids: ${error.message}</div>`;
         }
     }
     
@@ -269,7 +288,6 @@
                 return;
             }
             
-            // Convert to array and sort
             let transactions = [];
             transactionsSnapshot.forEach(doc => {
                 transactions.push({ id: doc.id, ...doc.data() });
@@ -283,7 +301,9 @@
             
             let html = '';
             for (const t of transactions) {
-                const date = t.date?.toDate().toLocaleString() || 'Pending';
+                const date = t.date?.toDate() || new Date();
+                const dateStr = date.toLocaleDateString();
+                const timeStr = date.toLocaleTimeString();
                 const isCredit = t.type === 'credit';
                 let statusColor = '#ff9800', statusText = '⏳ Pending';
                 
@@ -303,9 +323,11 @@
                         </div>
                         <div class="bid-body">
                             <div class="bid-row"><span class="bid-label">Amount</span><span class="bid-value" style="color:${isCredit ? '#28a745' : '#ff9800'}; font-size:18px;">${isCredit ? '+' : '-'} ₹${t.amount}</span></div>
-                            <div class="bid-row"><span class="bid-label">Date</span><span class="bid-value">${date}</span></div>
+                            <div class="bid-row"><span class="bid-label">Date</span><span class="bid-value">${dateStr}</span></div>
+                            <div class="bid-row"><span class="bid-label">Time</span><span class="bid-value">${timeStr}</span></div>
                             ${t.description ? `<div class="bid-row"><span class="bid-label">Description</span><span class="bid-value">${t.description}</span></div>` : ''}
                         </div>
+                        <div class="bid-footer">📅 Transaction ID: ${t.id.substring(0, 8)}...</div>
                     </div>
                 `;
             }
@@ -317,17 +339,17 @@
         }
     }
     
-    // Listen to auth state
     auth.onAuthStateChanged(user => {
         if (!user) {
             window.location.href = 'index.html';
         } else {
-            console.log("User logged in:", user.uid);
             loadBids();
         }
     });
     
     window.showTab = showTab;
+    window.clearAllBids = clearAllBids;
+    window.clearAllTransactions = clearAllTransactions;
 </script>
 </body>
 </html>
