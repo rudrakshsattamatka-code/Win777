@@ -9,65 +9,61 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #0a0a0f; }
+        body { background: #000; }
         
-        /* Login Screen */
-        .login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a0f; display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .login-card { background: #1a1a2e; padding: 40px; border-radius: 20px; width: 320px; text-align: center; border: 1px solid #00b4ff; }
-        .login-card h2 { color: #00b4ff; margin-bottom: 20px; }
-        .login-card input { width: 100%; padding: 12px; margin: 10px 0; background: #0a0a0f; border: 1px solid #00b4ff; border-radius: 8px; color: white; }
-        .login-card button { width: 100%; padding: 12px; background: #00b4ff; border: none; border-radius: 8px; color: black; font-weight: bold; cursor: pointer; }
+        .login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .login-card { background: #111; padding: 40px; border-radius: 20px; width: 320px; text-align: center; border: 1px solid #333; }
+        .login-card h2 { color: #fff; margin-bottom: 20px; }
+        .login-card input { width: 100%; padding: 12px; margin: 10px 0; background: #000; border: 1px solid #333; border-radius: 8px; color: #fff; }
+        .login-card button { width: 100%; padding: 12px; background: #333; border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; }
         
-        /* Admin Panel */
         .admin-panel { display: none; }
-        .sidebar { width: 260px; background: #1a1a2e; min-height: 100vh; position: fixed; border-right: 1px solid #00b4ff; }
-        .sidebar h2 { color: #00b4ff; padding: 25px; text-align: center; border-bottom: 1px solid #00b4ff; }
-        .sidebar-item { padding: 15px 25px; color: #ffffff; cursor: pointer; border-bottom: 1px solid #222; }
-        .sidebar-item:hover { background: #00b4ff; color: #000000; }
+        .sidebar { width: 260px; background: #111; min-height: 100vh; position: fixed; border-right: 1px solid #333; }
+        .sidebar h2 { color: #fff; padding: 25px; text-align: center; border-bottom: 1px solid #333; }
+        .sidebar-item { padding: 15px 25px; color: #ccc; cursor: pointer; border-bottom: 1px solid #222; }
+        .sidebar-item:hover { background: #333; color: #fff; }
         .main-content { margin-left: 260px; padding: 25px; }
-        .card { background: #1a1a2e; border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid #00b4ff; }
-        .card h3 { margin-bottom: 15px; color: #00b4ff; border-left: 3px solid #00b4ff; padding-left: 12px; }
-        input, select { padding: 10px; margin: 5px; background: #0a0a0f; border: 1px solid #00b4ff; border-radius: 8px; color: white; width: calc(100% - 10px); }
-        button { background: #00b4ff; border: none; padding: 8px 16px; border-radius: 8px; color: #000000; font-weight: bold; cursor: pointer; margin: 5px; }
+        .card { background: #111; border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid #333; }
+        .card h3 { margin-bottom: 15px; color: #fff; border-left: 3px solid #fff; padding-left: 12px; }
+        input, select { padding: 10px; margin: 5px; background: #000; border: 1px solid #333; border-radius: 8px; color: #fff; width: calc(100% - 10px); }
+        button { background: #333; border: none; padding: 8px 16px; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; margin: 5px; }
         
-        .market-item { background: #0a0a0f; padding: 20px; margin: 15px 0; border-radius: 12px; border: 1px solid #00b4ff; }
+        .market-item, .user-item, .request-item { background: #000; padding: 20px; margin: 15px 0; border-radius: 12px; border: 1px solid #333; }
         .market-info { margin-bottom: 15px; }
         .market-actions { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
         .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; display: inline-block; }
-        .status-open { background: #4caf50; color: white; border: none; }
-        .status-close { background: #00b4ff; color: white; border: none; }
-        .status-closed { background: #f44336; color: white; border: none; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-danger { background: #dc3545; color: white; }
-        .btn-warning { background: #ff9800; color: black; }
-        .btn-reset { background: #6c757d; color: white; }
+        .status-open { background: #1a3a1a; color: #66ff66; border: 1px solid #66ff66; }
+        .status-close { background: #1a1a3a; color: #88ccff; border: 1px solid #88ccff; }
+        .status-closed { background: #3a1a1a; color: #ff6666; border: 1px solid #ff6666; }
+        .btn-success { background: #2a5a2a; color: #fff; }
+        .btn-danger { background: #5a2a2a; color: #fff; }
+        .btn-warning { background: #5a4a2a; color: #fff; }
+        .btn-reset { background: #444; color: #fff; }
         .hidden { display: none; }
         
         .results-container { display: flex; gap: 20px; flex-wrap: wrap; margin: 15px 0; }
-        .result-card { background: #1a1a2e; border-radius: 16px; padding: 15px 25px; min-width: 160px; text-align: center; }
-        .open-card { border: 2px solid #00b4ff; background: linear-gradient(135deg, #0a2a3e, #1a1a2e); }
-        .close-card { border: 2px solid #ff9800; background: linear-gradient(135deg, #3a2a1e, #1a1a2e); }
-        .result-label { font-size: 12px; letter-spacing: 2px; margin-bottom: 10px; }
-        .open-card .result-label { color: #00b4ff; }
-        .close-card .result-label { color: #ff9800; }
-        .result-pana { font-size: 32px; font-weight: bold; color: white; }
-        .result-digit { font-size: 14px; color: #ccc; margin-top: 5px; }
+        .result-card { background: #111; border-radius: 16px; padding: 15px 25px; min-width: 160px; text-align: center; border: 1px solid #333; }
+        .result-pana { font-size: 32px; font-weight: bold; color: #fff; }
+        .result-digit { font-size: 14px; color: #888; margin-top: 5px; }
         
         .input-group { display: flex; gap: 15px; flex-wrap: wrap; margin: 10px 0; align-items: center; }
-        .input-group label { color: white; min-width: 100px; }
+        .input-group label { color: #fff; min-width: 100px; }
         .input-group input { width: 120px; margin: 0; }
-        .section-title { color: #00b4ff; font-size: 14px; margin: 15px 0 5px 0; }
+        .section-title { color: #fff; font-size: 14px; margin: 15px 0 5px 0; }
         
-        .market-name-text { color: #00b4ff; font-size: 18px; font-weight: bold; }
-        .market-numbers-text { color: #aaa; font-size: 14px; margin: 5px 0; }
-        .market-time-text { color: #888; font-size: 12px; }
+        .market-name-text { color: #fff; font-size: 18px; font-weight: bold; }
+        .market-numbers-text { color: #888; font-size: 14px; margin: 5px 0; }
+        .market-time-text { color: #666; font-size: 12px; }
         
-        .warning-box { background: #ff980020; border: 1px solid #ff9800; border-radius: 8px; padding: 8px; margin: 10px 0; color: #ff9800; font-size: 12px; text-align: center; }
-        .success-box { background: #4caf5020; border: 1px solid #4caf50; border-radius: 8px; padding: 8px; margin: 10px 0; color: #4caf50; font-size: 12px; text-align: center; }
+        .warning-box { background: #3a2a1a; border: 1px solid #ffaa44; border-radius: 8px; padding: 8px; margin: 10px 0; color: #ffaa44; font-size: 12px; text-align: center; }
+        .success-box { background: #1a3a1a; border: 1px solid #66ff66; border-radius: 8px; padding: 8px; margin: 10px 0; color: #66ff66; font-size: 12px; text-align: center; }
         
-        .jodi-display { background: #0a0a0f; border-radius: 12px; padding: 10px; margin: 10px 0; text-align: center; border: 1px solid #00ffaa30; }
-        .jodi-display span { color: #00ffaa; font-size: 24px; font-weight: bold; }
-        .jodi-label { color: #aaa; font-size: 11px; }
+        .jodi-display { background: #000; border-radius: 12px; padding: 10px; margin: 10px 0; text-align: center; border: 1px solid #333; }
+        .jodi-display span { color: #fff; font-size: 24px; font-weight: bold; }
+        .jodi-label { color: #888; font-size: 11px; }
+        
+        .user-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .user-blocked { opacity: 0.6; background: #2a2a2a; }
         
         @media (max-width: 768px) { 
             .sidebar { width: 70px; } 
@@ -86,7 +82,7 @@
         <h2>WIN777 ADMIN</h2>
         <input type="password" id="adminPass" placeholder="Enter Password">
         <button onclick="login()">Login</button>
-        <div id="loginError" style="color:red; margin-top:10px;"></div>
+        <div id="loginError" style="color:#ff6666; margin-top:10px;"></div>
     </div>
 </div>
 
@@ -97,7 +93,7 @@
         <div class="sidebar-item" onclick="showSection('users')">👥 Users</div>
         <div class="sidebar-item" onclick="showSection('deposits')">💰 Deposits</div>
         <div class="sidebar-item" onclick="showSection('withdrawals')">💸 Withdrawals</div>
-        <div class="sidebar-item" onclick="showSection('notice')">📢 Notice Board</div>
+        <div class="sidebar-item" onclick="showSection('notice')">📢 Notice</div>
         <div class="sidebar-item" onclick="showSection('settings')">⚙️ Settings</div>
         <div class="sidebar-item" onclick="logout()">🚪 Logout</div>
     </div>
@@ -147,7 +143,7 @@
         <div id="noticeSection" class="hidden">
             <div class="card">
                 <h3>📢 Notice Board</h3>
-                <textarea id="noticeText" rows="3" placeholder="Enter notice text..." style="width:100%; padding:10px; border-radius:8px; background:#0a0a0f; color:white; border:1px solid #00b4ff;"></textarea>
+                <textarea id="noticeText" rows="3" placeholder="Enter notice text..." style="width:100%; padding:10px; border-radius:8px; background:#000; color:#fff; border:1px solid #333;"></textarea>
                 <button onclick="updateNotice()">Update Notice</button>
                 <div id="noticeMsg" style="margin-top:10px;"></div>
             </div>
@@ -198,14 +194,9 @@
     }
     
     const gameRates = {
-        'Single Digit': 10,
-        'Jodi': 100,
-        'Single Pana': 160,
-        'Double Pana': 320,
-        'Triple Pana': 1000,
-        'Half Sangam A': 1600,
-        'Half Sangam B': 1600,
-        'Full Sangam': 25000
+        'Single Digit': 10, 'Jodi': 100, 'Single Pana': 160,
+        'Double Pana': 320, 'Triple Pana': 1000,
+        'Half Sangam A': 1600, 'Half Sangam B': 1600, 'Full Sangam': 25000
     };
     
     async function login() {
@@ -248,7 +239,6 @@
                 let jodi = m.jodi || '**';
                 let isCloseDeclared = m.closeDeclared || false;
                 
-                // Determine JODI display
                 let jodiDisplay = jodi;
                 if (!isCloseDeclared && openPana !== '***') {
                     jodiDisplay = openDigit + '*';
@@ -262,43 +252,40 @@
                             <div class="market-time-text">⏰ Time: ${m.openBid || '--:--'} - ${m.closeBid || '--:--'}</div>
                             
                             <div class="results-container">
-                                <div class="result-card open-card">
-                                    <div class="result-label">🔓 OPEN PANEL</div>
+                                <div class="result-card">
                                     <div class="result-pana">${openPana}</div>
                                     <div class="result-digit">Open Digit: ${openDigit}</div>
                                 </div>
-                                
-                                <div class="result-card close-card">
-                                    <div class="result-label">🔒 CLOSE PANEL</div>
+                                <div class="result-card">
                                     <div class="result-pana">${closePana}</div>
                                     <div class="result-digit">Close Digit: ${closeDigit}</div>
                                 </div>
                             </div>
                             
                             <div class="jodi-display">
-                                <div class="jodi-label">🎲 JODI</div>
+                                <div class="jodi-label">JODI</div>
                                 <span>${jodiDisplay}</span>
                             </div>
                             
-                            ${!isCloseDeclared && openPana !== '***' ? '<div class="warning-box">⚠️ OPEN result declared. Pending CLOSE result. Open winners credited.</div>' : ''}
-                            ${isCloseDeclared ? '<div class="success-box">✅ FULL result declared! All winners credited.</div>' : ''}
+                            ${!isCloseDeclared && openPana !== '***' ? '<div class="warning-box">⚠️ OPEN declared. Pending CLOSE.</div>' : ''}
+                            ${isCloseDeclared ? '<div class="success-box">✅ FULL result declared!</div>' : ''}
                             
-                            <div class="section-title">📝 STEP 1: Declare OPEN Result (Credits OPEN winners)</div>
+                            <div class="section-title">📝 STEP 1: Declare OPEN Result</div>
                             <div class="input-group">
-                                <label style="color:#00b4ff;">🔓 Open Pana:</label>
+                                <label>🔓 Open Pana:</label>
                                 <input type="text" id="openPana_${doc.id}" placeholder="3 digits" value="${openPana !== '***' ? openPana : ''}" style="width:100px;" maxlength="3">
-                                <label style="color:#00b4ff;">Open Digit:</label>
+                                <label>Open Digit:</label>
                                 <input type="text" id="openDigit_${doc.id}" placeholder="1 digit" value="${openDigit !== '*' ? openDigit : ''}" style="width:60px;" maxlength="1">
-                                <button onclick="declareOpenResult('${doc.id}', '${m.name}')" style="background:#00b4ff;">✅ Declare OPEN & Credit</button>
+                                <button onclick="declareOpenResult('${doc.id}', '${m.name}')">Declare OPEN</button>
                             </div>
                             
-                            <div class="section-title">📝 STEP 2: Declare CLOSE Result (Credits JODI, CLOSE, HALF, FULL winners)</div>
+                            <div class="section-title">📝 STEP 2: Declare CLOSE Result</div>
                             <div class="input-group">
-                                <label style="color:#ff9800;">🔒 Close Pana:</label>
+                                <label>🔒 Close Pana:</label>
                                 <input type="text" id="closePana_${doc.id}" placeholder="3 digits" value="${closePana !== '***' ? closePana : ''}" style="width:100px;" maxlength="3">
-                                <label style="color:#ff9800;">Close Digit:</label>
+                                <label>Close Digit:</label>
                                 <input type="text" id="closeDigit_${doc.id}" placeholder="1 digit" value="${closeDigit !== '*' ? closeDigit : ''}" style="width:60px;" maxlength="1">
-                                <button onclick="declareCloseResult('${doc.id}', '${m.name}')" style="background:#ff9800;">✅ Declare CLOSE & Credit</button>
+                                <button onclick="declareCloseResult('${doc.id}', '${m.name}')">Declare CLOSE</button>
                             </div>
                         </div>
                         
@@ -320,13 +307,12 @@
         });
     }
     
-    // STEP 1: Declare OPEN Result - Credits Open winners only
     async function declareOpenResult(marketId, marketName) {
         const openPana = document.getElementById(`openPana_${marketId}`).value.trim();
         const openDigit = document.getElementById(`openDigit_${marketId}`).value.trim();
         
         if (!openPana || !openPana.match(/^\d{3}$/)) {
-            alert('Enter valid 3-digit Open Pana (e.g., 123)');
+            alert('Enter valid 3-digit Open Pana');
             return;
         }
         if (!openDigit || !openDigit.match(/^\d$/)) {
@@ -334,29 +320,23 @@
             return;
         }
         
-        if (confirm(`📢 DECLARE OPEN RESULT for ${marketName}?\n\n━━━━━━━━━━━━━━━━━━━\n🔓 Open Pana: ${openPana}\n🔢 Open Digit: ${openDigit}\n━━━━━━━━━━━━━━━━━━━\n\n⚠️ This will credit winners for:\n• Single Digit (Open)\n• Single/Double/Triple Pana (Open)\n\nClose result will be declared later.\n\nContinue?`)) {
-            
+        if (confirm(`Declare OPEN result for ${marketName}?\n\nOpen Pana: ${openPana}\nOpen Digit: ${openDigit}\n\nThis will credit OPEN winners.`)) {
             await db.collection('markets').doc(marketId).update({ 
                 openPana: openPana,
                 openDigit: openDigit,
-                closeDeclared: false,
-                lastUpdated: new Date()
+                closeDeclared: false
             });
-            
-            // Credit OPEN winners only
             await creditOpenWinners(marketId, marketName, openPana, openDigit);
-            
-            alert(`✅ OPEN RESULT DECLARED!\n\n${openPana} | Open Digit: ${openDigit}\n\n💰 OPEN winners have been credited!\n\n📌 Close result will be declared later.`);
+            alert(`✅ OPEN result declared! Winners credited.`);
         }
     }
     
-    // STEP 2: Declare CLOSE Result - Credits Close, JODI, Half, Full winners
     async function declareCloseResult(marketId, marketName) {
         const closePana = document.getElementById(`closePana_${marketId}`).value.trim();
         const closeDigit = document.getElementById(`closeDigit_${marketId}`).value.trim();
         
         if (!closePana || !closePana.match(/^\d{3}$/)) {
-            alert('Enter valid 3-digit Close Pana (e.g., 570)');
+            alert('Enter valid 3-digit Close Pana');
             return;
         }
         if (!closeDigit || !closeDigit.match(/^\d$/)) {
@@ -370,178 +350,169 @@
         const openDigit = market.openDigit || '*';
         
         if (openPana === '***') {
-            alert('Please declare OPEN result first before declaring CLOSE result!');
+            alert('Please declare OPEN result first!');
             return;
         }
         
-        // Calculate JODI = Open Digit + Close Digit
         const jodi = openDigit + closeDigit;
         
-        if (confirm(`📢 DECLARE CLOSE RESULT for ${marketName}?\n\n━━━━━━━━━━━━━━━━━━━\n🔓 Open: ${openPana} (Digit: ${openDigit})\n🔒 Close Pana: ${closePana}\n🔢 Close Digit: ${closeDigit}\n🎲 JODI: ${jodi}\n━━━━━━━━━━━━━━━━━━━\n\n⚠️ This will credit winners for:\n• JODI\n• Close Digit\n• Close Pana\n• Half Sangam A\n• Half Sangam B\n• Full Sangam\n\nContinue?`)) {
-            
+        if (confirm(`Declare CLOSE result for ${marketName}?\n\nClose Pana: ${closePana}\nClose Digit: ${closeDigit}\nJODI: ${jodi}\n\nThis will credit all winners.`)) {
             await db.collection('markets').doc(marketId).update({ 
                 closePana: closePana,
                 closeDigit: closeDigit,
                 jodi: jodi,
-                closeDeclared: true,
-                lastUpdated: new Date()
+                closeDeclared: true
             });
-            
-            // Credit CLOSE winners
             await creditCloseWinners(marketId, marketName, openPana, openDigit, closePana, closeDigit, jodi);
-            
-            alert(`✅ CLOSE RESULT DECLARED & WINNERS CREDITED!\n\n${openPana} - ${jodi} - ${closePana}\n\n💰 All winners have been credited!`);
+            alert(`✅ CLOSE result declared! All winners credited.`);
         }
     }
     
-    // Reset market result
     async function resetMarketResult(marketId, marketName) {
-        if (confirm(`🔄 RESET MARKET\n\nAre you sure you want to reset "${marketName}"?\n\nThis will clear all declared results to:\n*** - ** - ***\n\n⚠️ WARNING: This will NOT refund any credits already given!\n\nContinue?`)) {
-            try {
-                await db.collection('markets').doc(marketId).update({
-                    openPana: '***',
-                    openDigit: '*',
-                    closePana: '***',
-                    closeDigit: '*',
-                    jodi: '**',
-                    result: '***-**-***',
-                    closeDeclared: false
-                });
-                alert(`✅ ${marketName} has been reset to *** - ** - ***`);
-            } catch (error) {
-                console.error("Reset error:", error);
-                alert("Error resetting market: " + error.message);
-            }
+        if (confirm(`Reset "${marketName}" to *** - ** - ***?\n\nWARNING: This will NOT refund credits!`)) {
+            await db.collection('markets').doc(marketId).update({
+                openPana: '***', openDigit: '*', closePana: '***', closeDigit: '*', jodi: '**', closeDeclared: false
+            });
+            alert(`✅ ${marketName} reset!`);
         }
     }
     
-    // Credit winners for OPEN results only
     async function creditOpenWinners(marketId, marketName, openPana, openDigit) {
-        const bids = await db.collection('bids')
-            .where('marketId', '==', marketId)
-            .where('status', '==', 'pending')
-            .get();
-        
-        let winnersCount = 0;
-        let totalWon = 0;
-        let winnerList = [];
-        
+        const bids = await db.collection('bids').where('marketId', '==', marketId).where('status', '==', 'pending').get();
         for (const bidDoc of bids.docs) {
             const bid = bidDoc.data();
             let isWinning = false;
-            let winAmount = 0;
-            
-            switch(bid.gameType) {
-                case 'Single Digit':
-                    if ((bid.bidType === 'Open' || !bid.bidType) && bid.value === openDigit) isWinning = true;
-                    break;
-                case 'Single Pana':
-                case 'Double Pana':
-                case 'Triple Pana':
-                    if ((bid.bidType === 'Open' || !bid.bidType) && bid.value === openPana) isWinning = true;
-                    break;
-            }
+            if (bid.gameType === 'Single Digit' && bid.value === openDigit) isWinning = true;
+            if ((bid.gameType === 'Single Pana' || bid.gameType === 'Double Pana' || bid.gameType === 'Triple Pana') && bid.value === openPana) isWinning = true;
             
             if (isWinning) {
-                const multiplier = gameRates[bid.gameType] || 10;
-                winAmount = bid.points * multiplier;
-                totalWon += winAmount;
-                winnersCount++;
-                winnerList.push(`${bid.gameType}: ${bid.value} (₹${winAmount})`);
-                
+                const winAmount = bid.points * (gameRates[bid.gameType] || 10);
                 await bidDoc.ref.update({ status: 'won' });
-                
                 const userRef = db.collection('users').doc(bid.userId);
                 const userDoc = await userRef.get();
                 await userRef.update({ balance: (userDoc.data().balance || 0) + winAmount });
-                
                 await db.collection('transactions').add({
-                    userId: bid.userId,
-                    type: 'credit',
-                    amount: winAmount,
-                    status: 'Completed',
-                    description: `🎉 Won on ${marketName} (OPEN) - ${bid.gameType}: ${bid.value}`,
-                    date: new Date()
+                    userId: bid.userId, type: 'credit', amount: winAmount, status: 'Completed',
+                    description: `Won on ${marketName} (OPEN) - ${bid.gameType}: ${bid.value}`, date: new Date()
                 });
             }
         }
-        
-        if (winnersCount > 0) {
-            console.log(`✅ OPEN RESULT - ${winnersCount} winners! Total: ₹${totalWon}`);
-            console.log(`Winners: ${winnerList.join(', ')}`);
-        }
     }
     
-    // Credit winners for CLOSE results
     async function creditCloseWinners(marketId, marketName, openPana, openDigit, closePana, closeDigit, jodi) {
-        const bids = await db.collection('bids')
-            .where('marketId', '==', marketId)
-            .where('status', '==', 'pending')
-            .get();
-        
-        let winnersCount = 0;
-        let totalWon = 0;
-        let winnerList = [];
-        
+        const bids = await db.collection('bids').where('marketId', '==', marketId).where('status', '==', 'pending').get();
         for (const bidDoc of bids.docs) {
             const bid = bidDoc.data();
             let isWinning = false;
-            let winAmount = 0;
-            
-            switch(bid.gameType) {
-                case 'Single Digit':
-                    if ((bid.bidType === 'Close' || !bid.bidType) && bid.value === closeDigit) isWinning = true;
-                    break;
-                case 'Jodi':
-                    if (bid.value === jodi) isWinning = true;
-                    break;
-                case 'Single Pana':
-                case 'Double Pana':
-                case 'Triple Pana':
-                    if ((bid.bidType === 'Close' || !bid.bidType) && bid.value === closePana) isWinning = true;
-                    break;
-                case 'Half Sangam A':
-                    if (bid.value === `${openPana}-${closeDigit}`) isWinning = true;
-                    break;
-                case 'Half Sangam B':
-                    if (bid.value === `${openDigit}-${closePana}`) isWinning = true;
-                    break;
-                case 'Full Sangam':
-                    if (bid.value === `${openPana}-${closePana}`) isWinning = true;
-                    break;
-            }
+            if (bid.gameType === 'Single Digit' && bid.value === closeDigit) isWinning = true;
+            if (bid.gameType === 'Jodi' && bid.value === jodi) isWinning = true;
+            if ((bid.gameType === 'Single Pana' || bid.gameType === 'Double Pana' || bid.gameType === 'Triple Pana') && bid.value === closePana) isWinning = true;
+            if (bid.gameType === 'Half Sangam A' && bid.value === `${openPana}-${closeDigit}`) isWinning = true;
+            if (bid.gameType === 'Half Sangam B' && bid.value === `${openDigit}-${closePana}`) isWinning = true;
+            if (bid.gameType === 'Full Sangam' && bid.value === `${openPana}-${closePana}`) isWinning = true;
             
             if (isWinning) {
-                const multiplier = gameRates[bid.gameType] || 10;
-                winAmount = bid.points * multiplier;
-                totalWon += winAmount;
-                winnersCount++;
-                winnerList.push(`${bid.gameType}: ${bid.value} (₹${winAmount})`);
-                
+                const winAmount = bid.points * (gameRates[bid.gameType] || 10);
                 await bidDoc.ref.update({ status: 'won' });
-                
                 const userRef = db.collection('users').doc(bid.userId);
                 const userDoc = await userRef.get();
                 await userRef.update({ balance: (userDoc.data().balance || 0) + winAmount });
-                
                 await db.collection('transactions').add({
-                    userId: bid.userId,
-                    type: 'credit',
-                    amount: winAmount,
-                    status: 'Completed',
-                    description: `🎉 Won on ${marketName} - ${bid.gameType}: ${bid.value}`,
-                    date: new Date()
+                    userId: bid.userId, type: 'credit', amount: winAmount, status: 'Completed',
+                    description: `Won on ${marketName} - ${bid.gameType}: ${bid.value}`, date: new Date()
                 });
             } else {
-                if (bid.status === 'pending') {
-                    await bidDoc.ref.update({ status: 'lost' });
-                }
+                await bidDoc.ref.update({ status: 'lost' });
             }
         }
-        
-        if (winnersCount > 0) {
-            console.log(`✅ CLOSE RESULT - ${winnersCount} winners! Total: ₹${totalWon}`);
-            console.log(`Winners: ${winnerList.join(', ')}`);
+    }
+    
+    // ============ USER MANAGEMENT WITH BLOCK/DELETE/CLEAR HISTORY ============
+    function loadUsers() {
+        db.collection('users').onSnapshot(async (snapshot) => {
+            let html = '';
+            for (const doc of snapshot.docs) {
+                const u = doc.data();
+                const isBlocked = u.blocked === true;
+                html += `
+                    <div class="user-item ${isBlocked ? 'user-blocked' : ''}">
+                        <div>
+                            <b style="color:#fff;">${u.name || 'Unknown'}</b><br>
+                            ${u.phone || 'No phone'}<br>
+                            Balance: ₹${u.balance || 0}<br>
+                            ${isBlocked ? '<span style="color:#ff6666;">🚫 BLOCKED</span>' : ''}
+                        </div>
+                        <div class="user-actions">
+                            <button onclick="addBalance('${doc.id}')">Add ₹</button>
+                            <button onclick="toggleBlockUser('${doc.id}', '${u.name}', ${isBlocked})" class="btn-warning">${isBlocked ? 'Unblock' : 'Block'}</button>
+                            <button onclick="clearUserBids('${doc.id}', '${u.name}')" class="btn-warning">Clear Bids</button>
+                            <button onclick="clearUserTransactions('${doc.id}', '${u.name}')" class="btn-warning">Clear History</button>
+                            <button onclick="deleteUser('${doc.id}', '${u.name}')" class="btn-danger">Delete User</button>
+                        </div>
+                    </div>
+                `;
+            }
+            document.getElementById('usersList').innerHTML = html || '<p style="color: #888;">No users yet</p>';
+        });
+    }
+    
+    async function toggleBlockUser(uid, name, isBlocked) {
+        const action = isBlocked ? 'unblock' : 'block';
+        if (confirm(`${action.toUpperCase()} user "${name}"?\n\nBlocked users cannot place bets.`)) {
+            await db.collection('users').doc(uid).update({ blocked: !isBlocked });
+            alert(`✅ User ${action}ed!`);
+        }
+    }
+    
+    async function clearUserBids(uid, name) {
+        if (confirm(`Clear ALL bid history for "${name}"?\n\nThis action cannot be undone!`)) {
+            const bids = await db.collection('bids').where('userId', '==', uid).get();
+            const batch = db.batch();
+            bids.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+            alert(`✅ Cleared ${bids.size} bids for ${name}`);
+        }
+    }
+    
+    async function clearUserTransactions(uid, name) {
+        if (confirm(`Clear ALL transaction history for "${name}"?\n\nThis action cannot be undone!`)) {
+            const transactions = await db.collection('transactions').where('userId', '==', uid).get();
+            const batch = db.batch();
+            transactions.forEach(doc => batch.delete(doc.ref));
+            await batch.commit();
+            alert(`✅ Cleared ${transactions.size} transactions for ${name}`);
+        }
+    }
+    
+    async function addBalance(uid) {
+        const amount = prompt('Enter amount to add:');
+        if (amount && !isNaN(amount) && parseInt(amount) > 0) {
+            const userDoc = await db.collection('users').doc(uid).get();
+            const newBalance = (userDoc.data().balance || 0) + parseInt(amount);
+            await db.collection('users').doc(uid).update({ balance: newBalance });
+            alert(`✅ ₹${amount} added! New balance: ₹${newBalance}`);
+        }
+    }
+    
+    async function deleteUser(uid, name) {
+        if (confirm(`⚠️ PERMANENT DELETE\n\nDelete user "${name}" completely?\n\nThis will remove all user data including:\n• Profile\n• Bid history\n• Transaction history\n\nThis action CANNOT be undone!\n\nType "${name}" to confirm:`)) {
+            const confirmText = prompt(`Type "${name}" to confirm deletion:`);
+            if (confirmText === name) {
+                // Delete user bids
+                const bids = await db.collection('bids').where('userId', '==', uid).get();
+                bids.forEach(doc => doc.ref.delete());
+                // Delete user transactions
+                const transactions = await db.collection('transactions').where('userId', '==', uid).get();
+                transactions.forEach(doc => doc.ref.delete());
+                // Delete withdraw requests
+                const withdraws = await db.collection('withdrawRequests').where('userId', '==', uid).get();
+                withdraws.forEach(doc => doc.ref.delete());
+                // Delete user document
+                await db.collection('users').doc(uid).delete();
+                alert(`✅ User "${name}" deleted permanently!`);
+            } else {
+                alert(`❌ Confirmation failed. User not deleted.`);
+            }
         }
     }
     
@@ -556,24 +527,8 @@
         const openBid = document.getElementById('openBid').value;
         const closeBid = document.getElementById('closeBid').value;
         const status = document.getElementById('marketStatus').value;
-        
-        if (!name) {
-            alert('Enter market name');
-            return;
-        }
-        await db.collection('markets').add({
-            name: name,
-            numbers: numbers,
-            openBid: openBid,
-            closeBid: closeBid,
-            status: status,
-            openPana: '***',
-            openDigit: '*',
-            closePana: '***',
-            closeDigit: '*',
-            jodi: '**',
-            closeDeclared: false
-        });
+        if (!name) { alert('Enter market name'); return; }
+        await db.collection('markets').add({ name, numbers, openBid, closeBid, status, openPana: '***', openDigit: '*', closePana: '***', closeDigit: '*', jodi: '**', closeDeclared: false });
         document.getElementById('marketName').value = '';
         document.getElementById('marketNumbers').value = '';
         document.getElementById('openBid').value = '';
@@ -586,56 +541,11 @@
         const newNumbers = prompt('New numbers', oldNumbers);
         const newOpen = prompt('Open Bid Time', oldOpen);
         const newClose = prompt('Close Bid Time', oldClose);
-        if (newName) {
-            await db.collection('markets').doc(id).update({
-                name: newName, numbers: newNumbers, openBid: newOpen, closeBid: newClose
-            });
-        }
+        if (newName) await db.collection('markets').doc(id).update({ name: newName, numbers: newNumbers, openBid: newOpen, closeBid: newClose });
     }
     
     async function deleteMarket(id) {
-        if (confirm('Delete this market permanently?')) {
-            await db.collection('markets').doc(id).delete();
-        }
-    }
-    
-    function loadUsers() {
-        db.collection('users').onSnapshot(async (snapshot) => {
-            let html = '';
-            for (const doc of snapshot.docs) {
-                const u = doc.data();
-                html += `
-                    <div class="market-item" style="display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <b style="color:#00b4ff;">${u.name || 'Unknown'}</b><br>
-                            ${u.phone || 'No phone'}<br>
-                            Balance: ₹${u.balance || 0}
-                        </div>
-                        <div>
-                            <button onclick="addBalance('${doc.id}')">Add ₹</button>
-                            <button onclick="deleteUser('${doc.id}')" class="btn-danger">Delete</button>
-                        </div>
-                    </div>
-                `;
-            }
-            document.getElementById('usersList').innerHTML = html || '<p style="color: #888;">No users yet</p>';
-        });
-    }
-    
-    async function addBalance(uid) {
-        const amount = prompt('Enter amount to add:');
-        if (amount && !isNaN(amount) && parseInt(amount) > 0) {
-            const userDoc = await db.collection('users').doc(uid).get();
-            const newBalance = (userDoc.data().balance || 0) + parseInt(amount);
-            await db.collection('users').doc(uid).update({ balance: newBalance });
-            alert(`✅ ₹${amount} added! New balance: ₹${newBalance}`);
-        }
-    }
-    
-    async function deleteUser(uid) {
-        if (confirm('Delete this user permanently?')) {
-            await db.collection('users').doc(uid).delete();
-        }
+        if (confirm('Delete this market permanently?')) await db.collection('markets').doc(id).delete();
     }
     
     function loadDeposits() {
@@ -644,12 +554,7 @@
             for (const doc of snapshot.docs) {
                 const d = doc.data();
                 const user = await db.collection('users').doc(d.userId).get();
-                html += `
-                    <div class="market-item" style="display:flex; justify-content:space-between;">
-                        <div><b>👤 ${user.data()?.name || 'Unknown'}</b><br>💰 ₹${d.amount}<br>📅 ${d.date?.toDate().toLocaleString() || 'Pending'}</div>
-                        <div><button onclick="approveDeposit('${doc.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button><button onclick="rejectDeposit('${doc.id}')" class="btn-danger">Reject</button></div>
-                    </div>
-                `;
+                html += `<div class="request-item" style="display:flex; justify-content:space-between;"><div><b>👤 ${user.data()?.name || 'Unknown'}</b><br>💰 ₹${d.amount}<br>📅 ${d.date?.toDate().toLocaleString() || 'Pending'}</div><div><button onclick="approveDeposit('${doc.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button><button onclick="rejectDeposit('${doc.id}')" class="btn-danger">Reject</button></div></div>`;
             }
             document.getElementById('depositsList').innerHTML = html || '<p style="color: #888;">No pending deposits</p>';
         });
@@ -665,9 +570,7 @@
     }
     
     async function rejectDeposit(id) {
-        if (confirm('Reject this deposit?')) {
-            await db.collection('transactions').doc(id).update({ status: 'Rejected' });
-        }
+        if (confirm('Reject this deposit?')) await db.collection('transactions').doc(id).update({ status: 'Rejected' });
     }
     
     function loadWithdrawals() {
@@ -676,12 +579,7 @@
             for (const doc of snapshot.docs) {
                 const d = doc.data();
                 const user = await db.collection('users').doc(d.userId).get();
-                html += `
-                    <div class="market-item" style="display:flex; justify-content:space-between;">
-                        <div><b>👤 ${user.data()?.name || 'Unknown'}</b><br>💰 ₹${d.amount}<br>🏦 ${d.bankDetails?.bankName || 'N/A'}</div>
-                        <div><button onclick="approveWithdraw('${doc.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button><button onclick="rejectWithdraw('${doc.id}')" class="btn-danger">Reject</button></div>
-                    </div>
-                `;
+                html += `<div class="request-item" style="display:flex; justify-content:space-between;"><div><b>👤 ${user.data()?.name || 'Unknown'}</b><br>💰 ₹${d.amount}<br>🏦 ${d.bankDetails?.bankName || 'N/A'}</div><div><button onclick="approveWithdraw('${doc.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button><button onclick="rejectWithdraw('${doc.id}')" class="btn-danger">Reject</button></div></div>`;
             }
             document.getElementById('withdrawalsList').innerHTML = html || '<p style="color: #888;">No pending withdrawals</p>';
         });
@@ -698,9 +596,7 @@
     }
     
     async function rejectWithdraw(id) {
-        if (confirm('Reject this withdrawal?')) {
-            await db.collection('withdrawRequests').doc(id).update({ status: 'Rejected' });
-        }
+        if (confirm('Reject this withdrawal?')) await db.collection('withdrawRequests').doc(id).update({ status: 'Rejected' });
     }
     
     function loadNotice() {
@@ -718,12 +614,8 @@
     function changePassword() {
         const old = document.getElementById('oldPass').value;
         const newP = document.getElementById('newPass').value;
-        if (old === adminPassword) {
-            adminPassword = newP;
-            document.getElementById('passMsg').innerHTML = '✅ Password changed!';
-        } else {
-            document.getElementById('passMsg').innerHTML = '❌ Wrong password!';
-        }
+        if (old === adminPassword) { adminPassword = newP; document.getElementById('passMsg').innerHTML = '✅ Password changed!'; }
+        else { document.getElementById('passMsg').innerHTML = '❌ Wrong password!'; }
         setTimeout(() => document.getElementById('passMsg').innerHTML = '', 3000);
     }
     
@@ -734,9 +626,7 @@
     }
     
     function showSection(section) {
-        ['markets', 'users', 'deposits', 'withdrawals', 'notice', 'settings'].forEach(s => {
-            document.getElementById(`${s}Section`).classList.add('hidden');
-        });
+        ['markets', 'users', 'deposits', 'withdrawals', 'notice', 'settings'].forEach(s => document.getElementById(`${s}Section`).classList.add('hidden'));
         document.getElementById(`${section}Section`).classList.remove('hidden');
     }
     
@@ -747,7 +637,6 @@
         document.getElementById('adminPass').value = '';
     }
     
-    // Make functions global
     window.login = login;
     window.declareOpenResult = declareOpenResult;
     window.declareCloseResult = declareCloseResult;
@@ -757,6 +646,9 @@
     window.editMarket = editMarket;
     window.deleteMarket = deleteMarket;
     window.addBalance = addBalance;
+    window.toggleBlockUser = toggleBlockUser;
+    window.clearUserBids = clearUserBids;
+    window.clearUserTransactions = clearUserTransactions;
     window.deleteUser = deleteUser;
     window.approveDeposit = approveDeposit;
     window.rejectDeposit = rejectDeposit;
