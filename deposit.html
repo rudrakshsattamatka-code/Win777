@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>WIN777 - Deposit</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { background: #e8f4f8; padding-bottom: 70px; }
+        .container { max-width: 450px; margin: 0 auto; padding: 20px; }
+        
+        .header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+        .back-btn { background: #fff; border: none; color: #00b4ff; font-size: 24px; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; border: 1px solid #d4eaf5; }
+        .header h1 { color: #00b4ff; font-size: 24px; flex: 1; text-align: center; }
+        
+        .amount-card { background: #fff; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #d4eaf5; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .amount-card h3 { color: #333; margin-bottom: 15px; }
+        
+        .amount-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .amount-btn { background: #f8f9fa; border: 1px solid #d4eaf5; border-radius: 16px; padding: 14px; text-align: center; color: #333; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .amount-btn.active { background: #00b4ff; color: #fff; border-color: #00b4ff; }
+        .amount-btn:hover { background: #e8f4f8; }
+        
+        .custom-amount input { width: 100%; padding: 14px; background: #fff; border: 1px solid #d4eaf5; border-radius: 12px; color: #333; font-size: 16px; }
+        
+        .bonus-box { background: #fff; border-radius: 16px; padding: 15px; margin: 15px 0; border: 1px solid #d4eaf5; display: flex; align-items: center; justify-content: space-between; }
+        .bonus-box label { color: #333; font-weight: bold; }
+        .bonus-box input { width: 20px; height: 20px; cursor: pointer; }
+        .bonus-text { color: #28a745; font-size: 12px; margin-top: 5px; }
+        
+        .upi-id-box { background: #fff; border-radius: 16px; padding: 15px; text-align: center; margin: 15px 0; border: 1px solid #d4eaf5; }
+        .upi-id { color: #00b4ff; font-size: 18px; font-weight: bold; letter-spacing: 1px; }
+        .upi-label { color: #888; font-size: 12px; margin-bottom: 8px; }
+        
+        .deposit-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, #00b4ff, #0099cc); border: none; border-radius: 24px; color: #fff; font-size: 20px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .deposit-btn:hover { transform: scale(1.02); }
+        .deposit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        
+        .timer-box { background: #fff; border-radius: 16px; padding: 15px; text-align: center; margin-top: 20px; border: 1px solid #ffe0b3; }
+        .timer-text { color: #ff9800; font-size: 32px; font-weight: bold; font-family: monospace; }
+        .timer-label { color: #888; font-size: 12px; margin-top: 5px; }
+        
+        .message { padding: 12px; border-radius: 12px; text-align: center; margin-top: 15px; font-size: 13px; }
+        .message-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .message-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .message-pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        
+        .hidden { display: none; }
+        .note-text { font-size: 11px; color: #888; text-align: center; margin-top: 15px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <button class="back-btn" onclick="goBack()">←</button>
+        <h1>ADD FUNDS</h1>
+        <div style="width:40px;"></div>
+    </div>
+    
+    <div class="amount-card">
+        <h3>💰 Select Amount</h3>
+        <div class="amount-grid">
+            <div class="amount-btn" onclick="selectAmount(100)">₹100</div>
+            <div class="amount-btn" onclick="selectAmount(500)">₹500</div>
+            <div class="amount-btn" onclick="selectAmount(1000)">₹1000</div>
+            <div class="amount-btn" onclick="selectAmount(2000)">₹2000</div>
+            <div class="amount-btn" onclick="selectAmount(5000)">₹5000</div>
+            <div class="amount-btn" onclick="selectAmount(10000)">₹10000</div>
+        </div>
+        <div class="custom-amount">
+            <input type="number" id="customAmount" placeholder="Enter custom amount (Min ₹100)">
+        </div>
+    </div>
+    
+    <div class="bonus-box">
+        <div>
+            <label>🎁 Apply 10% Bonus</label>
+            <div class="bonus-text">Get 10% extra on deposit above ₹500</div>
+        </div>
+        <input type="checkbox" id="applyBonus">
+    </div>
+    
+    <div class="upi-id-box">
+        <div class="upi-label">📱 Send payment to this UPI ID</div>
+        <div class="upi-id" id="upiIdDisplay">ganeshpatil99@slc</div>
+    </div>
+    
+    <button class="deposit-btn" id="depositBtn">💳 PROCEED TO PAY</button>
+    
+    <div id="message" class="message hidden"></div>
+    <div id="timerBox" class="timer-box hidden">
+        <div class="timer-text" id="countdownTimer">05:00</div>
+        <div class="timer-label">⏳ Waiting for admin confirmation...</div>
+    </div>
+    <div class="note-text">⚡ Minimum deposit ₹100 | Maximum ₹50,000 | Bonus valid on ₹500+</div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
+        authDomain: "win777-ed482.firebaseapp.com",
+        projectId: "win777-ed482",
+        storageBucket: "win777-ed482.firebasestorage.app",
+        messagingSenderId: "843686112399",
+        appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    let currentUser = null;
+    let selectedAmount = 100;
+    let currentTransactionId = null;
+    let timerInterval = null;
+    let upiId = "ganeshpatil99@slc";
+    
+    async function loadUpiId() {
+        const doc = await db.collection('settings').doc('upi').get();
+        if (doc.exists) {
+            upiId = doc.data().upiId;
+            document.getElementById('upiIdDisplay').innerText = upiId;
+        }
+    }
+    
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.href = 'index.html';
+        } else {
+            currentUser = user;
+            await loadUpiId();
+        }
+    });
+    
+    function selectAmount(amount) {
+        selectedAmount = amount;
+        document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById('customAmount').value = '';
+    }
+    
+    function showMessage(msg, type) {
+        const msgDiv = document.getElementById('message');
+        msgDiv.innerText = msg;
+        msgDiv.className = `message message-${type}`;
+        msgDiv.classList.remove('hidden');
+        setTimeout(() => msgDiv.classList.add('hidden'), 5000);
+    }
+    
+    async function createDepositRequest(amount, bonusAmount) {
+        const totalAmount = amount + bonusAmount;
+        const transactionRef = await db.collection('transactions').add({
+            userId: currentUser.uid,
+            type: 'credit',
+            amount: totalAmount,
+            requestedAmount: amount,
+            bonusAmount: bonusAmount,
+            status: 'Pending',
+            date: new Date(),
+            upiId: upiId
+        });
+        currentTransactionId = transactionRef.id;
+        return transactionRef.id;
+    }
+    
+    function startTimerAndWait() {
+        const timerBox = document.getElementById('timerBox');
+        timerBox.classList.remove('hidden');
+        let timeLeft = 300;
+        const timerDisplay = document.getElementById('countdownTimer');
+        
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timerBox.classList.add('hidden');
+                showMessage('⏰ Time expired! Please create new deposit request.', 'error');
+            }
+        }, 1000);
+        
+        if (currentTransactionId) {
+            db.collection('transactions').doc(currentTransactionId).onSnapshot((doc) => {
+                if (doc.exists && doc.data().status === 'Completed') {
+                    clearInterval(timerInterval);
+                    timerBox.classList.add('hidden');
+                    const data = doc.data();
+                    showMessage(`✅ ₹${data.amount} added successfully!${data.bonusAmount > 0 ? ` (Including ₹${data.bonusAmount} bonus)` : ''}`, 'success');
+                    setTimeout(() => window.location.href = 'dashboard.html', 2000);
+                }
+            });
+        }
+    }
+    
+    document.getElementById('depositBtn').onclick = async () => {
+        let amount = selectedAmount;
+        const custom = parseInt(document.getElementById('customAmount').value);
+        if (custom && custom >= 100) amount = custom;
+        
+        if (amount < 100) {
+            showMessage('Minimum deposit amount is ₹100', 'error');
+            return;
+        }
+        if (amount > 50000) {
+            showMessage('Maximum deposit amount is ₹50,000', 'error');
+            return;
+        }
+        
+        let bonusAmount = 0;
+        const applyBonus = document.getElementById('applyBonus').checked;
+        if (applyBonus && amount >= 500) {
+            bonusAmount = Math.floor(amount * 0.10);
+        }
+        
+        const totalAmount = amount + bonusAmount;
+        
+        const confirmMsg = `💰 DEPOSIT SUMMARY\n\n` +
+            `Deposit Amount: ₹${amount}\n` +
+            `${bonusAmount > 0 ? `Bonus (10%): +₹${bonusAmount}\n` : ``}` +
+            `Total to add: ₹${totalAmount}\n\n` +
+            `UPI ID: ${upiId}\n\n` +
+            `Click OK to proceed with payment`;
+        
+        if (!confirm(confirmMsg)) return;
+        
+        const btn = document.getElementById('depositBtn');
+        btn.disabled = true;
+        btn.innerText = 'Processing...';
+        
+        showMessage(`Creating deposit request for ₹${amount}...`, 'pending');
+        await createDepositRequest(amount, bonusAmount);
+        showMessage(`✅ Request created! Pay ₹${amount} to ${upiId}`, 'success');
+        
+        // Open UPI app
+        const upiIntent = `upi://pay?pa=${upiId}&pn=WIN777&am=${amount}&cu=INR`;
+        setTimeout(() => {
+            window.location.href = upiIntent;
+        }, 1000);
+        
+        setTimeout(() => {
+            btn.disabled = false;
+            btn.innerText = '💳 PROCEED TO PAY';
+            if (confirm(`Did you successfully pay ₹${amount}?\n\nClick OK after completing payment.`)) {
+                showMessage(`✅ Payment recorded! Waiting for admin confirmation...`, 'success');
+                startTimerAndWait();
+            } else {
+                showMessage(`⏳ Payment pending. Admin will verify manually.`, 'pending');
+                startTimerAndWait();
+            }
+        }, 8000);
+    };
+    
+    function goBack() {
+        window.location.href = 'dashboard.html';
+    }
+    
+    window.selectAmount = selectAmount;
+</script>
+</body>
+</html>
