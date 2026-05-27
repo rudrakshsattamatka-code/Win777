@@ -16,8 +16,7 @@
         .logo { color: #00b4ff; font-size: 20px; font-weight: bold; flex: 1; text-align: center; }
         .back-btn { background: none; border: none; color: #00b4ff; font-size: 24px; cursor: pointer; }
         
-        .bid-card { background: #fff; margin: 12px; border-radius: 16px; overflow: hidden; border: 1px solid #d4eaf5; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: all 0.3s; }
-        .bid-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .bid-card { background: #fff; margin: 12px; border-radius: 16px; overflow: hidden; border: 1px solid #d4eaf5; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .bid-header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e8f4f8; }
         .market-name { color: #00b4ff; font-size: 16px; font-weight: bold; }
         .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
@@ -29,31 +28,30 @@
         .bid-label { color: #888; font-size: 13px; }
         .bid-value { color: #333; font-weight: bold; font-size: 14px; }
         .win-amount { color: #28a745; font-size: 18px; font-weight: bold; }
-        .lost-amount { color: #dc3545; }
         .bid-footer { background: #f8f9fa; padding: 10px 15px; font-size: 11px; color: #888; text-align: right; }
         .no-data { text-align: center; color: #888; padding: 60px 20px; }
-        .summary-bar { background: linear-gradient(135deg, #00b4ff, #0099cc); margin: 12px; padding: 15px; border-radius: 16px; text-align: center; color: #fff; }
+        .summary-bar { background: linear-gradient(135deg, #28a745, #1e7e34); margin: 12px; padding: 15px; border-radius: 16px; text-align: center; color: #fff; }
         .summary-title { font-size: 12px; opacity: 0.9; }
         .summary-value { font-size: 28px; font-weight: bold; }
-        
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #fff; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #d4eaf5; }
-        .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 11px; transition: all 0.3s; }
-        .nav-item:hover { color: #00b4ff; }
-        .nav-item span { font-size: 22px; display: block; }
-        .nav-item.active { color: #00b4ff; }
         
         .tab-bar { display: flex; background: #fff; margin: 12px; border-radius: 12px; padding: 4px; gap: 4px; }
         .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-radius: 10px; transition: all 0.3s; color: #666; }
         .tab.active { background: #00b4ff; color: #fff; }
         
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #fff; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #d4eaf5; }
+        .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 11px; transition: all 0.3s; }
+        .nav-item.active { color: #00b4ff; }
+        .nav-item span { font-size: 22px; display: block; }
+        
         .hidden { display: none; }
+        .error-box { background: #f8d7da; color: #721c24; padding: 15px; margin: 12px; border-radius: 12px; text-align: center; }
     </style>
 </head>
 <body>
 <div class="app-container">
     <div class="header">
         <button class="back-btn" onclick="location.href='dashboard.html'">←</button>
-        <div class="logo">MY BIDS & HISTORY</div>
+        <div class="logo">MY BIDS</div>
         <div style="width:30px;"></div>
     </div>
     
@@ -120,8 +118,6 @@
         'Half Sangam A': 1600, 'Half Sangam B': 1600, 'Full Sangam': 25000
     };
     
-    let currentUser = null;
-    
     function showTab(tab) {
         document.getElementById('bidsTab').classList.add('hidden');
         document.getElementById('transactionsTab').classList.add('hidden');
@@ -136,130 +132,147 @@
     
     async function loadBids() {
         const user = auth.currentUser;
-        if (!user) { window.location.href = 'index.html'; return; }
-        currentUser = user;
-        
-        const bids = await db.collection('bids')
-            .where('userId', '==', user.uid)
-            .orderBy('createdAt', 'desc')
-            .get();
+        if (!user) { 
+            window.location.href = 'index.html'; 
+            return; 
+        }
         
         const container = document.getElementById('bidsList');
         const summaryDiv = document.getElementById('summary');
         
-        if (bids.empty) {
-            container.innerHTML = '<div class="no-data">📭 No bids placed yet<br><small>Go to dashboard and place your first bid!</small></div>';
-            summaryDiv.classList.add('hidden');
-            return;
-        }
+        container.innerHTML = '<div style="text-align:center; color:#888; padding:40px;">Loading bids...</div>';
         
-        let totalWonAmount = 0;
-        let html = '';
-        
-        for (const doc of bids.docs) {
-            const b = doc.data();
-            const bidAmount = b.points || 0;
-            const multiplier = gameRates[b.gameType] || 10;
-            const possibleWin = bidAmount * multiplier;
+        try {
+            const bids = await db.collection('bids')
+                .where('userId', '==', user.uid)
+                .orderBy('createdAt', 'desc')
+                .get();
             
-            let statusClass = '', statusText = '', winAmount = 0, winAmountHtml = '';
+            if (bids.empty) {
+                container.innerHTML = '<div class="no-data">📭 No bids placed yet<br><small>Go to dashboard and place your first bid!</small></div>';
+                summaryDiv.classList.add('hidden');
+                return;
+            }
             
-            if (b.status === 'won') {
-                statusClass = 'status-won';
-                statusText = '🏆 WON';
-                winAmount = bidAmount * multiplier;
-                totalWonAmount += winAmount;
-                winAmountHtml = `<div class="bid-row"><span class="bid-label">🏆 Winning Amount</span><span class="win-amount">+ ₹${winAmount}</span></div>`;
-            } else if (b.status === 'lost') {
-                statusClass = 'status-lost';
-                statusText = '❌ LOST';
-                winAmountHtml = `<div class="bid-row"><span class="bid-label">💰 Amount Lost</span><span class="lost-amount">- ₹${bidAmount}</span></div>`;
+            let totalWonAmount = 0;
+            let html = '';
+            
+            for (const doc of bids.docs) {
+                const b = doc.data();
+                const bidAmount = b.points || 0;
+                const multiplier = gameRates[b.gameType] || 10;
+                const possibleWin = bidAmount * multiplier;
+                
+                let statusClass = '', statusText = '', winAmount = 0, winAmountHtml = '';
+                
+                if (b.status === 'won') {
+                    statusClass = 'status-won';
+                    statusText = '🏆 WON';
+                    winAmount = bidAmount * multiplier;
+                    totalWonAmount += winAmount;
+                    winAmountHtml = `<div class="bid-row"><span class="bid-label">🏆 Winning Amount</span><span class="win-amount">+ ₹${winAmount}</span></div>`;
+                } else if (b.status === 'lost') {
+                    statusClass = 'status-lost';
+                    statusText = '❌ LOST';
+                    winAmountHtml = `<div class="bid-row"><span class="bid-label">💰 Amount Lost</span><span class="bid-value" style="color:#dc3545;">- ₹${bidAmount}</span></div>`;
+                } else {
+                    statusClass = 'status-pending';
+                    statusText = '⏳ PENDING';
+                    winAmountHtml = `<div class="bid-row"><span class="bid-label">🎯 Possible Win</span><span class="bid-value">₹${possibleWin}</span></div>`;
+                }
+                
+                let bidDate = 'Pending';
+                if (b.createdAt && b.createdAt.toDate) {
+                    bidDate = b.createdAt.toDate().toLocaleString();
+                }
+                
+                html += `
+                    <div class="bid-card">
+                        <div class="bid-header">
+                            <span class="market-name">📊 ${b.market || 'Unknown Market'}</span>
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="bid-body">
+                            <div class="bid-row"><span class="bid-label">🎲 Game Type</span><span class="bid-value">${b.gameType || '-'}</span></div>
+                            <div class="bid-row"><span class="bid-label">🔢 Your Number</span><span class="bid-value" style="color:#00b4ff; font-size:16px;">${b.value || '-'}</span></div>
+                            <div class="bid-row"><span class="bid-label">💰 Bid Amount</span><span class="bid-value">₹${bidAmount}</span></div>
+                            ${winAmountHtml}
+                            ${b.bidType ? `<div class="bid-row"><span class="bid-label">🎲 Bid Type</span><span class="bid-value">${b.bidType}</span></div>` : ''}
+                            <div class="bid-row"><span class="bid-label">📊 Rate</span><span class="bid-value">${multiplier}x</span></div>
+                        </div>
+                        <div class="bid-footer">📅 ${bidDate}</div>
+                    </div>
+                `;
+            }
+            
+            if (totalWonAmount > 0) {
+                summaryDiv.classList.remove('hidden');
+                document.getElementById('totalWon').innerText = totalWonAmount;
             } else {
-                statusClass = 'status-pending';
-                statusText = '⏳ PENDING';
-                winAmountHtml = `<div class="bid-row"><span class="bid-label">🎯 Possible Win</span><span class="bid-value">₹${possibleWin}</span></div>`;
+                summaryDiv.classList.add('hidden');
             }
             
-            let bidDate = 'Pending';
-            if (b.createdAt && b.createdAt.toDate) {
-                bidDate = b.createdAt.toDate().toLocaleString();
-            }
+            container.innerHTML = html;
             
-            html += `
-                <div class="bid-card">
-                    <div class="bid-header">
-                        <span class="market-name">📊 ${b.market || 'Unknown Market'}</span>
-                        <span class="status-badge ${statusClass}">${statusText}</span>
-                    </div>
-                    <div class="bid-body">
-                        <div class="bid-row"><span class="bid-label">🎲 Game Type</span><span class="bid-value">${b.gameType || '-'}</span></div>
-                        <div class="bid-row"><span class="bid-label">🔢 Your Number</span><span class="bid-value" style="color:#00b4ff; font-size:16px;">${b.value || '-'}</span></div>
-                        <div class="bid-row"><span class="bid-label">💰 Bid Amount</span><span class="bid-value">₹${bidAmount}</span></div>
-                        ${winAmountHtml}
-                        ${b.bidType ? `<div class="bid-row"><span class="bid-label">🎲 Bid Type</span><span class="bid-value">${b.bidType}</span></div>` : ''}
-                        <div class="bid-row"><span class="bid-label">📊 Rate</span><span class="bid-value">${multiplier}x</span></div>
-                    </div>
-                    <div class="bid-footer">📅 ${bidDate}</div>
-                </div>
-            `;
+        } catch (error) {
+            console.error("Error loading bids:", error);
+            container.innerHTML = `<div class="error-box">❌ Error loading bids: ${error.message}<br><br>Please check your internet connection and Firebase rules.</div>`;
         }
-        
-        if (totalWonAmount > 0) {
-            summaryDiv.classList.remove('hidden');
-            document.getElementById('totalWon').innerText = totalWonAmount;
-        } else {
-            summaryDiv.classList.add('hidden');
-        }
-        
-        container.innerHTML = html;
     }
     
     async function loadTransactions() {
         const user = auth.currentUser;
         if (!user) return;
         
-        const transactions = await db.collection('transactions')
-            .where('userId', '==', user.uid)
-            .orderBy('date', 'desc')
-            .get();
-        
         const container = document.getElementById('transactionsList');
+        container.innerHTML = '<div style="text-align:center; color:#888; padding:40px;">Loading transactions...</div>';
         
-        if (transactions.empty) {
-            container.innerHTML = '<div class="no-data">📭 No transactions yet</div>';
-            return;
-        }
-        
-        let html = '';
-        for (const doc of transactions.docs) {
-            const t = doc.data();
-            const date = t.date?.toDate().toLocaleString() || 'Pending';
-            const isCredit = t.type === 'credit';
-            let statusColor = '#ff9800', statusText = '⏳ Pending';
+        try {
+            const transactions = await db.collection('transactions')
+                .where('userId', '==', user.uid)
+                .orderBy('date', 'desc')
+                .get();
             
-            if (t.status === 'Completed') {
-                statusColor = '#28a745';
-                statusText = '✅ Completed';
-            } else if (t.status === 'Rejected') {
-                statusColor = '#dc3545';
-                statusText = '❌ Rejected';
+            if (transactions.empty) {
+                container.innerHTML = '<div class="no-data">📭 No transactions yet</div>';
+                return;
             }
             
-            html += `
-                <div class="bid-card">
-                    <div class="bid-header">
-                        <span class="market-name">${isCredit ? '💰 DEPOSIT' : '💸 WITHDRAWAL'}</span>
-                        <span style="color:${statusColor};">${statusText}</span>
+            let html = '';
+            for (const doc of transactions.docs) {
+                const t = doc.data();
+                const date = t.date?.toDate().toLocaleString() || 'Pending';
+                const isCredit = t.type === 'credit';
+                let statusColor = '#ff9800', statusText = '⏳ Pending';
+                
+                if (t.status === 'Completed') {
+                    statusColor = '#28a745';
+                    statusText = '✅ Completed';
+                } else if (t.status === 'Rejected') {
+                    statusColor = '#dc3545';
+                    statusText = '❌ Rejected';
+                }
+                
+                html += `
+                    <div class="bid-card">
+                        <div class="bid-header">
+                            <span class="market-name">${isCredit ? '💰 DEPOSIT' : '💸 WITHDRAWAL'}</span>
+                            <span style="color:${statusColor};">${statusText}</span>
+                        </div>
+                        <div class="bid-body">
+                            <div class="bid-row"><span class="bid-label">Amount</span><span class="bid-value" style="color:${isCredit ? '#28a745' : '#ff9800'}; font-size:18px;">${isCredit ? '+' : '-'} ₹${t.amount}</span></div>
+                            <div class="bid-row"><span class="bid-label">Date</span><span class="bid-value">${date}</span></div>
+                            ${t.description ? `<div class="bid-row"><span class="bid-label">Description</span><span class="bid-value">${t.description}</span></div>` : ''}
+                        </div>
                     </div>
-                    <div class="bid-body">
-                        <div class="bid-row"><span class="bid-label">Amount</span><span class="bid-value" style="color:${isCredit ? '#28a745' : '#ff9800'}; font-size:18px;">${isCredit ? '+' : '-'} ₹${t.amount}</span></div>
-                        <div class="bid-row"><span class="bid-label">Date</span><span class="bid-value">${date}</span></div>
-                        ${t.description ? `<div class="bid-row"><span class="bid-label">Description</span><span class="bid-value">${t.description}</span></div>` : ''}
-                    </div>
-                </div>
-            `;
+                `;
+            }
+            container.innerHTML = html;
+            
+        } catch (error) {
+            console.error("Error loading transactions:", error);
+            container.innerHTML = `<div class="error-box">❌ Error loading transactions: ${error.message}</div>`;
         }
-        container.innerHTML = html;
     }
     
     auth.onAuthStateChanged(user => {
