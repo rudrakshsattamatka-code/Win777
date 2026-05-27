@@ -11,12 +11,14 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #0a0a0f; }
         
+        /* Login Screen */
         .login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0a0a0f; display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .login-card { background: #1a1a2e; padding: 40px; border-radius: 20px; width: 320px; text-align: center; border: 1px solid #00b4ff; }
         .login-card h2 { color: #00b4ff; margin-bottom: 20px; }
         .login-card input { width: 100%; padding: 12px; margin: 10px 0; background: #0a0a0f; border: 1px solid #00b4ff; border-radius: 8px; color: white; }
         .login-card button { width: 100%; padding: 12px; background: #00b4ff; border: none; border-radius: 8px; color: black; font-weight: bold; cursor: pointer; }
         
+        /* Admin Panel */
         .admin-panel { display: none; }
         .sidebar { width: 260px; background: #1a1a2e; min-height: 100vh; position: fixed; border-right: 1px solid #00b4ff; }
         .sidebar h2 { color: #00b4ff; padding: 25px; text-align: center; border-bottom: 1px solid #00b4ff; }
@@ -38,6 +40,7 @@
         .btn-success { background: #28a745; color: white; }
         .btn-danger { background: #dc3545; color: white; }
         .btn-warning { background: #ff9800; color: black; }
+        .btn-reset { background: #6c757d; color: white; }
         .hidden { display: none; }
         
         .results-container { display: flex; gap: 20px; flex-wrap: wrap; margin: 15px 0; }
@@ -60,6 +63,11 @@
         .market-time-text { color: #888; font-size: 12px; }
         
         .warning-box { background: #ff980020; border: 1px solid #ff9800; border-radius: 8px; padding: 8px; margin: 10px 0; color: #ff9800; font-size: 12px; text-align: center; }
+        .success-box { background: #4caf5020; border: 1px solid #4caf50; border-radius: 8px; padding: 8px; margin: 10px 0; color: #4caf50; font-size: 12px; text-align: center; }
+        
+        .jodi-display { background: #0a0a0f; border-radius: 12px; padding: 10px; margin: 10px 0; text-align: center; border: 1px solid #00ffaa30; }
+        .jodi-display span { color: #00ffaa; font-size: 24px; font-weight: bold; }
+        .jodi-label { color: #aaa; font-size: 11px; }
         
         @media (max-width: 768px) { 
             .sidebar { width: 70px; } 
@@ -190,9 +198,14 @@
     }
     
     const gameRates = {
-        'Single Digit': 10, 'Jodi': 100, 'Single Pana': 160,
-        'Double Pana': 320, 'Triple Pana': 1000,
-        'Half Sangam A': 1600, 'Half Sangam B': 1600, 'Full Sangam': 25000
+        'Single Digit': 10,
+        'Jodi': 100,
+        'Single Pana': 160,
+        'Double Pana': 320,
+        'Triple Pana': 1000,
+        'Half Sangam A': 1600,
+        'Half Sangam B': 1600,
+        'Full Sangam': 25000
     };
     
     async function login() {
@@ -235,6 +248,12 @@
                 let jodi = m.jodi || '**';
                 let isCloseDeclared = m.closeDeclared || false;
                 
+                // Determine JODI display
+                let jodiDisplay = jodi;
+                if (!isCloseDeclared && openPana !== '***') {
+                    jodiDisplay = openDigit + '*';
+                }
+                
                 html += `
                     <div class="market-item">
                         <div class="market-info">
@@ -256,16 +275,18 @@
                                 </div>
                             </div>
                             
-                            <div style="margin: 10px 0; padding: 10px; background: #0a0a0f; border-radius: 8px; text-align: center;">
-                                <span style="color: #00ffaa;">🎲 JODI: ${jodi}</span>
+                            <div class="jodi-display">
+                                <div class="jodi-label">🎲 JODI</div>
+                                <span>${jodiDisplay}</span>
                             </div>
                             
-                            ${!isCloseDeclared && openPana !== '***' ? '<div class="warning-box">⚠️ Open result declared. Close result pending. Winners for OPEN games credited.</div>' : ''}
+                            ${!isCloseDeclared && openPana !== '***' ? '<div class="warning-box">⚠️ OPEN result declared. Pending CLOSE result. Open winners credited.</div>' : ''}
+                            ${isCloseDeclared ? '<div class="success-box">✅ FULL result declared! All winners credited.</div>' : ''}
                             
                             <div class="section-title">📝 STEP 1: Declare OPEN Result (Credits OPEN winners)</div>
                             <div class="input-group">
                                 <label style="color:#00b4ff;">🔓 Open Pana:</label>
-                                <input type="text" id="openPana_${doc.id}" placeholder="3 digits" value="${openPana !== '***' ? openPana : ''}" style="width:100px;">
+                                <input type="text" id="openPana_${doc.id}" placeholder="3 digits" value="${openPana !== '***' ? openPana : ''}" style="width:100px;" maxlength="3">
                                 <label style="color:#00b4ff;">Open Digit:</label>
                                 <input type="text" id="openDigit_${doc.id}" placeholder="1 digit" value="${openDigit !== '*' ? openDigit : ''}" style="width:60px;" maxlength="1">
                                 <button onclick="declareOpenResult('${doc.id}', '${m.name}')" style="background:#00b4ff;">✅ Declare OPEN & Credit</button>
@@ -274,7 +295,7 @@
                             <div class="section-title">📝 STEP 2: Declare CLOSE Result (Credits JODI, CLOSE, HALF, FULL winners)</div>
                             <div class="input-group">
                                 <label style="color:#ff9800;">🔒 Close Pana:</label>
-                                <input type="text" id="closePana_${doc.id}" placeholder="3 digits" value="${closePana !== '***' ? closePana : ''}" style="width:100px;">
+                                <input type="text" id="closePana_${doc.id}" placeholder="3 digits" value="${closePana !== '***' ? closePana : ''}" style="width:100px;" maxlength="3">
                                 <label style="color:#ff9800;">Close Digit:</label>
                                 <input type="text" id="closeDigit_${doc.id}" placeholder="1 digit" value="${closeDigit !== '*' ? closeDigit : ''}" style="width:60px;" maxlength="1">
                                 <button onclick="declareCloseResult('${doc.id}', '${m.name}')" style="background:#ff9800;">✅ Declare CLOSE & Credit</button>
@@ -285,6 +306,7 @@
                             <span class="status-badge ${statusClass}" onclick="changeStatus('${doc.id}', '${m.status}')">${statusText} ▼</span>
                             <div>
                                 <button onclick="editMarket('${doc.id}', '${m.name}', '${m.numbers || ''}', '${m.openBid || ''}', '${m.closeBid || ''}')">✏️ Edit</button>
+                                <button onclick="resetMarketResult('${doc.id}', '${m.name}')" class="btn-reset">⟳ Reset</button>
                                 <button onclick="deleteMarket('${doc.id}')" class="btn-danger">🗑️ Delete</button>
                             </div>
                         </div>
@@ -312,15 +334,11 @@
             return;
         }
         
-        if (confirm(`DECLARE OPEN RESULT for ${marketName}?\n\n🔓 Open Pana: ${openPana}\n🔢 Open Digit: ${openDigit}\n\n⚠️ This will credit winners for:\n• Single Digit (Open)\n• Single/Double/Triple Pana (Open)\n\nClose result will be declared later.\n\nContinue?`)) {
-            
-            // Store open result, show JODI as openDigit + *
-            const jodiDisplay = openDigit + '*';
+        if (confirm(`📢 DECLARE OPEN RESULT for ${marketName}?\n\n━━━━━━━━━━━━━━━━━━━\n🔓 Open Pana: ${openPana}\n🔢 Open Digit: ${openDigit}\n━━━━━━━━━━━━━━━━━━━\n\n⚠️ This will credit winners for:\n• Single Digit (Open)\n• Single/Double/Triple Pana (Open)\n\nClose result will be declared later.\n\nContinue?`)) {
             
             await db.collection('markets').doc(marketId).update({ 
                 openPana: openPana,
                 openDigit: openDigit,
-                jodi: jodiDisplay,
                 closeDeclared: false,
                 lastUpdated: new Date()
             });
@@ -359,7 +377,7 @@
         // Calculate JODI = Open Digit + Close Digit
         const jodi = openDigit + closeDigit;
         
-        if (confirm(`DECLARE CLOSE RESULT for ${marketName}?\n\n🔓 Open: ${openPana} (Digit: ${openDigit})\n🔒 Close Pana: ${closePana}\n🔢 Close Digit: ${closeDigit}\n🎲 JODI: ${jodi}\n\n⚠️ This will credit winners for:\n• JODI\n• Close Digit\n• Close Pana\n• Half Sangam A (Open Pana + Close Digit)\n• Half Sangam B (Open Digit + Close Pana)\n• Full Sangam (Open Pana + Close Pana)\n\nContinue?`)) {
+        if (confirm(`📢 DECLARE CLOSE RESULT for ${marketName}?\n\n━━━━━━━━━━━━━━━━━━━\n🔓 Open: ${openPana} (Digit: ${openDigit})\n🔒 Close Pana: ${closePana}\n🔢 Close Digit: ${closeDigit}\n🎲 JODI: ${jodi}\n━━━━━━━━━━━━━━━━━━━\n\n⚠️ This will credit winners for:\n• JODI\n• Close Digit\n• Close Pana\n• Half Sangam A\n• Half Sangam B\n• Full Sangam\n\nContinue?`)) {
             
             await db.collection('markets').doc(marketId).update({ 
                 closePana: closePana,
@@ -376,6 +394,27 @@
         }
     }
     
+    // Reset market result
+    async function resetMarketResult(marketId, marketName) {
+        if (confirm(`🔄 RESET MARKET\n\nAre you sure you want to reset "${marketName}"?\n\nThis will clear all declared results to:\n*** - ** - ***\n\n⚠️ WARNING: This will NOT refund any credits already given!\n\nContinue?`)) {
+            try {
+                await db.collection('markets').doc(marketId).update({
+                    openPana: '***',
+                    openDigit: '*',
+                    closePana: '***',
+                    closeDigit: '*',
+                    jodi: '**',
+                    result: '***-**-***',
+                    closeDeclared: false
+                });
+                alert(`✅ ${marketName} has been reset to *** - ** - ***`);
+            } catch (error) {
+                console.error("Reset error:", error);
+                alert("Error resetting market: " + error.message);
+            }
+        }
+    }
+    
     // Credit winners for OPEN results only
     async function creditOpenWinners(marketId, marketName, openPana, openDigit) {
         const bids = await db.collection('bids')
@@ -385,21 +424,21 @@
         
         let winnersCount = 0;
         let totalWon = 0;
+        let winnerList = [];
         
         for (const bidDoc of bids.docs) {
             const bid = bidDoc.data();
             let isWinning = false;
             let winAmount = 0;
             
-            // Only credit OPEN bets
             switch(bid.gameType) {
                 case 'Single Digit':
-                    if (bid.bidType === 'Open' && bid.value === openDigit) isWinning = true;
+                    if ((bid.bidType === 'Open' || !bid.bidType) && bid.value === openDigit) isWinning = true;
                     break;
                 case 'Single Pana':
                 case 'Double Pana':
                 case 'Triple Pana':
-                    if (bid.bidType === 'Open' && bid.value === openPana) isWinning = true;
+                    if ((bid.bidType === 'Open' || !bid.bidType) && bid.value === openPana) isWinning = true;
                     break;
             }
             
@@ -408,6 +447,7 @@
                 winAmount = bid.points * multiplier;
                 totalWon += winAmount;
                 winnersCount++;
+                winnerList.push(`${bid.gameType}: ${bid.value} (₹${winAmount})`);
                 
                 await bidDoc.ref.update({ status: 'won' });
                 
@@ -426,10 +466,13 @@
             }
         }
         
-        console.log(`✅ OPEN RESULT - ${winnersCount} winners! Total: ₹${totalWon}`);
+        if (winnersCount > 0) {
+            console.log(`✅ OPEN RESULT - ${winnersCount} winners! Total: ₹${totalWon}`);
+            console.log(`Winners: ${winnerList.join(', ')}`);
+        }
     }
     
-    // Credit winners for CLOSE results (including JODI, Half, Full)
+    // Credit winners for CLOSE results
     async function creditCloseWinners(marketId, marketName, openPana, openDigit, closePana, closeDigit, jodi) {
         const bids = await db.collection('bids')
             .where('marketId', '==', marketId)
@@ -438,6 +481,7 @@
         
         let winnersCount = 0;
         let totalWon = 0;
+        let winnerList = [];
         
         for (const bidDoc of bids.docs) {
             const bid = bidDoc.data();
@@ -446,7 +490,7 @@
             
             switch(bid.gameType) {
                 case 'Single Digit':
-                    if (bid.bidType === 'Close' && bid.value === closeDigit) isWinning = true;
+                    if ((bid.bidType === 'Close' || !bid.bidType) && bid.value === closeDigit) isWinning = true;
                     break;
                 case 'Jodi':
                     if (bid.value === jodi) isWinning = true;
@@ -454,7 +498,7 @@
                 case 'Single Pana':
                 case 'Double Pana':
                 case 'Triple Pana':
-                    if (bid.bidType === 'Close' && bid.value === closePana) isWinning = true;
+                    if ((bid.bidType === 'Close' || !bid.bidType) && bid.value === closePana) isWinning = true;
                     break;
                 case 'Half Sangam A':
                     if (bid.value === `${openPana}-${closeDigit}`) isWinning = true;
@@ -472,6 +516,7 @@
                 winAmount = bid.points * multiplier;
                 totalWon += winAmount;
                 winnersCount++;
+                winnerList.push(`${bid.gameType}: ${bid.value} (₹${winAmount})`);
                 
                 await bidDoc.ref.update({ status: 'won' });
                 
@@ -488,14 +533,16 @@
                     date: new Date()
                 });
             } else {
-                // Only mark as lost after close result is declared
                 if (bid.status === 'pending') {
                     await bidDoc.ref.update({ status: 'lost' });
                 }
             }
         }
         
-        console.log(`✅ CLOSE RESULT - ${winnersCount} winners! Total: ₹${totalWon}`);
+        if (winnersCount > 0) {
+            console.log(`✅ CLOSE RESULT - ${winnersCount} winners! Total: ₹${totalWon}`);
+            console.log(`Winners: ${winnerList.join(', ')}`);
+        }
     }
     
     async function changeStatus(id, current) {
@@ -515,7 +562,11 @@
             return;
         }
         await db.collection('markets').add({
-            name, numbers, openBid, closeBid, status,
+            name: name,
+            numbers: numbers,
+            openBid: openBid,
+            closeBid: closeBid,
+            status: status,
             openPana: '***',
             openDigit: '*',
             closePana: '***',
@@ -696,9 +747,11 @@
         document.getElementById('adminPass').value = '';
     }
     
+    // Make functions global
     window.login = login;
     window.declareOpenResult = declareOpenResult;
     window.declareCloseResult = declareCloseResult;
+    window.resetMarketResult = resetMarketResult;
     window.changeStatus = changeStatus;
     window.addMarket = addMarket;
     window.editMarket = editMarket;
