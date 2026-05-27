@@ -77,6 +77,11 @@
         .time-group { display: flex; gap: 10px; align-items: center; margin: 5px 0; flex-wrap: wrap; }
         .time-group input { width: 110px; }
         
+        .status-control { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-open { background: #28a745; }
+        .btn-close-bid { background: #ffc107; color: #333; }
+        .btn-closed { background: #dc3545; }
+        
         @media (max-width: 768px) { 
             .sidebar { width: 70px; } 
             .sidebar h2 { font-size: 12px; padding: 15px 5px; } 
@@ -118,15 +123,15 @@
                 <input type="text" id="marketNumbers" placeholder="Numbers (e.g., 440-8*-***)">
                 
                 <div class="time-group">
-                    <label>🟢 Open Bid Time:</label>
-                    <input type="time" id="openBid" step="60">
+                    <label>🟢 Open Bid End Time:</label>
+                    <input type="time" id="openBidEnd" step="60">
                 </div>
                 <div class="time-group">
-                    <label>🟡 Close Bid Time:</label>
-                    <input type="time" id="closeBid" step="60">
+                    <label>🟡 Close Bid End Time:</label>
+                    <input type="time" id="closeBidEnd" step="60">
                 </div>
                 <div class="time-group">
-                    <label>🔴 Closed Time:</label>
+                    <label>🔴 Market Closed Time:</label>
                     <input type="time" id="closedTime" step="60">
                 </div>
                 
@@ -138,7 +143,7 @@
                 <button onclick="addMarket()">Add Market</button>
             </div>
             <div class="card">
-                <h3>📋 Manage Markets (Auto Status Change)</h3>
+                <h3>📋 Manage Markets (Manual Status Control)</h3>
                 <div id="marketsList">Loading...</div>
             </div>
         </div>
@@ -206,7 +211,6 @@
     const db = firebase.firestore();
     
     let adminPassword = "Gani99@@";
-    let autoStatusInterval = null;
     
     if (sessionStorage.getItem('adminLoggedIn') === 'true') {
         document.getElementById('loginScreen').style.display = 'none';
@@ -216,7 +220,6 @@
         loadDeposits();
         loadWithdrawals();
         loadNotice();
-        startAutoStatusChecker();
     }
     
     const gameRates = {
@@ -236,58 +239,9 @@
             loadDeposits();
             loadWithdrawals();
             loadNotice();
-            startAutoStatusChecker();
         } else {
             document.getElementById('loginError').innerText = 'Wrong password!';
         }
-    }
-    
-    // Auto status checker based on time
-    function startAutoStatusChecker() {
-        if (autoStatusInterval) clearInterval(autoStatusInterval);
-        autoStatusInterval = setInterval(() => {
-            checkAndUpdateMarketStatus();
-        }, 60000); // Check every minute
-    }
-    
-    async function checkAndUpdateMarketStatus() {
-        const now = new Date();
-        const currentTime = now.getHours() * 60 + now.getMinutes();
-        
-        const markets = await db.collection('markets').get();
-        
-        for (const doc of markets.docs) {
-            const market = doc.data();
-            const openTime = convertTimeToMinutes(market.openBid);
-            const closeTime = convertTimeToMinutes(market.closeBid);
-            const closedTime = convertTimeToMinutes(market.closedTime);
-            
-            let newStatus = market.status;
-            
-            if (closedTime && currentTime >= closedTime) {
-                newStatus = 'closed';
-            } else if (closeTime && currentTime >= closeTime && (!closedTime || currentTime < closedTime)) {
-                newStatus = 'close';
-            } else if (openTime && currentTime >= openTime && (!closeTime || currentTime < closeTime)) {
-                newStatus = 'open';
-            } else {
-                newStatus = 'closed';
-            }
-            
-            if (newStatus !== market.status) {
-                await db.collection('markets').doc(doc.id).update({ status: newStatus });
-                console.log(`Market ${market.name} status changed to ${newStatus}`);
-            }
-        }
-    }
-    
-    function convertTimeToMinutes(timeStr) {
-        if (!timeStr) return null;
-        const parts = timeStr.split(':');
-        if (parts.length === 2) {
-            return parseInt(parts[0]) * 60 + parseInt(parts[1]);
-        }
-        return null;
     }
     
     function formatTimeTo12Hour(timeStr) {
@@ -330,8 +284,8 @@
                     jodiDisplay = openDigit + '*';
                 }
                 
-                const openBid12 = formatTimeTo12Hour(m.openBid);
-                const closeBid12 = formatTimeTo12Hour(m.closeBid);
+                const openBidEnd12 = formatTimeTo12Hour(m.openBidEnd);
+                const closeBidEnd12 = formatTimeTo12Hour(m.closeBidEnd);
                 const closedTime12 = formatTimeTo12Hour(m.closedTime);
                 
                 html += `
@@ -340,7 +294,7 @@
                             <div class="market-name-text">📊 ${m.name || 'No name'}</div>
                             <div class="market-numbers-text">🎲 Numbers: ${m.numbers || '***'}</div>
                             <div class="market-time-text">
-                                ⏰ Open: ${openBid12} | Close: ${closeBid12} | Closed: ${closedTime12}
+                                ⏰ Open Bid Ends: ${openBidEnd12} | Close Bid Ends: ${closeBidEnd12} | Market Closes: ${closedTime12}
                             </div>
                             
                             <div class="results-container">
@@ -362,21 +316,28 @@
                             ${!isCloseDeclared && openPana !== '***' ? '<div class="warning-box">⚠️ OPEN declared. Pending CLOSE.</div>' : ''}
                             ${isCloseDeclared ? '<div class="success-box">✅ FULL result declared!</div>' : ''}
                             
-                            <div class="section-title">📝 Timings (24-hour format)</div>
+                            <div class="section-title">📝 Display Timings (24-hour format)</div>
                             <div class="input-group">
-                                <label>🟢 Open Time:</label>
-                                <input type="time" id="openTime_${doc.id}" value="${m.openBid || ''}" step="60">
-                                <button onclick="updateMarketTime('${doc.id}', 'openBid', document.getElementById('openTime_${doc.id}').value)">Set Open</button>
+                                <label>🟢 Open Bid Ends:</label>
+                                <input type="time" id="openBidEnd_${doc.id}" value="${m.openBidEnd || ''}" step="60">
+                                <button onclick="updateMarketTime('${doc.id}', 'openBidEnd', document.getElementById('openBidEnd_${doc.id}').value)">Save</button>
                             </div>
                             <div class="input-group">
-                                <label>🟡 Close Time:</label>
-                                <input type="time" id="closeTime_${doc.id}" value="${m.closeBid || ''}" step="60">
-                                <button onclick="updateMarketTime('${doc.id}', 'closeBid', document.getElementById('closeTime_${doc.id}').value)">Set Close</button>
+                                <label>🟡 Close Bid Ends:</label>
+                                <input type="time" id="closeBidEnd_${doc.id}" value="${m.closeBidEnd || ''}" step="60">
+                                <button onclick="updateMarketTime('${doc.id}', 'closeBidEnd', document.getElementById('closeBidEnd_${doc.id}').value)">Save</button>
                             </div>
                             <div class="input-group">
-                                <label>🔴 Closed Time:</label>
+                                <label>🔴 Market Closes:</label>
                                 <input type="time" id="closedTime_${doc.id}" value="${m.closedTime || ''}" step="60">
-                                <button onclick="updateMarketTime('${doc.id}', 'closedTime', document.getElementById('closedTime_${doc.id}').value)">Set Closed</button>
+                                <button onclick="updateMarketTime('${doc.id}', 'closedTime', document.getElementById('closedTime_${doc.id}').value)">Save</button>
+                            </div>
+                            
+                            <div class="section-title">🎮 Manual Status Control</div>
+                            <div class="status-control">
+                                <button onclick="setMarketStatus('${doc.id}', 'open')" class="btn-open" style="background:#28a745;">🟢 Set OPEN</button>
+                                <button onclick="setMarketStatus('${doc.id}', 'close')" class="btn-close-bid" style="background:#ffc107; color:#333;">🟡 Set CLOSE</button>
+                                <button onclick="setMarketStatus('${doc.id}', 'closed')" class="btn-closed" style="background:#dc3545;">🔴 Set CLOSED</button>
                             </div>
                             
                             <div class="section-title">📝 STEP 1: Declare OPEN Result</div>
@@ -399,9 +360,9 @@
                         </div>
                         
                         <div class="market-actions">
-                            <span class="status-badge ${statusClass}" onclick="changeStatus('${doc.id}', '${m.status}')">${statusText} ▼</span>
+                            <span class="status-badge ${statusClass}">${statusText}</span>
                             <div>
-                                <button onclick="editMarket('${doc.id}', '${m.name}', '${m.numbers || ''}', '${m.openBid || ''}', '${m.closeBid || ''}', '${m.closedTime || ''}')">✏️ Edit</button>
+                                <button onclick="editMarket('${doc.id}', '${m.name}', '${m.numbers || ''}')">✏️ Edit</button>
                                 <button onclick="resetMarketResult('${doc.id}', '${m.name}')" class="btn-reset">⟳ Reset</button>
                                 <button onclick="deleteMarket('${doc.id}')" class="btn-danger">🗑️ Delete</button>
                             </div>
@@ -414,6 +375,11 @@
             }
             document.getElementById('marketsList').innerHTML = html;
         });
+    }
+    
+    async function setMarketStatus(marketId, status) {
+        await db.collection('markets').doc(marketId).update({ status: status });
+        alert(`✅ Market status changed to ${status.toUpperCase()}`);
     }
     
     async function updateMarketTime(marketId, field, value) {
@@ -543,41 +509,31 @@
         }
     }
     
-    async function changeStatus(id, current) {
-        let newStatus = current === 'open' ? 'close' : (current === 'close' ? 'closed' : 'open');
-        await db.collection('markets').doc(id).update({ status: newStatus });
-    }
-    
     async function addMarket() {
         const name = document.getElementById('marketName').value;
         const numbers = document.getElementById('marketNumbers').value || '***-**-***';
-        const openBid = document.getElementById('openBid').value;
-        const closeBid = document.getElementById('closeBid').value;
+        const openBidEnd = document.getElementById('openBidEnd').value;
+        const closeBidEnd = document.getElementById('closeBidEnd').value;
         const closedTime = document.getElementById('closedTime').value;
         const status = document.getElementById('marketStatus').value;
         
         if (!name) { alert('Enter market name'); return; }
         await db.collection('markets').add({ 
-            name, numbers, openBid, closeBid, closedTime, status, 
-            openPana: '***', openDigit: '*', closePana: '***', closeDigit: '*', jodi: '**', closeDeclared: false 
+            name, numbers, openBidEnd, closeBidEnd, closedTime, status,
+            openPana: '***', openDigit: '*', closePana: '***', closeDigit: '*', jodi: '**', closeDeclared: false
         });
         document.getElementById('marketName').value = '';
         document.getElementById('marketNumbers').value = '';
-        document.getElementById('openBid').value = '';
-        document.getElementById('closeBid').value = '';
+        document.getElementById('openBidEnd').value = '';
+        document.getElementById('closeBidEnd').value = '';
         document.getElementById('closedTime').value = '';
         alert('Market added!');
     }
     
-    async function editMarket(id, oldName, oldNumbers, oldOpen, oldClose, oldClosed) {
+    async function editMarket(id, oldName, oldNumbers) {
         const newName = prompt('New name', oldName);
         const newNumbers = prompt('New numbers', oldNumbers);
-        const newOpen = prompt('Open Bid Time (24hr format, e.g., 09:30)', oldOpen);
-        const newClose = prompt('Close Bid Time (24hr format, e.g., 17:30)', oldClose);
-        const newClosed = prompt('Closed Time (24hr format, e.g., 20:00)', oldClosed);
-        if (newName) await db.collection('markets').doc(id).update({ 
-            name: newName, numbers: newNumbers, openBid: newOpen, closeBid: newClose, closedTime: newClosed 
-        });
+        if (newName) await db.collection('markets').doc(id).update({ name: newName, numbers: newNumbers });
     }
     
     async function deleteMarket(id) {
@@ -628,9 +584,7 @@
         const userDoc = await db.collection('users').doc(uid).get();
         const currentBalance = userDoc.data().balance || 0;
         
-        let newBalance;
-        let transactionType;
-        let description;
+        let newBalance, transactionType, description;
         
         if (action === 'add') {
             newBalance = currentBalance + amountNum;
@@ -842,10 +796,10 @@
     }
     
     window.login = login;
+    window.setMarketStatus = setMarketStatus;
     window.declareOpenResult = declareOpenResult;
     window.declareCloseResult = declareCloseResult;
     window.resetMarketResult = resetMarketResult;
-    window.changeStatus = changeStatus;
     window.addMarket = addMarket;
     window.editMarket = editMarket;
     window.deleteMarket = deleteMarket;
