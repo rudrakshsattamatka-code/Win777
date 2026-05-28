@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>WIN777 - Deposit</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
@@ -22,31 +23,34 @@
         .amount-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
         .amount-btn { background: #f8f9fa; border: 1px solid #d4eaf5; border-radius: 16px; padding: 14px; text-align: center; color: #333; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
         .amount-btn.active { background: #00b4ff; color: #fff; border-color: #00b4ff; }
-        .amount-btn:hover { background: #e8f4f8; }
         
         .custom-amount input { width: 100%; padding: 14px; background: #fff; border: 1px solid #d4eaf5; border-radius: 12px; color: #333; font-size: 16px; }
         
         .bonus-box { background: #fff; border-radius: 16px; padding: 15px; margin: 15px 0; border: 1px solid #d4eaf5; display: flex; align-items: center; justify-content: space-between; }
-        .bonus-box label { color: #333; font-weight: bold; }
-        .bonus-box input { width: 20px; height: 20px; cursor: pointer; }
         .bonus-text { color: #28a745; font-size: 12px; margin-top: 5px; }
         
-        .deposit-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, #00b4ff, #0099cc); border: none; border-radius: 24px; color: #fff; font-size: 20px; font-weight: bold; cursor: pointer; transition: all 0.3s; margin-top: 10px; }
-        .deposit-btn:hover { transform: scale(1.02); }
-        .deposit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .summary-box { background: linear-gradient(135deg, #00b4ff, #0099cc); padding: 12px; border-radius: 12px; margin: 10px 0; text-align: center; color: #fff; }
         
-        .timer-box { background: #fff; border-radius: 16px; padding: 15px; text-align: center; margin-top: 20px; border: 1px solid #ffe0b3; }
+        .qr-container { background: #fff; border-radius: 20px; padding: 25px; margin: 20px 0; text-align: center; border: 2px dashed #00b4ff; display: none; }
+        .qr-container h3 { color: #00b4ff; margin-bottom: 15px; }
+        #qrcode { display: flex; justify-content: center; margin: 15px 0; }
+        .upi-id-text { font-size: 16px; color: #333; margin: 10px 0; word-break: break-all; background: #f0f8ff; padding: 10px; border-radius: 10px; }
+        
+        .generate-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, #00b4ff, #0099cc); border: none; border-radius: 24px; color: #fff; font-size: 20px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .generate-btn:hover { transform: scale(1.02); }
+        
+        .confirm-btn { width: 100%; padding: 16px; background: #28a745; border: none; border-radius: 24px; color: #fff; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 15px; display: none; }
+        
+        .timer-box { background: #fff; border-radius: 16px; padding: 15px; text-align: center; margin-top: 20px; border: 1px solid #ffe0b3; display: none; }
         .timer-text { color: #ff9800; font-size: 32px; font-weight: bold; font-family: monospace; }
-        .timer-label { color: #888; font-size: 12px; margin-top: 5px; }
         
-        .message { padding: 12px; border-radius: 12px; text-align: center; margin-top: 15px; font-size: 13px; }
-        .message-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .message-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .message-pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-        
+        .message { padding: 12px; border-radius: 12px; text-align: center; margin-top: 15px; }
+        .message-success { background: #d4edda; color: #155724; }
+        .message-error { background: #f8d7da; color: #721c24; }
         .hidden { display: none; }
+        
+        .instruction { background: #fff3cd; padding: 12px; border-radius: 12px; margin: 15px 0; font-size: 12px; color: #856404; }
         .note-text { font-size: 11px; color: #888; text-align: center; margin-top: 15px; }
-        .summary-box { background: #f0f8ff; padding: 12px; border-radius: 12px; margin: 10px 0; text-align: center; }
     </style>
 </head>
 <body>
@@ -84,14 +88,33 @@
         💰 You will receive: ₹<span id="totalAmount">100</span>
     </div>
     
-    <button class="deposit-btn" id="depositBtn">💳 PAY NOW</button>
+    <div class="instruction">
+        📌 <strong>How to Deposit:</strong><br>
+        1. Select amount above<br>
+        2. Click "GENERATE QR CODE"<br>
+        3. Scan QR code with any UPI app (PhonePe/GPay/Paytm)<br>
+        4. Amount will be auto-filled in the app<br>
+        5. Complete payment and click "I HAVE PAID"
+    </div>
+    
+    <button class="generate-btn" id="generateBtn">📱 GENERATE QR CODE</button>
+    
+    <div class="qr-container" id="qrContainer">
+        <h3>📸 Scan QR Code to Pay</h3>
+        <div id="qrcode"></div>
+        <div class="upi-id-text" id="upiIdDisplay">ganeshpatil99@slc</div>
+        <div style="font-size: 12px; color: #888;">Amount: ₹<span id="qrAmount">0</span></div>
+        <p style="font-size: 11px; color: #888; margin-top: 10px;">Open any UPI app → Scan QR → Pay</p>
+    </div>
+    
+    <button class="confirm-btn" id="confirmBtn">✅ I HAVE COMPLETED THE PAYMENT</button>
     
     <div id="message" class="message hidden"></div>
-    <div id="timerBox" class="timer-box hidden">
+    <div id="timerBox" class="timer-box">
         <div class="timer-text" id="countdownTimer">05:00</div>
-        <div class="timer-label">⏳ Waiting for admin confirmation...</div>
+        <div>⏳ Waiting for admin confirmation...</div>
     </div>
-    <div class="note-text">⚡ Minimum deposit ₹100 | Maximum ₹50,000 | Bonus valid on ₹500+</div>
+    <div class="note-text">⚡ Minimum ₹100 | Maximum ₹50,000 | 10% Bonus on ₹500+</div>
 </div>
 
 <script>
@@ -119,6 +142,7 @@
         const doc = await db.collection('settings').doc('upi').get();
         if (doc.exists && doc.data().upiId) {
             upiId = doc.data().upiId;
+            document.getElementById('upiIdDisplay').innerText = upiId;
         }
     }
     
@@ -138,6 +162,11 @@
         event.target.classList.add('active');
         document.getElementById('customAmount').value = '';
         updateSummary();
+        
+        // Hide QR if amount changes
+        document.getElementById('qrContainer').style.display = 'none';
+        document.getElementById('confirmBtn').style.display = 'none';
+        document.getElementById('timerBox').style.display = 'none';
     }
     
     function updateSummary() {
@@ -195,7 +224,7 @@
     
     function startTimerAndWait() {
         const timerBox = document.getElementById('timerBox');
-        timerBox.classList.remove('hidden');
+        timerBox.style.display = 'block';
         let timeLeft = 300;
         const timerDisplay = document.getElementById('countdownTimer');
         
@@ -207,7 +236,7 @@
             timerDisplay.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
-                timerBox.classList.add('hidden');
+                timerBox.style.display = 'none';
                 showMessage('Time expired! Please create new request.', 'error');
             }
         }, 1000);
@@ -216,7 +245,7 @@
             const unsubscribe = db.collection('transactions').doc(currentTransactionId).onSnapshot((doc) => {
                 if (doc.exists && doc.data().status === 'Completed') {
                     clearInterval(timerInterval);
-                    timerBox.classList.add('hidden');
+                    timerBox.style.display = 'none';
                     unsubscribe();
                     const data = doc.data();
                     showMessage(`✅ ₹${data.amount} added successfully!${data.bonusAmount > 0 ? ` (Including ₹${data.bonusAmount} bonus)` : ''}`, 'success');
@@ -226,68 +255,61 @@
         }
     }
     
-    // DIRECT UPI PAYMENT - This will open UPI app with amount pre-filled
-    function directUPIPayment() {
+    function generateQR() {
         const amount = getAmount();
         
         if (amount < 100) {
             showMessage('Minimum deposit amount is ₹100', 'error');
-            return false;
+            return;
         }
         if (amount > 50000) {
             showMessage('Maximum deposit amount is ₹50,000', 'error');
-            return false;
+            return;
         }
         
         const bonusAmount = getBonusAmount(amount);
         
-        // Create the UPI URL in the correct format
+        // Create UPI QR code string with amount
         // Format: upi://pay?pa=UPI_ID&pn=NAME&am=AMOUNT&cu=INR
-        const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR`;
+        const upiString = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR&tn=WIN777%20Deposit`;
         
-        // Show payment details
-        const confirmMsg = `💰 PAYMENT DETAILS\n\n` +
-            `Amount: ₹${amount}\n` +
-            `${bonusAmount > 0 ? `Bonus: +₹${bonusAmount}\n` : ''}` +
-            `Total You Get: ₹${amount + bonusAmount}\n\n` +
-            `UPI ID: ${upiId}\n` +
-            `Payee: ${upiName}\n\n` +
-            `Click OK to open UPI app and pay ₹${amount}\n\n` +
-            `Amount will be pre-filled automatically.`;
+        // Clear previous QR
+        document.getElementById('qrcode').innerHTML = '';
         
-        if (!confirm(confirmMsg)) return false;
-        
-        // Create deposit request first
-        createDepositRequest(amount, bonusAmount).then(() => {
-            // Open UPI app
-            window.location.href = upiUrl;
-            
-            // For some browsers, also try opening in a new window
-            setTimeout(() => {
-                window.open(upiUrl, '_blank');
-            }, 500);
-            
-            // Ask for confirmation after returning
-            setTimeout(() => {
-                if (confirm(`✅ Did you successfully pay ₹${amount} to ${upiId}?\n\nClick OK after completing the payment.`)) {
-                    showMessage(`✅ Payment recorded! Waiting for admin confirmation...`, 'success');
-                    startTimerAndWait();
-                } else {
-                    showMessage(`⏳ Payment pending. Admin will verify manually.`, 'pending');
-                    startTimerAndWait();
-                }
-            }, 10000);
-        }).catch(err => {
-            showMessage('Error: ' + err.message, 'error');
+        // Generate new QR code
+        new QRCode(document.getElementById("qrcode"), {
+            text: upiString,
+            width: 200,
+            height: 200,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
         });
         
-        return true;
+        // Update amount display
+        document.getElementById('qrAmount').innerText = amount;
+        
+        // Show QR container and confirm button
+        document.getElementById('qrContainer').style.display = 'block';
+        document.getElementById('confirmBtn').style.display = 'block';
+        
+        // Create deposit request
+        createDepositRequest(amount, bonusAmount);
+        
+        showMessage(`✅ QR Code generated for ₹${amount}. Scan with any UPI app to pay.`, 'success');
     }
     
-    // Handle deposit button click
-    document.getElementById('depositBtn').onclick = function() {
-        directUPIPayment();
-    };
+    async function confirmPayment() {
+        const amount = getAmount();
+        
+        if (confirm(`✅ Have you scanned the QR code and paid ₹${amount}?\n\nClick OK to confirm.`)) {
+            showMessage(`✅ Payment confirmed! Waiting for admin approval...`, 'success');
+            startTimerAndWait();
+        }
+    }
+    
+    document.getElementById('generateBtn').onclick = generateQR;
+    document.getElementById('confirmBtn').onclick = confirmPayment;
     
     function goBack() {
         window.location.href = 'dashboard.html';
@@ -297,6 +319,8 @@
     
     window.selectAmount = selectAmount;
     window.updateSummary = updateSummary;
+    window.generateQR = generateQR;
+    window.confirmPayment = confirmPayment;
 </script>
 </body>
 </html>
