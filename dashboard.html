@@ -12,12 +12,10 @@
         body { background: #fff9e8; padding-bottom: 70px; }
         .app-container { max-width: 500px; margin: 0 auto; background: #fff9e8; min-height: 100vh; }
         
-        /* Header */
         .header { background: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ffe0b3; }
         .logo { color: #ff9800; font-size: 22px; font-weight: bold; }
         .balance { background: #ff9800; padding: 5px 12px; border-radius: 20px; color: #fff; font-weight: bold; font-size: 14px; cursor: pointer; }
         
-        /* Profile Row */
         .profile-row { display: flex; align-items: center; gap: 12px; background: #fff; margin: 10px; padding: 12px 15px; border-radius: 16px; border: 1px solid #ffe0b3; cursor: pointer; transition: all 0.3s; }
         .profile-row:hover { transform: scale(1.01); box-shadow: 0 4px 12px rgba(255,152,0,0.1); }
         .profile-avatar { width: 50px; height: 50px; background: linear-gradient(135deg, #ff9800, #e68a00); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; }
@@ -26,20 +24,17 @@
         .profile-phone { color: #888; font-size: 12px; }
         .view-profile { color: #ff9800; font-size: 12px; }
         
-        /* Notice Board */
         .notice-board { background: linear-gradient(135deg, #ff9800, #e68a00); margin: 10px; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
         .notice-icon { font-size: 24px; }
         .notice-text { flex: 1; color: #fff; font-weight: bold; font-size: 13px; }
         .close-notice { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
         
-        /* Games Row with Logos */
         .games-row { display: flex; justify-content: space-around; background: #fff; margin: 10px; padding: 12px; border-radius: 12px; }
         .game-icon { text-align: center; color: #666; font-size: 11px; cursor: pointer; transition: all 0.3s; }
         .game-icon:hover { transform: translateY(-3px); }
-        .game-icon img { width: 40px; height: 40px; display: block; margin: 0 auto 4px; border-radius: 10px; }
+        .game-icon img { width: 45px; height: 45px; display: block; margin: 0 auto 4px; border-radius: 12px; object-fit: cover; }
         .game-icon span { font-size: 11px; }
         
-        /* Market Card */
         .market-card { background: #fff; margin: 12px; border-radius: 16px; padding: 16px; border: 1px solid #ffe0b3; transition: all 0.3s; }
         .market-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
         .market-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
@@ -62,17 +57,15 @@
         .play-btn:hover { background: #e68a00; transform: scale(1.02); }
         .play-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #ccc; }
         
-        /* Bottom Navigation with Logos */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #fff; display: flex; justify-content: space-around; padding: 10px; border-top: 1px solid #ffe0b3; }
-        .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 10px; transition: all 0.3s; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #fff; display: flex; justify-content: space-around; padding: 8px 10px; border-top: 1px solid #ffe0b3; }
+        .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 10px; transition: all 0.3s; flex: 1; }
         .nav-item:hover { color: #ff9800; transform: translateY(-2px); }
-        .nav-item img { width: 24px; height: 24px; display: block; margin: 0 auto 3px; }
-        .nav-item span { font-size: 10px; }
+        .nav-item img { width: 28px; height: 28px; display: block; margin: 0 auto 3px; border-radius: 8px; object-fit: cover; }
+        .nav-item span { font-size: 10px; display: block; }
         .nav-item.active { color: #ff9800; }
         
         .hidden { display: none; }
         
-        /* Modal Styles */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; animation: fadeIn 0.3s ease-out; }
         .modal-content { background: #fff; border-radius: 24px; padding: 25px; width: 90%; max-width: 350px; max-height: 80vh; overflow-y: auto; }
         .modal-content h3 { color: #ff9800; margin-bottom: 15px; text-align: center; }
@@ -134,7 +127,7 @@
             <span>Withdraw</span>
         </div>
         <div class="game-icon" onclick="window.location.href='mybids.html'">
-            <img src="https://i.imgur.com/NvJCTli.png" alt="My Bids">
+            <img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids">
             <span>My Bids</span>
         </div>
     </div>
@@ -147,11 +140,11 @@
             <span>Home</span>
         </div>
         <div class="nav-item" onclick="window.location.href='mybids.html'">
-            <img src="https://i.imgur.com/StGZq3Y.png" alt="Passbook">
+            <img src="https://i.imgur.com/rUWwMYm.png" alt="Passbook">
             <span>Passbook</span>
         </div>
         <div class="nav-item" onclick="window.location.href='mybids.html'">
-            <img src="https://i.imgur.com/StGZq3Y.png" alt="My Bids">
+            <img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids">
             <span>My Bids</span>
         </div>
         <div class="nav-item" onclick="window.location.href='funds.html'">
@@ -159,7 +152,7 @@
             <span>Fund</span>
         </div>
         <div class="nav-item" onclick="showSupportModal()">
-            <img src="https://i.imgur.com/StGZq3Y.png" alt="Support">
+            <img src="https://i.imgur.com/ug9IprL.jpeg" alt="Support">
             <span>Support</span>
         </div>
     </div>
