@@ -25,7 +25,6 @@
         .game-type-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
         .game-type-btn { background: #f8f9fa; border: 1px solid #ffe0b3; padding: 8px 16px; border-radius: 30px; color: #666; font-size: 13px; cursor: pointer; transition: all 0.3s; }
         .game-type-btn.active { background: #ff9800; color: #fff; border-color: #ff9800; }
-        .game-type-btn.disabled { opacity: 0.5; cursor: not-allowed; background: #e0e0e0; }
         
         .game-panel { background: #fff; margin: 10px; border-radius: 16px; padding: 20px; border: 1px solid #ffe0b3; }
         .game-panel-title { color: #ff9800; font-size: 16px; font-weight: bold; text-align: center; margin-bottom: 15px; }
@@ -159,9 +158,10 @@
     const validTriplePanaList = ['111','222','333','444','555','666','777','888','999','000'];
     
     // Game Types with correct Open/Close availability
+    // Jodi: Only in OPEN bidding, NOT in CLOSE bidding
     const allGameTypes = [
         { name: 'Single Digit', rate: 10, hasOpenClose: true, availableInOpen: true, availableInClose: true },
-        { name: 'Jodi', rate: 100, hasOpenClose: false, availableInOpen: true, availableInClose: true },
+        { name: 'Jodi', rate: 100, hasOpenClose: false, availableInOpen: true, availableInClose: false },
         { name: 'Single Pana', rate: 160, hasOpenClose: true, availableInOpen: true, availableInClose: true },
         { name: 'Double Pana', rate: 320, hasOpenClose: true, availableInOpen: true, availableInClose: true },
         { name: 'Triple Pana', rate: 1000, hasOpenClose: true, availableInOpen: true, availableInClose: true },
