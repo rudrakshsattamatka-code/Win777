@@ -70,6 +70,16 @@
         .rate-info { text-align: center; font-size: 11px; color: #888; margin-top: 10px; }
         
         .info-text { font-size: 11px; color: #ff9800; text-align: center; margin-top: 5px; }
+        
+        /* Pana Grid for Quick Selection */
+        .pana-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 15px 0; max-height: 300px; overflow-y: auto; padding: 5px; }
+        .pana-btn { background: #f8f9fa; border: 1px solid #ffe0b3; padding: 8px; border-radius: 8px; text-align: center; font-size: 12px; font-weight: bold; color: #333; cursor: pointer; transition: all 0.3s; }
+        .pana-btn:hover { background: #ffe0b3; transform: scale(1.02); }
+        .pana-btn.selected { background: #ff9800; color: #fff; border-color: #ff9800; }
+        
+        .selection-mode { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; }
+        .mode-btn { background: #f8f9fa; border: 1px solid #ffe0b3; padding: 6px 20px; border-radius: 30px; color: #666; cursor: pointer; }
+        .selected-count { text-align: center; color: #ff9800; font-size: 13px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -119,7 +129,7 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
     
-    let currentUser = null, userData = null, currentMarket = '', currentMarketId = '', currentStatus = 'open', currentGameType = 'Single Digit', bids = [];
+    let currentUser = null, userData = null, currentMarket = '', currentMarketId = '', currentStatus = 'open', currentGameType = 'Single Digit', bids = [], selectedNumbers = new Set(), selectionMode = 'multiple';
     
     const gameRates = {
         'Single Digit': 10, 'Jodi': 100, 'Single Pana': 160,
@@ -127,14 +137,41 @@
         'Half Sangam A': 1600, 'Half Sangam B': 1600, 'Full Sangam': 25000
     };
     
-    // Predefined valid lists
+    // Complete Single Pana List (184 numbers)
+    const validSinglePanaList = [
+        '128','137','146','236','245','290','380','470','489','560','579','678',
+        '129','138','147','156','237','246','345','390','480','570','589','679',
+        '120','139','148','157','238','247','256','346','490','580','670','689',
+        '130','149','158','167','239','248','257','347','356','590','680','789',
+        '140','159','168','230','249','258','267','348','357','456','690','780',
+        '123','150','169','178','240','259','268','349','358','367','457','790',
+        '124','160','278','179','250','269','340','359','368','458','467','890',
+        '125','134','170','189','260','279','350','369','468','378','459','567',
+        '126','135','180','234','270','289','360','379','450','469','478','568',
+        '127','136','145','190','235','280','370','389','460','479','569','578'
+    ];
+    
+    // Complete Double Pana List (86 numbers)
+    const validDoublePanaList = [
+        '100','119','155','227','335','344','399','588','669','110','200','228',
+        '255','366','499','660','688','778','166','229','300','337','355','445',
+        '599','779','788','112','220','266','338','400','446','455','699','770',
+        '113','122','177','339','366','447','500','799','889','600','114','277',
+        '330','448','466','556','880','899','115','133','188','223','377','449',
+        '557','566','700','116','224','233','288','440','477','558','800','990',
+        '117','144','199','225','388','559','577','667','900','118','226','244',
+        '299','334','488','550','668','677'
+    ];
+    
+    // Triple Pana List
+    const validTriplePanaList = ['111','222','333','444','555','666','777','888','999','000'];
+    
+    // Single Digit List
     const validSingleDigits = ['0','1','2','3','4','5','6','7','8','9'];
+    
+    // Jodi List
     const validJodiList = [];
     for(let i = 0; i <= 99; i++) validJodiList.push(i.toString().padStart(2,'0'));
-    
-    const validSinglePanaList = ['127','136','145','190','235','280','370','389','460','479','569','578','128','137','146','236','245','290','380','470','489','560','579','678','129','138','147','156','237','246','345','390','480','570','589','679','120','139','148','157','238','247','256','346','490','580','670','689','130','149','158','167','239','248','257','347','356','590','680','789'];
-    const validDoublePanaList = ['100','119','155','227','335','344','399','588','669','110','200','228','255','366','499','660','688','778','166','229','300','337','355','445','599','779','788','112','220','266','338','400','446','455','699','770'];
-    const validTriplePanaList = ['111','222','333','444','555','666','777','888','999','000'];
     
     const allGameTypes = [
         { name: 'Single Digit', rate: 10 },
@@ -150,24 +187,6 @@
     let availableGameTypes = [];
     let selectedOpenClose = 'Open';
     
-    // Validation functions
-    function validateNumber(value, gameType) {
-        switch(gameType) {
-            case 'Single Digit':
-                return validSingleDigits.includes(value);
-            case 'Jodi':
-                return validJodiList.includes(value);
-            case 'Single Pana':
-                return validSinglePanaList.includes(value);
-            case 'Double Pana':
-                return validDoublePanaList.includes(value);
-            case 'Triple Pana':
-                return validTriplePanaList.includes(value);
-            default:
-                return true;
-        }
-    }
-    
     function renderGameTypeSelector() {
         const container = document.getElementById('gameTypeOptions');
         container.innerHTML = availableGameTypes.map(type => 
@@ -177,6 +196,7 @@
     
     function selectGameType(type) {
         currentGameType = type;
+        selectedNumbers.clear();
         renderGameTypeSelector();
         renderGamePanel();
     }
@@ -199,18 +219,20 @@
                             <span class="points-label">Points:</span>
                             <input type="number" id="pointsInput" class="points-input" value="10" min="5">
                         </div>
-                        <div class="manual-entry">
-                            <div class="manual-row">
-                                <span class="manual-label">Enter Digit:</span>
-                                <input type="text" id="manualValue" placeholder="Enter digit (0-9)" maxlength="1">
-                            </div>
+                        <div class="selection-mode">
+                            <button class="mode-btn" onclick="toggleSelectionMode()">${selectionMode === 'multiple' ? 'Multiple Select' : 'Single Select'}</button>
                         </div>
-                        <button class="add-btn" onclick="addManualNumber()">+ Add to Bids</button>
+                        <div class="selected-count">Selected: ${selectedNumbers.size}</div>
+                        <div class="pana-grid" id="digitsGrid"></div>
+                        <button class="add-btn" onclick="addSelectedToBids()">+ Add to Bids</button>
                         ${renderBidItems()}
                         <div class="rate-info">💰 Win ${rate}x your bid amount!</div>
-                        <div class="info-text">✅ Valid digits: 0,1,2,3,4,5,6,7,8,9</div>
+                        <div class="info-text">✅ Valid digits: 0-9</div>
                     </div>
                 `;
+                const digits = ['0','1','2','3','4','5','6','7','8','9'];
+                const grid = document.getElementById('digitsGrid');
+                if(grid) grid.innerHTML = digits.map(d => `<div class="pana-btn ${selectedNumbers.has(d) ? 'selected' : ''}" onclick="toggleNumber('${d}')">${d}</div>`).join('');
                 break;
                 
             case 'Jodi':
@@ -221,18 +243,26 @@
                             <span class="points-label">Points:</span>
                             <input type="number" id="pointsInput" class="points-input" value="10" min="5">
                         </div>
-                        <div class="manual-entry">
-                            <div class="manual-row">
-                                <span class="manual-label">Enter Jodi:</span>
-                                <input type="text" id="manualValue" placeholder="Enter Jodi (00-99)" maxlength="2">
-                            </div>
+                        <div class="selection-mode">
+                            <button class="mode-btn" onclick="toggleSelectionMode()">${selectionMode === 'multiple' ? 'Multiple Select' : 'Single Select'}</button>
                         </div>
-                        <button class="add-btn" onclick="addManualNumber()">+ Add to Bids</button>
+                        <div class="selected-count">Selected: ${selectedNumbers.size}</div>
+                        <div class="pana-grid" id="jodiGrid"></div>
+                        <button class="add-btn" onclick="addSelectedToBids()">+ Add to Bids</button>
                         ${renderBidItems()}
                         <div class="rate-info">💰 Win ${rate}x your bid amount!</div>
                         <div class="info-text">✅ Valid Jodi: 00 to 99</div>
                     </div>
                 `;
+                const jodiGrid = document.getElementById('jodiGrid');
+                if(jodiGrid) {
+                    let jodiHtml = '';
+                    for(let i = 0; i <= 99; i++) {
+                        const j = i.toString().padStart(2,'0');
+                        jodiHtml += `<div class="pana-btn ${selectedNumbers.has(j) ? 'selected' : ''}" onclick="toggleNumber('${j}')">${j}</div>`;
+                    }
+                    jodiGrid.innerHTML = jodiHtml;
+                }
                 break;
                 
             case 'Single Pana':
@@ -248,18 +278,23 @@
                             <span class="points-label">Points:</span>
                             <input type="number" id="pointsInput" class="points-input" value="10" min="5">
                         </div>
-                        <div class="manual-entry">
-                            <div class="manual-row">
-                                <span class="manual-label">Enter Single Pana:</span>
-                                <input type="text" id="manualValue" placeholder="Enter 3-digit Pana" maxlength="3">
-                            </div>
+                        <div class="selection-mode">
+                            <button class="mode-btn" onclick="toggleSelectionMode()">${selectionMode === 'multiple' ? 'Multiple Select' : 'Single Select'}</button>
                         </div>
-                        <button class="add-btn" onclick="addManualNumber()">+ Add to Bids</button>
+                        <div class="selected-count">Selected: ${selectedNumbers.size}</div>
+                        <div class="pana-grid" id="singlePanaGrid"></div>
+                        <button class="add-btn" onclick="addSelectedToBids()">+ Add to Bids</button>
                         ${renderBidItems()}
                         <div class="rate-info">💰 Win ${rate}x your bid amount!</div>
-                        <div class="info-text">✅ Valid Single Pana numbers only (60+ available)</div>
+                        <div class="info-text">✅ Valid Single Pana numbers only (184 available)</div>
                     </div>
                 `;
+                const singlePanaGrid = document.getElementById('singlePanaGrid');
+                if(singlePanaGrid) {
+                    singlePanaGrid.innerHTML = validSinglePanaList.map(p => 
+                        `<div class="pana-btn ${selectedNumbers.has(p) ? 'selected' : ''}" onclick="toggleNumber('${p}')">${p}</div>`
+                    ).join('');
+                }
                 break;
                 
             case 'Double Pana':
@@ -275,18 +310,23 @@
                             <span class="points-label">Points:</span>
                             <input type="number" id="pointsInput" class="points-input" value="10" min="5">
                         </div>
-                        <div class="manual-entry">
-                            <div class="manual-row">
-                                <span class="manual-label">Enter Double Pana:</span>
-                                <input type="text" id="manualValue" placeholder="Enter 3-digit Pana" maxlength="3">
-                            </div>
+                        <div class="selection-mode">
+                            <button class="mode-btn" onclick="toggleSelectionMode()">${selectionMode === 'multiple' ? 'Multiple Select' : 'Single Select'}</button>
                         </div>
-                        <button class="add-btn" onclick="addManualNumber()">+ Add to Bids</button>
+                        <div class="selected-count">Selected: ${selectedNumbers.size}</div>
+                        <div class="pana-grid" id="doublePanaGrid"></div>
+                        <button class="add-btn" onclick="addSelectedToBids()">+ Add to Bids</button>
                         ${renderBidItems()}
                         <div class="rate-info">💰 Win ${rate}x your bid amount!</div>
-                        <div class="info-text">✅ Valid Double Pana numbers only (50+ available)</div>
+                        <div class="info-text">✅ Valid Double Pana numbers only (86 available)</div>
                     </div>
                 `;
+                const doublePanaGrid = document.getElementById('doublePanaGrid');
+                if(doublePanaGrid) {
+                    doublePanaGrid.innerHTML = validDoublePanaList.map(p => 
+                        `<div class="pana-btn ${selectedNumbers.has(p) ? 'selected' : ''}" onclick="toggleNumber('${p}')">${p}</div>`
+                    ).join('');
+                }
                 break;
                 
             case 'Triple Pana':
@@ -302,18 +342,23 @@
                             <span class="points-label">Points:</span>
                             <input type="number" id="pointsInput" class="points-input" value="10" min="5">
                         </div>
-                        <div class="manual-entry">
-                            <div class="manual-row">
-                                <span class="manual-label">Enter Triple Pana:</span>
-                                <input type="text" id="manualValue" placeholder="Enter 3-digit Pana" maxlength="3">
-                            </div>
+                        <div class="selection-mode">
+                            <button class="mode-btn" onclick="toggleSelectionMode()">${selectionMode === 'multiple' ? 'Multiple Select' : 'Single Select'}</button>
                         </div>
-                        <button class="add-btn" onclick="addManualNumber()">+ Add to Bids</button>
+                        <div class="selected-count">Selected: ${selectedNumbers.size}</div>
+                        <div class="pana-grid" id="triplePanaGrid"></div>
+                        <button class="add-btn" onclick="addSelectedToBids()">+ Add to Bids</button>
                         ${renderBidItems()}
                         <div class="rate-info">💰 Win ${rate}x your bid amount!</div>
                         <div class="info-text">✅ Valid Triple Pana: 000,111,222,333,444,555,666,777,888,999</div>
                     </div>
                 `;
+                const triplePanaGrid = document.getElementById('triplePanaGrid');
+                if(triplePanaGrid) {
+                    triplePanaGrid.innerHTML = validTriplePanaList.map(p => 
+                        `<div class="pana-btn ${selectedNumbers.has(p) ? 'selected' : ''}" onclick="toggleNumber('${p}')">${p}</div>`
+                    ).join('');
+                }
                 break;
                 
             case 'Half Sangam A':
@@ -401,37 +446,40 @@
         renderGamePanel(); 
     }
     
-    function addManualNumber() {
-        const value = document.getElementById('manualValue')?.value.trim();
-        const points = parseInt(document.getElementById('pointsInput')?.value || 10);
-        
-        if(!value) {
-            alert('Please enter a number');
-            return;
-        }
-        
-        if(points < 5) {
-            alert('Minimum points is ₹5');
-            return;
-        }
-        
-        if(!validateNumber(value, currentGameType)) {
-            alert(`Invalid ${currentGameType} number!\n\nPlease enter a valid number from the allowed list.`);
-            return;
-        }
-        
-        bids.push({
-            type: currentGameType,
-            option: (currentGameType !== 'Jodi' && currentGameType !== 'Half Sangam A' && currentGameType !== 'Half Sangam B' && currentGameType !== 'Full Sangam') ? selectedOpenClose : null,
-            value: value,
-            points: points,
-            market: currentMarket,
-            marketId: currentMarketId
-        });
-        
-        document.getElementById('manualValue').value = '';
-        updateSummary();
-        renderGamePanel();
+    function toggleSelectionMode() { 
+        selectionMode = selectionMode === 'multiple' ? 'single' : 'multiple'; 
+        selectedNumbers.clear(); 
+        renderGamePanel(); 
+    }
+    
+    function toggleNumber(value) { 
+        if(selectionMode === 'single') { 
+            selectedNumbers.clear(); 
+            selectedNumbers.add(value); 
+        } else { 
+            if(selectedNumbers.has(value)) selectedNumbers.delete(value); 
+            else selectedNumbers.add(value); 
+        } 
+        renderGamePanel(); 
+    }
+    
+    function addSelectedToBids() { 
+        if(selectedNumbers.size === 0) return; 
+        let pts = parseInt(document.getElementById('pointsInput')?.value || 10); 
+        if(pts < 5) { alert('Minimum points is ₹5'); return; } 
+        for(let v of selectedNumbers) { 
+            bids.push({ 
+                type: currentGameType, 
+                option: (currentGameType !== 'Jodi' && currentGameType !== 'Half Sangam A' && currentGameType !== 'Half Sangam B' && currentGameType !== 'Full Sangam') ? selectedOpenClose : null, 
+                value: v, 
+                points: pts, 
+                market: currentMarket, 
+                marketId: currentMarketId 
+            }); 
+        } 
+        selectedNumbers.clear(); 
+        updateSummary(); 
+        renderGamePanel(); 
     }
     
     function addHalfSangamA() { 
@@ -612,7 +660,7 @@
                 date: new Date() 
             });
             showMessage(`✅ ₹${total} bids placed!`, false);
-            bids = []; updateSummary(); renderGamePanel();
+            bids = []; selectedNumbers.clear(); updateSummary(); renderGamePanel();
             const updatedUser = await db.collection('users').doc(currentUser.uid).get(); 
             userData = updatedUser.data(); 
             document.getElementById('userBalance').innerText = userData?.balance || 0;
@@ -646,8 +694,10 @@
     
     window.selectGameType = selectGameType;
     window.setOpenClose = setOpenClose;
-    window.addManualNumber = addManualNumber;
+    window.toggleNumber = toggleNumber;
+    window.addSelectedToBids = addSelectedToBids;
     window.removeBid = removeBid;
+    window.toggleSelectionMode = toggleSelectionMode;
     window.addHalfSangamA = addHalfSangamA;
     window.addHalfSangamB = addHalfSangamB;
     window.addFullSangam = addFullSangam;
