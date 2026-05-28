@@ -12,97 +12,74 @@
         body { background: #fff9e8; padding-bottom: 70px; }
         .app-container { max-width: 500px; margin: 0 auto; background: #fff9e8; min-height: 100vh; }
         
-        /* Animations */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideInLeft {
-            from { opacity: 0; transform: translateX(-30px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.02); }
-            100% { transform: scale(1); }
-        }
-        @keyframes glow {
-            0% { box-shadow: 0 0 5px rgba(255,152,0,0.3); }
-            50% { box-shadow: 0 0 20px rgba(255,152,0,0.6); }
-            100% { box-shadow: 0 0 5px rgba(255,152,0,0.3); }
-        }
-        
-        .header { background: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ffe0b3; animation: slideInLeft 0.5s ease-out; }
+        .header { background: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ffe0b3; }
         .logo-img { width: 40px; height: 40px; border-radius: 10px; }
-        .balance { background: #ff9800; padding: 5px 12px; border-radius: 20px; color: #fff; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s; }
-        .balance:hover { transform: scale(1.05); }
+        .balance { background: #ff9800; padding: 5px 12px; border-radius: 20px; color: #fff; font-weight: bold; font-size: 14px; cursor: pointer; }
         
-        .profile-row { display: flex; align-items: center; gap: 12px; background: #fff; margin: 10px; padding: 12px 15px; border-radius: 16px; border: 1px solid #ffe0b3; cursor: pointer; transition: all 0.3s; animation: fadeInUp 0.5s ease-out; }
-        .profile-row:hover { transform: scale(1.01); box-shadow: 0 4px 12px rgba(255,152,0,0.1); }
+        .profile-row { display: flex; align-items: center; gap: 12px; background: #fff; margin: 10px; padding: 12px 15px; border-radius: 16px; border: 1px solid #ffe0b3; cursor: pointer; }
         .profile-avatar { width: 50px; height: 50px; background: linear-gradient(135deg, #ff9800, #e68a00); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; }
         .profile-info { flex: 1; }
         .profile-name { color: #333; font-size: 16px; font-weight: bold; }
         .profile-phone { color: #888; font-size: 12px; }
         .view-profile { color: #ff9800; font-size: 12px; }
         
-        .notice-board { background: linear-gradient(135deg, #ff9800, #e68a00); margin: 10px; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; animation: fadeInUp 0.5s ease-out 0.1s both; }
+        .notice-board { background: linear-gradient(135deg, #ff9800, #e68a00); margin: 10px; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
         .notice-icon { font-size: 24px; }
         .notice-text { flex: 1; color: #fff; font-weight: bold; font-size: 13px; }
         .close-notice { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
         
         /* Live Clock */
-        .live-clock { background: linear-gradient(135deg, #ff9800, #e68a00); margin: 10px; padding: 10px 15px; border-radius: 40px; display: flex; justify-content: center; align-items: center; gap: 10px; animation: glow 2s infinite, fadeInUp 0.5s ease-out 0.2s both; }
+        .live-clock { background: linear-gradient(135deg, #ff9800, #e68a00); margin: 10px; padding: 10px 15px; border-radius: 40px; display: flex; justify-content: center; align-items: center; gap: 10px; }
         .clock-icon { font-size: 18px; color: #fff; }
         .clock-time { font-size: 20px; font-weight: bold; color: #fff; font-family: monospace; letter-spacing: 2px; }
         .clock-date { font-size: 12px; color: #fff; opacity: 0.9; }
         
-        .games-row { display: flex; justify-content: space-around; background: #fff; margin: 10px; padding: 12px; border-radius: 12px; animation: fadeInUp 0.5s ease-out 0.3s both; }
+        .games-row { display: flex; justify-content: space-around; background: #fff; margin: 10px; padding: 12px; border-radius: 12px; }
         .game-icon { text-align: center; color: #666; font-size: 11px; cursor: pointer; transition: all 0.3s; }
-        .game-icon:hover { transform: translateY(-5px) scale(1.05); }
+        .game-icon:hover { transform: translateY(-3px); }
         .game-icon img { width: 45px; height: 45px; display: block; margin: 0 auto 4px; border-radius: 12px; object-fit: cover; }
         .game-icon span { font-size: 11px; }
         
-        .market-card { background: #fff; margin: 12px; border-radius: 16px; padding: 16px; border: 1px solid #ffe0b3; transition: all 0.3s; animation: fadeInUp 0.5s ease-out; }
-        .market-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .market-card { background: #fff; margin: 12px; border-radius: 16px; padding: 16px; border: 1px solid #ffe0b3; transition: all 0.3s; }
+        .market-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
         .market-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
         .market-name { color: #ff9800; font-size: 16px; font-weight: bold; }
         .market-numbers { color: #888; font-size: 12px; font-family: monospace; background: #fff9e8; padding: 4px 8px; border-radius: 8px; }
         
-        .result-box { background: linear-gradient(135deg, #fff9e8, #fff0d8); border-radius: 12px; padding: 15px; margin: 10px 0; text-align: center; border: 1px solid #ffe0b3; transition: all 0.3s; }
-        .result-box:hover { transform: scale(1.02); }
+        .result-box { background: linear-gradient(135deg, #fff9e8, #fff0d8); border-radius: 12px; padding: 15px; margin: 10px 0; text-align: center; border: 1px solid #ffe0b3; }
         .result-numbers { color: #ff9800; font-size: 22px; font-weight: bold; letter-spacing: 2px; }
         
         /* Market Timings under result bar */
         .market-timings { display: flex; justify-content: center; gap: 25px; margin: 10px 0 5px 0; padding: 8px; background: #f8f9fa; border-radius: 30px; }
         .timing-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
-        .green-dot { width: 10px; height: 10px; background: #28a745; border-radius: 50%; animation: pulse 2s infinite; }
-        .orange-dot { width: 10px; height: 10px; background: #ff9800; border-radius: 50%; animation: pulse 2s infinite; }
+        .green-dot { width: 10px; height: 10px; background: #28a745; border-radius: 50%; }
+        .orange-dot { width: 10px; height: 10px; background: #ff9800; border-radius: 50%; }
         .timing-label { color: #555; font-weight: 500; }
         .timing-value { color: #333; font-weight: bold; }
         
-        .market-status { font-size: 11px; padding: 4px 8px; border-radius: 12px; display: inline-block; transition: all 0.3s; }
+        .market-status { font-size: 11px; padding: 4px 8px; border-radius: 12px; display: inline-block; }
         .status-closed { background: #ffe8e8; color: #dc3545; border: 1px solid #ffc9c9; }
         .status-close { background: #fff0d8; color: #ff9800; border: 1px solid #ffe0b3; }
         .status-open { background: #e8ffe8; color: #28a745; border: 1px solid #c8ffc8; }
         
         .play-btn { width: 100%; margin-top: 12px; padding: 10px; background: #ff9800; border: none; border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .play-btn:hover { background: #e68a00; transform: scale(1.02); }
-        .play-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #ccc; transform: none; }
+        .play-btn:hover { background: #e68a00; }
+        .play-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #ccc; }
         
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #fff; display: flex; justify-content: space-around; padding: 8px 10px; border-top: 1px solid #ffe0b3; animation: fadeInUp 0.5s ease-out; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #fff; display: flex; justify-content: space-around; padding: 8px 10px; border-top: 1px solid #ffe0b3; }
         .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 10px; transition: all 0.3s; flex: 1; }
-        .nav-item:hover { color: #ff9800; transform: translateY(-3px); }
+        .nav-item:hover { color: #ff9800; transform: translateY(-2px); }
         .nav-item img { width: 28px; height: 28px; display: block; margin: 0 auto 3px; border-radius: 8px; object-fit: cover; }
         .nav-item span { font-size: 10px; display: block; }
         .nav-item.active { color: #ff9800; }
         
         .hidden { display: none; }
         
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; animation: fadeInUp 0.3s ease-out; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: #fff; border-radius: 24px; padding: 25px; width: 90%; max-width: 350px; max-height: 80vh; overflow-y: auto; }
         .modal-content h3 { color: #ff9800; margin-bottom: 15px; text-align: center; }
-        .modal-btn { width: 100%; padding: 12px; background: #ff9800; border: none; border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
-        .modal-btn:hover { background: #e68a00; transform: scale(1.02); }
+        .modal-btn { width: 100%; padding: 12px; background: #ff9800; border: none; border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .modal-btn:hover { background: #e68a00; }
         .close-modal { background: #e0e0e0; color: #333; }
         .logout-btn { background: #dc3545; color: #fff; }
         .logout-btn:hover { background: #c82333; }
@@ -112,8 +89,8 @@
         .rate-name { color: #555; }
         .rate-value { color: #ff9800; font-weight: bold; }
         
-        .support-option { display: flex; align-items: center; gap: 15px; padding: 15px; background: #f8f9fa; border-radius: 12px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s; }
-        .support-option:hover { background: #fff0d8; transform: translateX(5px); }
+        .support-option { display: flex; align-items: center; gap: 15px; padding: 15px; background: #f8f9fa; border-radius: 12px; margin-bottom: 10px; cursor: pointer; }
+        .support-option:hover { background: #fff0d8; }
         .support-icon { font-size: 30px; }
         .support-text { flex: 1; }
         .support-title { font-weight: bold; color: #333; }
@@ -308,7 +285,7 @@
             const serverTime = doc.data().timestamp.toDate();
             const clientTime = new Date();
             serverTimeOffset = serverTime.getTime() - clientTime.getTime();
-            console.log("Server time synced, offset:", serverTimeOffset, "ms");
+            console.log("Server time synced");
             return serverTime;
         } catch (error) {
             console.error("Error syncing server time:", error);
@@ -412,7 +389,7 @@
     function renderMarkets() {
         const container = document.getElementById('marketsList');
         if (marketsData.length === 0) {
-            container.innerHTML = '<div style="text-align:center; color:#888; padding:40px; animation: fadeInUp 0.5s;">No markets available. Admin will add soon.</div>';
+            container.innerHTML = '<div style="text-align:center; color:#888; padding:40px;">No markets available. Admin will add soon.</div>';
             return;
         }
         
@@ -621,6 +598,11 @@
             updateLiveClock();
             listenToMarkets(); // Refresh market status every minute
         }, 1000);
+        
+        // Re-sync server time every hour to prevent drift
+        setInterval(async () => {
+            await syncServerTime();
+        }, 3600000);
     }
     
     setInterval(() => {
