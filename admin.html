@@ -41,6 +41,7 @@
         .btn-warning { background: #ffc107; color: #333; }
         .btn-reset { background: #6c757d; color: #fff; }
         .btn-info { background: #17a2b8; color: #fff; }
+        .btn-serial { background: #ff9800; color: #fff; }
         .hidden { display: none; }
         
         .results-container { display: flex; gap: 20px; flex-wrap: wrap; margin: 15px 0; }
@@ -54,7 +55,8 @@
         .section-title { color: #333; font-size: 14px; margin: 15px 0 5px 0; font-weight: bold; }
         
         .market-name-text { color: #333; font-size: 16px; font-weight: bold; }
-        .market-serial { color: #ff9800; font-size: 14px; font-weight: bold; margin-right: 8px; }
+        .market-serial { color: #ff9800; font-size: 14px; font-weight: bold; margin-right: 8px; cursor: pointer; }
+        .market-serial:hover { text-decoration: underline; }
         .market-numbers-text { color: #666; font-size: 14px; margin: 5px 0; }
         .market-time-text { color: #888; font-size: 12px; }
         
@@ -142,9 +144,10 @@
                     <option value="closed">🔴 CLOSED</option>
                 </select>
                 <button onclick="addMarket()">Add Market</button>
+                <button onclick="deleteAllMarkets()" style="background:#dc3545;">🗑️ Delete All</button>
             </div>
             <div class="card">
-                <h3>📋 Manage Markets (With Serial Numbers)</h3>
+                <h3>📋 Manage Markets (Click Serial Number to Change Order)</h3>
                 <div id="marketsList">Loading...</div>
             </div>
         </div>
@@ -256,10 +259,70 @@
         return `${hours}:${minutes} ${ampm}`;
     }
     
+    async function changeSerialNumber(marketId, currentSerial) {
+        const newSerial = prompt(`Enter new serial number for this market:\n\nCurrent serial: #${currentSerial}\n\nEnter number (1-100):`, currentSerial);
+        if (newSerial && !isNaN(newSerial) && parseInt(newSerial) > 0) {
+            const newSerialNum = parseInt(newSerial);
+            
+            // Check if serial number already exists
+            const existingMarkets = await db.collection('markets').get();
+            let serialExists = false;
+            let existingMarketId = null;
+            
+            for (const doc of existingMarkets.docs) {
+                const data = doc.data();
+                if (data.serialNo === newSerialNum && doc.id !== marketId) {
+                    serialExists = true;
+                    existingMarketId = doc.id;
+                    break;
+                }
+            }
+            
+            if (serialExists) {
+                // Swap serial numbers
+                if (confirm(`Serial #${newSerialNum} is already used by another market.\n\nDo you want to SWAP serial numbers?`)) {
+                    const currentMarket = await db.collection('markets').doc(marketId).get();
+                    const currentSerialNum = currentMarket.data().serialNo;
+                    
+                    // Swap serials
+                    await db.collection('markets').doc(marketId).update({ serialNo: newSerialNum });
+                    await db.collection('markets').doc(existingMarketId).update({ serialNo: currentSerialNum });
+                    alert(`✅ Serial numbers swapped!\n\nMarket 1: #${currentSerialNum} → #${newSerialNum}\nMarket 2: #${newSerialNum} → #${currentSerialNum}`);
+                    
+                    // Reload markets to show new order
+                    loadMarkets();
+                }
+            } else {
+                // Just update the serial number
+                await db.collection('markets').doc(marketId).update({ serialNo: newSerialNum });
+                alert(`✅ Serial number changed to #${newSerialNum}`);
+                loadMarkets();
+            }
+        }
+    }
+    
+    async function deleteAllMarkets() {
+        if (confirm("⚠️ DELETE ALL MARKETS\n\nThis will permanently delete ALL markets!\n\nThis action cannot be undone!\n\nType 'DELETE' to confirm:")) {
+            const confirmText = prompt('Type "DELETE" to confirm:');
+            if (confirmText === 'DELETE') {
+                const markets = await db.collection('markets').get();
+                const batch = db.batch();
+                markets.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+                alert(`✅ Deleted ${markets.size} markets successfully!`);
+                loadMarkets();
+            } else {
+                alert("❌ Deletion cancelled.");
+            }
+        }
+    }
+    
     function loadMarkets() {
         db.collection('markets').orderBy('serialNo', 'asc').onSnapshot((snapshot) => {
             let html = '';
-            let serialNo = 1;
+            let displaySerial = 1;
             snapshot.forEach(doc => {
                 const m = doc.data();
                 let statusClass = '', statusText = '';
@@ -294,7 +357,7 @@
                     <div class="market-item">
                         <div class="market-info">
                             <div class="market-name-text">
-                                <span class="market-serial">#${serialNo}</span> 📊 ${m.name || 'No name'}
+                                <span class="market-serial" onclick="changeSerialNumber('${doc.id}', ${m.serialNo || displaySerial})" title="Click to change serial number">#${m.serialNo || displaySerial}</span> 📊 ${m.name || 'No name'}
                             </div>
                             <div class="market-numbers-text">🎲 Numbers: ${m.numbers || '***'}</div>
                             <div class="market-time-text">
@@ -373,7 +436,7 @@
                         </div>
                     </div>
                 `;
-                serialNo++;
+                displaySerial++;
             });
             if (snapshot.empty) {
                 html = '<p style="color: #888; text-align:center; padding:40px;">No markets. Add one above!</p>';
@@ -524,9 +587,14 @@
         
         if (!name) { alert('Enter market name'); return; }
         
-        // Get current count for serial number
+        // Get current max serial number
         const markets = await db.collection('markets').get();
-        const serialNo = markets.size + 1;
+        let maxSerial = 0;
+        markets.forEach(doc => {
+            const data = doc.data();
+            if (data.serialNo && data.serialNo > maxSerial) maxSerial = data.serialNo;
+        });
+        const serialNo = maxSerial + 1;
         
         await db.collection('markets').add({ 
             name, numbers, openBidEnd, closeBidEnd, closedTime, status, serialNo,
@@ -806,6 +874,8 @@
     }
     
     window.login = login;
+    window.changeSerialNumber = changeSerialNumber;
+    window.deleteAllMarkets = deleteAllMarkets;
     window.setMarketStatus = setMarketStatus;
     window.declareOpenResult = declareOpenResult;
     window.declareCloseResult = declareCloseResult;
