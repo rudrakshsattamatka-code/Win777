@@ -12,11 +12,32 @@
         body { background: #fff9e8; padding-bottom: 70px; }
         .app-container { max-width: 500px; margin: 0 auto; background: #fff9e8; min-height: 100vh; }
         
-        .header { background: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ffe0b3; }
-        .logo-img { width: 40px; height: 40px; border-radius: 10px; }
-        .balance { background: #ff9800; padding: 5px 12px; border-radius: 20px; color: #fff; font-weight: bold; font-size: 14px; cursor: pointer; }
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(255,152,0,0.3); }
+            50% { box-shadow: 0 0 20px rgba(255,152,0,0.6); }
+            100% { box-shadow: 0 0 5px rgba(255,152,0,0.3); }
+        }
         
-        .profile-row { display: flex; align-items: center; gap: 12px; background: #fff; margin: 10px; padding: 12px 15px; border-radius: 16px; border: 1px solid #ffe0b3; cursor: pointer; transition: all 0.3s; }
+        .header { background: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ffe0b3; animation: slideInLeft 0.5s ease-out; }
+        .logo-img { width: 40px; height: 40px; border-radius: 10px; }
+        .balance { background: #ff9800; padding: 5px 12px; border-radius: 20px; color: #fff; font-weight: bold; font-size: 14px; cursor: pointer; transition: all 0.3s; }
+        .balance:hover { transform: scale(1.05); }
+        
+        .profile-row { display: flex; align-items: center; gap: 12px; background: #fff; margin: 10px; padding: 12px 15px; border-radius: 16px; border: 1px solid #ffe0b3; cursor: pointer; transition: all 0.3s; animation: fadeInUp 0.5s ease-out; }
         .profile-row:hover { transform: scale(1.01); box-shadow: 0 4px 12px rgba(255,152,0,0.1); }
         .profile-avatar { width: 50px; height: 50px; background: linear-gradient(135deg, #ff9800, #e68a00); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; }
         .profile-info { flex: 1; }
@@ -24,63 +45,64 @@
         .profile-phone { color: #888; font-size: 12px; }
         .view-profile { color: #ff9800; font-size: 12px; }
         
-        .notice-board { background: linear-gradient(135deg, #ff9800, #e68a00); margin: 10px; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .notice-board { background: linear-gradient(135deg, #ff9800, #e68a00); margin: 10px; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; animation: fadeInUp 0.5s ease-out 0.1s both; }
         .notice-icon { font-size: 24px; }
         .notice-text { flex: 1; color: #fff; font-weight: bold; font-size: 13px; }
         .close-notice { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
         
-        .games-row { display: flex; justify-content: space-around; background: #fff; margin: 10px; padding: 12px; border-radius: 12px; }
+        /* Live Clock */
+        .live-clock { background: linear-gradient(135deg, #ff9800, #e68a00); margin: 10px; padding: 10px 15px; border-radius: 40px; display: flex; justify-content: center; align-items: center; gap: 10px; animation: glow 2s infinite, fadeInUp 0.5s ease-out 0.2s both; }
+        .clock-icon { font-size: 18px; color: #fff; }
+        .clock-time { font-size: 20px; font-weight: bold; color: #fff; font-family: monospace; letter-spacing: 2px; }
+        .clock-date { font-size: 12px; color: #fff; opacity: 0.9; }
+        
+        .games-row { display: flex; justify-content: space-around; background: #fff; margin: 10px; padding: 12px; border-radius: 12px; animation: fadeInUp 0.5s ease-out 0.3s both; }
         .game-icon { text-align: center; color: #666; font-size: 11px; cursor: pointer; transition: all 0.3s; }
-        .game-icon:hover { transform: translateY(-3px); }
+        .game-icon:hover { transform: translateY(-5px) scale(1.05); }
         .game-icon img { width: 45px; height: 45px; display: block; margin: 0 auto 4px; border-radius: 12px; object-fit: cover; }
         .game-icon span { font-size: 11px; }
         
-        /* Live Timer */
-        .live-timer { background: linear-gradient(135deg, #ff9800, #e68a00); margin: 10px; padding: 12px 15px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; color: #fff; }
-        .timer-label { font-size: 12px; opacity: 0.9; }
-        .timer-value { font-size: 18px; font-weight: bold; font-family: monospace; }
-        .timer-status { font-size: 12px; }
-        
-        .market-card { background: #fff; margin: 12px; border-radius: 16px; padding: 16px; border: 1px solid #ffe0b3; transition: all 0.3s; }
-        .market-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .market-card { background: #fff; margin: 12px; border-radius: 16px; padding: 16px; border: 1px solid #ffe0b3; transition: all 0.3s; animation: fadeInUp 0.5s ease-out; }
+        .market-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
         .market-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
         .market-name { color: #ff9800; font-size: 16px; font-weight: bold; }
         .market-numbers { color: #888; font-size: 12px; font-family: monospace; background: #fff9e8; padding: 4px 8px; border-radius: 8px; }
         
-        /* Clean Market Times - Only dots */
-        .market-times { display: flex; gap: 15px; margin: 8px 0; font-size: 11px; }
-        .open-time { display: flex; align-items: center; gap: 5px; }
-        .open-dot { width: 8px; height: 8px; background: #28a745; border-radius: 50%; }
-        .close-time { display: flex; align-items: center; gap: 5px; }
-        .close-dot { width: 8px; height: 8px; background: #ff9800; border-radius: 50%; }
-        .time-text { color: #888; }
-        
-        .result-box { background: linear-gradient(135deg, #fff9e8, #fff0d8); border-radius: 12px; padding: 15px; margin: 10px 0; text-align: center; border: 1px solid #ffe0b3; }
+        .result-box { background: linear-gradient(135deg, #fff9e8, #fff0d8); border-radius: 12px; padding: 15px; margin: 10px 0; text-align: center; border: 1px solid #ffe0b3; transition: all 0.3s; }
+        .result-box:hover { transform: scale(1.02); }
         .result-numbers { color: #ff9800; font-size: 22px; font-weight: bold; letter-spacing: 2px; }
         
-        .market-status { font-size: 11px; padding: 4px 8px; border-radius: 12px; display: inline-block; }
+        /* Market Timings under result bar */
+        .market-timings { display: flex; justify-content: center; gap: 25px; margin: 10px 0 5px 0; padding: 8px; background: #f8f9fa; border-radius: 30px; }
+        .timing-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+        .green-dot { width: 10px; height: 10px; background: #28a745; border-radius: 50%; animation: pulse 2s infinite; }
+        .orange-dot { width: 10px; height: 10px; background: #ff9800; border-radius: 50%; animation: pulse 2s infinite; }
+        .timing-label { color: #555; font-weight: 500; }
+        .timing-value { color: #333; font-weight: bold; }
+        
+        .market-status { font-size: 11px; padding: 4px 8px; border-radius: 12px; display: inline-block; transition: all 0.3s; }
         .status-closed { background: #ffe8e8; color: #dc3545; border: 1px solid #ffc9c9; }
         .status-close { background: #fff0d8; color: #ff9800; border: 1px solid #ffe0b3; }
         .status-open { background: #e8ffe8; color: #28a745; border: 1px solid #c8ffc8; }
         
         .play-btn { width: 100%; margin-top: 12px; padding: 10px; background: #ff9800; border: none; border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .play-btn:hover { background: #e68a00; transform: scale(1.02); }
-        .play-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #ccc; }
+        .play-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #ccc; transform: none; }
         
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #fff; display: flex; justify-content: space-around; padding: 8px 10px; border-top: 1px solid #ffe0b3; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #fff; display: flex; justify-content: space-around; padding: 8px 10px; border-top: 1px solid #ffe0b3; animation: fadeInUp 0.5s ease-out; }
         .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 10px; transition: all 0.3s; flex: 1; }
-        .nav-item:hover { color: #ff9800; transform: translateY(-2px); }
+        .nav-item:hover { color: #ff9800; transform: translateY(-3px); }
         .nav-item img { width: 28px; height: 28px; display: block; margin: 0 auto 3px; border-radius: 8px; object-fit: cover; }
         .nav-item span { font-size: 10px; display: block; }
         .nav-item.active { color: #ff9800; }
         
         .hidden { display: none; }
         
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; animation: fadeIn 0.3s ease-out; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; animation: fadeInUp 0.3s ease-out; }
         .modal-content { background: #fff; border-radius: 24px; padding: 25px; width: 90%; max-width: 350px; max-height: 80vh; overflow-y: auto; }
         .modal-content h3 { color: #ff9800; margin-bottom: 15px; text-align: center; }
         .modal-btn { width: 100%; padding: 12px; background: #ff9800; border: none; border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
-        .modal-btn:hover { background: #e68a00; }
+        .modal-btn:hover { background: #e68a00; transform: scale(1.02); }
         .close-modal { background: #e0e0e0; color: #333; }
         .logout-btn { background: #dc3545; color: #fff; }
         .logout-btn:hover { background: #c82333; }
@@ -96,11 +118,6 @@
         .support-text { flex: 1; }
         .support-title { font-weight: bold; color: #333; }
         .support-desc { font-size: 12px; color: #888; }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
     </style>
 </head>
 <body>
@@ -125,11 +142,11 @@
         <button class="close-notice" onclick="event.stopPropagation(); closeNotice()">✕</button>
     </div>
     
-    <!-- Live Timer -->
-    <div class="live-timer" id="liveTimer">
-        <span class="timer-label">⏰ Next Bid Ends In</span>
-        <span class="timer-value" id="timerValue">--:--:--</span>
-        <span class="timer-status" id="timerStatus">Loading...</span>
+    <!-- Live Clock -->
+    <div class="live-clock" id="liveClock">
+        <span class="clock-icon">🕐</span>
+        <span class="clock-time" id="liveClockTime">--:--:--</span>
+        <span class="clock-date" id="liveClockDate">--/--/----</span>
     </div>
     
     <div class="games-row">
@@ -282,15 +299,21 @@
     let currentUserData = null;
     let serverTimeOffset = 0;
     
-    // Get server time from Firestore
-    async function getServerTime() {
-        const docRef = db.collection('settings').doc('servertime');
-        await docRef.set({ timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-        const doc = await docRef.get();
-        const serverTime = doc.data().timestamp.toDate();
-        const clientTime = new Date();
-        serverTimeOffset = serverTime - clientTime;
-        return serverTime;
+    // Get server time from Firestore (prevents phone time manipulation)
+    async function syncServerTime() {
+        try {
+            const docRef = db.collection('settings').doc('servertime');
+            await docRef.set({ timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+            const doc = await docRef.get();
+            const serverTime = doc.data().timestamp.toDate();
+            const clientTime = new Date();
+            serverTimeOffset = serverTime.getTime() - clientTime.getTime();
+            console.log("Server time synced, offset:", serverTimeOffset, "ms");
+            return serverTime;
+        } catch (error) {
+            console.error("Error syncing server time:", error);
+            return new Date();
+        }
     }
     
     function getCurrentServerTime() {
@@ -325,47 +348,18 @@
         else return 'closed';
     }
     
-    // Find next bid end time and update timer
-    function updateLiveTimer() {
-        const now = getCurrentServerTime();
-        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    // Update live clock
+    function updateLiveClock() {
+        const serverTime = getCurrentServerTime();
+        const hours = serverTime.getHours().toString().padStart(2, '0');
+        const minutes = serverTime.getMinutes().toString().padStart(2, '0');
+        const seconds = serverTime.getSeconds().toString().padStart(2, '0');
+        const day = serverTime.getDate().toString().padStart(2, '0');
+        const month = (serverTime.getMonth() + 1).toString().padStart(2, '0');
+        const year = serverTime.getFullYear();
         
-        let nextEndTime = null;
-        let nextEndType = null;
-        
-        for (const market of marketsData) {
-            const openEnd = timeToMinutes(market.openBidEnd);
-            const closeEnd = timeToMinutes(market.closeBidEnd);
-            
-            if (openEnd && currentMinutes < openEnd) {
-                if (!nextEndTime || openEnd < nextEndTime) {
-                    nextEndTime = openEnd;
-                    nextEndType = 'Open';
-                }
-            }
-            if (closeEnd && currentMinutes < closeEnd) {
-                if (!nextEndTime || closeEnd < nextEndTime) {
-                    nextEndTime = closeEnd;
-                    nextEndType = 'Close';
-                }
-            }
-        }
-        
-        if (nextEndTime) {
-            const targetTime = new Date(now);
-            targetTime.setHours(Math.floor(nextEndTime / 60), nextEndTime % 60, 0, 0);
-            const diffMs = targetTime - now;
-            if (diffMs > 0) {
-                const hours = Math.floor(diffMs / (1000 * 60 * 60));
-                const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
-                document.getElementById('timerValue').innerHTML = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                document.getElementById('timerStatus').innerHTML = `${nextEndType} Bid Ends`;
-                return;
-            }
-        }
-        document.getElementById('timerValue').innerHTML = '00:00:00';
-        document.getElementById('timerStatus').innerHTML = 'No Active Markets';
+        document.getElementById('liveClockTime').innerHTML = `${hours}:${minutes}:${seconds}`;
+        document.getElementById('liveClockDate').innerHTML = `${day}/${month}/${year}`;
     }
     
     function listenToMarkets() {
@@ -418,7 +412,7 @@
     function renderMarkets() {
         const container = document.getElementById('marketsList');
         if (marketsData.length === 0) {
-            container.innerHTML = '<div style="text-align:center; color:#888; padding:40px;">No markets available. Admin will add soon.</div>';
+            container.innerHTML = '<div style="text-align:center; color:#888; padding:40px; animation: fadeInUp 0.5s;">No markets available. Admin will add soon.</div>';
             return;
         }
         
@@ -450,18 +444,20 @@
                         <span class="market-name">${market.name}</span>
                         <span class="market-numbers">${numbersDisplay}</span>
                     </div>
-                    <div class="market-times">
-                        <div class="open-time">
-                            <div class="open-dot"></div>
-                            <span class="time-text">${openBidEnd12}</span>
-                        </div>
-                        <div class="close-time">
-                            <div class="close-dot"></div>
-                            <span class="time-text">${closeBidEnd12}</span>
-                        </div>
-                    </div>
                     <div class="result-box">
                         <div class="result-numbers">${resultDisplay}</div>
+                    </div>
+                    <div class="market-timings">
+                        <div class="timing-item">
+                            <div class="green-dot"></div>
+                            <span class="timing-label">Open</span>
+                            <span class="timing-value">${openBidEnd12}</span>
+                        </div>
+                        <div class="timing-item">
+                            <div class="orange-dot"></div>
+                            <span class="timing-label">Close</span>
+                            <span class="timing-value">${closeBidEnd12}</span>
+                        </div>
                     </div>
                     <div>
                         <span class="market-status ${getStatusClass(market.status)}">${getStatusText(market.status)}</span>
@@ -472,7 +468,6 @@
                 </div>
             `;
         });
-        updateLiveTimer();
     }
     
     async function loadUserData() {
@@ -617,14 +612,16 @@
     function closeNotice() { document.getElementById('noticeBoard').style.display = 'none'; }
     function showGames() { alert('Games coming soon!'); }
     
-    // Initialize server time
-    getServerTime().then(() => {
+    // Initialize - Sync server time first
+    async function init() {
+        await syncServerTime();
         listenToMarkets();
+        listenToNotice();
         setInterval(() => {
-            listenToMarkets();
-            updateLiveTimer();
+            updateLiveClock();
+            listenToMarkets(); // Refresh market status every minute
         }, 1000);
-    });
+    }
     
     setInterval(() => {
         if (auth.currentUser) {
@@ -639,7 +636,10 @@
     
     auth.onAuthStateChanged(user => { 
         if (!user) window.location.href = 'index.html'; 
-        else { loadUserData(); } 
+        else { 
+            loadUserData(); 
+            init();
+        } 
     });
     
     window.showBalance = showBalance;
