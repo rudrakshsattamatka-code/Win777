@@ -9,40 +9,40 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #e8f4f8; padding-bottom: 70px; }
-        .app-container { max-width: 500px; margin: 0 auto; background: #e8f4f8; min-height: 100vh; }
+        body { background: #fff9e8; padding-bottom: 70px; }
+        .app-container { max-width: 500px; margin: 0 auto; background: #fff9e8; min-height: 100vh; }
         
-        .header { background: #fff; padding: 15px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #d4eaf5; }
-        .logo { color: #00b4ff; font-size: 20px; font-weight: bold; flex: 1; text-align: center; }
-        .back-btn { background: none; border: none; color: #00b4ff; font-size: 24px; cursor: pointer; }
+        .header { background: #fff; padding: 15px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #ffe0b3; }
+        .logo { color: #ff9800; font-size: 20px; font-weight: bold; flex: 1; text-align: center; }
+        .back-btn { background: none; border: none; color: #ff9800; font-size: 24px; cursor: pointer; }
         
-        .user-card { background: #fff; margin: 15px; padding: 15px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #d4eaf5; }
+        .user-card { background: #fff; margin: 15px; padding: 15px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #ffe0b3; }
         .user-name { color: #333; font-size: 16px; font-weight: bold; }
         .user-phone { color: #888; font-size: 12px; margin-top: 4px; }
-        .balance-amount { color: #00b4ff; font-size: 20px; font-weight: bold; }
-        .balance-card { background: linear-gradient(135deg, #00b4ff, #0099cc); margin: 15px; padding: 20px; border-radius: 20px; text-align: center; color: #fff; }
+        .balance-amount { color: #ff9800; font-size: 20px; font-weight: bold; }
+        .balance-card { background: linear-gradient(135deg, #ff9800, #e68a00); margin: 15px; padding: 20px; border-radius: 20px; text-align: center; color: #fff; }
         .balance-card .label { font-size: 12px; opacity: 0.9; }
         .balance-card .amount { font-size: 36px; font-weight: bold; }
         
         .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 15px; }
-        .menu-card { background: #fff; border-radius: 16px; padding: 20px; text-align: center; border: 1px solid #d4eaf5; cursor: pointer; transition: all 0.3s; }
-        .menu-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .menu-icon { font-size: 40px; margin-bottom: 8px; }
-        .menu-title { color: #00b4ff; font-size: 14px; font-weight: bold; }
+        .menu-card { background: #fff; border-radius: 16px; padding: 20px; text-align: center; border: 1px solid #ffe0b3; cursor: pointer; transition: all 0.3s; }
+        .menu-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(255,152,0,0.1); }
+        .menu-card img { width: 50px; height: 50px; margin-bottom: 8px; border-radius: 12px; object-fit: cover; }
+        .menu-title { color: #ff9800; font-size: 14px; font-weight: bold; margin-top: 5px; }
         
         .screen { padding: 15px; }
-        .input-field { width: 100%; padding: 14px; background: #fff; border: 1px solid #d4eaf5; border-radius: 12px; color: #333; font-size: 16px; margin-bottom: 15px; }
+        .input-field { width: 100%; padding: 14px; background: #fff; border: 1px solid #ffe0b3; border-radius: 12px; color: #333; font-size: 16px; margin-bottom: 15px; }
         .amount-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-        .amount-btn { background: #fff; border: 1px solid #d4eaf5; border-radius: 16px; padding: 14px; text-align: center; color: #333; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
-        .amount-btn.active { background: #00b4ff; color: #fff; border-color: #00b4ff; }
-        .amount-btn:hover { background: #e8f4f8; }
+        .amount-btn { background: #fff; border: 1px solid #ffe0b3; border-radius: 16px; padding: 14px; text-align: center; color: #333; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .amount-btn.active { background: #ff9800; color: #fff; border-color: #ff9800; }
+        .amount-btn:hover { background: #fff0d8; }
         
-        .btn { width: 100%; padding: 14px; background: #00b4ff; border: none; border-radius: 12px; color: #fff; font-weight: bold; font-size: 16px; cursor: pointer; transition: all 0.3s; }
-        .btn:hover { background: #0099cc; transform: scale(1.02); }
+        .btn { width: 100%; padding: 14px; background: #ff9800; border: none; border-radius: 12px; color: #fff; font-weight: bold; font-size: 16px; cursor: pointer; transition: all 0.3s; }
+        .btn:hover { background: #e68a00; transform: scale(1.02); }
         .btn-warning { background: #ffc107; color: #333; }
         
-        .upi-id-box { background: #fff; border-radius: 16px; padding: 15px; text-align: center; margin: 15px 0; border: 1px solid #d4eaf5; }
-        .upi-id { color: #00b4ff; font-size: 18px; font-weight: bold; }
+        .upi-id-box { background: #fff; border-radius: 16px; padding: 15px; text-align: center; margin: 15px 0; border: 1px solid #ffe0b3; }
+        .upi-id { color: #ff9800; font-size: 18px; font-weight: bold; }
         
         .timer-box { background: #fff; border-radius: 16px; padding: 15px; text-align: center; margin: 15px 0; border: 1px solid #ffe0b3; }
         .timer-text { color: #ff9800; font-size: 32px; font-weight: bold; font-family: monospace; }
@@ -52,18 +52,19 @@
         .message-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .message-pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         
-        .bank-details-box { background: #fff; border-radius: 16px; padding: 15px; margin: 15px 0; border: 1px solid #d4eaf5; }
-        .bank-details-box h4 { color: #00b4ff; margin-bottom: 10px; }
+        .bank-details-box { background: #fff; border-radius: 16px; padding: 15px; margin: 15px 0; border: 1px solid #ffe0b3; }
+        .bank-details-box h4 { color: #ff9800; margin-bottom: 10px; }
         .bank-info { color: #555; font-size: 13px; margin: 5px 0; }
-        .bank-info span { color: #00b4ff; }
+        .bank-info span { color: #ff9800; }
         
         .hidden { display: none; }
         
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #fff; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #d4eaf5; }
-        .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 11px; transition: all 0.3s; }
-        .nav-item:hover { color: #00b4ff; }
-        .nav-item span { font-size: 22px; display: block; }
-        .nav-item.active { color: #00b4ff; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #fff; display: flex; justify-content: space-around; padding: 8px 10px; border-top: 1px solid #ffe0b3; }
+        .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 10px; transition: all 0.3s; flex: 1; }
+        .nav-item:hover { color: #ff9800; transform: translateY(-2px); }
+        .nav-item img { width: 28px; height: 28px; display: block; margin: 0 auto 3px; border-radius: 8px; object-fit: cover; }
+        .nav-item span { font-size: 10px; display: block; }
+        .nav-item.active { color: #ff9800; }
     </style>
 </head>
 <body>
@@ -81,10 +82,22 @@
         </div>
         <div class="balance-card"><div class="label">Available Balance</div><div class="amount">₹<span id="balanceAmount">0</span></div></div>
         <div class="menu-grid">
-            <div class="menu-card" onclick="showAddFund()"><div class="menu-icon">💰</div><div class="menu-title">Add Fund</div></div>
-            <div class="menu-card" onclick="showWithdraw()"><div class="menu-icon">💸</div><div class="menu-title">Withdraw Fund</div></div>
-            <div class="menu-card" onclick="showAddBank()"><div class="menu-icon">🏦</div><div class="menu-title">Bank Details</div></div>
-            <div class="menu-card" onclick="showTransactions()"><div class="menu-icon">📊</div><div class="menu-title">Transactions</div></div>
+            <div class="menu-card" onclick="showAddFund()">
+                <img src="https://i.imgur.com/NvJCTli.png" alt="Add Fund">
+                <div class="menu-title">Add Fund</div>
+            </div>
+            <div class="menu-card" onclick="showWithdraw()">
+                <img src="https://i.imgur.com/3ZxjAIp.png" alt="Withdraw">
+                <div class="menu-title">Withdraw Fund</div>
+            </div>
+            <div class="menu-card" onclick="showAddBank()">
+                <img src="https://i.imgur.com/NvJCTli.png" alt="Bank Details">
+                <div class="menu-title">Bank Details</div>
+            </div>
+            <div class="menu-card" onclick="showTransactions()">
+                <img src="https://i.imgur.com/rUWwMYm.png" alt="Transactions">
+                <div class="menu-title">Transactions</div>
+            </div>
         </div>
     </div>
     
@@ -95,7 +108,7 @@
             <div class="amount-btn" onclick="selectAmount(2000)">₹2000</div><div class="amount-btn" onclick="selectAmount(5000)">₹5000</div><div class="amount-btn" onclick="selectAmount(10000)">₹10000</div>
         </div>
         <input type="number" id="customAmount" class="input-field" placeholder="Enter custom amount (Min ₹100)">
-        <div class="upi-id-box"><div class="upi-label" style="color:#888; font-size:12px;">📱 Send payment to this UPI ID</div><div class="upi-id" id="upiIdDisplay">ganeshpatil99@slc</div></div>
+        <div class="upi-id-box"><div style="color:#888; font-size:12px;">📱 Send payment to this UPI ID</div><div class="upi-id" id="upiIdDisplay">ganeshpatil99@slc</div></div>
         <button class="btn" id="depositBtn">💳 Proceed to Pay</button>
         <div id="depositMsg" class="message hidden"></div>
         <div id="timerBox" class="timer-box hidden"><div class="timer-text" id="countdownTimer">05:00</div><div style="color:#888; font-size:12px;">⏳ Waiting for admin approval...</div></div>
@@ -116,7 +129,7 @@
     </div>
     
     <div id="bankScreen" class="screen hidden">
-        <h3 style="color:#00b4ff; margin-bottom:15px;">🏦 Bank Account Details</h3>
+        <h3 style="color:#ff9800; margin-bottom:15px;">🏦 Bank Account Details</h3>
         <input type="text" id="accountHolder" class="input-field" placeholder="Account Holder Name">
         <input type="text" id="bankNameField" class="input-field" placeholder="Bank Name">
         <input type="text" id="accountNumber" class="input-field" placeholder="Account Number">
@@ -128,16 +141,28 @@
     </div>
     
     <div id="transactionsScreen" class="screen hidden">
-        <h3 style="color:#00b4ff; margin-bottom:15px;">📊 Transaction History</h3>
+        <h3 style="color:#ff9800; margin-bottom:15px;">📊 Transaction History</h3>
         <div id="transactionsList" style="max-height: 500px; overflow-y: auto;"></div>
         <button class="btn btn-warning" onclick="showMainMenu()" style="margin-top:15px;">← Back</button>
     </div>
     
     <div class="bottom-nav">
-        <div class="nav-item" onclick="location.href='dashboard.html'"><span>🏠</span><p>Home</p></div>
-        <div class="nav-item" onclick="location.href='mybids.html'"><span>📘</span><p>Passbook</p></div>
-        <div class="nav-item active" onclick="location.href='funds.html'"><span>🏦</span><p>Fund</p></div>
-        <div class="nav-item" onclick="alert('Support: WhatsApp +919876543210')"><span>💬</span><p>Support</p></div>
+        <div class="nav-item" onclick="location.href='dashboard.html'">
+            <img src="https://i.imgur.com/StGZq3Y.png" alt="Home">
+            <span>Home</span>
+        </div>
+        <div class="nav-item" onclick="location.href='mybids.html'">
+            <img src="https://i.imgur.com/rUWwMYm.png" alt="Passbook">
+            <span>Passbook</span>
+        </div>
+        <div class="nav-item active" onclick="location.href='funds.html'">
+            <img src="https://i.imgur.com/NvJCTli.png" alt="Fund">
+            <span>Fund</span>
+        </div>
+        <div class="nav-item" onclick="alert('Support: WhatsApp +919876543210')">
+            <img src="https://i.imgur.com/ug9IprL.jpeg" alt="Support">
+            <span>Support</span>
+        </div>
     </div>
 </div>
 
