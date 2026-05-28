@@ -16,7 +16,7 @@
         .back-btn { background: #fff; border: none; color: #00b4ff; font-size: 24px; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; border: 1px solid #d4eaf5; }
         .header h1 { color: #00b4ff; font-size: 24px; flex: 1; text-align: center; }
         
-        .amount-card { background: #fff; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #d4eaf5; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .amount-card { background: #fff; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #d4eaf5; }
         .amount-card h3 { color: #333; margin-bottom: 15px; }
         
         .amount-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
@@ -208,7 +208,7 @@
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
                 timerBox.classList.add('hidden');
-                showMessage('⏰ Time expired! Please create new deposit request.', 'error');
+                showMessage('Time expired! Please create new request.', 'error');
             }
         }, 1000);
         
@@ -226,8 +226,8 @@
         }
     }
     
-    // Correct UPI Intent Function - This will open UPI app with amount pre-filled
-    async function payWithUPI() {
+    // DIRECT UPI PAYMENT - This will open UPI app with amount pre-filled
+    function directUPIPayment() {
         const amount = getAmount();
         
         if (amount < 100) {
@@ -240,65 +240,53 @@
         }
         
         const bonusAmount = getBonusAmount(amount);
-        const totalAmount = amount + bonusAmount;
         
-        // Create deposit request first
-        await createDepositRequest(amount, bonusAmount);
+        // Create the UPI URL in the correct format
+        // Format: upi://pay?pa=UPI_ID&pn=NAME&am=AMOUNT&cu=INR
+        const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR`;
         
-        // Correct UPI intent format - this works on all UPI apps
-        // Format: pay?pa=UPI_ID&pn=NAME&am=AMOUNT&cu=INR&tn=NOTE
-        const upiIntent = `pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR&tn=Deposit%20to%20WIN777`;
-        
-        // Show confirmation dialog
+        // Show payment details
         const confirmMsg = `💰 PAYMENT DETAILS\n\n` +
             `Amount: ₹${amount}\n` +
             `${bonusAmount > 0 ? `Bonus: +₹${bonusAmount}\n` : ''}` +
-            `Total You Get: ₹${totalAmount}\n\n` +
+            `Total You Get: ₹${amount + bonusAmount}\n\n` +
             `UPI ID: ${upiId}\n` +
             `Payee: ${upiName}\n\n` +
-            `Click OK to open UPI app and pay ₹${amount}`;
+            `Click OK to open UPI app and pay ₹${amount}\n\n` +
+            `Amount will be pre-filled automatically.`;
         
         if (!confirm(confirmMsg)) return false;
         
-        // Try multiple UPI intent formats for maximum compatibility
-        const upiUrls = [
-            `upi://${upiIntent}`,
-            `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR`,
-            `https://www.phonepe.com/upi/pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR`
-        ];
-        
-        // Open first UPI intent
-        window.location.href = upiUrls[0];
-        
-        // Fallback after 2 seconds
-        setTimeout(() => {
-            window.location.href = upiUrls[0];
-        }, 500);
-        
-        // Ask for confirmation after returning to app
-        setTimeout(() => {
-            if (confirm(`✅ Did you successfully pay ₹${amount} to ${upiId}?\n\nClick OK after completing the payment.`)) {
-                showMessage(`✅ Payment recorded! Waiting for admin confirmation...`, 'success');
-                startTimerAndWait();
-            } else {
-                showMessage(`⏳ Payment pending. Admin will verify manually.`, 'pending');
-                startTimerAndWait();
-            }
-        }, 10000);
+        // Create deposit request first
+        createDepositRequest(amount, bonusAmount).then(() => {
+            // Open UPI app
+            window.location.href = upiUrl;
+            
+            // For some browsers, also try opening in a new window
+            setTimeout(() => {
+                window.open(upiUrl, '_blank');
+            }, 500);
+            
+            // Ask for confirmation after returning
+            setTimeout(() => {
+                if (confirm(`✅ Did you successfully pay ₹${amount} to ${upiId}?\n\nClick OK after completing the payment.`)) {
+                    showMessage(`✅ Payment recorded! Waiting for admin confirmation...`, 'success');
+                    startTimerAndWait();
+                } else {
+                    showMessage(`⏳ Payment pending. Admin will verify manually.`, 'pending');
+                    startTimerAndWait();
+                }
+            }, 10000);
+        }).catch(err => {
+            showMessage('Error: ' + err.message, 'error');
+        });
         
         return true;
     }
     
     // Handle deposit button click
-    document.getElementById('depositBtn').onclick = async () => {
-        const btn = document.getElementById('depositBtn');
-        btn.disabled = true;
-        btn.innerText = 'Processing...';
-        
-        await payWithUPI();
-        
-        btn.disabled = false;
-        btn.innerText = '💳 PAY NOW';
+    document.getElementById('depositBtn').onclick = function() {
+        directUPIPayment();
     };
     
     function goBack() {
