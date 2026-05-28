@@ -13,7 +13,7 @@
         .app-container { max-width: 500px; margin: 0 auto; background: #fff9e8; min-height: 100vh; }
         
         .header { background: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ffe0b3; }
-        .logo { color: #ff9800; font-size: 22px; font-weight: bold; }
+        .logo-img { width: 40px; height: 40px; border-radius: 10px; }
         .balance { background: #ff9800; padding: 5px 12px; border-radius: 20px; color: #fff; font-weight: bold; font-size: 14px; cursor: pointer; }
         
         .profile-row { display: flex; align-items: center; gap: 12px; background: #fff; margin: 10px; padding: 12px 15px; border-radius: 16px; border: 1px solid #ffe0b3; cursor: pointer; transition: all 0.3s; }
@@ -94,7 +94,7 @@
 <body>
 <div class="app-container">
     <div class="header">
-        <div class="logo">WIN777</div>
+        <img src="https://i.imgur.com/V4pMmxP.jpeg" alt="WIN777" class="logo-img">
         <div class="balance" onclick="showBalance()">₹<span id="userBalance">0</span></div>
     </div>
     
@@ -272,18 +272,50 @@
         return `${hours}:${minutes} ${ampm}`;
     }
     
+    // Convert time string to minutes for comparison
+    function timeToMinutes(timeStr) {
+        if (!timeStr) return null;
+        const parts = timeStr.split(':');
+        return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+    }
+    
+    // Calculate market status based on current time and display timings
+    function calculateMarketStatus(openBidEnd, closeBidEnd) {
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        
+        const openEnd = timeToMinutes(openBidEnd);
+        const closeEnd = timeToMinutes(closeBidEnd);
+        
+        // Before Open Bid End Time -> OPEN Bidding
+        if (openEnd && currentMinutes < openEnd) {
+            return 'open';
+        }
+        // After Open Bid End Time but before Close Bid End Time -> CLOSE Bidding
+        else if (openEnd && closeEnd && currentMinutes >= openEnd && currentMinutes < closeEnd) {
+            return 'close';
+        }
+        // After Close Bid End Time -> Market Closed
+        else {
+            return 'closed';
+        }
+    }
+    
     function listenToMarkets() {
         db.collection('markets').onSnapshot((snapshot) => {
             marketsData = [];
             snapshot.forEach(doc => {
                 const data = doc.data();
+                // Calculate status based on display timings
+                const calculatedStatus = calculateMarketStatus(data.openBidEnd, data.closeBidEnd);
+                
                 marketsData.push({ 
                     id: doc.id, 
                     name: data.name,
                     numbers: data.numbers,
                     openBidEnd: data.openBidEnd,
                     closeBidEnd: data.closeBidEnd,
-                    status: data.status,
+                    status: calculatedStatus,
                     openPana: data.openPana || '***',
                     openDigit: data.openDigit || '*',
                     closePana: data.closePana || '***',
@@ -512,6 +544,11 @@
     function closeNoticeModal() { document.getElementById('noticeModal').style.display = 'none'; }
     function closeNotice() { document.getElementById('noticeBoard').style.display = 'none'; }
     function showGames() { alert('Games coming soon!'); }
+    
+    // Auto refresh markets every minute to update status based on time
+    setInterval(() => {
+        listenToMarkets();
+    }, 60000);
     
     setInterval(() => {
         if (auth.currentUser) {
