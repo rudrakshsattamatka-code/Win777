@@ -35,15 +35,25 @@
         .game-icon img { width: 45px; height: 45px; display: block; margin: 0 auto 4px; border-radius: 12px; object-fit: cover; }
         .game-icon span { font-size: 11px; }
         
+        /* Live Timer */
+        .live-timer { background: linear-gradient(135deg, #ff9800, #e68a00); margin: 10px; padding: 12px 15px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; color: #fff; }
+        .timer-label { font-size: 12px; opacity: 0.9; }
+        .timer-value { font-size: 18px; font-weight: bold; font-family: monospace; }
+        .timer-status { font-size: 12px; }
+        
         .market-card { background: #fff; margin: 12px; border-radius: 16px; padding: 16px; border: 1px solid #ffe0b3; transition: all 0.3s; }
         .market-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
         .market-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
         .market-name { color: #ff9800; font-size: 16px; font-weight: bold; }
         .market-numbers { color: #888; font-size: 12px; font-family: monospace; background: #fff9e8; padding: 4px 8px; border-radius: 8px; }
-        .market-time { background: #f0f0f0; padding: 8px; border-radius: 10px; margin: 10px 0; font-size: 12px; color: #555; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-        .time-item { display: flex; align-items: center; gap: 5px; }
-        .time-label { color: #888; }
-        .time-value { color: #333; font-weight: bold; }
+        
+        /* Clean Market Times - Only dots */
+        .market-times { display: flex; gap: 15px; margin: 8px 0; font-size: 11px; }
+        .open-time { display: flex; align-items: center; gap: 5px; }
+        .open-dot { width: 8px; height: 8px; background: #28a745; border-radius: 50%; }
+        .close-time { display: flex; align-items: center; gap: 5px; }
+        .close-dot { width: 8px; height: 8px; background: #ff9800; border-radius: 50%; }
+        .time-text { color: #888; }
         
         .result-box { background: linear-gradient(135deg, #fff9e8, #fff0d8); border-radius: 12px; padding: 15px; margin: 10px 0; text-align: center; border: 1px solid #ffe0b3; }
         .result-numbers { color: #ff9800; font-size: 22px; font-weight: bold; letter-spacing: 2px; }
@@ -72,6 +82,8 @@
         .modal-btn { width: 100%; padding: 12px; background: #ff9800; border: none; border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
         .modal-btn:hover { background: #e68a00; }
         .close-modal { background: #e0e0e0; color: #333; }
+        .logout-btn { background: #dc3545; color: #fff; }
+        .logout-btn:hover { background: #c82333; }
         .modal-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; }
         
         .rate-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
@@ -111,6 +123,13 @@
         <div class="notice-icon">📢</div>
         <div class="notice-text" id="noticeText">Welcome to WIN777! Play big · Win big · Unlimited</div>
         <button class="close-notice" onclick="event.stopPropagation(); closeNotice()">✕</button>
+    </div>
+    
+    <!-- Live Timer -->
+    <div class="live-timer" id="liveTimer">
+        <span class="timer-label">⏰ Next Bid Ends In</span>
+        <span class="timer-value" id="timerValue">--:--:--</span>
+        <span class="timer-status" id="timerStatus">Loading...</span>
     </div>
     
     <div class="games-row">
@@ -158,16 +177,7 @@
     </div>
 </div>
 
-<!-- Notice Modal -->
-<div id="noticeModal" class="modal">
-    <div class="modal-content">
-        <h3>📢 Notice Board</h3>
-        <div id="noticeModalText" style="color:#555; margin-bottom:15px; line-height:1.5;"></div>
-        <button class="modal-btn close-modal" onclick="closeNoticeModal()">Close</button>
-    </div>
-</div>
-
-<!-- Profile Modal -->
+<!-- Profile Modal with Logout -->
 <div id="profileModal" class="modal">
     <div class="modal-content">
         <h3>👤 My Profile</h3>
@@ -175,7 +185,17 @@
         <button class="modal-btn" onclick="showGameRatesModal()">🎲 Game Rates</button>
         <button class="modal-btn" onclick="showChangePinModal()">🔐 Change MPIN</button>
         <button class="modal-btn" onclick="showBankModal()">🏦 Bank Details</button>
+        <button class="modal-btn logout-btn" onclick="logout()">🚪 Logout</button>
         <button class="modal-btn close-modal" onclick="closeProfileModal()">Close</button>
+    </div>
+</div>
+
+<!-- Notice Modal -->
+<div id="noticeModal" class="modal">
+    <div class="modal-content">
+        <h3>📢 Notice Board</h3>
+        <div id="noticeModalText" style="color:#555; margin-bottom:15px; line-height:1.5;"></div>
+        <button class="modal-btn close-modal" onclick="closeNoticeModal()">Close</button>
     </div>
 </div>
 
@@ -260,6 +280,22 @@
     
     let marketsData = [];
     let currentUserData = null;
+    let serverTimeOffset = 0;
+    
+    // Get server time from Firestore
+    async function getServerTime() {
+        const docRef = db.collection('settings').doc('servertime');
+        await docRef.set({ timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+        const doc = await docRef.get();
+        const serverTime = doc.data().timestamp.toDate();
+        const clientTime = new Date();
+        serverTimeOffset = serverTime - clientTime;
+        return serverTime;
+    }
+    
+    function getCurrentServerTime() {
+        return new Date(Date.now() + serverTimeOffset);
+    }
     
     function formatTimeTo12Hour(timeStr) {
         if (!timeStr || timeStr === '--:--') return '--:--';
@@ -272,33 +308,64 @@
         return `${hours}:${minutes} ${ampm}`;
     }
     
-    // Convert time string to minutes for comparison
     function timeToMinutes(timeStr) {
         if (!timeStr) return null;
         const parts = timeStr.split(':');
         return parseInt(parts[0]) * 60 + parseInt(parts[1]);
     }
     
-    // Calculate market status based on current time and display timings
     function calculateMarketStatus(openBidEnd, closeBidEnd) {
-        const now = new Date();
+        const now = getCurrentServerTime();
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
-        
         const openEnd = timeToMinutes(openBidEnd);
         const closeEnd = timeToMinutes(closeBidEnd);
         
-        // Before Open Bid End Time -> OPEN Bidding
-        if (openEnd && currentMinutes < openEnd) {
-            return 'open';
+        if (openEnd && currentMinutes < openEnd) return 'open';
+        else if (openEnd && closeEnd && currentMinutes >= openEnd && currentMinutes < closeEnd) return 'close';
+        else return 'closed';
+    }
+    
+    // Find next bid end time and update timer
+    function updateLiveTimer() {
+        const now = getCurrentServerTime();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        
+        let nextEndTime = null;
+        let nextEndType = null;
+        
+        for (const market of marketsData) {
+            const openEnd = timeToMinutes(market.openBidEnd);
+            const closeEnd = timeToMinutes(market.closeBidEnd);
+            
+            if (openEnd && currentMinutes < openEnd) {
+                if (!nextEndTime || openEnd < nextEndTime) {
+                    nextEndTime = openEnd;
+                    nextEndType = 'Open';
+                }
+            }
+            if (closeEnd && currentMinutes < closeEnd) {
+                if (!nextEndTime || closeEnd < nextEndTime) {
+                    nextEndTime = closeEnd;
+                    nextEndType = 'Close';
+                }
+            }
         }
-        // After Open Bid End Time but before Close Bid End Time -> CLOSE Bidding
-        else if (openEnd && closeEnd && currentMinutes >= openEnd && currentMinutes < closeEnd) {
-            return 'close';
+        
+        if (nextEndTime) {
+            const targetTime = new Date(now);
+            targetTime.setHours(Math.floor(nextEndTime / 60), nextEndTime % 60, 0, 0);
+            const diffMs = targetTime - now;
+            if (diffMs > 0) {
+                const hours = Math.floor(diffMs / (1000 * 60 * 60));
+                const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+                document.getElementById('timerValue').innerHTML = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                document.getElementById('timerStatus').innerHTML = `${nextEndType} Bid Ends`;
+                return;
+            }
         }
-        // After Close Bid End Time -> Market Closed
-        else {
-            return 'closed';
-        }
+        document.getElementById('timerValue').innerHTML = '00:00:00';
+        document.getElementById('timerStatus').innerHTML = 'No Active Markets';
     }
     
     function listenToMarkets() {
@@ -306,9 +373,7 @@
             marketsData = [];
             snapshot.forEach(doc => {
                 const data = doc.data();
-                // Calculate status based on display timings
                 const calculatedStatus = calculateMarketStatus(data.openBidEnd, data.closeBidEnd);
-                
                 marketsData.push({ 
                     id: doc.id, 
                     name: data.name,
@@ -385,14 +450,14 @@
                         <span class="market-name">${market.name}</span>
                         <span class="market-numbers">${numbersDisplay}</span>
                     </div>
-                    <div class="market-time">
-                        <div class="time-item">
-                            <span class="time-label">🟢 Open Bid Ends:</span>
-                            <span class="time-value">${openBidEnd12}</span>
+                    <div class="market-times">
+                        <div class="open-time">
+                            <div class="open-dot"></div>
+                            <span class="time-text">${openBidEnd12}</span>
                         </div>
-                        <div class="time-item">
-                            <span class="time-label">🟡 Close Bid Ends:</span>
-                            <span class="time-value">${closeBidEnd12}</span>
+                        <div class="close-time">
+                            <div class="close-dot"></div>
+                            <span class="time-text">${closeBidEnd12}</span>
                         </div>
                     </div>
                     <div class="result-box">
@@ -407,6 +472,7 @@
                 </div>
             `;
         });
+        updateLiveTimer();
     }
     
     async function loadUserData() {
@@ -449,6 +515,13 @@
     function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
     function showGameRatesModal() { closeProfileModal(); document.getElementById('gameRatesModal').style.display = 'flex'; }
     function closeGameRatesModal() { document.getElementById('gameRatesModal').style.display = 'none'; }
+    
+    function logout() {
+        auth.signOut().then(() => {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        });
+    }
     
     function showChangePinModal() {
         closeProfileModal();
@@ -539,16 +612,19 @@
     function closeSupportModal() { document.getElementById('supportModal').style.display = 'none'; }
     function sendEmail() { window.location.href = 'mailto:win777@support.com'; }
     function sendWhatsApp() { window.open('https://wa.me/919876543210', '_blank'); }
-    
     function showNoticeModal() { document.getElementById('noticeModal').style.display = 'flex'; }
     function closeNoticeModal() { document.getElementById('noticeModal').style.display = 'none'; }
     function closeNotice() { document.getElementById('noticeBoard').style.display = 'none'; }
     function showGames() { alert('Games coming soon!'); }
     
-    // Auto refresh markets every minute to update status based on time
-    setInterval(() => {
+    // Initialize server time
+    getServerTime().then(() => {
         listenToMarkets();
-    }, 60000);
+        setInterval(() => {
+            listenToMarkets();
+            updateLiveTimer();
+        }, 1000);
+    });
     
     setInterval(() => {
         if (auth.currentUser) {
@@ -563,7 +639,7 @@
     
     auth.onAuthStateChanged(user => { 
         if (!user) window.location.href = 'index.html'; 
-        else { loadUserData(); listenToMarkets(); listenToNotice(); } 
+        else { loadUserData(); } 
     });
     
     window.showBalance = showBalance;
@@ -585,6 +661,7 @@
     window.closeNoticeModal = closeNoticeModal;
     window.closeNotice = closeNotice;
     window.showGames = showGames;
+    window.logout = logout;
 </script>
 </body>
 </html>
