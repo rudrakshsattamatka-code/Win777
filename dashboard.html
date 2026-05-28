@@ -168,7 +168,93 @@
     </div>
 </div>
 
-<!-- Rest of modals same as before... -->
+<!-- Profile Modal -->
+<div id="profileModal" class="modal">
+    <div class="modal-content">
+        <h3>👤 My Profile</h3>
+        <div id="profileInfo"></div>
+        <button class="modal-btn" onclick="showGameRatesModal()">🎲 Game Rates</button>
+        <button class="modal-btn" onclick="showChangePinModal()">🔐 Change MPIN</button>
+        <button class="modal-btn" onclick="showBankModal()">🏦 Bank Details</button>
+        <button class="modal-btn logout-btn" onclick="logout()">🚪 Logout</button>
+        <button class="modal-btn close-modal" onclick="closeProfileModal()">Close</button>
+    </div>
+</div>
+
+<!-- Notice Modal -->
+<div id="noticeModal" class="modal">
+    <div class="modal-content">
+        <h3>📢 Notice Board</h3>
+        <div id="noticeModalText" style="color:#555; margin-bottom:15px; line-height:1.5;"></div>
+        <button class="modal-btn close-modal" onclick="closeNoticeModal()">Close</button>
+    </div>
+</div>
+
+<!-- Game Rates Modal -->
+<div id="gameRatesModal" class="modal">
+    <div class="modal-content">
+        <h3>🎲 GAME RATES</h3>
+        <div class="rate-row"><span class="rate-name">Single Digit</span><span class="rate-value">10x</span></div>
+        <div class="rate-row"><span class="rate-name">Jodi</span><span class="rate-value">100x</span></div>
+        <div class="rate-row"><span class="rate-name">Single Pana</span><span class="rate-value">160x</span></div>
+        <div class="rate-row"><span class="rate-name">Double Pana</span><span class="rate-value">320x</span></div>
+        <div class="rate-row"><span class="rate-name">Triple Pana</span><span class="rate-value">1000x</span></div>
+        <div class="rate-row"><span class="rate-name">Half Sangam A</span><span class="rate-value">1600x</span></div>
+        <div class="rate-row"><span class="rate-name">Half Sangam B</span><span class="rate-value">1600x</span></div>
+        <div class="rate-row"><span class="rate-name">Full Sangam</span><span class="rate-value">25000x</span></div>
+        <button class="modal-btn close-modal" onclick="closeGameRatesModal()">Close</button>
+    </div>
+</div>
+
+<!-- Change PIN Modal -->
+<div id="changePinModal" class="modal">
+    <div class="modal-content">
+        <h3>🔐 Change MPIN</h3>
+        <input type="password" id="oldPin" class="modal-input" placeholder="Current MPIN" maxlength="4">
+        <input type="password" id="newPin" class="modal-input" placeholder="New MPIN (4 digits)" maxlength="4">
+        <input type="password" id="confirmPin" class="modal-input" placeholder="Confirm New MPIN" maxlength="4">
+        <button class="modal-btn" onclick="updatePin()">Update MPIN</button>
+        <button class="modal-btn close-modal" onclick="closeChangePinModal()">Cancel</button>
+        <div id="pinMsg" style="color:#dc3545; text-align:center; margin-top:10px;"></div>
+    </div>
+</div>
+
+<!-- Bank Details Modal -->
+<div id="bankModal" class="modal">
+    <div class="modal-content">
+        <h3>🏦 Bank Details</h3>
+        <input type="text" id="bankAccountHolder" class="modal-input" placeholder="Account Holder Name">
+        <input type="text" id="bankName" class="modal-input" placeholder="Bank Name">
+        <input type="text" id="bankAccountNumber" class="modal-input" placeholder="Account Number">
+        <input type="text" id="bankIfsc" class="modal-input" placeholder="IFSC Code">
+        <button class="modal-btn" onclick="saveBankDetails()">Save Bank Details</button>
+        <button class="modal-btn close-modal" onclick="closeBankModal()">Cancel</button>
+        <div id="bankMsg" style="color:#28a745; text-align:center; margin-top:10px;"></div>
+    </div>
+</div>
+
+<!-- Support Modal -->
+<div id="supportModal" class="modal">
+    <div class="modal-content">
+        <h3>💬 Support Center</h3>
+        <div class="support-option" onclick="sendEmail()">
+            <div class="support-icon">📧</div>
+            <div class="support-text">
+                <div class="support-title">Email Us</div>
+                <div class="support-desc">win777@support.com</div>
+            </div>
+        </div>
+        <div class="support-option" onclick="sendWhatsApp()">
+            <div class="support-icon">📱</div>
+            <div class="support-text">
+                <div class="support-title">WhatsApp</div>
+                <div class="support-desc">+91 9876543210</div>
+            </div>
+        </div>
+        <button class="modal-btn close-modal" onclick="closeSupportModal()">Close</button>
+    </div>
+</div>
+
 <script>
     const firebaseConfig = {
         apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
@@ -251,20 +337,24 @@
             marketsData = [];
             snapshot.forEach(doc => {
                 const data = doc.data();
-                const calculatedStatus = calculateMarketStatus(data.openBidEnd, data.closeBidEnd);
                 marketsData.push({ 
                     id: doc.id, 
                     name: data.name,
                     numbers: data.numbers,
                     openBidEnd: data.openBidEnd,
                     closeBidEnd: data.closeBidEnd,
-                    status: calculatedStatus,
+                    status: data.status,
                     openPana: data.openPana || '***',
                     openDigit: data.openDigit || '*',
                     closePana: data.closePana || '***',
-                    jodi: data.jodi || '**'
+                    jodi: data.jodi || '**',
+                    serialNo: data.serialNo || 999
                 });
             });
+            
+            // Sort by serial number before rendering
+            marketsData.sort((a, b) => (a.serialNo || 999) - (b.serialNo || 999));
+            
             renderMarkets();
         });
     }
