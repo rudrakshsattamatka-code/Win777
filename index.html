@@ -20,7 +20,6 @@
             overflow-x: hidden;
         }
         
-        /* Falling Numbers Animation */
         .falling-numbers {
             position: fixed;
             top: 0;
@@ -43,17 +42,10 @@
         }
         
         @keyframes fall {
-            0% {
-                transform: translateY(-100px) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(100vh) rotate(360deg);
-                opacity: 0;
-            }
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
         }
         
-        /* Random delays for numbers */
         .number:nth-child(1) { left: 5%; animation-duration: 8s; animation-delay: 0s; font-size: 30px; }
         .number:nth-child(2) { left: 15%; animation-duration: 11s; animation-delay: 2s; font-size: 20px; }
         .number:nth-child(3) { left: 25%; animation-duration: 7s; animation-delay: 1s; font-size: 35px; }
@@ -194,28 +186,11 @@
     </style>
 </head>
 <body>
-    <!-- Falling Numbers Animation -->
     <div class="falling-numbers">
-        <div class="number">1</div>
-        <div class="number">2</div>
-        <div class="number">3</div>
-        <div class="number">4</div>
-        <div class="number">5</div>
-        <div class="number">6</div>
-        <div class="number">7</div>
-        <div class="number">8</div>
-        <div class="number">9</div>
-        <div class="number">0</div>
-        <div class="number">1</div>
-        <div class="number">2</div>
-        <div class="number">3</div>
-        <div class="number">4</div>
-        <div class="number">5</div>
-        <div class="number">6</div>
-        <div class="number">7</div>
-        <div class="number">8</div>
-        <div class="number">9</div>
-        <div class="number">0</div>
+        <div class="number">1</div><div class="number">2</div><div class="number">3</div><div class="number">4</div><div class="number">5</div>
+        <div class="number">6</div><div class="number">7</div><div class="number">8</div><div class="number">9</div><div class="number">0</div>
+        <div class="number">1</div><div class="number">2</div><div class="number">3</div><div class="number">4</div><div class="number">5</div>
+        <div class="number">6</div><div class="number">7</div><div class="number">8</div><div class="number">9</div><div class="number">0</div>
     </div>
 
     <div class="app-container">
@@ -229,14 +204,15 @@
             <input type="tel" id="phoneNumber" class="input-field" placeholder="Enter Mobile Number">
             <button class="btn" id="sendOtpBtn">Login with OTP</button>
             <div class="link" id="showPinBtn">Login with MPIN</div>
+            <div class="link" id="forgotPinLink">Forgot MPIN?</div>
             <div id="phoneError" class="error-text"></div>
         </div>
 
         <div id="otpScreen" class="screen hidden">
-            <div class="welcome-text">India's best Satta Matka Application Welcomes You !!!</div>
+            <div class="welcome-text">Enter OTP sent to your mobile</div>
             <div class="timer" id="timer">Second Remaining 60</div>
             <input type="text" id="otpCode" class="input-field" placeholder="Enter OTP" maxlength="6">
-            <button class="btn" id="verifyOtpBtn">SUBMIT</button>
+            <button class="btn" id="verifyOtpBtn">VERIFY OTP</button>
             <div class="link" id="resendOtpBtn">Resend OTP</div>
             <div id="otpError" class="error-text"></div>
         </div>
@@ -244,7 +220,6 @@
         <div id="pinScreen" class="screen hidden">
             <input type="password" id="pinInput" class="input-field pin-input" placeholder="●●●●" maxlength="4">
             <button class="btn" id="verifyPinBtn">Login with MPIN</button>
-            <div class="link" id="forgotPinBtn">Forgot MPIN?</div>
             <div id="pinError" class="error-text"></div>
         </div>
 
@@ -254,6 +229,25 @@
             <input type="password" id="regConfirmPin" class="input-field" placeholder="Confirm MPIN" maxlength="4">
             <button class="btn" id="registerBtn">Register</button>
             <div id="regError" class="error-text"></div>
+        </div>
+
+        <!-- Forgot PIN Reset Screen -->
+        <div id="resetPinScreen" class="screen hidden">
+            <div class="welcome-text">Reset MPIN</div>
+            <input type="tel" id="resetPhone" class="input-field" placeholder="Enter Mobile Number">
+            <button class="btn" id="sendResetOtpBtn">Send OTP</button>
+            <div id="resetError" class="error-text"></div>
+        </div>
+
+        <div id="resetOtpScreen" class="screen hidden">
+            <div class="welcome-text">Enter OTP to reset MPIN</div>
+            <div class="timer" id="resetTimer">Second Remaining 60</div>
+            <input type="text" id="resetOtpCode" class="input-field" placeholder="Enter OTP" maxlength="6">
+            <input type="password" id="newPinReset" class="input-field" placeholder="New MPIN (4 digits)" maxlength="4">
+            <input type="password" id="confirmPinReset" class="input-field" placeholder="Confirm MPIN" maxlength="4">
+            <button class="btn" id="resetPinBtn">Reset MPIN</button>
+            <div class="link" id="backToLogin">Back to Login</div>
+            <div id="resetOtpError" class="error-text"></div>
         </div>
     </div>
 
@@ -273,12 +267,15 @@
         auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         
         let confirmationResult = null, currentPhone = null, countdown = 0, timerInterval = null, recaptchaVerifier = null;
+        let resetConfirmationResult = null, resetPhoneNumber = null;
         
         function showScreen(screen) {
             document.getElementById('phoneScreen').classList.add('hidden');
             document.getElementById('otpScreen').classList.add('hidden');
             document.getElementById('pinScreen').classList.add('hidden');
             document.getElementById('registerScreen').classList.add('hidden');
+            document.getElementById('resetPinScreen').classList.add('hidden');
+            document.getElementById('resetOtpScreen').classList.add('hidden');
             screen.classList.remove('hidden');
         }
         
@@ -286,29 +283,151 @@
         
         function initRecaptcha() { if (!recaptchaVerifier) { const container = document.createElement('div'); container.id = 'recaptcha-container'; container.style.position = 'absolute'; container.style.left = '-9999px'; document.body.appendChild(container); recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', { size: 'invisible' }); } return recaptchaVerifier; }
         
-        function startTimer(seconds) { countdown = seconds; if (timerInterval) clearInterval(timerInterval); timerInterval = setInterval(() => { if (countdown <= 1) clearInterval(timerInterval); const timerEl = document.getElementById('timer'); if (timerEl && countdown > 0) timerEl.innerText = `Second Remaining ${countdown}`; countdown--; }, 1000); }
+        function startTimer(seconds, timerElementId) { 
+            countdown = seconds; 
+            if (timerInterval) clearInterval(timerInterval); 
+            timerInterval = setInterval(() => { 
+                if (countdown <= 1) clearInterval(timerInterval); 
+                const timerEl = document.getElementById(timerElementId); 
+                if (timerEl && countdown > 0) timerEl.innerText = `Second Remaining ${countdown}`; 
+                countdown--; 
+            }, 1000); 
+        }
         
+        // Normal Login OTP
         document.getElementById('sendOtpBtn').onclick = function() {
             const phone = document.getElementById('phoneNumber').value.replace(/\D/g, '');
             if (!phone || phone.length < 10) { showError('phoneError', 'Enter valid 10-digit number'); return; }
             currentPhone = '+91' + phone;
             const btn = this; btn.disabled = true; btn.innerText = 'Sending...';
             const verifier = initRecaptcha();
-            auth.signInWithPhoneNumber(currentPhone, verifier).then(confirmation => { confirmationResult = confirmation; showScreen(otpScreen); startTimer(60); btn.disabled = false; btn.innerText = 'Login with OTP'; }).catch(error => { showError('phoneError', error.message); btn.disabled = false; btn.innerText = 'Login with OTP'; });
+            auth.signInWithPhoneNumber(currentPhone, verifier).then(confirmation => { 
+                confirmationResult = confirmation; 
+                showScreen(otpScreen); 
+                startTimer(60, 'timer'); 
+                btn.disabled = false; 
+                btn.innerText = 'Login with OTP'; 
+            }).catch(error => { 
+                showError('phoneError', error.message); 
+                btn.disabled = false; 
+                btn.innerText = 'Login with OTP'; 
+            });
         };
         
         document.getElementById('verifyOtpBtn').onclick = function() {
             const code = document.getElementById('otpCode').value;
             if (!code || code.length !== 6) { showError('otpError', 'Enter 6-digit OTP'); return; }
             const btn = this; btn.disabled = true; btn.innerText = 'Verifying...';
-            confirmationResult.confirm(code).then(result => { const user = result.user; db.collection('users').doc(user.uid).get().then(doc => { if (doc.exists && doc.data().pin) showScreen(pinScreen); else showScreen(registerScreen); btn.disabled = false; btn.innerText = 'SUBMIT'; }).catch(() => { showScreen(registerScreen); btn.disabled = false; btn.innerText = 'SUBMIT'; }); }).catch(error => { showError('otpError', 'Invalid OTP'); btn.disabled = false; btn.innerText = 'SUBMIT'; });
+            confirmationResult.confirm(code).then(result => { 
+                const user = result.user; 
+                db.collection('users').doc(user.uid).get().then(doc => { 
+                    if (doc.exists && doc.data().pin) showScreen(pinScreen); 
+                    else showScreen(registerScreen); 
+                    btn.disabled = false; 
+                    btn.innerText = 'VERIFY OTP'; 
+                }).catch(() => { 
+                    showScreen(registerScreen); 
+                    btn.disabled = false; 
+                    btn.innerText = 'VERIFY OTP'; 
+                }); 
+            }).catch(error => { 
+                showError('otpError', 'Invalid OTP'); 
+                btn.disabled = false; 
+                btn.innerText = 'VERIFY OTP'; 
+            });
         };
         
-        document.getElementById('resendOtpBtn').onclick = function() { if (!currentPhone) return; const verifier = initRecaptcha(); auth.signInWithPhoneNumber(currentPhone, verifier).then(confirmation => { confirmationResult = confirmation; startTimer(60); showError('otpError', 'OTP resent!'); }).catch(error => showError('otpError', error.message)); };
+        document.getElementById('resendOtpBtn').onclick = function() { 
+            if (!currentPhone) return; 
+            const verifier = initRecaptcha(); 
+            auth.signInWithPhoneNumber(currentPhone, verifier).then(confirmation => { 
+                confirmationResult = confirmation; 
+                startTimer(60, 'timer'); 
+                showError('otpError', 'OTP resent!'); 
+            }).catch(error => showError('otpError', error.message)); 
+        };
+        
+        // Forgot PIN Flow
+        document.getElementById('forgotPinLink').onclick = function() {
+            showScreen(resetPinScreen);
+        };
+        
+        document.getElementById('sendResetOtpBtn').onclick = function() {
+            const phone = document.getElementById('resetPhone').value.replace(/\D/g, '');
+            if (!phone || phone.length < 10) { showError('resetError', 'Enter valid 10-digit number'); return; }
+            resetPhoneNumber = '+91' + phone;
+            
+            // Check if user exists
+            db.collection('users').where('phone', '==', resetPhoneNumber).get().then((snapshot) => {
+                if (snapshot.empty) {
+                    showError('resetError', 'No account found with this number');
+                    return;
+                }
+                const btn = this; btn.disabled = true; btn.innerText = 'Sending...';
+                const verifier = initRecaptcha();
+                auth.signInWithPhoneNumber(resetPhoneNumber, verifier).then(confirmation => {
+                    resetConfirmationResult = confirmation;
+                    showScreen(resetOtpScreen);
+                    startTimer(60, 'resetTimer');
+                    btn.disabled = false;
+                    btn.innerText = 'Send OTP';
+                }).catch(error => {
+                    showError('resetError', error.message);
+                    btn.disabled = false;
+                    btn.innerText = 'Send OTP';
+                });
+            }).catch(() => {
+                showError('resetError', 'Error checking user');
+            });
+        };
+        
+        document.getElementById('resetPinBtn').onclick = function() {
+            const otp = document.getElementById('resetOtpCode').value;
+            const newPin = document.getElementById('newPinReset').value;
+            const confirmPin = document.getElementById('confirmPinReset').value;
+            
+            if (!otp || otp.length !== 6) { showError('resetOtpError', 'Enter 6-digit OTP'); return; }
+            if (!newPin || newPin.length !== 4) { showError('resetOtpError', 'MPIN must be 4 digits'); return; }
+            if (newPin !== confirmPin) { showError('resetOtpError', 'MPINs do not match'); return; }
+            
+            const btn = this; btn.disabled = true; btn.innerText = 'Verifying...';
+            
+            resetConfirmationResult.confirm(otp).then((result) => {
+                const user = result.user;
+                db.collection('users').doc(user.uid).update({ pin: newPin }).then(() => {
+                    alert('✅ MPIN reset successfully! Please login with new MPIN.');
+                    showScreen(phoneScreen);
+                    document.getElementById('resetPhone').value = '';
+                    document.getElementById('resetOtpCode').value = '';
+                    document.getElementById('newPinReset').value = '';
+                    document.getElementById('confirmPinReset').value = '';
+                    btn.disabled = false;
+                    btn.innerText = 'Reset MPIN';
+                }).catch((err) => {
+                    showError('resetOtpError', 'Error updating PIN');
+                    btn.disabled = false;
+                    btn.innerText = 'Reset MPIN';
+                });
+            }).catch((error) => {
+                showError('resetOtpError', 'Invalid OTP');
+                btn.disabled = false;
+                btn.innerText = 'Reset MPIN';
+            });
+        };
+        
+        document.getElementById('backToLogin').onclick = function() {
+            showScreen(phoneScreen);
+            document.getElementById('resetPhone').value = '';
+            document.getElementById('resetOtpCode').value = '';
+            document.getElementById('newPinReset').value = '';
+            document.getElementById('confirmPinReset').value = '';
+        };
         
         document.getElementById('registerBtn').onclick = function() {
             const name = document.getElementById('regName').value.trim(), pin = document.getElementById('regPin').value, confirmPin = document.getElementById('regConfirmPin').value;
-            if (!name) { showError('regError', 'Enter your name'); return; } if (!pin || pin.length !== 4) { showError('regError', 'MPIN must be 4 digits'); return; } if (pin !== confirmPin) { showError('regError', 'MPINs do not match'); return; }
+            if (!name) { showError('regError', 'Enter your name'); return; } 
+            if (!pin || pin.length !== 4) { showError('regError', 'MPIN must be 4 digits'); return; } 
+            if (pin !== confirmPin) { showError('regError', 'MPINs do not match'); return; }
             const user = auth.currentUser; if (!user) { showError('regError', 'Session expired'); return; }
             const btn = this; btn.disabled = true; btn.innerText = 'Creating...';
             db.collection('users').doc(user.uid).set({ uid: user.uid, phone: user.phoneNumber, name: name, pin: pin, balance: 0, role: 'user', createdAt: new Date() }).then(() => { window.location.href = 'dashboard.html'; }).catch(error => { showError('regError', error.message); btn.disabled = false; btn.innerText = 'Register'; });
@@ -326,8 +445,6 @@
             const user = auth.currentUser; if (!user) { showScreen(phoneScreen); return; }
             db.collection('users').doc(user.uid).get().then(doc => { if (doc.exists && doc.data().pin) showScreen(pinScreen); else showScreen(phoneScreen); }).catch(() => showScreen(phoneScreen));
         };
-        
-        document.getElementById('forgotPinBtn').onclick = function() { auth.signOut().then(() => showScreen(phoneScreen)).catch(() => showScreen(phoneScreen)); };
         
         auth.onAuthStateChanged(user => { if (user) { db.collection('users').doc(user.uid).get().then(doc => { if (doc.exists && doc.data().pin) showScreen(pinScreen); else if (doc.exists && !doc.data().pin) showScreen(registerScreen); else showScreen(phoneScreen); }).catch(() => showScreen(phoneScreen)); } else showScreen(phoneScreen); });
     </script>
