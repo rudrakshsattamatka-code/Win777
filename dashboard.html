@@ -281,8 +281,10 @@
             const serverTime = doc.data().timestamp.toDate();
             const clientTime = new Date();
             serverTimeOffset = serverTime.getTime() - clientTime.getTime();
+            console.log("Server time synced");
             return serverTime;
         } catch (error) {
+            console.error("Error syncing server time:", error);
             return new Date();
         }
     }
@@ -292,7 +294,7 @@
     }
     
     function formatTimeTo12Hour(timeStr) {
-        if (!timeStr || timeStr === '--:--') return '--:--';
+        if (!timeStr) return '--:--';
         const parts = timeStr.split(':');
         let hours = parseInt(parts[0]);
         const minutes = parts[1];
@@ -308,15 +310,34 @@
         return parseInt(parts[0]) * 60 + parseInt(parts[1]);
     }
     
+    // Calculate market status based on current server time
     function calculateMarketStatus(openBidEnd, closeBidEnd) {
         const now = getCurrentServerTime();
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        
         const openEnd = timeToMinutes(openBidEnd);
         const closeEnd = timeToMinutes(closeBidEnd);
         
-        if (openEnd && currentMinutes < openEnd) return 'open';
-        else if (openEnd && closeEnd && currentMinutes >= openEnd && currentMinutes < closeEnd) return 'close';
-        else return 'closed';
+        // Debug logging
+        console.log("Current time:", currentMinutes);
+        console.log("Open End:", openEnd);
+        console.log("Close End:", closeEnd);
+        
+        // Before Open End Time -> OPEN Bidding
+        if (openEnd && currentMinutes < openEnd) {
+            console.log("Status: OPEN");
+            return 'open';
+        }
+        // After Open End but before Close End -> CLOSE Bidding
+        else if (openEnd && closeEnd && currentMinutes >= openEnd && currentMinutes < closeEnd) {
+            console.log("Status: CLOSE");
+            return 'close';
+        }
+        // After Close End -> Market Closed
+        else {
+            console.log("Status: CLOSED");
+            return 'closed';
+        }
     }
     
     function updateLiveClock() {
@@ -337,13 +358,15 @@
             marketsData = [];
             snapshot.forEach(doc => {
                 const data = doc.data();
+                const calculatedStatus = calculateMarketStatus(data.openBidEnd, data.closeBidEnd);
+                
                 marketsData.push({ 
                     id: doc.id, 
                     name: data.name,
                     numbers: data.numbers,
                     openBidEnd: data.openBidEnd,
                     closeBidEnd: data.closeBidEnd,
-                    status: data.status,
+                    status: calculatedStatus,
                     openPana: data.openPana || '***',
                     openDigit: data.openDigit || '*',
                     closePana: data.closePana || '***',
@@ -352,7 +375,7 @@
                 });
             });
             
-            // Sort by serial number before rendering
+            // Sort by serial number
             marketsData.sort((a, b) => (a.serialNo || 999) - (b.serialNo || 999));
             
             renderMarkets();
@@ -590,9 +613,17 @@
         await syncServerTime();
         listenToMarkets();
         listenToNotice();
+        // Update every second for real-time clock and status
         setInterval(() => {
             updateLiveClock();
-            listenToMarkets();
+            // Recalculate status for each market
+            marketsData.forEach(market => {
+                const newStatus = calculateMarketStatus(market.openBidEnd, market.closeBidEnd);
+                if (market.status !== newStatus) {
+                    market.status = newStatus;
+                    renderMarkets();
+                }
+            });
         }, 1000);
         setInterval(async () => {
             await syncServerTime();
