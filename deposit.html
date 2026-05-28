@@ -16,44 +16,37 @@
         .back-btn { background: #fff; border: none; color: #00b4ff; font-size: 24px; width: 40px; height: 40px; border-radius: 12px; cursor: pointer; border: 1px solid #d4eaf5; }
         .header h1 { color: #00b4ff; font-size: 24px; flex: 1; text-align: center; }
         
-        .amount-card { background: #fff; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #d4eaf5; }
+        .amount-card { background: #fff; border-radius: 20px; padding: 20px; margin-bottom: 20px; border: 1px solid #d4eaf5; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .amount-card h3 { color: #333; margin-bottom: 15px; }
         
         .amount-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
         .amount-btn { background: #f8f9fa; border: 1px solid #d4eaf5; border-radius: 16px; padding: 14px; text-align: center; color: #333; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
         .amount-btn.active { background: #00b4ff; color: #fff; border-color: #00b4ff; }
+        .amount-btn:hover { background: #e8f4f8; }
         
         .custom-amount input { width: 100%; padding: 14px; background: #fff; border: 1px solid #d4eaf5; border-radius: 12px; color: #333; font-size: 16px; }
         
         .bonus-box { background: #fff; border-radius: 16px; padding: 15px; margin: 15px 0; border: 1px solid #d4eaf5; display: flex; align-items: center; justify-content: space-between; }
+        .bonus-box label { color: #333; font-weight: bold; }
+        .bonus-box input { width: 20px; height: 20px; cursor: pointer; }
         .bonus-text { color: #28a745; font-size: 12px; margin-top: 5px; }
         
-        .summary-box { background: linear-gradient(135deg, #00b4ff, #0099cc); padding: 15px; border-radius: 16px; text-align: center; color: #fff; margin: 15px 0; }
-        .summary-box .label { font-size: 12px; opacity: 0.9; }
-        .summary-box .amount { font-size: 28px; font-weight: bold; }
-        
-        .payment-card { background: #fff; border-radius: 20px; padding: 20px; margin: 15px 0; text-align: center; border: 1px solid #d4eaf5; }
-        .upi-id { background: #f0f8ff; padding: 15px; border-radius: 12px; font-size: 20px; font-weight: bold; color: #00b4ff; margin: 10px 0; word-break: break-all; }
-        .copy-btn { background: #28a745; color: #fff; border: none; padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; margin: 10px 0; }
-        
-        .pay-link-btn { display: block; width: 100%; padding: 16px; background: #00b4ff; color: #fff; text-align: center; text-decoration: none; border-radius: 16px; font-weight: bold; font-size: 18px; margin: 15px 0; border: none; cursor: pointer; }
-        .pay-link-btn:hover { background: #0099cc; }
-        
-        .upi-apps { display: flex; gap: 12px; margin: 15px 0; flex-wrap: wrap; }
-        .app-icon { flex: 1; text-align: center; padding: 12px; background: #f8f9fa; border-radius: 12px; cursor: pointer; transition: all 0.3s; }
-        .app-icon:hover { background: #e8f4f8; transform: scale(1.05); }
-        .app-icon img { width: 40px; height: 40px; }
-        .app-icon span { display: block; font-size: 12px; margin-top: 5px; color: #333; }
+        .deposit-btn { width: 100%; padding: 18px; background: linear-gradient(135deg, #00b4ff, #0099cc); border: none; border-radius: 24px; color: #fff; font-size: 20px; font-weight: bold; cursor: pointer; transition: all 0.3s; margin-top: 10px; }
+        .deposit-btn:hover { transform: scale(1.02); }
+        .deposit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
         .timer-box { background: #fff; border-radius: 16px; padding: 15px; text-align: center; margin-top: 20px; border: 1px solid #ffe0b3; }
         .timer-text { color: #ff9800; font-size: 32px; font-weight: bold; font-family: monospace; }
+        .timer-label { color: #888; font-size: 12px; margin-top: 5px; }
         
-        .message { padding: 12px; border-radius: 12px; text-align: center; margin-top: 15px; }
-        .message-success { background: #d4edda; color: #155724; }
-        .message-error { background: #f8d7da; color: #721c24; }
+        .message { padding: 12px; border-radius: 12px; text-align: center; margin-top: 15px; font-size: 13px; }
+        .message-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .message-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .message-pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         
         .hidden { display: none; }
         .note-text { font-size: 11px; color: #888; text-align: center; margin-top: 15px; }
+        .summary-box { background: #f0f8ff; padding: 12px; border-radius: 12px; margin: 10px 0; text-align: center; }
     </style>
 </head>
 <body>
@@ -87,36 +80,18 @@
         <input type="checkbox" id="applyBonus" onchange="updateSummary()">
     </div>
     
-    <div class="summary-box">
-        <div class="label">💰 You will receive</div>
-        <div class="amount">₹<span id="totalAmount">100</span></div>
+    <div class="summary-box" id="summaryBox">
+        💰 You will receive: ₹<span id="totalAmount">100</span>
     </div>
     
-    <div class="payment-card">
-        <div>📱 Send payment to this UPI ID</div>
-        <div class="upi-id" id="upiIdDisplay">ganeshpatil99@slc</div>
-        <div style="font-size: 12px; color: #888; margin-bottom: 10px;">Payee: Ganesh Siddharth Patil</div>
-        <button class="copy-btn" onclick="copyUpiId()">📋 Copy UPI ID</button>
-    </div>
-    
-    <!-- Simple Pay Button - This will open UPI app -->
-    <button class="pay-link-btn" id="payBtn" onclick="makePayment()">
-        💳 PAY ₹<span id="payAmount">100</span> NOW
-    </button>
-    
-    <!-- Alternative: Manual UPI Link (Copy and paste in browser if above doesn't work) -->
-    <div id="manualLink" class="payment-card hidden">
-        <div style="font-size: 14px; color: #888; margin-bottom: 10px;">If payment doesn't open automatically:</div>
-        <div style="background: #f0f8ff; padding: 10px; border-radius: 8px; font-size: 11px; word-break: break-all; font-family: monospace;" id="upiLink"></div>
-        <button class="copy-btn" onclick="copyUpiLink()" style="margin-top: 10px; background: #ff9800;">📋 Copy Link & Open in Browser</button>
-    </div>
+    <button class="deposit-btn" id="depositBtn">💳 PAY NOW</button>
     
     <div id="message" class="message hidden"></div>
     <div id="timerBox" class="timer-box hidden">
         <div class="timer-text" id="countdownTimer">05:00</div>
-        <div>⏳ Waiting for admin confirmation...</div>
+        <div class="timer-label">⏳ Waiting for admin confirmation...</div>
     </div>
-    <div class="note-text">⚡ Minimum ₹100 | Maximum ₹50,000 | 10% Bonus on ₹500+</div>
+    <div class="note-text">⚡ Minimum deposit ₹100 | Maximum ₹50,000 | Bonus valid on ₹500+</div>
 </div>
 
 <script>
@@ -144,7 +119,6 @@
         const doc = await db.collection('settings').doc('upi').get();
         if (doc.exists && doc.data().upiId) {
             upiId = doc.data().upiId;
-            document.getElementById('upiIdDisplay').innerText = upiId;
         }
     }
     
@@ -178,7 +152,6 @@
         }
         const total = amount + bonus;
         document.getElementById('totalAmount').innerText = total;
-        document.getElementById('payAmount').innerText = amount;
     }
     
     function getAmount() {
@@ -235,91 +208,98 @@
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
                 timerBox.classList.add('hidden');
-                showMessage('Time expired! Please create new request.', 'error');
+                showMessage('⏰ Time expired! Please create new deposit request.', 'error');
             }
         }, 1000);
         
         if (currentTransactionId) {
-            db.collection('transactions').doc(currentTransactionId).onSnapshot((doc) => {
+            const unsubscribe = db.collection('transactions').doc(currentTransactionId).onSnapshot((doc) => {
                 if (doc.exists && doc.data().status === 'Completed') {
                     clearInterval(timerInterval);
                     timerBox.classList.add('hidden');
-                    showMessage(`✅ ₹${doc.data().amount} added successfully!`, 'success');
+                    unsubscribe();
+                    const data = doc.data();
+                    showMessage(`✅ ₹${data.amount} added successfully!${data.bonusAmount > 0 ? ` (Including ₹${data.bonusAmount} bonus)` : ''}`, 'success');
                     setTimeout(() => window.location.href = 'dashboard.html', 2000);
                 }
             });
         }
     }
     
-    function copyUpiId() {
-        navigator.clipboard.writeText(upiId);
-        showMessage('✅ UPI ID copied!', 'success');
-    }
-    
-    function copyUpiLink() {
-        const link = document.getElementById('upiLink').innerText;
-        navigator.clipboard.writeText(link);
-        showMessage('✅ Link copied! Open in browser.', 'success');
-    }
-    
-    async function makePayment() {
+    // Correct UPI Intent Function - This will open UPI app with amount pre-filled
+    async function payWithUPI() {
         const amount = getAmount();
         
         if (amount < 100) {
-            showMessage('Minimum amount is ₹100', 'error');
-            return;
+            showMessage('Minimum deposit amount is ₹100', 'error');
+            return false;
         }
         if (amount > 50000) {
-            showMessage('Maximum amount is ₹50,000', 'error');
-            return;
+            showMessage('Maximum deposit amount is ₹50,000', 'error');
+            return false;
         }
         
         const bonusAmount = getBonusAmount(amount);
+        const totalAmount = amount + bonusAmount;
         
-        // Create the UPI link
-        const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR&tn=Deposit%20to%20WIN777`;
+        // Create deposit request first
+        await createDepositRequest(amount, bonusAmount);
         
-        // Show manual link as fallback
-        document.getElementById('upiLink').innerHTML = upiLink;
-        document.getElementById('manualLink').classList.remove('hidden');
+        // Correct UPI intent format - this works on all UPI apps
+        // Format: pay?pa=UPI_ID&pn=NAME&am=AMOUNT&cu=INR&tn=NOTE
+        const upiIntent = `pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR&tn=Deposit%20to%20WIN777`;
         
-        // Show confirmation
+        // Show confirmation dialog
         const confirmMsg = `💰 PAYMENT DETAILS\n\n` +
             `Amount: ₹${amount}\n` +
-            `Bonus: +₹${bonusAmount}\n` +
-            `Total You Get: ₹${amount + bonusAmount}\n\n` +
+            `${bonusAmount > 0 ? `Bonus: +₹${bonusAmount}\n` : ''}` +
+            `Total You Get: ₹${totalAmount}\n\n` +
             `UPI ID: ${upiId}\n` +
             `Payee: ${upiName}\n\n` +
             `Click OK to open UPI app and pay ₹${amount}`;
         
-        if (!confirm(confirmMsg)) return;
+        if (!confirm(confirmMsg)) return false;
         
-        // Create deposit request
-        await createDepositRequest(amount, bonusAmount);
+        // Try multiple UPI intent formats for maximum compatibility
+        const upiUrls = [
+            `upi://${upiIntent}`,
+            `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR`,
+            `https://www.phonepe.com/upi/pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR`
+        ];
         
-        // Try to open UPI app
-        window.location.href = upiLink;
+        // Open first UPI intent
+        window.location.href = upiUrls[0];
         
-        // Also try to open via iframe as fallback (works on some browsers)
+        // Fallback after 2 seconds
         setTimeout(() => {
-            const iframe = document.createElement('iframe');
-            iframe.style.display = 'none';
-            iframe.src = upiLink;
-            document.body.appendChild(iframe);
-            setTimeout(() => document.body.removeChild(iframe), 3000);
-        }, 100);
+            window.location.href = upiUrls[0];
+        }, 500);
         
-        // Ask for confirmation after returning
+        // Ask for confirmation after returning to app
         setTimeout(() => {
             if (confirm(`✅ Did you successfully pay ₹${amount} to ${upiId}?\n\nClick OK after completing the payment.`)) {
-                showMessage(`✅ Payment recorded! Waiting for admin approval...`, 'success');
+                showMessage(`✅ Payment recorded! Waiting for admin confirmation...`, 'success');
                 startTimerAndWait();
             } else {
-                showMessage(`⏳ Payment pending. If you paid, admin will verify.`, 'success');
+                showMessage(`⏳ Payment pending. Admin will verify manually.`, 'pending');
                 startTimerAndWait();
             }
         }, 10000);
+        
+        return true;
     }
+    
+    // Handle deposit button click
+    document.getElementById('depositBtn').onclick = async () => {
+        const btn = document.getElementById('depositBtn');
+        btn.disabled = true;
+        btn.innerText = 'Processing...';
+        
+        await payWithUPI();
+        
+        btn.disabled = false;
+        btn.innerText = '💳 PAY NOW';
+    };
     
     function goBack() {
         window.location.href = 'dashboard.html';
@@ -329,9 +309,6 @@
     
     window.selectAmount = selectAmount;
     window.updateSummary = updateSummary;
-    window.makePayment = makePayment;
-    window.copyUpiId = copyUpiId;
-    window.copyUpiLink = copyUpiLink;
 </script>
 </body>
 </html>
