@@ -664,7 +664,6 @@
             const updatedUser = await db.collection('users').doc(currentUser.uid).get(); 
             userData = updatedUser.data(); 
             document.getElementById('userBalance').innerText = userData?.balance || 0;
-            setTimeout(() => goBack(), 2000);
         } catch(e) { showMessage('Error: ' + e.message, true); }
     }
     
