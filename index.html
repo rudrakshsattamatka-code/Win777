@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WIN777 - Login</title>
+    <title>WIN777 - Royal Login</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Georgia', 'Times New Roman', serif; }
         
         body {
-            background: linear-gradient(135deg, #1a0a00, #331a00);
+            background: linear-gradient(135deg, #0a0806, #1a1510);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -21,51 +21,54 @@
         .app-container {
             max-width: 420px;
             width: 100%;
-            background: rgba(255, 255, 255, 0.95);
+            background: #0a0806;
             min-height: 100vh;
             margin: 0 auto;
             border-radius: 0;
-            box-shadow: 0 0 50px rgba(0,0,0,0.3);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            border-left: 1px solid #ffd70040;
+            border-right: 1px solid #ffd70040;
         }
         
         .header {
-            background: linear-gradient(135deg, #ff9800, #e68a00);
+            background: linear-gradient(135deg, #1a1510, #0a0806);
             padding: 30px 20px;
             text-align: center;
-            border-bottom: 1px solid #ffe0b3;
+            border-bottom: 2px solid #ffd700;
         }
         
         .logo-img {
             width: 80px;
             height: 80px;
-            border-radius: 20px;
+            border-radius: 50%;
             margin-bottom: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 0 20px rgba(255,215,0,0.3);
+            border: 2px solid #ffd700;
         }
         
         .logo-text {
             font-size: 32px;
             font-weight: bold;
-            color: #fff;
+            color: #ffd700;
             letter-spacing: 3px;
+            text-shadow: 0 0 10px rgba(255,215,0,0.5);
         }
         
         .tagline {
             font-size: 11px;
-            color: #fff;
+            color: #aa9c7a;
             margin-top: 8px;
-            opacity: 0.9;
         }
         
         .screen { padding: 30px 25px; }
         
         .input-field {
-            background: #f8f9fa;
-            border: 1px solid #ffe0b3;
+            background: #1a1510;
+            border: 1px solid #ffd70040;
             border-radius: 12px;
             padding: 15px;
             width: 100%;
-            color: #333;
+            color: #ffd700;
             font-size: 16px;
             margin-bottom: 20px;
             outline: none;
@@ -73,8 +76,12 @@
         }
         
         .input-field:focus {
-            border-color: #ff9800;
-            box-shadow: 0 0 0 2px rgba(255,152,0,0.2);
+            border-color: #ffd700;
+            box-shadow: 0 0 10px rgba(255,215,0,0.2);
+        }
+        
+        .input-field::placeholder {
+            color: #aa9c7a;
         }
         
         .pin-input {
@@ -86,10 +93,10 @@
         .btn {
             width: 100%;
             padding: 14px;
-            background: linear-gradient(135deg, #ff9800, #e68a00);
+            background: linear-gradient(135deg, #ffd700, #daa520);
             border: none;
             border-radius: 12px;
-            color: #fff;
+            color: #1a1510;
             font-weight: bold;
             font-size: 16px;
             cursor: pointer;
@@ -98,19 +105,19 @@
         
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(255,152,0,0.4);
+            box-shadow: 0 5px 20px rgba(255,215,0,0.4);
         }
         
         .link {
             text-align: center;
             margin-top: 15px;
-            color: #ff9800;
+            color: #ffd700;
             font-size: 13px;
             cursor: pointer;
         }
         
         .timer {
-            color: #ff9800;
+            color: #ffd700;
             font-size: 20px;
             font-weight: bold;
             margin: 20px 0;
@@ -118,14 +125,14 @@
         }
         
         .welcome-text {
-            color: #ff9800;
+            color: #ffd700;
             font-size: 14px;
             margin-bottom: 20px;
             text-align: center;
         }
         
         .error-text {
-            color: #dc3545;
+            color: #ff6666;
             font-size: 12px;
             text-align: center;
             margin-top: 10px;
@@ -134,14 +141,14 @@
         .footer {
             text-align: center;
             padding: 20px;
-            border-top: 1px solid #ffe0b3;
-            background: #fff;
+            border-top: 1px solid #ffd70020;
+            background: #0a0806;
             font-size: 11px;
-            color: #888;
+            color: #aa9c7a;
         }
         
         .footer .brand {
-            color: #ff9800;
+            color: #ffd700;
             font-weight: bold;
         }
         
@@ -153,7 +160,7 @@
         <div class="header">
             <img src="https://i.imgur.com/V4pMmxP.jpeg" alt="WIN777" class="logo-img">
             <div class="logo-text">WIN777</div>
-            <div class="tagline">India's No.1 Satta Matka Platform</div>
+            <div class="tagline">India's Royal Satta Matka Platform</div>
         </div>
 
         <div id="phoneScreen" class="screen">
@@ -188,7 +195,6 @@
             <div id="regError" class="error-text"></div>
         </div>
 
-        <!-- Forgot PIN Reset Screen -->
         <div id="resetPinScreen" class="screen hidden">
             <div class="welcome-text">Reset MPIN</div>
             <input type="tel" id="resetPhone" class="input-field" placeholder="Enter Mobile Number">
@@ -207,11 +213,10 @@
             <div id="resetOtpError" class="error-text"></div>
         </div>
         
-        <!-- Footer -->
         <div class="footer">
-            <span>© 2024 WIN777 - India's Best Satta Matka Application</span><br>
+            <span>© 2024 WIN777 - India's Royal Satta Matka Application</span><br>
             <span>Founded in 2024 | Trusted by 1,00,000+ Users</span><br>
-            <span class="brand">24/7 Customer Support</span>
+            <span class="brand">👑 24/7 Royal Support 👑</span>
         </div>
     </div>
 
@@ -258,7 +263,6 @@
             }, 1000); 
         }
         
-        // Normal Login OTP
         document.getElementById('sendOtpBtn').onclick = function() {
             const phone = document.getElementById('phoneNumber').value.replace(/\D/g, '');
             if (!phone || phone.length < 10) { showError('phoneError', 'Enter valid 10-digit number'); return; }
@@ -311,7 +315,6 @@
             }).catch(error => showError('otpError', error.message)); 
         };
         
-        // Forgot PIN Flow
         document.getElementById('forgotPinLink').onclick = function() { showScreen(resetPinScreen); };
         document.getElementById('forgotPinFromPinBtn').onclick = function() { showScreen(resetPinScreen); };
         
