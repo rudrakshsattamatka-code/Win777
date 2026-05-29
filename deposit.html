@@ -7,7 +7,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Georgia', 'Times New Roman', serif; }
         body { background: #0a0806; padding-bottom: 70px; }
@@ -51,14 +50,13 @@
         
         .summary-box { background: linear-gradient(135deg, #ffd700, #daa520); padding: 12px; border-radius: 12px; margin: 10px 0; text-align: center; color: #1a1510; font-weight: bold; }
         
-        .upi-info { background: #0a0806; border-radius: 16px; padding: 15px; margin: 20px 0; text-align: center; border: 1px solid #ffd70040; }
-        .upi-id { color: #ffd700; font-size: 18px; font-weight: bold; word-break: break-all; }
-        
-        .proceed-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #ffd700, #daa520); border: none; border-radius: 30px; color: #1a1510; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; margin-top: 10px; }
-        .proceed-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255,215,0,0.5); }
-        
-        .back-btn { width: 100%; padding: 14px; background: #1a1510; border: 1px solid #ffd70040; border-radius: 30px; color: #ffd700; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
-        .back-btn:hover { border-color: #ffd700; }
+        /* UPI App Buttons */
+        .upi-apps { display: flex; flex-direction: column; gap: 12px; margin: 20px 0; }
+        .app-btn { display: flex; align-items: center; gap: 15px; padding: 15px 20px; background: #0a0806; border: 1px solid #ffd70040; border-radius: 20px; cursor: pointer; transition: all 0.3s; }
+        .app-btn:hover { background: #1a1510; border-color: #ffd700; transform: translateX(5px); }
+        .app-icon { font-size: 32px; }
+        .app-name { flex: 1; color: #ffd700; font-weight: bold; }
+        .app-arrow { color: #aa9c7a; font-size: 20px; }
         
         .timer-box { background: #0a0806; border-radius: 16px; padding: 15px; text-align: center; margin-top: 20px; border: 1px solid #ffd70040; display: none; }
         .timer-text { color: #ffd700; font-size: 32px; font-weight: bold; font-family: monospace; }
@@ -78,6 +76,9 @@
         
         .note-text { font-size: 11px; color: #aa9c7a; text-align: center; margin-top: 15px; }
         
+        /* QR Code Container (Hidden) */
+        .hidden-qr { display: none; }
+        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: linear-gradient(135deg, #1a1510, #0f0c08); border-radius: 24px; padding: 25px; width: 90%; max-width: 350px; max-height: 80vh; overflow-y: auto; border: 1px solid #ffd700; }
         .modal-content h3 { color: #ffd700; margin-bottom: 15px; text-align: center; }
@@ -94,7 +95,6 @@
         .support-icon { font-size: 30px; }
         .support-text { flex: 1; }
         .support-title { font-weight: bold; color: #ffd700; }
-        .support-desc { font-size: 12px; color: #aa9c7a; }
     </style>
 </head>
 <body>
@@ -120,22 +120,10 @@
     </div>
     
     <div class="games-row">
-        <div class="game-icon" onclick="showGames()">
-            <img src="https://i.imgur.com/xaMlRtU.jpeg" alt="Games">
-            <span>Games</span>
-        </div>
-        <div class="game-icon" onclick="window.location.href='deposit.html'">
-            <img src="https://i.imgur.com/NvJCTli.png" alt="Deposit">
-            <span>Deposit</span>
-        </div>
-        <div class="game-icon" onclick="window.location.href='withdraw.html'">
-            <img src="https://i.imgur.com/3ZxjAIp.png" alt="Withdraw">
-            <span>Withdraw</span>
-        </div>
-        <div class="game-icon" onclick="window.location.href='mybids.html'">
-            <img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids">
-            <span>My Bids</span>
-        </div>
+        <div class="game-icon" onclick="showGames()"><img src="https://i.imgur.com/xaMlRtU.jpeg" alt="Games"><span>Games</span></div>
+        <div class="game-icon" onclick="window.location.href='deposit.html'"><img src="https://i.imgur.com/NvJCTli.png" alt="Deposit"><span>Deposit</span></div>
+        <div class="game-icon" onclick="window.location.href='withdraw.html'"><img src="https://i.imgur.com/3ZxjAIp.png" alt="Withdraw"><span>Withdraw</span></div>
+        <div class="game-icon" onclick="window.location.href='mybids.html'"><img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids"><span>My Bids</span></div>
     </div>
     
     <div class="deposit-card">
@@ -166,13 +154,48 @@
             💰 You will receive: ₹<span id="totalAmount">100</span>
         </div>
         
-        <div class="upi-info">
-            <div>📱 Send payment to this UPI ID</div>
-            <div class="upi-id" id="upiIdDisplay">ganeshpatil99@slc</div>
+        <!-- Hidden QR Code Generator -->
+        <div id="qrData" class="hidden-qr"></div>
+        
+        <!-- UPI Apps Selection -->
+        <div id="upiAppsSection" style="display: none;">
+            <div style="color:#ffd700; text-align:center; margin:15px 0;">Choose UPI App to Pay</div>
+            <div class="upi-apps">
+                <div class="app-btn" onclick="openUPIApp('phonepe')">
+                    <div class="app-icon">📱</div>
+                    <div class="app-name">PhonePe</div>
+                    <div class="app-arrow">→</div>
+                </div>
+                <div class="app-btn" onclick="openUPIApp('googlepay')">
+                    <div class="app-icon">💳</div>
+                    <div class="app-name">Google Pay</div>
+                    <div class="app-arrow">→</div>
+                </div>
+                <div class="app-btn" onclick="openUPIApp('paytm')">
+                    <div class="app-icon">🏦</div>
+                    <div class="app-name">Paytm</div>
+                    <div class="app-arrow">→</div>
+                </div>
+                <div class="app-btn" onclick="openUPIApp('bhim')">
+                    <div class="app-icon">🇮🇳</div>
+                    <div class="app-name">BHIM</div>
+                    <div class="app-arrow">→</div>
+                </div>
+                <div class="app-btn" onclick="openUPIApp('amazon')">
+                    <div class="app-icon">🛍️</div>
+                    <div class="app-name">Amazon Pay</div>
+                    <div class="app-arrow">→</div>
+                </div>
+                <div class="app-btn" onclick="openUPIApp('any')">
+                    <div class="app-icon">🔄</div>
+                    <div class="app-name">Any Other UPI App</div>
+                    <div class="app-arrow">→</div>
+                </div>
+            </div>
+            <button class="back-btn" onclick="hideUPIApps()" style="width:100%; padding:12px; background:#1a1510; border:1px solid #ffd70040; border-radius:30px; color:#ffd700; cursor:pointer; margin-top:10px;">← Back</button>
         </div>
         
-        <button class="proceed-btn" id="proceedBtn">💳 PROCEED TO PAY</button>
-        <button class="back-btn" onclick="goBack()">← Back</button>
+        <button class="proceed-btn" id="proceedBtn" style="width:100%; padding:16px; background:linear-gradient(135deg,#ffd700,#daa520); border:none; border-radius:30px; color:#1a1510; font-size:18px; font-weight:bold; cursor:pointer; margin-top:10px;">💳 PROCEED TO PAY</button>
         
         <div id="message" class="message hidden"></div>
         <div id="timerBox" class="timer-box">
@@ -183,102 +206,20 @@
     </div>
     
     <div class="bottom-nav">
-        <div class="nav-item" onclick="location.href='dashboard.html'">
-            <img src="https://i.imgur.com/StGZq3Y.png" alt="Home">
-            <span>Home</span>
-        </div>
-        <div class="nav-item" onclick="location.href='mybids.html'">
-            <img src="https://i.imgur.com/rUWwMYm.png" alt="Passbook">
-            <span>Passbook</span>
-        </div>
-        <div class="nav-item" onclick="location.href='mybids.html'">
-            <img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids">
-            <span>My Bids</span>
-        </div>
-        <div class="nav-item active" onclick="location.href='funds.html'">
-            <img src="https://i.imgur.com/NvJCTli.png" alt="Fund">
-            <span>Fund</span>
-        </div>
-        <div class="nav-item" onclick="showSupportModal()">
-            <img src="https://i.imgur.com/ug9IprL.jpeg" alt="Support">
-            <span>Support</span>
-        </div>
+        <div class="nav-item" onclick="location.href='dashboard.html'"><img src="https://i.imgur.com/StGZq3Y.png" alt="Home"><span>Home</span></div>
+        <div class="nav-item" onclick="location.href='mybids.html'"><img src="https://i.imgur.com/rUWwMYm.png" alt="Passbook"><span>Passbook</span></div>
+        <div class="nav-item" onclick="location.href='mybids.html'"><img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids"><span>My Bids</span></div>
+        <div class="nav-item active" onclick="location.href='funds.html'"><img src="https://i.imgur.com/NvJCTli.png" alt="Fund"><span>Fund</span></div>
+        <div class="nav-item" onclick="showSupportModal()"><img src="https://i.imgur.com/ug9IprL.jpeg" alt="Support"><span>Support</span></div>
     </div>
 </div>
 
-<!-- Profile Modal (same as before) -->
-<div id="profileModal" class="modal">
-    <div class="modal-content">
-        <h3>👑 My Profile</h3>
-        <div id="profileInfo"></div>
-        <button class="modal-btn" onclick="showGameRatesModal()">🎲 Game Rates</button>
-        <button class="modal-btn" onclick="showChangePinModal()">🔐 Change MPIN</button>
-        <button class="modal-btn" onclick="showBankModal()">🏦 Bank Details</button>
-        <button class="modal-btn logout-btn" onclick="logout()">🚪 Logout</button>
-        <button class="modal-btn close-modal" onclick="closeProfileModal()">Close</button>
-    </div>
-</div>
-
-<div id="gameRatesModal" class="modal">
-    <div class="modal-content">
-        <h3>🎲 GAME RATES</h3>
-        <div class="rate-row"><span class="rate-name">Single Digit</span><span class="rate-value">10x</span></div>
-        <div class="rate-row"><span class="rate-name">Jodi</span><span class="rate-value">100x</span></div>
-        <div class="rate-row"><span class="rate-name">Single Pana</span><span class="rate-value">160x</span></div>
-        <div class="rate-row"><span class="rate-name">Double Pana</span><span class="rate-value">320x</span></div>
-        <div class="rate-row"><span class="rate-name">Triple Pana</span><span class="rate-value">1000x</span></div>
-        <div class="rate-row"><span class="rate-name">Half Sangam A</span><span class="rate-value">1600x</span></div>
-        <div class="rate-row"><span class="rate-name">Half Sangam B</span><span class="rate-value">1600x</span></div>
-        <div class="rate-row"><span class="rate-name">Full Sangam</span><span class="rate-value">25000x</span></div>
-        <button class="modal-btn close-modal" onclick="closeGameRatesModal()">Close</button>
-    </div>
-</div>
-
-<div id="changePinModal" class="modal">
-    <div class="modal-content">
-        <h3>🔐 Change MPIN</h3>
-        <input type="password" id="oldPin" class="modal-input" placeholder="Current MPIN" maxlength="4">
-        <input type="password" id="newPin" class="modal-input" placeholder="New MPIN (4 digits)" maxlength="4">
-        <input type="password" id="confirmPin" class="modal-input" placeholder="Confirm New MPIN" maxlength="4">
-        <button class="modal-btn" onclick="updatePin()">Update MPIN</button>
-        <button class="modal-btn close-modal" onclick="closeChangePinModal()">Cancel</button>
-        <div id="pinMsg" style="color:#ff6666; text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<div id="bankModal" class="modal">
-    <div class="modal-content">
-        <h3>🏦 Bank Details</h3>
-        <input type="text" id="bankAccountHolder" class="modal-input" placeholder="Account Holder Name">
-        <input type="text" id="bankName" class="modal-input" placeholder="Bank Name">
-        <input type="text" id="bankAccountNumber" class="modal-input" placeholder="Account Number">
-        <input type="text" id="bankIfsc" class="modal-input" placeholder="IFSC Code">
-        <button class="modal-btn" onclick="saveBankDetails()">Save Bank Details</button>
-        <button class="modal-btn close-modal" onclick="closeBankModal()">Cancel</button>
-        <div id="bankMsg" style="color:#66ff66; text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<div id="supportModal" class="modal">
-    <div class="modal-content">
-        <h3>💬 Royal Support</h3>
-        <div class="support-option" onclick="sendEmail()">
-            <div class="support-icon">📧</div>
-            <div class="support-text">
-                <div class="support-title">Email Us</div>
-                <div class="support-desc">win777@support.com</div>
-            </div>
-        </div>
-        <div class="support-option" onclick="sendWhatsApp()">
-            <div class="support-icon">📱</div>
-            <div class="support-text">
-                <div class="support-title">WhatsApp</div>
-                <div class="support-desc">+91 9876543210</div>
-            </div>
-        </div>
-        <button class="modal-btn close-modal" onclick="closeSupportModal()">Close</button>
-    </div>
-</div>
+<!-- Modals -->
+<div id="profileModal" class="modal"><div class="modal-content"><h3>👑 My Profile</h3><div id="profileInfo"></div><button class="modal-btn" onclick="showGameRatesModal()">🎲 Game Rates</button><button class="modal-btn" onclick="showChangePinModal()">🔐 Change MPIN</button><button class="modal-btn" onclick="showBankModal()">🏦 Bank Details</button><button class="modal-btn logout-btn" onclick="logout()">🚪 Logout</button><button class="modal-btn close-modal" onclick="closeProfileModal()">Close</button></div></div>
+<div id="gameRatesModal" class="modal"><div class="modal-content"><h3>🎲 GAME RATES</h3><div class="rate-row"><span class="rate-name">Single Digit</span><span class="rate-value">10x</span></div><div class="rate-row"><span class="rate-name">Jodi</span><span class="rate-value">100x</span></div><div class="rate-row"><span class="rate-name">Single Pana</span><span class="rate-value">160x</span></div><div class="rate-row"><span class="rate-name">Double Pana</span><span class="rate-value">320x</span></div><div class="rate-row"><span class="rate-name">Triple Pana</span><span class="rate-value">1000x</span></div><div class="rate-row"><span class="rate-name">Half Sangam A</span><span class="rate-value">1600x</span></div><div class="rate-row"><span class="rate-name">Half Sangam B</span><span class="rate-value">1600x</span></div><div class="rate-row"><span class="rate-name">Full Sangam</span><span class="rate-value">25000x</span></div><button class="modal-btn close-modal" onclick="closeGameRatesModal()">Close</button></div></div>
+<div id="changePinModal" class="modal"><div class="modal-content"><h3>🔐 Change MPIN</h3><input type="password" id="oldPin" class="modal-input" placeholder="Current MPIN" maxlength="4"><input type="password" id="newPin" class="modal-input" placeholder="New MPIN (4 digits)" maxlength="4"><input type="password" id="confirmPin" class="modal-input" placeholder="Confirm New MPIN" maxlength="4"><button class="modal-btn" onclick="updatePin()">Update MPIN</button><button class="modal-btn close-modal" onclick="closeChangePinModal()">Cancel</button><div id="pinMsg" style="color:#ff6666; text-align:center; margin-top:10px;"></div></div></div>
+<div id="bankModal" class="modal"><div class="modal-content"><h3>🏦 Bank Details</h3><input type="text" id="bankAccountHolder" class="modal-input" placeholder="Account Holder Name"><input type="text" id="bankName" class="modal-input" placeholder="Bank Name"><input type="text" id="bankAccountNumber" class="modal-input" placeholder="Account Number"><input type="text" id="bankIfsc" class="modal-input" placeholder="IFSC Code"><button class="modal-btn" onclick="saveBankDetails()">Save Bank Details</button><button class="modal-btn close-modal" onclick="closeBankModal()">Cancel</button><div id="bankMsg" style="color:#66ff66; text-align:center; margin-top:10px;"></div></div></div>
+<div id="supportModal" class="modal"><div class="modal-content"><h3>💬 Royal Support</h3><div class="support-option" onclick="sendEmail()"><div class="support-icon">📧</div><div class="support-text"><div class="support-title">Email Us</div><div class="support-desc">win777@support.com</div></div></div><div class="support-option" onclick="sendWhatsApp()"><div class="support-icon">📱</div><div class="support-text"><div class="support-title">WhatsApp</div><div class="support-desc">+91 9876543210</div></div></div><button class="modal-btn close-modal" onclick="closeSupportModal()">Close</button></div></div>
 
 <script>
     const firebaseConfig = {
@@ -301,12 +242,13 @@
     let timerInterval = null;
     let upiId = "ganeshpatil99@slc";
     let upiName = "Ganesh Siddharth Patil";
+    let pendingAmount = 0;
+    let pendingBonus = 0;
     
     async function loadUpiId() {
         const doc = await db.collection('settings').doc('upi').get();
         if (doc.exists && doc.data().upiId) {
             upiId = doc.data().upiId;
-            document.getElementById('upiIdDisplay').innerText = upiId;
         }
     }
     
@@ -411,34 +353,91 @@
         }
     }
     
-    async function proceedToPay() {
-        const amount = getAmount();
-        if (amount < 100) { showMessage('Minimum amount is ₹100', 'error'); return; }
-        if (amount > 50000) { showMessage('Maximum amount is ₹50,000', 'error'); return; }
+    function hideUPIApps() {
+        document.getElementById('upiAppsSection').style.display = 'none';
+        document.getElementById('proceedBtn').style.display = 'block';
+    }
+    
+    function openUPIApp(appName) {
+        const amount = pendingAmount;
         
-        const bonusAmount = getBonusAmount(amount);
+        // Create UPI intent URL
         const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR&tn=WIN777%20Deposit`;
         
-        if (!confirm(`💰 PAY ₹${amount} to ${upiId}?`)) return;
+        // Try to open app specific URL
+        let appUrl = upiUrl;
+        switch(appName) {
+            case 'phonepe':
+                appUrl = `phonepe://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR`;
+                break;
+            case 'googlepay':
+                appUrl = `tez://upi/pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR`;
+                break;
+            case 'paytm':
+                appUrl = `paytmmp://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR`;
+                break;
+            case 'bhim':
+                appUrl = `bhim://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR`;
+                break;
+            case 'amazon':
+                appUrl = `amazonpay://upi/pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR`;
+                break;
+            default:
+                appUrl = upiUrl;
+        }
         
-        await createDepositRequest(amount, bonusAmount);
-        window.location.href = upiUrl;
+        // Open the UPI app
+        window.location.href = appUrl;
         
+        // Fallback to normal UPI intent
         setTimeout(() => {
-            if (confirm(`✅ Did you pay ₹${amount}?`)) {
-                showMessage(`✅ Payment recorded! Waiting for admin...`, 'success');
+            window.location.href = upiUrl;
+        }, 500);
+        
+        // After returning to app, ask for confirmation
+        setTimeout(() => {
+            if (confirm(`✅ Did you successfully pay ₹${amount} to ${upiId}?\n\nClick OK after completing the payment.`)) {
+                showMessage(`✅ Payment recorded! Waiting for admin confirmation...`, 'success');
                 startTimerAndWait();
+                hideUPIApps();
             } else {
-                showMessage(`⏳ Payment pending.`, 'pending');
+                showMessage(`⏳ Payment pending. Admin will verify manually.`, 'success');
                 startTimerAndWait();
+                hideUPIApps();
             }
         }, 10000);
     }
     
-    // Profile Modal Functions (same as dashboard)
+    async function proceedToPay() {
+        const amount = getAmount();
+        
+        if (amount < 100) {
+            showMessage('Minimum deposit amount is ₹100', 'error');
+            return;
+        }
+        if (amount > 50000) {
+            showMessage('Maximum deposit amount is ₹50,000', 'error');
+            return;
+        }
+        
+        const bonusAmount = getBonusAmount(amount);
+        pendingAmount = amount;
+        pendingBonus = bonusAmount;
+        
+        // Create deposit request first
+        await createDepositRequest(amount, bonusAmount);
+        
+        // Show UPI apps selection
+        document.getElementById('upiAppsSection').style.display = 'block';
+        document.getElementById('proceedBtn').style.display = 'none';
+        
+        showMessage(`✅ Request created for ₹${amount}. Select your UPI app to pay.`, 'success');
+    }
+    
+    // Profile Modal Functions
     function showProfileModal() {
         if (currentUserData) {
-            document.getElementById('profileInfo').innerHTML = `<div style="text-align:center; margin-bottom:15px;"><div style="font-size:20px; margin-bottom:5px; color:#ffd700;">${currentUserData.name}</div><div style="color:#aa9c7a;">${currentUserData.phone}</div><div style="color:#ffd700; font-size:18px;">₹${currentUserData.balance}</div></div>`;
+            document.getElementById('profileInfo').innerHTML = `<div style="text-align:center;"><div style="font-size:20px; color:#ffd700;">${currentUserData.name}</div><div style="color:#aa9c7a;">${currentUserData.phone}</div><div style="color:#ffd700; font-size:18px;">₹${currentUserData.balance}</div></div>`;
             document.getElementById('profileModal').style.display = 'flex';
         }
     }
@@ -511,6 +510,8 @@
     window.showGames = showGames;
     window.goBack = goBack;
     window.logout = logout;
+    window.openUPIApp = openUPIApp;
+    window.hideUPIApps = hideUPIApps;
 </script>
 </body>
 </html>
