@@ -254,7 +254,7 @@
             </ul>
         </div>
         <div class="terms-footer">
-            <button class="terms-accept-btn" onclick="acceptTerms()">✓ ACCEPT</button>
+            <button class="terms-accept-btn" onclick="closeTermsPopup()">✓ I AGREE & CONTINUE</button>
         </div>
     </div>
 </div>
@@ -281,7 +281,6 @@
     const db = firebase.firestore();
     
     let currentUser = null, currentUserData = null, selectedAmount = 500;
-    let termsAccepted = sessionStorage.getItem('withdrawTermsAccepted') === 'true';
     
     auth.onAuthStateChanged(async (user) => {
         if (!user) {
@@ -290,16 +289,18 @@
             currentUser = user;
             await loadUserData();
             loadBankDetails();
-            // Show terms popup if not accepted
-            if (!termsAccepted) {
-                document.getElementById('termsPopup').style.display = 'flex';
-            }
         }
     });
     
-    function acceptTerms() {
-        sessionStorage.setItem('withdrawTermsAccepted', 'true');
+    // Function to show Terms Popup - Called when clicking Withdraw button
+    function showTermsPopup() {
+        document.getElementById('termsPopup').style.display = 'flex';
+    }
+    
+    function closeTermsPopup() {
         document.getElementById('termsPopup').style.display = 'none';
+        // After accepting terms, proceed with withdrawal
+        processWithdrawal();
     }
     
     async function loadUserData() {
@@ -350,7 +351,7 @@
         return amount;
     }
     
-    document.getElementById('withdrawBtn').onclick = async () => {
+    async function processWithdrawal() {
         const amount = getAmount();
         if (amount < 500) { showMessage('Minimum withdrawal amount is ₹500', 'error'); return; }
         if (amount > 2500000) { showMessage('Maximum withdrawal amount is ₹25,00,000', 'error'); return; }
@@ -397,6 +398,11 @@
             btn.innerText = '💸 REQUEST WITHDRAWAL';
             setTimeout(() => goBack(), 3000);
         }
+    }
+    
+    // When user clicks Withdraw button, show Terms popup first
+    document.getElementById('withdrawBtn').onclick = () => {
+        showTermsPopup();
     };
     
     function showBalance() { alert(`💰 Current Balance: ₹${currentUserData?.balance || 0}`); }
@@ -471,7 +477,8 @@
     window.sendWhatsApp = sendWhatsApp;
     window.closeNotice = closeNotice;
     window.showGames = showGames;
-    window.acceptTerms = acceptTerms;
+    window.showTermsPopup = showTermsPopup;
+    window.closeTermsPopup = closeTermsPopup;
 </script>
 </body>
 </html>
