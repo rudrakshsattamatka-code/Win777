@@ -81,7 +81,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0,0,0,0.95);
-            z-index: 3000;
+            z-index: 9999;
             justify-content: center;
             align-items: center;
         }
@@ -122,8 +122,8 @@
             padding-left: 0;
         }
         .terms-body li {
-            padding: 6px 0;
-            padding-left: 20px;
+            padding: 8px 0;
+            padding-left: 25px;
             position: relative;
         }
         .terms-body li:before {
@@ -139,7 +139,7 @@
         .terms-accept-btn {
             background: linear-gradient(135deg, #ffd700, #daa520);
             border: none;
-            padding: 12px 40px;
+            padding: 14px 40px;
             border-radius: 40px;
             color: #1a1510;
             font-size: 18px;
@@ -151,6 +151,21 @@
         .terms-accept-btn:hover {
             transform: scale(1.02);
             box-shadow: 0 0 20px rgba(255,215,0,0.5);
+        }
+        .terms-close-btn {
+            background: none;
+            border: 1px solid #ffd70040;
+            padding: 10px;
+            border-radius: 40px;
+            color: #aa9c7a;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .terms-close-btn:hover {
+            border-color: #ffd700;
+            color: #ffd700;
         }
         
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; }
@@ -219,7 +234,7 @@
             <div id="bankInfoContent">Loading bank details...</div>
         </div>
         
-        <button class="withdraw-btn" id="withdrawBtn">💸 REQUEST WITHDRAWAL</button>
+        <button class="withdraw-btn" id="withdrawBtn" onclick="showTermsPopup()">💸 REQUEST WITHDRAWAL</button>
         <button class="back-btn" onclick="goBack()">← Back</button>
         
         <div id="message" class="message hidden"></div>
@@ -254,7 +269,8 @@
             </ul>
         </div>
         <div class="terms-footer">
-            <button class="terms-accept-btn" onclick="closeTermsPopup()">✓ I AGREE & CONTINUE</button>
+            <button class="terms-accept-btn" onclick="acceptTermsAndProceed()">✓ I AGREE & CONTINUE</button>
+            <button class="terms-close-btn" onclick="closeTermsPopup()">✗ Cancel</button>
         </div>
     </div>
 </div>
@@ -281,6 +297,7 @@
     const db = firebase.firestore();
     
     let currentUser = null, currentUserData = null, selectedAmount = 500;
+    let pendingWithdrawalAmount = 0;
     
     auth.onAuthStateChanged(async (user) => {
         if (!user) {
@@ -292,15 +309,34 @@
         }
     });
     
-    // Function to show Terms Popup - Called when clicking Withdraw button
+    // Show Terms Popup
     function showTermsPopup() {
+        const amount = getAmount();
+        if (amount < 500) {
+            showMessage('Minimum withdrawal amount is ₹500', 'error');
+            return;
+        }
+        if (amount > 2500000) {
+            showMessage('Maximum withdrawal amount is ₹25,00,000', 'error');
+            return;
+        }
+        if (amount > (currentUserData?.balance || 0)) {
+            showMessage(`Insufficient balance! You have ₹${currentUserData?.balance || 0}`, 'error');
+            return;
+        }
+        
+        pendingWithdrawalAmount = amount;
         document.getElementById('termsPopup').style.display = 'flex';
     }
     
     function closeTermsPopup() {
         document.getElementById('termsPopup').style.display = 'none';
-        // After accepting terms, proceed with withdrawal
-        processWithdrawal();
+        pendingWithdrawalAmount = 0;
+    }
+    
+    function acceptTermsAndProceed() {
+        document.getElementById('termsPopup').style.display = 'none';
+        processWithdrawal(pendingWithdrawalAmount);
     }
     
     async function loadUserData() {
@@ -351,11 +387,8 @@
         return amount;
     }
     
-    async function processWithdrawal() {
-        const amount = getAmount();
-        if (amount < 500) { showMessage('Minimum withdrawal amount is ₹500', 'error'); return; }
-        if (amount > 2500000) { showMessage('Maximum withdrawal amount is ₹25,00,000', 'error'); return; }
-        if (amount > (currentUserData?.balance || 0)) { showMessage(`Insufficient balance! You have ₹${currentUserData?.balance || 0}`, 'error'); return; }
+    async function processWithdrawal(amount) {
+        if (!amount || amount < 500) return;
         
         const doc = await db.collection('users').doc(currentUser.uid).get();
         const bankDetails = doc.data()?.bankDetails;
@@ -399,11 +432,6 @@
             setTimeout(() => goBack(), 3000);
         }
     }
-    
-    // When user clicks Withdraw button, show Terms popup first
-    document.getElementById('withdrawBtn').onclick = () => {
-        showTermsPopup();
-    };
     
     function showBalance() { alert(`💰 Current Balance: ₹${currentUserData?.balance || 0}`); }
     function goBack() { window.location.href = 'dashboard.html'; }
@@ -479,6 +507,7 @@
     window.showGames = showGames;
     window.showTermsPopup = showTermsPopup;
     window.closeTermsPopup = closeTermsPopup;
+    window.acceptTermsAndProceed = acceptTermsAndProceed;
 </script>
 </body>
 </html>
