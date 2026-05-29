@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WIN777 - Add Funds</title>
+    <title>WIN777 - Funds</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #fff9e8; padding-bottom: 70px; }
@@ -35,39 +34,32 @@
         .game-icon img { width: 45px; height: 45px; display: block; margin: 0 auto 4px; border-radius: 12px; object-fit: cover; }
         .game-icon span { font-size: 11px; }
         
-        .funds-card { background: #fff; margin: 12px; border-radius: 16px; padding: 20px; border: 1px solid #ffe0b3; }
-        .funds-title { color: #ff9800; font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 15px; }
+        /* Menu Cards */
+        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 12px; }
+        .menu-card { background: #fff; border-radius: 16px; padding: 20px; text-align: center; border: 1px solid #ffe0b3; cursor: pointer; transition: all 0.3s; }
+        .menu-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(255,152,0,0.1); }
+        .menu-icon { font-size: 40px; margin-bottom: 8px; }
+        .menu-title { color: #ff9800; font-size: 14px; font-weight: bold; }
         
-        .amount-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-        .amount-btn { background: #f8f9fa; border: 1px solid #ffe0b3; border-radius: 16px; padding: 14px; text-align: center; color: #333; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
-        .amount-btn.active { background: #ff9800; color: #fff; border-color: #ff9800; }
-        .amount-btn:hover { background: #fff0d8; }
+        .screen { padding: 15px; }
+        .input-field { width: 100%; padding: 14px; background: #fff; border: 1px solid #ffe0b3; border-radius: 12px; color: #333; font-size: 16px; margin-bottom: 15px; }
+        .btn { width: 100%; padding: 14px; background: #ff9800; border: none; border-radius: 12px; color: #fff; font-weight: bold; font-size: 16px; cursor: pointer; transition: all 0.3s; }
+        .btn:hover { background: #e68a00; transform: scale(1.02); }
+        .btn-warning { background: #ffc107; color: #333; }
         
-        .custom-amount input { width: 100%; padding: 14px; background: #fff; border: 1px solid #ffe0b3; border-radius: 12px; color: #333; font-size: 16px; }
+        .bank-details-box { background: #f8f9fa; border-radius: 12px; padding: 15px; margin: 15px 0; }
+        .bank-info { color: #555; font-size: 13px; margin: 5px 0; }
+        .bank-info span { color: #ff9800; font-weight: bold; }
         
-        .bonus-box { background: #fff; border-radius: 16px; padding: 15px; margin: 15px 0; border: 1px solid #ffe0b3; display: flex; align-items: center; justify-content: space-between; }
-        .bonus-box label { color: #333; font-weight: bold; }
-        .bonus-box input { width: 20px; height: 20px; cursor: pointer; }
-        .bonus-text { color: #28a745; font-size: 12px; margin-top: 5px; }
+        .bid-card, .transaction-card { background: #fff; margin: 12px; border-radius: 12px; padding: 12px; border: 1px solid #ffe0b3; }
+        .bid-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .bid-market { color: #ff9800; font-weight: bold; }
+        .bid-status { font-size: 11px; padding: 2px 8px; border-radius: 12px; }
+        .status-won { background: #d4edda; color: #155724; }
+        .status-lost { background: #f8d7da; color: #721c24; }
+        .status-pending { background: #fff3cd; color: #856404; }
         
-        .summary-box { background: linear-gradient(135deg, #ff9800, #e68a00); padding: 12px; border-radius: 12px; margin: 10px 0; text-align: center; color: #fff; }
-        
-        .upi-info { background: #fff0d8; border-radius: 16px; padding: 15px; margin: 20px 0; text-align: center; border: 1px solid #ffe0b3; }
-        .upi-id { color: #ff9800; font-size: 18px; font-weight: bold; word-break: break-all; }
-        
-        .proceed-btn { width: 100%; padding: 16px; background: #ff9800; border: none; border-radius: 16px; color: #fff; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; margin-top: 10px; }
-        .proceed-btn:hover { background: #e68a00; transform: scale(1.02); }
-        
-        .back-btn { width: 100%; padding: 14px; background: #e0e0e0; border: none; border-radius: 16px; color: #333; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
-        .back-btn:hover { background: #ccc; }
-        
-        .timer-box { background: #fff; border-radius: 16px; padding: 15px; text-align: center; margin-top: 20px; border: 1px solid #ffe0b3; display: none; }
-        .timer-text { color: #ff9800; font-size: 32px; font-weight: bold; font-family: monospace; }
-        
-        .message { padding: 12px; border-radius: 12px; text-align: center; margin-top: 15px; font-size: 13px; }
-        .message-success { background: #e8ffe8; color: #28a745; border: 1px solid #c8ffc8; }
-        .message-error { background: #ffe8e8; color: #dc3545; border: 1px solid #ffc9c9; }
-        .hidden { display: none; }
+        .no-data { text-align: center; color: #888; padding: 40px; }
         
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #fff; display: flex; justify-content: space-around; padding: 8px 10px; border-top: 1px solid #ffe0b3; }
         .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 10px; transition: all 0.3s; flex: 1; }
@@ -76,8 +68,7 @@
         .nav-item span { font-size: 10px; display: block; }
         .nav-item.active { color: #ff9800; }
         
-        .note-text { font-size: 11px; color: #888; text-align: center; margin-top: 15px; }
-        
+        .hidden { display: none; }
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: #fff; border-radius: 24px; padding: 25px; width: 90%; max-width: 350px; max-height: 80vh; overflow-y: auto; }
         .modal-content h3 { color: #ff9800; margin-bottom: 15px; text-align: center; }
@@ -85,15 +76,19 @@
         .modal-btn:hover { background: #e68a00; }
         .close-modal { background: #e0e0e0; color: #333; }
         .modal-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; }
+        
         .rate-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
         .rate-name { color: #555; }
         .rate-value { color: #ff9800; font-weight: bold; }
+        
         .support-option { display: flex; align-items: center; gap: 15px; padding: 15px; background: #f8f9fa; border-radius: 12px; margin-bottom: 10px; cursor: pointer; }
         .support-option:hover { background: #fff0d8; }
         .support-icon { font-size: 30px; }
         .support-text { flex: 1; }
         .support-title { font-weight: bold; color: #333; }
         .support-desc { font-size: 12px; color: #888; }
+        
+        .back-btn { background: none; border: none; color: #ff9800; font-size: 24px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -137,49 +132,58 @@
         </div>
     </div>
     
-    <!-- Funds / Deposit Content - Simple like first image -->
-    <div class="funds-card">
-        <div class="funds-title">💰 ADD FUNDS</div>
-        
-        <div class="amount-grid">
-            <div class="amount-btn" onclick="selectAmount(100)">₹100</div>
-            <div class="amount-btn" onclick="selectAmount(500)">₹500</div>
-            <div class="amount-btn" onclick="selectAmount(1000)">₹1000</div>
-            <div class="amount-btn" onclick="selectAmount(2000)">₹2000</div>
-            <div class="amount-btn" onclick="selectAmount(5000)">₹5000</div>
-            <div class="amount-btn" onclick="selectAmount(10000)">₹10000</div>
-        </div>
-        
-        <div class="custom-amount">
-            <input type="number" id="customAmount" placeholder="Enter custom amount (Min ₹100)">
-        </div>
-        
-        <div class="bonus-box">
-            <div>
-                <label>🎁 Apply 10% Bonus</label>
-                <div class="bonus-text">Get 10% extra on deposit above ₹500</div>
+    <!-- Main Menu -->
+    <div id="mainMenu">
+        <div class="menu-grid">
+            <div class="menu-card" onclick="showAddBank()">
+                <div class="menu-icon">🏦</div>
+                <div class="menu-title">Add Bank Account</div>
             </div>
-            <input type="checkbox" id="applyBonus" onchange="updateSummary()">
+            <div class="menu-card" onclick="showBidHistory()">
+                <div class="menu-icon">📋</div>
+                <div class="menu-title">Bid History</div>
+            </div>
+            <div class="menu-card" onclick="showTransactionHistory()">
+                <div class="menu-icon">📊</div>
+                <div class="menu-title">Transaction History</div>
+            </div>
         </div>
-        
-        <div class="summary-box" id="summaryBox">
-            💰 You will receive: ₹<span id="totalAmount">100</span>
+    </div>
+    
+    <!-- Add Bank Screen -->
+    <div id="bankScreen" class="screen hidden">
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+            <button class="back-btn" onclick="showMainMenu()">←</button>
+            <h3 style="color:#ff9800; flex:1; text-align:center;">🏦 Bank Details</h3>
+            <div style="width:30px;"></div>
         </div>
-        
-        <div class="upi-info">
-            <div>📱 Send payment to this UPI ID</div>
-            <div class="upi-id" id="upiIdDisplay">ganeshpatil99@slc</div>
+        <input type="text" id="accountHolder" class="input-field" placeholder="Account Holder Name">
+        <input type="text" id="bankName" class="input-field" placeholder="Bank Name">
+        <input type="text" id="accountNumber" class="input-field" placeholder="Account Number">
+        <input type="text" id="ifscCode" class="input-field" placeholder="IFSC Code">
+        <input type="text" id="confirmAccount" class="input-field" placeholder="Confirm Account Number">
+        <button class="btn" id="saveBankBtn">💾 Save Bank Details</button>
+        <div id="bankMsg" class="message" style="text-align:center; margin-top:10px; display:none;"></div>
+    </div>
+    
+    <!-- Bid History Screen -->
+    <div id="bidHistoryScreen" class="screen hidden">
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+            <button class="back-btn" onclick="showMainMenu()">←</button>
+            <h3 style="color:#ff9800; flex:1; text-align:center;">📋 Bid History</h3>
+            <div style="width:30px;"></div>
         </div>
-        
-        <button class="proceed-btn" id="proceedBtn">💳 PROCEED TO PAY</button>
-        <button class="back-btn" onclick="goBack()">← Back</button>
-        
-        <div id="message" class="message hidden"></div>
-        <div id="timerBox" class="timer-box">
-            <div class="timer-text" id="countdownTimer">05:00</div>
-            <div>⏳ Waiting for admin confirmation...</div>
+        <div id="bidsList"></div>
+    </div>
+    
+    <!-- Transaction History Screen -->
+    <div id="transactionHistoryScreen" class="screen hidden">
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+            <button class="back-btn" onclick="showMainMenu()">←</button>
+            <h3 style="color:#ff9800; flex:1; text-align:center;">📊 Transaction History</h3>
+            <div style="width:30px;"></div>
         </div>
-        <div class="note-text">⚡ Minimum ₹100 | Maximum ₹50,000 | 10% Bonus on ₹500+</div>
+        <div id="transactionsList"></div>
     </div>
     
     <div class="bottom-nav">
@@ -190,10 +194,6 @@
         <div class="nav-item" onclick="location.href='mybids.html'">
             <img src="https://i.imgur.com/rUWwMYm.png" alt="Passbook">
             <span>Passbook</span>
-        </div>
-        <div class="nav-item" onclick="location.href='mybids.html'">
-            <img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids">
-            <span>My Bids</span>
         </div>
         <div class="nav-item active" onclick="location.href='funds.html'">
             <img src="https://i.imgur.com/NvJCTli.png" alt="Fund">
@@ -247,20 +247,6 @@
     </div>
 </div>
 
-<!-- Bank Details Modal -->
-<div id="bankModal" class="modal">
-    <div class="modal-content">
-        <h3>🏦 Bank Details</h3>
-        <input type="text" id="bankAccountHolder" class="modal-input" placeholder="Account Holder Name">
-        <input type="text" id="bankName" class="modal-input" placeholder="Bank Name">
-        <input type="text" id="bankAccountNumber" class="modal-input" placeholder="Account Number">
-        <input type="text" id="bankIfsc" class="modal-input" placeholder="IFSC Code">
-        <button class="modal-btn" onclick="saveBankDetails()">Save Bank Details</button>
-        <button class="modal-btn close-modal" onclick="closeBankModal()">Cancel</button>
-        <div id="bankMsg" style="color:#28a745; text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
 <!-- Support Modal -->
 <div id="supportModal" class="modal">
     <div class="modal-content">
@@ -299,19 +285,12 @@
     
     let currentUser = null;
     let currentUserData = null;
-    let selectedAmount = 100;
-    let currentTransactionId = null;
-    let timerInterval = null;
-    let upiId = "ganeshpatil99@slc";
-    let upiName = "Ganesh Siddharth Patil";
     
-    async function loadUpiId() {
-        const doc = await db.collection('settings').doc('upi').get();
-        if (doc.exists && doc.data().upiId) {
-            upiId = doc.data().upiId;
-            document.getElementById('upiIdDisplay').innerText = upiId;
-        }
-    }
+    const gameRates = {
+        'Single Digit': 10, 'Jodi': 100, 'Single Pana': 160,
+        'Double Pana': 320, 'Triple Pana': 1000,
+        'Half Sangam A': 1600, 'Half Sangam B': 1600, 'Full Sangam': 25000
+    };
     
     auth.onAuthStateChanged(async (user) => {
         if (!user) {
@@ -319,8 +298,7 @@
         } else {
             currentUser = user;
             await loadUserData();
-            await loadUpiId();
-            updateSummary();
+            listenToNotice();
         }
     });
     
@@ -338,145 +316,177 @@
         alert(`💰 Current Balance: ₹${currentUserData?.balance || 0}`);
     }
     
-    function selectAmount(amount) {
-        selectedAmount = amount;
-        document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-        document.getElementById('customAmount').value = '';
-        updateSummary();
+    // Navigation
+    function showMainMenu() {
+        document.getElementById('mainMenu').classList.remove('hidden');
+        document.getElementById('bankScreen').classList.add('hidden');
+        document.getElementById('bidHistoryScreen').classList.add('hidden');
+        document.getElementById('transactionHistoryScreen').classList.add('hidden');
     }
     
-    function updateSummary() {
-        let amount = selectedAmount;
-        const custom = parseInt(document.getElementById('customAmount').value);
-        if (custom && custom >= 100) amount = custom;
-        
-        const applyBonus = document.getElementById('applyBonus').checked;
-        let bonus = 0;
-        if (applyBonus && amount >= 500) {
-            bonus = Math.floor(amount * 0.10);
-        }
-        const total = amount + bonus;
-        document.getElementById('totalAmount').innerText = total;
+    function showAddBank() {
+        document.getElementById('mainMenu').classList.add('hidden');
+        document.getElementById('bankScreen').classList.remove('hidden');
+        loadBankDetails();
     }
     
-    function getAmount() {
-        let amount = selectedAmount;
-        const custom = parseInt(document.getElementById('customAmount').value);
-        if (custom && custom >= 100) amount = custom;
-        return amount;
+    function showBidHistory() {
+        document.getElementById('mainMenu').classList.add('hidden');
+        document.getElementById('bidHistoryScreen').classList.remove('hidden');
+        loadBidHistory();
     }
     
-    function getBonusAmount(amount) {
-        const applyBonus = document.getElementById('applyBonus').checked;
-        if (applyBonus && amount >= 500) {
-            return Math.floor(amount * 0.10);
-        }
-        return 0;
+    function showTransactionHistory() {
+        document.getElementById('mainMenu').classList.add('hidden');
+        document.getElementById('transactionHistoryScreen').classList.remove('hidden');
+        loadTransactionHistory();
     }
     
-    function showMessage(msg, type) {
-        const msgDiv = document.getElementById('message');
-        msgDiv.innerText = msg;
-        msgDiv.className = `message message-${type}`;
-        msgDiv.classList.remove('hidden');
-        setTimeout(() => msgDiv.classList.add('hidden'), 5000);
-    }
-    
-    async function createDepositRequest(amount, bonusAmount) {
-        const totalAmount = amount + bonusAmount;
-        const transactionRef = await db.collection('transactions').add({
-            userId: currentUser.uid,
-            type: 'credit',
-            amount: totalAmount,
-            requestedAmount: amount,
-            bonusAmount: bonusAmount,
-            status: 'Pending',
-            date: new Date(),
-            upiId: upiId
-        });
-        currentTransactionId = transactionRef.id;
-        return transactionRef.id;
-    }
-    
-    function startTimerAndWait() {
-        const timerBox = document.getElementById('timerBox');
-        timerBox.style.display = 'block';
-        let timeLeft = 300;
-        const timerDisplay = document.getElementById('countdownTimer');
-        
-        if (timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            timeLeft--;
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timerDisplay.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                timerBox.style.display = 'none';
-                showMessage('Time expired! Please create new request.', 'error');
-            }
-        }, 1000);
-        
-        if (currentTransactionId) {
-            const unsubscribe = db.collection('transactions').doc(currentTransactionId).onSnapshot((doc) => {
-                if (doc.exists && doc.data().status === 'Completed') {
-                    clearInterval(timerInterval);
-                    timerBox.style.display = 'none';
-                    unsubscribe();
-                    const data = doc.data();
-                    showMessage(`✅ ₹${data.amount} added successfully!${data.bonusAmount > 0 ? ` (Including ₹${data.bonusAmount} bonus)` : ''}`, 'success');
-                    setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 2000);
-                }
-            });
+    // Bank Details
+    function loadBankDetails() {
+        if (currentUserData && currentUserData.bankDetails) {
+            const bank = currentUserData.bankDetails;
+            document.getElementById('accountHolder').value = bank.accountHolder || '';
+            document.getElementById('bankName').value = bank.bankName || '';
+            document.getElementById('accountNumber').value = bank.accountNumber || '';
+            document.getElementById('ifscCode').value = bank.ifscCode || '';
+            document.getElementById('confirmAccount').value = bank.accountNumber || '';
         }
     }
     
-    async function proceedToPay() {
-        const amount = getAmount();
+    document.getElementById('saveBankBtn').onclick = async () => {
+        const accountHolder = document.getElementById('accountHolder').value.trim();
+        const bankName = document.getElementById('bankName').value.trim();
+        const accountNumber = document.getElementById('accountNumber').value.trim();
+        const ifscCode = document.getElementById('ifscCode').value.trim();
+        const confirmAccount = document.getElementById('confirmAccount').value.trim();
         
-        if (amount < 100) {
-            showMessage('Minimum deposit amount is ₹100', 'error');
-            return;
-        }
-        if (amount > 50000) {
-            showMessage('Maximum deposit amount is ₹50,000', 'error');
+        if (!accountHolder || !bankName || !accountNumber || !ifscCode) {
+            document.getElementById('bankMsg').innerHTML = 'Please fill all fields';
+            document.getElementById('bankMsg').style.display = 'block';
+            document.getElementById('bankMsg').style.color = '#dc3545';
+            setTimeout(() => document.getElementById('bankMsg').style.display = 'none', 3000);
             return;
         }
         
-        const bonusAmount = getBonusAmount(amount);
+        if (accountNumber !== confirmAccount) {
+            document.getElementById('bankMsg').innerHTML = 'Account numbers do not match!';
+            document.getElementById('bankMsg').style.display = 'block';
+            document.getElementById('bankMsg').style.color = '#dc3545';
+            setTimeout(() => document.getElementById('bankMsg').style.display = 'none', 3000);
+            return;
+        }
         
-        const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR&tn=WIN777%20Deposit`;
+        const bankDetails = { accountHolder, bankName, accountNumber, ifscCode };
+        await db.collection('users').doc(currentUser.uid).update({ bankDetails: bankDetails });
+        currentUserData.bankDetails = bankDetails;
         
-        const confirmMsg = `💰 PAYMENT DETAILS\n\n` +
-            `Amount: ₹${amount}\n` +
-            `${bonusAmount > 0 ? `Bonus: +₹${bonusAmount}\n` : ''}` +
-            `Total You Get: ₹${amount + bonusAmount}\n\n` +
-            `UPI ID: ${upiId}\n` +
-            `Payee: ${upiName}\n\n` +
-            `Click OK to open UPI app and pay ₹${amount}`;
-        
-        if (!confirm(confirmMsg)) return;
-        
-        await createDepositRequest(amount, bonusAmount);
-        
-        window.location.href = upiUrl;
-        
+        document.getElementById('bankMsg').innerHTML = '✅ Bank details saved successfully!';
+        document.getElementById('bankMsg').style.display = 'block';
+        document.getElementById('bankMsg').style.color = '#28a745';
         setTimeout(() => {
-            window.location.href = upiUrl;
-        }, 500);
+            document.getElementById('bankMsg').style.display = 'none';
+            showMainMenu();
+        }, 2000);
+    };
+    
+    // Bid History
+    async function loadBidHistory() {
+        const container = document.getElementById('bidsList');
+        container.innerHTML = '<div class="no-data">Loading...</div>';
         
-        setTimeout(() => {
-            if (confirm(`✅ Did you successfully pay ₹${amount} to ${upiId}?\n\nClick OK after completing the payment.`)) {
-                showMessage(`✅ Payment recorded! Waiting for admin confirmation...`, 'success');
-                startTimerAndWait();
+        const bids = await db.collection('bids')
+            .where('userId', '==', currentUser.uid)
+            .orderBy('createdAt', 'desc')
+            .get();
+        
+        if (bids.empty) {
+            container.innerHTML = '<div class="no-data">📭 No bids placed yet</div>';
+            return;
+        }
+        
+        let html = '';
+        for (const doc of bids.docs) {
+            const b = doc.data();
+            const bidAmount = b.points || 0;
+            const multiplier = gameRates[b.gameType] || 10;
+            const winAmount = bidAmount * multiplier;
+            
+            let statusClass = '', statusText = '';
+            if (b.status === 'won') {
+                statusClass = 'status-won';
+                statusText = '🏆 WON';
+            } else if (b.status === 'lost') {
+                statusClass = 'status-lost';
+                statusText = '❌ LOST';
             } else {
-                showMessage(`⏳ Payment pending. Admin will verify manually.`, 'pending');
-                startTimerAndWait();
+                statusClass = 'status-pending';
+                statusText = '⏳ PENDING';
             }
-        }, 10000);
+            
+            const bidDate = b.createdAt?.toDate() ? b.createdAt.toDate().toLocaleString() : 'Pending';
+            
+            html += `
+                <div class="bid-card">
+                    <div class="bid-header">
+                        <span class="bid-market">${b.market || 'Unknown'}</span>
+                        <span class="bid-status ${statusClass}">${statusText}</span>
+                    </div>
+                    <div style="margin: 8px 0;"><strong>${b.gameType}</strong>: ${b.value}</div>
+                    <div>💰 Bid: ₹${bidAmount} | Rate: ${multiplier}x</div>
+                    ${b.status === 'won' ? `<div style="color:#28a745;">🏆 Win: ₹${winAmount}</div>` : ''}
+                    <div style="font-size: 11px; color: #888; margin-top: 8px;">📅 ${bidDate}</div>
+                </div>
+            `;
+        }
+        container.innerHTML = html;
+    }
+    
+    // Transaction History
+    async function loadTransactionHistory() {
+        const container = document.getElementById('transactionsList');
+        container.innerHTML = '<div class="no-data">Loading...</div>';
+        
+        const transactions = await db.collection('transactions')
+            .where('userId', '==', currentUser.uid)
+            .orderBy('date', 'desc')
+            .get();
+        
+        if (transactions.empty) {
+            container.innerHTML = '<div class="no-data">📭 No transactions yet</div>';
+            return;
+        }
+        
+        let html = '';
+        for (const doc of transactions.docs) {
+            const t = doc.data();
+            const date = t.date?.toDate() ? t.date.toDate().toLocaleString() : 'Pending';
+            const isCredit = t.type === 'credit';
+            let statusColor = '#ff9800', statusText = 'Pending';
+            
+            if (t.status === 'Completed') {
+                statusColor = '#28a745';
+                statusText = 'Completed';
+            } else if (t.status === 'Rejected') {
+                statusColor = '#dc3545';
+                statusText = 'Rejected';
+            }
+            
+            html += `
+                <div class="bid-card">
+                    <div class="bid-header">
+                        <span class="bid-market">${isCredit ? '💰 DEPOSIT' : '💸 WITHDRAWAL'}</span>
+                        <span style="color:${statusColor};">${statusText}</span>
+                    </div>
+                    <div style="font-size: 20px; font-weight: bold; color: ${isCredit ? '#28a745' : '#ff9800'}; margin: 8px 0;">
+                        ${isCredit ? '+' : '-'} ₹${t.amount}
+                    </div>
+                    <div style="font-size: 11px; color: #888;">📅 ${date}</div>
+                    ${t.description ? `<div style="font-size: 11px; color: #666; margin-top: 5px;">${t.description}</div>` : ''}
+                </div>
+            `;
+        }
+        container.innerHTML = html;
     }
     
     // Profile Modal Functions
@@ -541,43 +551,7 @@
     
     function showBankModal() {
         closeProfileModal();
-        if (currentUserData.bankDetails) {
-            document.getElementById('bankAccountHolder').value = currentUserData.bankDetails.accountHolder || '';
-            document.getElementById('bankName').value = currentUserData.bankDetails.bankName || '';
-            document.getElementById('bankAccountNumber').value = currentUserData.bankDetails.accountNumber || '';
-            document.getElementById('bankIfsc').value = currentUserData.bankDetails.ifscCode || '';
-        } else {
-            document.getElementById('bankAccountHolder').value = '';
-            document.getElementById('bankName').value = '';
-            document.getElementById('bankAccountNumber').value = '';
-            document.getElementById('bankIfsc').value = '';
-        }
-        document.getElementById('bankModal').style.display = 'flex';
-    }
-    
-    function closeBankModal() { 
-        document.getElementById('bankModal').style.display = 'none';
-        document.getElementById('bankMsg').innerHTML = '';
-    }
-    
-    async function saveBankDetails() {
-        const accountHolder = document.getElementById('bankAccountHolder').value.trim();
-        const bankName = document.getElementById('bankName').value.trim();
-        const accountNumber = document.getElementById('bankAccountNumber').value.trim();
-        const ifscCode = document.getElementById('bankIfsc').value.trim();
-        
-        if (!accountHolder || !bankName || !accountNumber || !ifscCode) {
-            document.getElementById('bankMsg').innerHTML = 'Please fill all fields';
-            document.getElementById('bankMsg').style.color = '#dc3545';
-            return;
-        }
-        
-        const bankDetails = { accountHolder, bankName, accountNumber, ifscCode };
-        await db.collection('users').doc(currentUser.uid).update({ bankDetails: bankDetails });
-        currentUserData.bankDetails = bankDetails;
-        document.getElementById('bankMsg').innerHTML = '✅ Bank details saved successfully!';
-        document.getElementById('bankMsg').style.color = '#28a745';
-        setTimeout(() => closeBankModal(), 1500);
+        showAddBank();
     }
     
     function showSupportModal() { document.getElementById('supportModal').style.display = 'flex'; }
@@ -590,7 +564,6 @@
     }
     function closeNotice() { document.getElementById('noticeBoard').style.display = 'none'; }
     function showGames() { alert('Games coming soon!'); }
-    function goBack() { window.location.href = 'dashboard.html'; }
     
     function listenToNotice() {
         db.collection('settings').doc('notice').onSnapshot((doc) => {
@@ -599,12 +572,10 @@
         });
     }
     
-    listenToNotice();
-    
-    document.getElementById('proceedBtn').onclick = proceedToPay;
-    document.getElementById('customAmount').addEventListener('input', updateSummary);
-    
-    window.selectAmount = selectAmount;
+    window.showMainMenu = showMainMenu;
+    window.showAddBank = showAddBank;
+    window.showBidHistory = showBidHistory;
+    window.showTransactionHistory = showTransactionHistory;
     window.showBalance = showBalance;
     window.showProfileModal = showProfileModal;
     window.closeProfileModal = closeProfileModal;
@@ -614,15 +585,12 @@
     window.closeChangePinModal = closeChangePinModal;
     window.updatePin = updatePin;
     window.showBankModal = showBankModal;
-    window.closeBankModal = closeBankModal;
-    window.saveBankDetails = saveBankDetails;
     window.showSupportModal = showSupportModal;
     window.closeSupportModal = closeSupportModal;
     window.sendEmail = sendEmail;
     window.sendWhatsApp = sendWhatsApp;
     window.closeNotice = closeNotice;
     window.showGames = showGames;
-    window.goBack = goBack;
 </script>
 </body>
 </html>
