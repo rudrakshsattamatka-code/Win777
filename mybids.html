@@ -8,53 +8,59 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #e8f4f8; padding-bottom: 70px; }
-        .app-container { max-width: 500px; margin: 0 auto; background: #e8f4f8; min-height: 100vh; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Georgia', 'Times New Roman', serif; }
+        body { background: #0a0806; padding-bottom: 70px; }
+        .app-container { max-width: 500px; margin: 0 auto; background: #0a0806; min-height: 100vh; }
         
-        .header { background: #fff; padding: 15px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #d4eaf5; }
-        .logo { color: #00b4ff; font-size: 20px; font-weight: bold; flex: 1; text-align: center; }
-        .back-btn { background: none; border: none; color: #00b4ff; font-size: 24px; cursor: pointer; }
+        .header { background: linear-gradient(135deg, #1a1510, #0a0806); padding: 15px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 2px solid #ffd700; }
+        .logo-img { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #ffd700; }
+        .logo-text { color: #ffd700; font-size: 20px; font-weight: bold; flex: 1; text-align: center; text-shadow: 0 0 5px rgba(255,215,0,0.3); }
+        .back-btn { background: none; border: none; color: #ffd700; font-size: 24px; cursor: pointer; }
         
-        .bid-card { background: #fff; margin: 12px; border-radius: 16px; overflow: hidden; border: 1px solid #d4eaf5; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .bid-header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e8f4f8; }
-        .market-name { color: #00b4ff; font-size: 16px; font-weight: bold; }
+        .bid-card { background: linear-gradient(135deg, #1a1510, #0f0c08); margin: 12px; border-radius: 16px; overflow: hidden; border: 1px solid #ffd70040; transition: all 0.3s; }
+        .bid-card:hover { border-color: #ffd700; }
+        .bid-header { padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ffd70020; }
+        .market-name { color: #ffd700; font-size: 16px; font-weight: bold; }
         .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; }
-        .status-won { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .status-lost { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .status-pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .status-won { background: #1a3a1a; color: #66ff66; border: 1px solid #66ff66; }
+        .status-lost { background: #3a1a1a; color: #ff6666; border: 1px solid #ff6666; }
+        .status-pending { background: #3a3a1a; color: #ffd700; border: 1px solid #ffd700; }
         .bid-body { padding: 15px; }
-        .bid-row { display: flex; justify-content: space-between; margin-bottom: 10px; padding: 5px 0; border-bottom: 1px solid #f0f0f0; }
-        .bid-label { color: #888; font-size: 13px; }
-        .bid-value { color: #333; font-weight: bold; font-size: 14px; }
-        .win-amount { color: #28a745; font-size: 18px; font-weight: bold; }
-        .bid-footer { background: #f8f9fa; padding: 10px 15px; font-size: 11px; color: #888; text-align: right; }
-        .no-data { text-align: center; color: #888; padding: 60px 20px; }
-        .summary-bar { background: linear-gradient(135deg, #28a745, #1e7e34); margin: 12px; padding: 15px; border-radius: 16px; text-align: center; color: #fff; }
+        .bid-row { display: flex; justify-content: space-between; margin-bottom: 10px; padding: 5px 0; border-bottom: 1px solid #ffd70010; }
+        .bid-label { color: #aa9c7a; font-size: 13px; }
+        .bid-value { color: #ffd700; font-weight: bold; font-size: 14px; }
+        .win-amount { color: #66ff66; font-size: 18px; font-weight: bold; }
+        .bid-footer { background: #0a0806; padding: 10px 15px; font-size: 11px; color: #aa9c7a; text-align: right; border-top: 1px solid #ffd70010; }
+        .no-data { text-align: center; color: #aa9c7a; padding: 60px 20px; }
+        .summary-bar { background: linear-gradient(135deg, #ffd700, #daa520); margin: 12px; padding: 15px; border-radius: 16px; text-align: center; color: #1a1510; }
         .summary-title { font-size: 12px; opacity: 0.9; }
         .summary-value { font-size: 28px; font-weight: bold; }
         
-        .tab-bar { display: flex; background: #fff; margin: 12px; border-radius: 12px; padding: 4px; gap: 4px; }
-        .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-radius: 10px; transition: all 0.3s; color: #666; }
-        .tab.active { background: #00b4ff; color: #fff; }
+        .tab-bar { display: flex; background: #1a1510; margin: 12px; border-radius: 12px; padding: 4px; gap: 4px; border: 1px solid #ffd70040; }
+        .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-radius: 10px; transition: all 0.3s; color: #aa9c7a; }
+        .tab.active { background: linear-gradient(135deg, #ffd700, #daa520); color: #1a1510; font-weight: bold; }
         
-        .clear-btn { background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 8px; margin: 10px; cursor: pointer; }
-        .clear-btn:hover { background: #c82333; }
+        .clear-btn { background: #8B0000; color: #fff; border: none; padding: 10px 20px; border-radius: 30px; margin: 10px; cursor: pointer; font-weight: bold; }
+        .clear-btn:hover { background: #a00000; transform: scale(1.02); }
         
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #fff; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #d4eaf5; }
-        .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 11px; transition: all 0.3s; }
-        .nav-item.active { color: #00b4ff; }
-        .nav-item span { font-size: 22px; display: block; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: linear-gradient(135deg, #1a1510, #0f0c08); display: flex; justify-content: space-around; padding: 8px 10px; border-top: 2px solid #ffd700; }
+        .nav-item { text-align: center; color: #aa9c7a; cursor: pointer; font-size: 10px; transition: all 0.3s; flex: 1; }
+        .nav-item:hover { color: #ffd700; transform: translateY(-3px); }
+        .nav-item img { width: 28px; height: 28px; display: block; margin: 0 auto 3px; border-radius: 8px; filter: brightness(0.8); }
+        .nav-item:hover img { filter: brightness(1); }
+        .nav-item span { font-size: 10px; display: block; }
+        .nav-item.active { color: #ffd700; }
         
         .hidden { display: none; }
-        .btn-warning { background: #ffc107; color: #333; margin: 5px; padding: 8px 16px; border: none; border-radius: 8px; cursor: pointer; }
+        .error-box { background: #3a1a1a; color: #ff6666; padding: 15px; margin: 12px; border-radius: 12px; text-align: center; border: 1px solid #ff6666; }
     </style>
 </head>
 <body>
 <div class="app-container">
     <div class="header">
         <button class="back-btn" onclick="location.href='dashboard.html'">←</button>
-        <div class="logo">MY BIDS</div>
+        <img src="https://i.imgur.com/V4pMmxP.jpeg" alt="WIN777" class="logo-img">
+        <div class="logo-text">MY BIDS</div>
         <div style="width:30px;"></div>
     </div>
     
@@ -99,11 +105,26 @@
     </div>
     
     <div class="bottom-nav">
-        <div class="nav-item" onclick="location.href='dashboard.html'"><span>🏠</span><p>Home</p></div>
-        <div class="nav-item active" onclick="location.href='mybids.html'"><span>📘</span><p>Passbook</p></div>
-        <div class="nav-item" onclick="location.href='dashboard.html'"><span>📋</span><p>My Bids</p></div>
-        <div class="nav-item" onclick="location.href='funds.html'"><span>🏦</span><p>Fund</p></div>
-        <div class="nav-item" onclick="alert('Support: WhatsApp +919876543210')"><span>💬</span><p>Support</p></div>
+        <div class="nav-item" onclick="location.href='dashboard.html'">
+            <img src="https://i.imgur.com/StGZq3Y.png" alt="Home">
+            <span>Home</span>
+        </div>
+        <div class="nav-item active" onclick="location.href='mybids.html'">
+            <img src="https://i.imgur.com/rUWwMYm.png" alt="Passbook">
+            <span>Passbook</span>
+        </div>
+        <div class="nav-item" onclick="location.href='dashboard.html'">
+            <img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids">
+            <span>My Bids</span>
+        </div>
+        <div class="nav-item" onclick="location.href='funds.html'">
+            <img src="https://i.imgur.com/NvJCTli.png" alt="Fund">
+            <span>Fund</span>
+        </div>
+        <div class="nav-item" onclick="alert('Support: WhatsApp +919876543210')">
+            <img src="https://i.imgur.com/ug9IprL.jpeg" alt="Support">
+            <span>Support</span>
+        </div>
     </div>
 </div>
 
@@ -127,6 +148,8 @@
         'Half Sangam A': 1600, 'Half Sangam B': 1600, 'Full Sangam': 25000
     };
     
+    let currentUserId = null;
+    
     function showTab(tab) {
         document.getElementById('bidsTab').classList.add('hidden');
         document.getElementById('transactionsTab').classList.add('hidden');
@@ -143,7 +166,6 @@
     async function clearAllBids() {
         const user = auth.currentUser;
         if (!user) return;
-        
         if (confirm("⚠️ WARNING: This will delete ALL your bid history permanently!\n\nThis action cannot be undone!\n\nAre you sure?")) {
             const bids = await db.collection('bids').where('userId', '==', user.uid).get();
             const batch = db.batch();
@@ -157,7 +179,6 @@
     async function clearAllTransactions() {
         const user = auth.currentUser;
         if (!user) return;
-        
         if (confirm("⚠️ WARNING: This will delete ALL your transaction history permanently!\n\nThis action cannot be undone!\n\nAre you sure?")) {
             const transactions = await db.collection('transactions').where('userId', '==', user.uid).get();
             const batch = db.batch();
@@ -170,37 +191,26 @@
     
     async function loadBids() {
         const user = auth.currentUser;
-        if (!user) { 
-            window.location.href = 'index.html'; 
-            return; 
-        }
+        if (!user) { window.location.href = 'index.html'; return; }
         
+        currentUserId = user.uid;
         const container = document.getElementById('bidsList');
         const summaryDiv = document.getElementById('summary');
         
-        container.innerHTML = '<div style="text-align:center; color:#888; padding:40px;">🔄 Loading bids...</div>';
+        container.innerHTML = '<div class="no-data">🔄 Loading bids...</div>';
         
         try {
-            const bidsSnapshot = await db.collection('bids')
-                .where('userId', '==', user.uid)
-                .get();
+            const bidsSnapshot = await db.collection('bids').where('userId', '==', currentUserId).get();
             
             if (bidsSnapshot.empty) {
-                container.innerHTML = '<div class="no-data">📭 No bids placed yet</div>';
+                container.innerHTML = '<div class="no-data">👑 No bids placed yet<br><small>Go to dashboard and place your first royal bid!</small></div>';
                 summaryDiv.classList.add('hidden');
                 return;
             }
             
             let bids = [];
-            bidsSnapshot.forEach(doc => {
-                bids.push({ id: doc.id, ...doc.data() });
-            });
-            
-            bids.sort((a, b) => {
-                const dateA = a.createdAt?.toDate() || new Date(0);
-                const dateB = b.createdAt?.toDate() || new Date(0);
-                return dateB - dateA;
-            });
+            bidsSnapshot.forEach(doc => { bids.push({ id: doc.id, ...doc.data() }); });
+            bids.sort((a, b) => (b.createdAt?.toDate() || new Date(0)) - (a.createdAt?.toDate() || new Date(0)));
             
             let totalWonAmount = 0;
             let html = '';
@@ -208,9 +218,9 @@
             for (const b of bids) {
                 const bidAmount = b.points || 0;
                 const multiplier = gameRates[b.gameType] || 10;
+                const possibleWin = bidAmount * multiplier;
                 
                 let statusClass = '', statusText = '', winAmount = 0, winAmountHtml = '';
-                let displayBidType = '';
                 
                 if (b.status === 'won') {
                     statusClass = 'status-won';
@@ -218,37 +228,31 @@
                     winAmount = bidAmount * multiplier;
                     totalWonAmount += winAmount;
                     winAmountHtml = `<div class="bid-row"><span class="bid-label">🏆 Winning Amount</span><span class="win-amount">+ ₹${winAmount}</span></div>`;
-                    // Show correct bid type based on win
-                    if (b.bidType) {
-                        displayBidType = `<div class="bid-row"><span class="bid-label">🎲 Won on</span><span class="bid-value">${b.bidType} Bid</span></div>`;
-                    }
                 } else if (b.status === 'lost') {
                     statusClass = 'status-lost';
                     statusText = '❌ LOST';
-                    winAmountHtml = `<div class="bid-row"><span class="bid-label">💰 Amount Lost</span><span class="bid-value" style="color:#dc3545;">- ₹${bidAmount}</span></div>`;
+                    winAmountHtml = `<div class="bid-row"><span class="bid-label">💰 Amount Lost</span><span class="bid-value" style="color:#ff6666;">- ₹${bidAmount}</span></div>`;
                 } else {
                     statusClass = 'status-pending';
                     statusText = '⏳ PENDING';
-                    winAmountHtml = `<div class="bid-row"><span class="bid-label">🎯 Possible Win</span><span class="bid-value">₹${bidAmount * multiplier}</span></div>`;
+                    winAmountHtml = `<div class="bid-row"><span class="bid-label">🎯 Possible Win</span><span class="bid-value">₹${possibleWin}</span></div>`;
                 }
                 
                 let bidDate = 'Pending';
-                if (b.createdAt && b.createdAt.toDate) {
-                    bidDate = b.createdAt.toDate().toLocaleString();
-                }
+                if (b.createdAt && b.createdAt.toDate) bidDate = b.createdAt.toDate().toLocaleString();
                 
                 html += `
                     <div class="bid-card">
                         <div class="bid-header">
-                            <span class="market-name">📊 ${b.market || 'Unknown Market'}</span>
+                            <span class="market-name">👑 ${b.market || 'Unknown Market'}</span>
                             <span class="status-badge ${statusClass}">${statusText}</span>
                         </div>
                         <div class="bid-body">
                             <div class="bid-row"><span class="bid-label">🎲 Game Type</span><span class="bid-value">${b.gameType || '-'}</span></div>
-                            <div class="bid-row"><span class="bid-label">🔢 Your Number</span><span class="bid-value" style="color:#00b4ff; font-size:16px;">${b.value || '-'}</span></div>
+                            <div class="bid-row"><span class="bid-label">🔢 Your Number</span><span class="bid-value" style="color:#ffd700; font-size:16px;">${b.value || '-'}</span></div>
                             <div class="bid-row"><span class="bid-label">💰 Bid Amount</span><span class="bid-value">₹${bidAmount}</span></div>
-                            ${displayBidType}
                             ${winAmountHtml}
+                            ${b.bidType ? `<div class="bid-row"><span class="bid-label">🎲 Bid Type</span><span class="bid-value">${b.bidType}</span></div>` : ''}
                             <div class="bid-row"><span class="bid-label">📊 Rate</span><span class="bid-value">${multiplier}x</span></div>
                         </div>
                         <div class="bid-footer">📅 ${bidDate}</div>
@@ -264,10 +268,8 @@
             }
             
             container.innerHTML = html;
-            
         } catch (error) {
-            console.error("Error loading bids:", error);
-            container.innerHTML = `<div class="no-data" style="color:#dc3545;">❌ Error loading bids: ${error.message}</div>`;
+            container.innerHTML = `<div class="error-box">❌ Error loading bids: ${error.message}</div>`;
         }
     }
     
@@ -276,44 +278,27 @@
         if (!user) return;
         
         const container = document.getElementById('transactionsList');
-        container.innerHTML = '<div style="text-align:center; color:#888; padding:40px;">🔄 Loading transactions...</div>';
+        container.innerHTML = '<div class="no-data">🔄 Loading transactions...</div>';
         
         try {
-            const transactionsSnapshot = await db.collection('transactions')
-                .where('userId', '==', user.uid)
-                .get();
+            const transactionsSnapshot = await db.collection('transactions').where('userId', '==', user.uid).get();
             
             if (transactionsSnapshot.empty) {
-                container.innerHTML = '<div class="no-data">📭 No transactions yet</div>';
+                container.innerHTML = '<div class="no-data">👑 No transactions yet</div>';
                 return;
             }
             
             let transactions = [];
-            transactionsSnapshot.forEach(doc => {
-                transactions.push({ id: doc.id, ...doc.data() });
-            });
-            
-            transactions.sort((a, b) => {
-                const dateA = a.date?.toDate() || new Date(0);
-                const dateB = b.date?.toDate() || new Date(0);
-                return dateB - dateA;
-            });
+            transactionsSnapshot.forEach(doc => { transactions.push({ id: doc.id, ...doc.data() }); });
+            transactions.sort((a, b) => (b.date?.toDate() || new Date(0)) - (a.date?.toDate() || new Date(0)));
             
             let html = '';
             for (const t of transactions) {
-                const date = t.date?.toDate() || new Date();
-                const dateStr = date.toLocaleDateString();
-                const timeStr = date.toLocaleTimeString();
+                const date = t.date?.toDate().toLocaleString() || 'Pending';
                 const isCredit = t.type === 'credit';
-                let statusColor = '#ff9800', statusText = '⏳ Pending';
-                
-                if (t.status === 'Completed') {
-                    statusColor = '#28a745';
-                    statusText = '✅ Completed';
-                } else if (t.status === 'Rejected') {
-                    statusColor = '#dc3545';
-                    statusText = '❌ Rejected';
-                }
+                let statusColor = '#ffd700', statusText = '⏳ Pending';
+                if (t.status === 'Completed') { statusColor = '#66ff66'; statusText = '✅ Completed'; }
+                else if (t.status === 'Rejected') { statusColor = '#ff6666'; statusText = '❌ Rejected'; }
                 
                 html += `
                     <div class="bid-card">
@@ -322,29 +307,22 @@
                             <span style="color:${statusColor};">${statusText}</span>
                         </div>
                         <div class="bid-body">
-                            <div class="bid-row"><span class="bid-label">Amount</span><span class="bid-value" style="color:${isCredit ? '#28a745' : '#ff9800'}; font-size:18px;">${isCredit ? '+' : '-'} ₹${t.amount}</span></div>
-                            <div class="bid-row"><span class="bid-label">Date</span><span class="bid-value">${dateStr}</span></div>
-                            <div class="bid-row"><span class="bid-label">Time</span><span class="bid-value">${timeStr}</span></div>
+                            <div class="bid-row"><span class="bid-label">Amount</span><span class="bid-value" style="color:${isCredit ? '#66ff66' : '#ffd700'}; font-size:18px;">${isCredit ? '+' : '-'} ₹${t.amount}</span></div>
+                            <div class="bid-row"><span class="bid-label">Date</span><span class="bid-value">${date}</span></div>
                             ${t.description ? `<div class="bid-row"><span class="bid-label">Description</span><span class="bid-value">${t.description}</span></div>` : ''}
                         </div>
-                        <div class="bid-footer">📅 Transaction ID: ${t.id.substring(0, 8)}...</div>
                     </div>
                 `;
             }
             container.innerHTML = html;
-            
         } catch (error) {
-            console.error("Error loading transactions:", error);
-            container.innerHTML = `<div class="no-data" style="color:#dc3545;">❌ Error loading transactions: ${error.message}</div>`;
+            container.innerHTML = `<div class="error-box">❌ Error loading transactions: ${error.message}</div>`;
         }
     }
     
     auth.onAuthStateChanged(user => {
-        if (!user) {
-            window.location.href = 'index.html';
-        } else {
-            loadBids();
-        }
+        if (!user) window.location.href = 'index.html';
+        else { loadBids(); }
     });
     
     window.showTab = showTab;
