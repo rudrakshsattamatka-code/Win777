@@ -2,61 +2,71 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>WIN777 - Funds</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>WIN777 - Add Funds</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
         body { background: #fff9e8; padding-bottom: 70px; }
         .app-container { max-width: 500px; margin: 0 auto; background: #fff9e8; min-height: 100vh; }
         
-        .header { background: #fff; padding: 15px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #ffe0b3; }
-        .logo { color: #ff9800; font-size: 20px; font-weight: bold; flex: 1; text-align: center; }
-        .back-btn { background: none; border: none; color: #ff9800; font-size: 24px; cursor: pointer; }
+        .header { background: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ffe0b3; }
+        .logo-img { width: 40px; height: 40px; border-radius: 10px; }
+        .balance { background: #ff9800; padding: 5px 12px; border-radius: 20px; color: #fff; font-weight: bold; font-size: 14px; cursor: pointer; }
         
-        .user-card { background: #fff; margin: 15px; padding: 15px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #ffe0b3; }
-        .user-name { color: #333; font-size: 16px; font-weight: bold; }
-        .user-phone { color: #888; font-size: 12px; margin-top: 4px; }
-        .balance-amount { color: #ff9800; font-size: 20px; font-weight: bold; }
-        .balance-card { background: linear-gradient(135deg, #ff9800, #e68a00); margin: 15px; padding: 20px; border-radius: 20px; text-align: center; color: #fff; }
-        .balance-card .label { font-size: 12px; opacity: 0.9; }
-        .balance-card .amount { font-size: 36px; font-weight: bold; }
+        .profile-row { display: flex; align-items: center; gap: 12px; background: #fff; margin: 10px; padding: 12px 15px; border-radius: 16px; border: 1px solid #ffe0b3; cursor: pointer; }
+        .profile-avatar { width: 50px; height: 50px; background: linear-gradient(135deg, #ff9800, #e68a00); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; }
+        .profile-info { flex: 1; }
+        .profile-name { color: #333; font-size: 16px; font-weight: bold; }
+        .profile-phone { color: #888; font-size: 12px; }
+        .view-profile { color: #ff9800; font-size: 12px; }
         
-        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 15px; }
-        .menu-card { background: #fff; border-radius: 16px; padding: 20px; text-align: center; border: 1px solid #ffe0b3; cursor: pointer; transition: all 0.3s; }
-        .menu-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(255,152,0,0.1); }
-        .menu-card img { width: 50px; height: 50px; margin-bottom: 8px; border-radius: 12px; object-fit: cover; }
-        .menu-title { color: #ff9800; font-size: 14px; font-weight: bold; margin-top: 5px; }
+        .notice-board { background: linear-gradient(135deg, #ff9800, #e68a00); margin: 10px; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .notice-icon { font-size: 24px; }
+        .notice-text { flex: 1; color: #fff; font-weight: bold; font-size: 13px; }
+        .close-notice { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
         
-        .screen { padding: 15px; }
-        .input-field { width: 100%; padding: 14px; background: #fff; border: 1px solid #ffe0b3; border-radius: 12px; color: #333; font-size: 16px; margin-bottom: 15px; }
+        .games-row { display: flex; justify-content: space-around; background: #fff; margin: 10px; padding: 12px; border-radius: 12px; }
+        .game-icon { text-align: center; color: #666; font-size: 11px; cursor: pointer; transition: all 0.3s; }
+        .game-icon:hover { transform: translateY(-3px); }
+        .game-icon img { width: 45px; height: 45px; display: block; margin: 0 auto 4px; border-radius: 12px; object-fit: cover; }
+        .game-icon span { font-size: 11px; }
+        
+        .funds-card { background: #fff; margin: 12px; border-radius: 16px; padding: 20px; border: 1px solid #ffe0b3; }
+        .funds-title { color: #ff9800; font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 15px; }
+        
         .amount-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-        .amount-btn { background: #fff; border: 1px solid #ffe0b3; border-radius: 16px; padding: 14px; text-align: center; color: #333; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .amount-btn { background: #f8f9fa; border: 1px solid #ffe0b3; border-radius: 16px; padding: 14px; text-align: center; color: #333; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
         .amount-btn.active { background: #ff9800; color: #fff; border-color: #ff9800; }
         .amount-btn:hover { background: #fff0d8; }
         
-        .btn { width: 100%; padding: 14px; background: #ff9800; border: none; border-radius: 12px; color: #fff; font-weight: bold; font-size: 16px; cursor: pointer; transition: all 0.3s; }
-        .btn:hover { background: #e68a00; transform: scale(1.02); }
-        .btn-warning { background: #ffc107; color: #333; }
+        .custom-amount input { width: 100%; padding: 14px; background: #fff; border: 1px solid #ffe0b3; border-radius: 12px; color: #333; font-size: 16px; }
         
-        .upi-id-box { background: #fff; border-radius: 16px; padding: 15px; text-align: center; margin: 15px 0; border: 1px solid #ffe0b3; }
-        .upi-id { color: #ff9800; font-size: 18px; font-weight: bold; }
+        .bonus-box { background: #fff; border-radius: 16px; padding: 15px; margin: 15px 0; border: 1px solid #ffe0b3; display: flex; align-items: center; justify-content: space-between; }
+        .bonus-box label { color: #333; font-weight: bold; }
+        .bonus-box input { width: 20px; height: 20px; cursor: pointer; }
+        .bonus-text { color: #28a745; font-size: 12px; margin-top: 5px; }
         
-        .timer-box { background: #fff; border-radius: 16px; padding: 15px; text-align: center; margin: 15px 0; border: 1px solid #ffe0b3; }
+        .summary-box { background: linear-gradient(135deg, #ff9800, #e68a00); padding: 12px; border-radius: 12px; margin: 10px 0; text-align: center; color: #fff; }
+        
+        .upi-info { background: #fff0d8; border-radius: 16px; padding: 15px; margin: 20px 0; text-align: center; border: 1px solid #ffe0b3; }
+        .upi-id { color: #ff9800; font-size: 18px; font-weight: bold; word-break: break-all; }
+        
+        .proceed-btn { width: 100%; padding: 16px; background: #ff9800; border: none; border-radius: 16px; color: #fff; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; margin-top: 10px; }
+        .proceed-btn:hover { background: #e68a00; transform: scale(1.02); }
+        
+        .back-btn { width: 100%; padding: 14px; background: #e0e0e0; border: none; border-radius: 16px; color: #333; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
+        .back-btn:hover { background: #ccc; }
+        
+        .timer-box { background: #fff; border-radius: 16px; padding: 15px; text-align: center; margin-top: 20px; border: 1px solid #ffe0b3; display: none; }
         .timer-text { color: #ff9800; font-size: 32px; font-weight: bold; font-family: monospace; }
         
-        .message { padding: 12px; border-radius: 12px; text-align: center; margin: 15px 0; font-size: 13px; }
-        .message-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .message-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .message-pending { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-        
-        .bank-details-box { background: #fff; border-radius: 16px; padding: 15px; margin: 15px 0; border: 1px solid #ffe0b3; }
-        .bank-details-box h4 { color: #ff9800; margin-bottom: 10px; }
-        .bank-info { color: #555; font-size: 13px; margin: 5px 0; }
-        .bank-info span { color: #ff9800; }
-        
+        .message { padding: 12px; border-radius: 12px; text-align: center; margin-top: 15px; font-size: 13px; }
+        .message-success { background: #e8ffe8; color: #28a745; border: 1px solid #c8ffc8; }
+        .message-error { background: #ffe8e8; color: #dc3545; border: 1px solid #ffc9c9; }
         .hidden { display: none; }
         
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #fff; display: flex; justify-content: space-around; padding: 8px 10px; border-top: 1px solid #ffe0b3; }
@@ -65,85 +75,111 @@
         .nav-item img { width: 28px; height: 28px; display: block; margin: 0 auto 3px; border-radius: 8px; object-fit: cover; }
         .nav-item span { font-size: 10px; display: block; }
         .nav-item.active { color: #ff9800; }
+        
+        .note-text { font-size: 11px; color: #888; text-align: center; margin-top: 15px; }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: #fff; border-radius: 24px; padding: 25px; width: 90%; max-width: 350px; max-height: 80vh; overflow-y: auto; }
+        .modal-content h3 { color: #ff9800; margin-bottom: 15px; text-align: center; }
+        .modal-btn { width: 100%; padding: 12px; background: #ff9800; border: none; border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .modal-btn:hover { background: #e68a00; }
+        .close-modal { background: #e0e0e0; color: #333; }
+        .modal-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; }
+        .rate-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
+        .rate-name { color: #555; }
+        .rate-value { color: #ff9800; font-weight: bold; }
+        .support-option { display: flex; align-items: center; gap: 15px; padding: 15px; background: #f8f9fa; border-radius: 12px; margin-bottom: 10px; cursor: pointer; }
+        .support-option:hover { background: #fff0d8; }
+        .support-icon { font-size: 30px; }
+        .support-text { flex: 1; }
+        .support-title { font-weight: bold; color: #333; }
+        .support-desc { font-size: 12px; color: #888; }
     </style>
 </head>
 <body>
 <div class="app-container">
     <div class="header">
-        <button class="back-btn" onclick="location.href='dashboard.html'">←</button>
-        <div class="logo">FUNDS</div>
-        <div style="width:30px;"></div>
+        <img src="https://i.imgur.com/V4pMmxP.jpeg" alt="WIN777" class="logo-img">
+        <div class="balance" onclick="showBalance()">₹<span id="userBalance">0</span></div>
     </div>
     
-    <div id="mainMenu">
-        <div class="user-card">
-            <div><div class="user-name" id="userName">Loading...</div><div class="user-phone" id="userPhone">Loading...</div></div>
-            <div class="balance-amount">₹<span id="userBalance">0</span></div>
+    <div class="profile-row" onclick="showProfileModal()">
+        <div class="profile-avatar">👤</div>
+        <div class="profile-info">
+            <div class="profile-name" id="profileName">Loading...</div>
+            <div class="profile-phone" id="profilePhone">Loading...</div>
         </div>
-        <div class="balance-card"><div class="label">Available Balance</div><div class="amount">₹<span id="balanceAmount">0</span></div></div>
-        <div class="menu-grid">
-            <div class="menu-card" onclick="showAddFund()">
-                <img src="https://i.imgur.com/NvJCTli.png" alt="Add Fund">
-                <div class="menu-title">Add Fund</div>
-            </div>
-            <div class="menu-card" onclick="showWithdraw()">
-                <img src="https://i.imgur.com/3ZxjAIp.png" alt="Withdraw">
-                <div class="menu-title">Withdraw Fund</div>
-            </div>
-            <div class="menu-card" onclick="showAddBank()">
-                <img src="https://i.imgur.com/NvJCTli.png" alt="Bank Details">
-                <div class="menu-title">Bank Details</div>
-            </div>
-            <div class="menu-card" onclick="showTransactions()">
-                <img src="https://i.imgur.com/rUWwMYm.png" alt="Transactions">
-                <div class="menu-title">Transactions</div>
-            </div>
+        <div class="view-profile">View Profile →</div>
+    </div>
+    
+    <div id="noticeBoard" class="notice-board" onclick="showNoticeModal()">
+        <div class="notice-icon">📢</div>
+        <div class="notice-text" id="noticeText">Welcome to WIN777! Play big · Win big · Unlimited</div>
+        <button class="close-notice" onclick="event.stopPropagation(); closeNotice()">✕</button>
+    </div>
+    
+    <div class="games-row">
+        <div class="game-icon" onclick="showGames()">
+            <img src="https://i.imgur.com/xaMlRtU.jpeg" alt="Games">
+            <span>Games</span>
+        </div>
+        <div class="game-icon" onclick="window.location.href='deposit.html'">
+            <img src="https://i.imgur.com/NvJCTli.png" alt="Deposit">
+            <span>Deposit</span>
+        </div>
+        <div class="game-icon" onclick="window.location.href='withdraw.html'">
+            <img src="https://i.imgur.com/3ZxjAIp.png" alt="Withdraw">
+            <span>Withdraw</span>
+        </div>
+        <div class="game-icon" onclick="window.location.href='mybids.html'">
+            <img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids">
+            <span>My Bids</span>
         </div>
     </div>
     
-    <div id="addFundScreen" class="screen hidden">
-        <div class="user-card"><div><div class="user-name" id="afUserName">Loading...</div></div><div class="balance-amount">₹<span id="afBalance">0</span></div></div>
+    <!-- Funds / Deposit Content - Simple like first image -->
+    <div class="funds-card">
+        <div class="funds-title">💰 ADD FUNDS</div>
+        
         <div class="amount-grid">
-            <div class="amount-btn" onclick="selectAmount(100)">₹100</div><div class="amount-btn" onclick="selectAmount(500)">₹500</div><div class="amount-btn" onclick="selectAmount(1000)">₹1000</div>
-            <div class="amount-btn" onclick="selectAmount(2000)">₹2000</div><div class="amount-btn" onclick="selectAmount(5000)">₹5000</div><div class="amount-btn" onclick="selectAmount(10000)">₹10000</div>
+            <div class="amount-btn" onclick="selectAmount(100)">₹100</div>
+            <div class="amount-btn" onclick="selectAmount(500)">₹500</div>
+            <div class="amount-btn" onclick="selectAmount(1000)">₹1000</div>
+            <div class="amount-btn" onclick="selectAmount(2000)">₹2000</div>
+            <div class="amount-btn" onclick="selectAmount(5000)">₹5000</div>
+            <div class="amount-btn" onclick="selectAmount(10000)">₹10000</div>
         </div>
-        <input type="number" id="customAmount" class="input-field" placeholder="Enter custom amount (Min ₹100)">
-        <div class="upi-id-box"><div style="color:#888; font-size:12px;">📱 Send payment to this UPI ID</div><div class="upi-id" id="upiIdDisplay">ganeshpatil99@slc</div></div>
-        <button class="btn" id="depositBtn">💳 Proceed to Pay</button>
-        <div id="depositMsg" class="message hidden"></div>
-        <div id="timerBox" class="timer-box hidden"><div class="timer-text" id="countdownTimer">05:00</div><div style="color:#888; font-size:12px;">⏳ Waiting for admin approval...</div></div>
-        <button class="btn btn-warning" onclick="showMainMenu()" style="margin-top:10px;">← Back</button>
-    </div>
-    
-    <div id="withdrawScreen" class="screen hidden">
-        <div class="user-card"><div><div class="user-name" id="wdUserName">Loading...</div></div><div class="balance-amount">₹<span id="wdBalance">0</span></div></div>
-        <div class="amount-grid">
-            <div class="amount-btn" onclick="selectWithdrawAmount(500)">₹500</div><div class="amount-btn" onclick="selectWithdrawAmount(1000)">₹1000</div><div class="amount-btn" onclick="selectWithdrawAmount(2000)">₹2000</div>
-            <div class="amount-btn" onclick="selectWithdrawAmount(5000)">₹5000</div><div class="amount-btn" onclick="selectWithdrawAmount(10000)">₹10000</div><div class="amount-btn" onclick="selectWithdrawAmount(20000)">₹20000</div>
+        
+        <div class="custom-amount">
+            <input type="number" id="customAmount" placeholder="Enter custom amount (Min ₹100)">
         </div>
-        <input type="number" id="withdrawAmount" class="input-field" placeholder="Enter amount (Min ₹500)">
-        <div id="bankDetailsDisplay" class="bank-details-box hidden"><h4>🏦 Selected Bank Account</h4><div class="bank-info">Bank: <span id="displayBankName">-</span></div><div class="bank-info">Account: <span id="displayAccountNumber">-</span></div><div class="bank-info">IFSC: <span id="displayIfsc">-</span></div><div class="bank-info">Holder: <span id="displayHolder">-</span></div></div>
-        <button class="btn" id="withdrawBtn">💸 Request Withdrawal</button>
-        <div id="withdrawMsg" class="message hidden"></div>
-        <button class="btn btn-warning" onclick="showMainMenu()" style="margin-top:10px;">← Back</button>
-    </div>
-    
-    <div id="bankScreen" class="screen hidden">
-        <h3 style="color:#ff9800; margin-bottom:15px;">🏦 Bank Account Details</h3>
-        <input type="text" id="accountHolder" class="input-field" placeholder="Account Holder Name">
-        <input type="text" id="bankNameField" class="input-field" placeholder="Bank Name">
-        <input type="text" id="accountNumber" class="input-field" placeholder="Account Number">
-        <input type="text" id="ifscCode" class="input-field" placeholder="IFSC Code">
-        <input type="text" id="confirmAccount" class="input-field" placeholder="Confirm Account Number">
-        <button class="btn" id="saveBankBtn">💾 Save Bank Details</button>
-        <div id="bankMsg" class="message hidden"></div>
-        <button class="btn btn-warning" onclick="showMainMenu()" style="margin-top:10px;">← Back</button>
-    </div>
-    
-    <div id="transactionsScreen" class="screen hidden">
-        <h3 style="color:#ff9800; margin-bottom:15px;">📊 Transaction History</h3>
-        <div id="transactionsList" style="max-height: 500px; overflow-y: auto;"></div>
-        <button class="btn btn-warning" onclick="showMainMenu()" style="margin-top:15px;">← Back</button>
+        
+        <div class="bonus-box">
+            <div>
+                <label>🎁 Apply 10% Bonus</label>
+                <div class="bonus-text">Get 10% extra on deposit above ₹500</div>
+            </div>
+            <input type="checkbox" id="applyBonus" onchange="updateSummary()">
+        </div>
+        
+        <div class="summary-box" id="summaryBox">
+            💰 You will receive: ₹<span id="totalAmount">100</span>
+        </div>
+        
+        <div class="upi-info">
+            <div>📱 Send payment to this UPI ID</div>
+            <div class="upi-id" id="upiIdDisplay">ganeshpatil99@slc</div>
+        </div>
+        
+        <button class="proceed-btn" id="proceedBtn">💳 PROCEED TO PAY</button>
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        
+        <div id="message" class="message hidden"></div>
+        <div id="timerBox" class="timer-box">
+            <div class="timer-text" id="countdownTimer">05:00</div>
+            <div>⏳ Waiting for admin confirmation...</div>
+        </div>
+        <div class="note-text">⚡ Minimum ₹100 | Maximum ₹50,000 | 10% Bonus on ₹500+</div>
     </div>
     
     <div class="bottom-nav">
@@ -155,130 +191,438 @@
             <img src="https://i.imgur.com/rUWwMYm.png" alt="Passbook">
             <span>Passbook</span>
         </div>
+        <div class="nav-item" onclick="location.href='mybids.html'">
+            <img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids">
+            <span>My Bids</span>
+        </div>
         <div class="nav-item active" onclick="location.href='funds.html'">
             <img src="https://i.imgur.com/NvJCTli.png" alt="Fund">
             <span>Fund</span>
         </div>
-        <div class="nav-item" onclick="alert('Support: WhatsApp +919876543210')">
+        <div class="nav-item" onclick="showSupportModal()">
             <img src="https://i.imgur.com/ug9IprL.jpeg" alt="Support">
             <span>Support</span>
         </div>
     </div>
 </div>
 
+<!-- Profile Modal -->
+<div id="profileModal" class="modal">
+    <div class="modal-content">
+        <h3>👤 My Profile</h3>
+        <div id="profileInfo"></div>
+        <button class="modal-btn" onclick="showGameRatesModal()">🎲 Game Rates</button>
+        <button class="modal-btn" onclick="showChangePinModal()">🔐 Change MPIN</button>
+        <button class="modal-btn" onclick="showBankModal()">🏦 Bank Details</button>
+        <button class="modal-btn close-modal" onclick="closeProfileModal()">Close</button>
+    </div>
+</div>
+
+<!-- Game Rates Modal -->
+<div id="gameRatesModal" class="modal">
+    <div class="modal-content">
+        <h3>🎲 GAME RATES</h3>
+        <div class="rate-row"><span class="rate-name">Single Digit</span><span class="rate-value">10x</span></div>
+        <div class="rate-row"><span class="rate-name">Jodi</span><span class="rate-value">100x</span></div>
+        <div class="rate-row"><span class="rate-name">Single Pana</span><span class="rate-value">160x</span></div>
+        <div class="rate-row"><span class="rate-name">Double Pana</span><span class="rate-value">320x</span></div>
+        <div class="rate-row"><span class="rate-name">Triple Pana</span><span class="rate-value">1000x</span></div>
+        <div class="rate-row"><span class="rate-name">Half Sangam A</span><span class="rate-value">1600x</span></div>
+        <div class="rate-row"><span class="rate-name">Half Sangam B</span><span class="rate-value">1600x</span></div>
+        <div class="rate-row"><span class="rate-name">Full Sangam</span><span class="rate-value">25000x</span></div>
+        <button class="modal-btn close-modal" onclick="closeGameRatesModal()">Close</button>
+    </div>
+</div>
+
+<!-- Change PIN Modal -->
+<div id="changePinModal" class="modal">
+    <div class="modal-content">
+        <h3>🔐 Change MPIN</h3>
+        <input type="password" id="oldPin" class="modal-input" placeholder="Current MPIN" maxlength="4">
+        <input type="password" id="newPin" class="modal-input" placeholder="New MPIN (4 digits)" maxlength="4">
+        <input type="password" id="confirmPin" class="modal-input" placeholder="Confirm New MPIN" maxlength="4">
+        <button class="modal-btn" onclick="updatePin()">Update MPIN</button>
+        <button class="modal-btn close-modal" onclick="closeChangePinModal()">Cancel</button>
+        <div id="pinMsg" style="color:#dc3545; text-align:center; margin-top:10px;"></div>
+    </div>
+</div>
+
+<!-- Bank Details Modal -->
+<div id="bankModal" class="modal">
+    <div class="modal-content">
+        <h3>🏦 Bank Details</h3>
+        <input type="text" id="bankAccountHolder" class="modal-input" placeholder="Account Holder Name">
+        <input type="text" id="bankName" class="modal-input" placeholder="Bank Name">
+        <input type="text" id="bankAccountNumber" class="modal-input" placeholder="Account Number">
+        <input type="text" id="bankIfsc" class="modal-input" placeholder="IFSC Code">
+        <button class="modal-btn" onclick="saveBankDetails()">Save Bank Details</button>
+        <button class="modal-btn close-modal" onclick="closeBankModal()">Cancel</button>
+        <div id="bankMsg" style="color:#28a745; text-align:center; margin-top:10px;"></div>
+    </div>
+</div>
+
+<!-- Support Modal -->
+<div id="supportModal" class="modal">
+    <div class="modal-content">
+        <h3>💬 Support Center</h3>
+        <div class="support-option" onclick="sendEmail()">
+            <div class="support-icon">📧</div>
+            <div class="support-text">
+                <div class="support-title">Email Us</div>
+                <div class="support-desc">win777@support.com</div>
+            </div>
+        </div>
+        <div class="support-option" onclick="sendWhatsApp()">
+            <div class="support-icon">📱</div>
+            <div class="support-text">
+                <div class="support-title">WhatsApp</div>
+                <div class="support-desc">+91 9876543210</div>
+            </div>
+        </div>
+        <button class="modal-btn close-modal" onclick="closeSupportModal()">Close</button>
+    </div>
+</div>
+
 <script>
-    const firebaseConfig = { apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38", authDomain: "win777-ed482.firebaseapp.com", projectId: "win777-ed482", storageBucket: "win777-ed482.firebasestorage.app", messagingSenderId: "843686112399", appId: "1:843686112399:web:9c20a96831e6a94cd814fa" };
+    const firebaseConfig = {
+        apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
+        authDomain: "win777-ed482.firebaseapp.com",
+        projectId: "win777-ed482",
+        storageBucket: "win777-ed482.firebasestorage.app",
+        messagingSenderId: "843686112399",
+        appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
+    };
+    
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
     
-    let currentUser = null, userData = null, selectedAmount = 100, selectedWithdrawAmount = 500, currentTransactionId = null, timerInterval = null, upiId = "ganeshpatil99@slc";
+    let currentUser = null;
+    let currentUserData = null;
+    let selectedAmount = 100;
+    let currentTransactionId = null;
+    let timerInterval = null;
+    let upiId = "ganeshpatil99@slc";
+    let upiName = "Ganesh Siddharth Patil";
     
-    async function loadUpiId() { const doc = await db.collection('settings').doc('upi').get(); if (doc.exists) { upiId = doc.data().upiId; document.getElementById('upiIdDisplay').innerText = upiId; } }
+    async function loadUpiId() {
+        const doc = await db.collection('settings').doc('upi').get();
+        if (doc.exists && doc.data().upiId) {
+            upiId = doc.data().upiId;
+            document.getElementById('upiIdDisplay').innerText = upiId;
+        }
+    }
     
-    auth.onAuthStateChanged(async (user) => { if (!user) window.location.href = 'index.html'; else { currentUser = user; await loadUserData(); await loadUpiId(); loadBankDetails(); } });
+    auth.onAuthStateChanged(async (user) => {
+        if (!user) {
+            window.location.href = 'index.html';
+        } else {
+            currentUser = user;
+            await loadUserData();
+            await loadUpiId();
+            updateSummary();
+        }
+    });
     
     async function loadUserData() {
         const doc = await db.collection('users').doc(currentUser.uid).get();
-        if (doc.exists) { userData = doc.data(); const balance = userData.balance || 0;
-            document.getElementById('userBalance').innerText = balance; document.getElementById('balanceAmount').innerText = balance;
-            document.getElementById('afBalance').innerText = balance; document.getElementById('wdBalance').innerText = balance;
-            document.getElementById('userName').innerHTML = userData.name || 'User'; document.getElementById('userPhone').innerHTML = userData.phone || '';
-            document.getElementById('afUserName').innerHTML = userData.name || 'User'; document.getElementById('wdUserName').innerHTML = userData.name || 'User';
+        if (doc.exists) {
+            currentUserData = doc.data();
+            document.getElementById('userBalance').innerText = currentUserData.balance || 0;
+            document.getElementById('profileName').innerHTML = currentUserData.name || 'User';
+            document.getElementById('profilePhone').innerHTML = currentUserData.phone || '';
         }
     }
     
-    async function loadBankDetails() {
-        const doc = await db.collection('users').doc(currentUser.uid).get();
-        if (doc.exists && doc.data().bankDetails) { const bank = doc.data().bankDetails;
-            document.getElementById('displayBankName').innerText = bank.bankName || '-'; document.getElementById('displayAccountNumber').innerText = bank.accountNumber || '-';
-            document.getElementById('displayIfsc').innerText = bank.ifscCode || '-'; document.getElementById('displayHolder').innerText = bank.accountHolder || '-';
-            document.getElementById('bankDetailsDisplay').classList.remove('hidden');
-            document.getElementById('accountHolder').value = bank.accountHolder || ''; document.getElementById('bankNameField').value = bank.bankName || '';
-            document.getElementById('accountNumber').value = bank.accountNumber || ''; document.getElementById('ifscCode').value = bank.ifscCode || '';
-        }
+    function showBalance() {
+        alert(`💰 Current Balance: ₹${currentUserData?.balance || 0}`);
     }
     
-    function showMainMenu() { document.getElementById('mainMenu').classList.remove('hidden'); document.getElementById('addFundScreen').classList.add('hidden'); document.getElementById('withdrawScreen').classList.add('hidden'); document.getElementById('bankScreen').classList.add('hidden'); document.getElementById('transactionsScreen').classList.add('hidden'); if (timerInterval) clearInterval(timerInterval); }
-    function showAddFund() { document.getElementById('mainMenu').classList.add('hidden'); document.getElementById('addFundScreen').classList.remove('hidden'); }
-    function showWithdraw() { document.getElementById('mainMenu').classList.add('hidden'); document.getElementById('withdrawScreen').classList.remove('hidden'); loadBankDetails(); }
-    function showAddBank() { document.getElementById('mainMenu').classList.add('hidden'); document.getElementById('bankScreen').classList.remove('hidden'); }
-    function showTransactions() { document.getElementById('mainMenu').classList.add('hidden'); document.getElementById('transactionsScreen').classList.remove('hidden'); loadTransactions(); }
+    function selectAmount(amount) {
+        selectedAmount = amount;
+        document.querySelectorAll('.amount-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById('customAmount').value = '';
+        updateSummary();
+    }
     
-    function selectAmount(amount) { selectedAmount = amount; document.querySelectorAll('#addFundScreen .amount-btn').forEach(btn => btn.classList.remove('active')); event.target.classList.add('active'); document.getElementById('customAmount').value = ''; }
-    function selectWithdrawAmount(amount) { selectedWithdrawAmount = amount; document.querySelectorAll('#withdrawScreen .amount-btn').forEach(btn => btn.classList.remove('active')); event.target.classList.add('active'); document.getElementById('withdrawAmount').value = ''; }
-    function showMessage(msg, type, elementId = 'depositMsg') { const msgDiv = document.getElementById(elementId); if (msgDiv) { msgDiv.innerText = msg; msgDiv.className = `message message-${type}`; msgDiv.classList.remove('hidden'); setTimeout(() => msgDiv.classList.add('hidden'), 5000); } }
+    function updateSummary() {
+        let amount = selectedAmount;
+        const custom = parseInt(document.getElementById('customAmount').value);
+        if (custom && custom >= 100) amount = custom;
+        
+        const applyBonus = document.getElementById('applyBonus').checked;
+        let bonus = 0;
+        if (applyBonus && amount >= 500) {
+            bonus = Math.floor(amount * 0.10);
+        }
+        const total = amount + bonus;
+        document.getElementById('totalAmount').innerText = total;
+    }
     
-    async function createDepositRequest(amount) { const transactionRef = await db.collection('transactions').add({ userId: currentUser.uid, type: 'credit', amount: amount, status: 'Pending', date: new Date(), upiId: upiId }); currentTransactionId = transactionRef.id; return transactionRef.id; }
+    function getAmount() {
+        let amount = selectedAmount;
+        const custom = parseInt(document.getElementById('customAmount').value);
+        if (custom && custom >= 100) amount = custom;
+        return amount;
+    }
+    
+    function getBonusAmount(amount) {
+        const applyBonus = document.getElementById('applyBonus').checked;
+        if (applyBonus && amount >= 500) {
+            return Math.floor(amount * 0.10);
+        }
+        return 0;
+    }
+    
+    function showMessage(msg, type) {
+        const msgDiv = document.getElementById('message');
+        msgDiv.innerText = msg;
+        msgDiv.className = `message message-${type}`;
+        msgDiv.classList.remove('hidden');
+        setTimeout(() => msgDiv.classList.add('hidden'), 5000);
+    }
+    
+    async function createDepositRequest(amount, bonusAmount) {
+        const totalAmount = amount + bonusAmount;
+        const transactionRef = await db.collection('transactions').add({
+            userId: currentUser.uid,
+            type: 'credit',
+            amount: totalAmount,
+            requestedAmount: amount,
+            bonusAmount: bonusAmount,
+            status: 'Pending',
+            date: new Date(),
+            upiId: upiId
+        });
+        currentTransactionId = transactionRef.id;
+        return transactionRef.id;
+    }
     
     function startTimerAndWait() {
-        const timerBox = document.getElementById('timerBox'); timerBox.classList.remove('hidden'); let timeLeft = 300; const timerDisplay = document.getElementById('countdownTimer');
+        const timerBox = document.getElementById('timerBox');
+        timerBox.style.display = 'block';
+        let timeLeft = 300;
+        const timerDisplay = document.getElementById('countdownTimer');
+        
         if (timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => { timeLeft--; const minutes = Math.floor(timeLeft/60); const seconds = timeLeft%60; timerDisplay.innerText = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`; if (timeLeft<=0) { clearInterval(timerInterval); timerBox.classList.add('hidden'); } },1000);
-        if (currentTransactionId) { db.collection('transactions').doc(currentTransactionId).onSnapshot((doc) => { if (doc.exists && doc.data().status === 'Completed') { clearInterval(timerInterval); timerBox.classList.add('hidden'); showMessage(`✅ ₹${doc.data().amount} added successfully!`, 'success', 'depositMsg'); loadUserData(); setTimeout(() => showMainMenu(), 2000); } }); }
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                timerBox.style.display = 'none';
+                showMessage('Time expired! Please create new request.', 'error');
+            }
+        }, 1000);
+        
+        if (currentTransactionId) {
+            const unsubscribe = db.collection('transactions').doc(currentTransactionId).onSnapshot((doc) => {
+                if (doc.exists && doc.data().status === 'Completed') {
+                    clearInterval(timerInterval);
+                    timerBox.style.display = 'none';
+                    unsubscribe();
+                    const data = doc.data();
+                    showMessage(`✅ ₹${data.amount} added successfully!${data.bonusAmount > 0 ? ` (Including ₹${data.bonusAmount} bonus)` : ''}`, 'success');
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 2000);
+                }
+            });
+        }
     }
     
-    document.getElementById('depositBtn').onclick = async () => {
-        let amount = selectedAmount; const custom = parseInt(document.getElementById('customAmount').value); if (custom >= 100) amount = custom;
-        if (amount < 100) { showMessage('Minimum deposit amount is ₹100', 'error', 'depositMsg'); return; }
-        if (amount > 50000) { showMessage('Maximum deposit amount is ₹50,000', 'error', 'depositMsg'); return; }
-        const btn = document.getElementById('depositBtn'); btn.disabled = true; btn.innerText = 'Processing...';
-        showMessage(`Creating request for ₹${amount}...`, 'pending', 'depositMsg');
-        await createDepositRequest(amount);
-        showMessage(`✅ Request created! Pay ₹${amount} to ${upiId}`, 'success', 'depositMsg');
-        const upiIntent = `upi://pay?pa=${upiId}&pn=WIN777&am=${amount}&cu=INR`;
-        setTimeout(() => { window.location.href = upiIntent; }, 1500);
-        setTimeout(() => { btn.disabled = false; btn.innerText = '💳 Proceed to Pay';
-            if (confirm(`Did you pay ₹${amount}?`)) { showMessage(`✅ Payment confirmed! Waiting for admin approval.`, 'success', 'depositMsg'); startTimerAndWait(); }
-            else { showMessage(`⏳ Payment pending. Admin will approve manually.`, 'pending', 'depositMsg'); startTimerAndWait(); }
+    async function proceedToPay() {
+        const amount = getAmount();
+        
+        if (amount < 100) {
+            showMessage('Minimum deposit amount is ₹100', 'error');
+            return;
+        }
+        if (amount > 50000) {
+            showMessage('Maximum deposit amount is ₹50,000', 'error');
+            return;
+        }
+        
+        const bonusAmount = getBonusAmount(amount);
+        
+        const upiUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR&tn=WIN777%20Deposit`;
+        
+        const confirmMsg = `💰 PAYMENT DETAILS\n\n` +
+            `Amount: ₹${amount}\n` +
+            `${bonusAmount > 0 ? `Bonus: +₹${bonusAmount}\n` : ''}` +
+            `Total You Get: ₹${amount + bonusAmount}\n\n` +
+            `UPI ID: ${upiId}\n` +
+            `Payee: ${upiName}\n\n` +
+            `Click OK to open UPI app and pay ₹${amount}`;
+        
+        if (!confirm(confirmMsg)) return;
+        
+        await createDepositRequest(amount, bonusAmount);
+        
+        window.location.href = upiUrl;
+        
+        setTimeout(() => {
+            window.location.href = upiUrl;
+        }, 500);
+        
+        setTimeout(() => {
+            if (confirm(`✅ Did you successfully pay ₹${amount} to ${upiId}?\n\nClick OK after completing the payment.`)) {
+                showMessage(`✅ Payment recorded! Waiting for admin confirmation...`, 'success');
+                startTimerAndWait();
+            } else {
+                showMessage(`⏳ Payment pending. Admin will verify manually.`, 'pending');
+                startTimerAndWait();
+            }
         }, 10000);
-    };
-    
-    document.getElementById('withdrawBtn').onclick = async () => {
-        let amount = selectedWithdrawAmount; const custom = parseInt(document.getElementById('withdrawAmount').value); if (custom >= 500) amount = custom;
-        if (amount < 500) { showMessage('Minimum withdrawal amount is ₹500', 'error', 'withdrawMsg'); return; }
-        if (amount > 50000) { showMessage('Maximum withdrawal amount is ₹50,000', 'error', 'withdrawMsg'); return; }
-        if (amount > (userData.balance || 0)) { showMessage(`Insufficient balance! Your balance: ₹${userData.balance || 0}`, 'error', 'withdrawMsg'); return; }
-        const doc = await db.collection('users').doc(currentUser.uid).get(); const bankDetails = doc.data().bankDetails;
-        if (!bankDetails) { showMessage('Please add bank details first!', 'error', 'withdrawMsg'); setTimeout(() => showAddBank(), 2000); return; }
-        if (confirm(`Request withdrawal of ₹${amount}?\n\nBank: ${bankDetails.bankName}\nAccount: ${bankDetails.accountNumber}\n\nThis will be processed within 24 hours.`)) {
-            const btn = document.getElementById('withdrawBtn'); btn.disabled = true; btn.innerText = 'Processing...';
-            await db.collection('withdrawRequests').add({ userId: currentUser.uid, amount: amount, bankDetails: bankDetails, status: 'Pending', date: new Date() });
-            await db.collection('transactions').add({ userId: currentUser.uid, type: 'debit', amount: amount, status: 'Pending', date: new Date(), description: 'Withdrawal Request' });
-            showMessage(`✅ Withdrawal request of ₹${amount} sent! Admin will approve within 24 hours.`, 'success', 'withdrawMsg');
-            btn.disabled = false; btn.innerText = '💸 Request Withdrawal';
-            setTimeout(() => showMainMenu(), 3000);
-        }
-    };
-    
-    document.getElementById('saveBankBtn').onclick = async () => {
-        const accountHolder = document.getElementById('accountHolder').value.trim(); const bankName = document.getElementById('bankNameField').value.trim();
-        const accountNumber = document.getElementById('accountNumber').value.trim(); const ifscCode = document.getElementById('ifscCode').value.trim();
-        const confirmAccount = document.getElementById('confirmAccount').value.trim();
-        if (!accountHolder || !bankName || !accountNumber || !ifscCode) { showMessage('Please fill all fields', 'error', 'bankMsg'); return; }
-        if (accountNumber !== confirmAccount) { showMessage('Account numbers do not match!', 'error', 'bankMsg'); return; }
-        await db.collection('users').doc(currentUser.uid).update({ bankDetails: { accountHolder, bankName, accountNumber, ifscCode } });
-        showMessage('✅ Bank details saved successfully!', 'success', 'bankMsg');
-        setTimeout(() => showMainMenu(), 1500);
-    };
-    
-    async function loadTransactions() {
-        const container = document.getElementById('transactionsList'); container.innerHTML = '<div style="text-align:center; color:#888; padding:20px;">Loading...</div>';
-        const transactions = await db.collection('transactions').where('userId', '==', currentUser.uid).orderBy('date', 'desc').get();
-        if (transactions.empty) { container.innerHTML = '<div class="no-data" style="text-align:center; color:#888; padding:40px;">No transactions found</div>'; return; }
-        let html = '';
-        for (const doc of transactions.docs) {
-            const t = doc.data(); const date = t.date?.toDate().toLocaleString() || 'Pending'; const isCredit = t.type === 'credit';
-            let statusColor = '#ff9800', statusText = '⏳ Pending';
-            if (t.status === 'Completed') { statusColor = '#28a745'; statusText = '✅ Completed'; }
-            else if (t.status === 'Rejected') { statusColor = '#dc3545'; statusText = '❌ Rejected'; }
-            html += `<div class="user-card" style="flex-direction:column; align-items:flex-start; gap:8px;"><div style="display:flex; justify-content:space-between; width:100%;"><span style="font-weight:bold;">${isCredit ? '💰 DEPOSIT' : '💸 WITHDRAWAL'}</span><span style="color:${statusColor};">${statusText}</span></div><div style="font-size:20px; font-weight:bold; color:${isCredit ? '#28a745' : '#ff9800'};">${isCredit ? '+' : '-'} ₹${t.amount}</div><div style="color:#888; font-size:11px;">${date}</div>${t.description ? `<div style="color:#666; font-size:11px;">${t.description}</div>` : ''}</div>`;
-        }
-        container.innerHTML = html;
     }
     
-    window.showMainMenu = showMainMenu; window.showAddFund = showAddFund; window.showWithdraw = showWithdraw; window.showAddBank = showAddBank; window.showTransactions = showTransactions;
-    window.selectAmount = selectAmount; window.selectWithdrawAmount = selectWithdrawAmount;
+    // Profile Modal Functions
+    function showProfileModal() {
+        if (currentUserData) {
+            document.getElementById('profileInfo').innerHTML = `
+                <div style="text-align:center; margin-bottom:15px;">
+                    <div style="font-size:20px; margin-bottom:5px;">${currentUserData.name || 'User'}</div>
+                    <div style="color:#888; font-size:12px;">${currentUserData.phone || ''}</div>
+                    <div style="color:#ff9800; font-size:18px; margin-top:10px;">₹${currentUserData.balance || 0}</div>
+                </div>
+            `;
+            document.getElementById('profileModal').style.display = 'flex';
+        }
+    }
+    
+    function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
+    function showGameRatesModal() { closeProfileModal(); document.getElementById('gameRatesModal').style.display = 'flex'; }
+    function closeGameRatesModal() { document.getElementById('gameRatesModal').style.display = 'none'; }
+    
+    function showChangePinModal() {
+        closeProfileModal();
+        document.getElementById('changePinModal').style.display = 'flex';
+    }
+    
+    function closeChangePinModal() { 
+        document.getElementById('changePinModal').style.display = 'none';
+        document.getElementById('pinMsg').innerHTML = '';
+        document.getElementById('oldPin').value = '';
+        document.getElementById('newPin').value = '';
+        document.getElementById('confirmPin').value = '';
+    }
+    
+    async function updatePin() {
+        const oldPin = document.getElementById('oldPin').value;
+        const newPin = document.getElementById('newPin').value;
+        const confirmPin = document.getElementById('confirmPin').value;
+        
+        if (!oldPin || !newPin || !confirmPin) {
+            document.getElementById('pinMsg').innerHTML = 'Please fill all fields';
+            return;
+        }
+        if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+            document.getElementById('pinMsg').innerHTML = 'MPIN must be 4 digits';
+            return;
+        }
+        if (newPin !== confirmPin) {
+            document.getElementById('pinMsg').innerHTML = 'New MPINs do not match';
+            return;
+        }
+        if (oldPin !== currentUserData.pin) {
+            document.getElementById('pinMsg').innerHTML = 'Current MPIN is incorrect';
+            return;
+        }
+        
+        await db.collection('users').doc(currentUser.uid).update({ pin: newPin });
+        currentUserData.pin = newPin;
+        document.getElementById('pinMsg').innerHTML = '✅ MPIN changed successfully!';
+        document.getElementById('pinMsg').style.color = '#28a745';
+        setTimeout(() => closeChangePinModal(), 1500);
+    }
+    
+    function showBankModal() {
+        closeProfileModal();
+        if (currentUserData.bankDetails) {
+            document.getElementById('bankAccountHolder').value = currentUserData.bankDetails.accountHolder || '';
+            document.getElementById('bankName').value = currentUserData.bankDetails.bankName || '';
+            document.getElementById('bankAccountNumber').value = currentUserData.bankDetails.accountNumber || '';
+            document.getElementById('bankIfsc').value = currentUserData.bankDetails.ifscCode || '';
+        } else {
+            document.getElementById('bankAccountHolder').value = '';
+            document.getElementById('bankName').value = '';
+            document.getElementById('bankAccountNumber').value = '';
+            document.getElementById('bankIfsc').value = '';
+        }
+        document.getElementById('bankModal').style.display = 'flex';
+    }
+    
+    function closeBankModal() { 
+        document.getElementById('bankModal').style.display = 'none';
+        document.getElementById('bankMsg').innerHTML = '';
+    }
+    
+    async function saveBankDetails() {
+        const accountHolder = document.getElementById('bankAccountHolder').value.trim();
+        const bankName = document.getElementById('bankName').value.trim();
+        const accountNumber = document.getElementById('bankAccountNumber').value.trim();
+        const ifscCode = document.getElementById('bankIfsc').value.trim();
+        
+        if (!accountHolder || !bankName || !accountNumber || !ifscCode) {
+            document.getElementById('bankMsg').innerHTML = 'Please fill all fields';
+            document.getElementById('bankMsg').style.color = '#dc3545';
+            return;
+        }
+        
+        const bankDetails = { accountHolder, bankName, accountNumber, ifscCode };
+        await db.collection('users').doc(currentUser.uid).update({ bankDetails: bankDetails });
+        currentUserData.bankDetails = bankDetails;
+        document.getElementById('bankMsg').innerHTML = '✅ Bank details saved successfully!';
+        document.getElementById('bankMsg').style.color = '#28a745';
+        setTimeout(() => closeBankModal(), 1500);
+    }
+    
+    function showSupportModal() { document.getElementById('supportModal').style.display = 'flex'; }
+    function closeSupportModal() { document.getElementById('supportModal').style.display = 'none'; }
+    function sendEmail() { window.location.href = 'mailto:win777@support.com'; }
+    function sendWhatsApp() { window.open('https://wa.me/919876543210', '_blank'); }
+    
+    function showNoticeModal() { 
+        alert(document.getElementById('noticeText').innerText);
+    }
+    function closeNotice() { document.getElementById('noticeBoard').style.display = 'none'; }
+    function showGames() { alert('Games coming soon!'); }
+    function goBack() { window.location.href = 'dashboard.html'; }
+    
+    function listenToNotice() {
+        db.collection('settings').doc('notice').onSnapshot((doc) => {
+            const text = doc.exists ? doc.data().text : 'Welcome to WIN777!';
+            document.getElementById('noticeText').innerHTML = text;
+        });
+    }
+    
+    listenToNotice();
+    
+    document.getElementById('proceedBtn').onclick = proceedToPay;
+    document.getElementById('customAmount').addEventListener('input', updateSummary);
+    
+    window.selectAmount = selectAmount;
+    window.showBalance = showBalance;
+    window.showProfileModal = showProfileModal;
+    window.closeProfileModal = closeProfileModal;
+    window.showGameRatesModal = showGameRatesModal;
+    window.closeGameRatesModal = closeGameRatesModal;
+    window.showChangePinModal = showChangePinModal;
+    window.closeChangePinModal = closeChangePinModal;
+    window.updatePin = updatePin;
+    window.showBankModal = showBankModal;
+    window.closeBankModal = closeBankModal;
+    window.saveBankDetails = saveBankDetails;
+    window.showSupportModal = showSupportModal;
+    window.closeSupportModal = closeSupportModal;
+    window.sendEmail = sendEmail;
+    window.sendWhatsApp = sendWhatsApp;
+    window.closeNotice = closeNotice;
+    window.showGames = showGames;
+    window.goBack = goBack;
 </script>
 </body>
 </html>
