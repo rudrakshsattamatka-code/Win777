@@ -3,92 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WIN777 - Funds</title>
+    <title>WIN777 - Royal Funds</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: #fff9e8; padding-bottom: 70px; }
-        .app-container { max-width: 500px; margin: 0 auto; background: #fff9e8; min-height: 100vh; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Georgia', 'Times New Roman', serif; }
+        body { background: #0a0806; padding-bottom: 70px; }
+        .app-container { max-width: 500px; margin: 0 auto; background: #0a0806; min-height: 100vh; }
         
-        .header { background: #fff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ffe0b3; }
-        .logo-img { width: 40px; height: 40px; border-radius: 10px; }
-        .balance { background: #ff9800; padding: 5px 12px; border-radius: 20px; color: #fff; font-weight: bold; font-size: 14px; cursor: pointer; }
+        .header { background: linear-gradient(135deg, #1a1510, #0a0806); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffd700; }
+        .logo-img { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #ffd700; }
+        .balance { background: linear-gradient(135deg, #ffd700, #daa520); padding: 5px 15px; border-radius: 30px; color: #1a1510; font-weight: bold; font-size: 14px; cursor: pointer; }
         
-        .profile-row { display: flex; align-items: center; gap: 12px; background: #fff; margin: 10px; padding: 12px 15px; border-radius: 16px; border: 1px solid #ffe0b3; cursor: pointer; }
-        .profile-avatar { width: 50px; height: 50px; background: linear-gradient(135deg, #ff9800, #e68a00); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; }
+        .profile-row { display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #1a1510, #0f0c08); margin: 10px; padding: 12px 15px; border-radius: 20px; border: 1px solid #ffd700; cursor: pointer; }
+        .profile-avatar { width: 50px; height: 50px; background: linear-gradient(135deg, #ffd700, #daa520); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #1a1510; }
         .profile-info { flex: 1; }
-        .profile-name { color: #333; font-size: 16px; font-weight: bold; }
-        .profile-phone { color: #888; font-size: 12px; }
-        .view-profile { color: #ff9800; font-size: 12px; }
+        .profile-name { color: #ffd700; font-size: 16px; font-weight: bold; }
+        .profile-phone { color: #aa9c7a; font-size: 12px; }
+        .view-profile { color: #daa520; font-size: 12px; }
         
-        .notice-board { background: linear-gradient(135deg, #ff9800, #e68a00); margin: 10px; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .notice-board { background: linear-gradient(135deg, #ffd700, #daa520); margin: 10px; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
         .notice-icon { font-size: 24px; }
-        .notice-text { flex: 1; color: #fff; font-weight: bold; font-size: 13px; }
-        .close-notice { background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; }
+        .notice-text { flex: 1; color: #1a1510; font-weight: bold; font-size: 13px; }
+        .close-notice { background: none; border: none; color: #1a1510; font-size: 18px; cursor: pointer; }
         
-        .games-row { display: flex; justify-content: space-around; background: #fff; margin: 10px; padding: 12px; border-radius: 12px; }
-        .game-icon { text-align: center; color: #666; font-size: 11px; cursor: pointer; transition: all 0.3s; }
-        .game-icon:hover { transform: translateY(-3px); }
-        .game-icon img { width: 45px; height: 45px; display: block; margin: 0 auto 4px; border-radius: 12px; object-fit: cover; }
-        .game-icon span { font-size: 11px; }
+        .games-row { display: flex; justify-content: space-around; background: linear-gradient(135deg, #1a1510, #0f0c08); margin: 10px; padding: 12px; border-radius: 20px; border: 1px solid #ffd70020; }
+        .game-icon { text-align: center; color: #aa9c7a; font-size: 11px; cursor: pointer; transition: all 0.3s; }
+        .game-icon:hover { transform: translateY(-5px); color: #ffd700; }
+        .game-icon img { width: 45px; height: 45px; display: block; margin: 0 auto 4px; border-radius: 12px; }
         
-        /* Menu Cards */
         .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 12px; }
-        .menu-card { background: #fff; border-radius: 16px; padding: 20px; text-align: center; border: 1px solid #ffe0b3; cursor: pointer; transition: all 0.3s; }
-        .menu-card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(255,152,0,0.1); }
-        .menu-icon { font-size: 40px; margin-bottom: 8px; }
-        .menu-title { color: #ff9800; font-size: 14px; font-weight: bold; }
+        .menu-card { background: linear-gradient(135deg, #1a1510, #0f0c08); border-radius: 20px; padding: 25px 15px; text-align: center; border: 1px solid #ffd70040; cursor: pointer; transition: all 0.3s; }
+        .menu-card:hover { transform: translateY(-5px); border-color: #ffd700; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .menu-icon { font-size: 45px; margin-bottom: 10px; }
+        .menu-title { color: #ffd700; font-size: 14px; font-weight: bold; }
         
         .screen { padding: 15px; }
-        .input-field { width: 100%; padding: 14px; background: #fff; border: 1px solid #ffe0b3; border-radius: 12px; color: #333; font-size: 16px; margin-bottom: 15px; }
-        .btn { width: 100%; padding: 14px; background: #ff9800; border: none; border-radius: 12px; color: #fff; font-weight: bold; font-size: 16px; cursor: pointer; transition: all 0.3s; }
-        .btn:hover { background: #e68a00; transform: scale(1.02); }
-        .btn-warning { background: #ffc107; color: #333; }
+        .input-field { width: 100%; padding: 14px; background: #0a0806; border: 1px solid #ffd70040; border-radius: 12px; color: #ffd700; font-size: 16px; margin-bottom: 15px; }
+        .btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #ffd700, #daa520); border: none; border-radius: 12px; color: #1a1510; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        .btn:hover { transform: scale(1.02); }
+        .back-btn { background: none; border: none; color: #ffd700; font-size: 24px; cursor: pointer; }
         
-        .bank-details-box { background: #f8f9fa; border-radius: 12px; padding: 15px; margin: 15px 0; }
-        .bank-info { color: #555; font-size: 13px; margin: 5px 0; }
-        .bank-info span { color: #ff9800; font-weight: bold; }
-        
-        .bid-card, .transaction-card { background: #fff; margin: 12px; border-radius: 12px; padding: 12px; border: 1px solid #ffe0b3; }
+        .bid-card, .transaction-card { background: linear-gradient(135deg, #1a1510, #0f0c08); margin: 12px; border-radius: 16px; padding: 12px; border: 1px solid #ffd70040; }
         .bid-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
-        .bid-market { color: #ff9800; font-weight: bold; }
+        .bid-market { color: #ffd700; font-weight: bold; }
         .bid-status { font-size: 11px; padding: 2px 8px; border-radius: 12px; }
-        .status-won { background: #d4edda; color: #155724; }
-        .status-lost { background: #f8d7da; color: #721c24; }
-        .status-pending { background: #fff3cd; color: #856404; }
+        .status-won { background: #1a3a1a; color: #66ff66; border: 1px solid #66ff66; }
+        .status-lost { background: #3a1a1a; color: #ff6666; border: 1px solid #ff6666; }
+        .status-pending { background: #3a3a1a; color: #ffd700; border: 1px solid #ffd700; }
         
-        .no-data { text-align: center; color: #888; padding: 40px; }
+        .no-data { text-align: center; color: #aa9c7a; padding: 40px; }
         
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #fff; display: flex; justify-content: space-around; padding: 8px 10px; border-top: 1px solid #ffe0b3; }
-        .nav-item { text-align: center; color: #aaa; cursor: pointer; font-size: 10px; transition: all 0.3s; flex: 1; }
-        .nav-item:hover { color: #ff9800; transform: translateY(-2px); }
-        .nav-item img { width: 28px; height: 28px; display: block; margin: 0 auto 3px; border-radius: 8px; object-fit: cover; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: linear-gradient(135deg, #1a1510, #0f0c08); display: flex; justify-content: space-around; padding: 8px 10px; border-top: 2px solid #ffd700; }
+        .nav-item { text-align: center; color: #aa9c7a; cursor: pointer; font-size: 10px; transition: all 0.3s; flex: 1; }
+        .nav-item:hover { color: #ffd700; transform: translateY(-3px); }
+        .nav-item img { width: 28px; height: 28px; display: block; margin: 0 auto 3px; border-radius: 8px; filter: brightness(0.8); }
+        .nav-item:hover img { filter: brightness(1); }
         .nav-item span { font-size: 10px; display: block; }
-        .nav-item.active { color: #ff9800; }
+        .nav-item.active { color: #ffd700; }
         
         .hidden { display: none; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-content { background: #fff; border-radius: 24px; padding: 25px; width: 90%; max-width: 350px; max-height: 80vh; overflow-y: auto; }
-        .modal-content h3 { color: #ff9800; margin-bottom: 15px; text-align: center; }
-        .modal-btn { width: 100%; padding: 12px; background: #ff9800; border: none; border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .modal-btn:hover { background: #e68a00; }
-        .close-modal { background: #e0e0e0; color: #333; }
-        .modal-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 12px; font-size: 14px; }
-        
-        .rate-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
-        .rate-name { color: #555; }
-        .rate-value { color: #ff9800; font-weight: bold; }
-        
-        .support-option { display: flex; align-items: center; gap: 15px; padding: 15px; background: #f8f9fa; border-radius: 12px; margin-bottom: 10px; cursor: pointer; }
-        .support-option:hover { background: #fff0d8; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: linear-gradient(135deg, #1a1510, #0f0c08); border-radius: 24px; padding: 25px; width: 90%; max-width: 350px; border: 1px solid #ffd700; }
+        .modal-content h3 { color: #ffd700; text-align: center; margin-bottom: 15px; }
+        .modal-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #ffd700, #daa520); border: none; border-radius: 12px; color: #1a1510; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .close-modal { background: #333; color: #fff; }
+        .modal-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ffd70040; background: #0a0806; border-radius: 12px; color: #ffd700; }
+        .rate-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ffd70020; }
+        .rate-name { color: #aa9c7a; }
+        .rate-value { color: #ffd700; font-weight: bold; }
+        .support-option { display: flex; align-items: center; gap: 15px; padding: 15px; background: #0a0806; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border: 1px solid #ffd70020; }
+        .support-option:hover { background: #1a1510; border-color: #ffd700; }
         .support-icon { font-size: 30px; }
         .support-text { flex: 1; }
-        .support-title { font-weight: bold; color: #333; }
-        .support-desc { font-size: 12px; color: #888; }
-        
-        .back-btn { background: none; border: none; color: #ff9800; font-size: 24px; cursor: pointer; }
+        .support-title { font-weight: bold; color: #ffd700; }
     </style>
 </head>
 <body>
@@ -99,7 +88,7 @@
     </div>
     
     <div class="profile-row" onclick="showProfileModal()">
-        <div class="profile-avatar">👤</div>
+        <div class="profile-avatar">👑</div>
         <div class="profile-info">
             <div class="profile-name" id="profileName">Loading...</div>
             <div class="profile-phone" id="profilePhone">Loading...</div>
@@ -108,28 +97,16 @@
     </div>
     
     <div id="noticeBoard" class="notice-board" onclick="showNoticeModal()">
-        <div class="notice-icon">📢</div>
+        <div class="notice-icon">📜</div>
         <div class="notice-text" id="noticeText">Welcome to WIN777! Play big · Win big · Unlimited</div>
         <button class="close-notice" onclick="event.stopPropagation(); closeNotice()">✕</button>
     </div>
     
     <div class="games-row">
-        <div class="game-icon" onclick="showGames()">
-            <img src="https://i.imgur.com/xaMlRtU.jpeg" alt="Games">
-            <span>Games</span>
-        </div>
-        <div class="game-icon" onclick="window.location.href='deposit.html'">
-            <img src="https://i.imgur.com/NvJCTli.png" alt="Deposit">
-            <span>Deposit</span>
-        </div>
-        <div class="game-icon" onclick="window.location.href='withdraw.html'">
-            <img src="https://i.imgur.com/3ZxjAIp.png" alt="Withdraw">
-            <span>Withdraw</span>
-        </div>
-        <div class="game-icon" onclick="window.location.href='mybids.html'">
-            <img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids">
-            <span>My Bids</span>
-        </div>
+        <div class="game-icon" onclick="showGames()"><img src="https://i.imgur.com/xaMlRtU.jpeg" alt="Games"><span>Games</span></div>
+        <div class="game-icon" onclick="window.location.href='deposit.html'"><img src="https://i.imgur.com/NvJCTli.png" alt="Deposit"><span>Deposit</span></div>
+        <div class="game-icon" onclick="window.location.href='withdraw.html'"><img src="https://i.imgur.com/3ZxjAIp.png" alt="Withdraw"><span>Withdraw</span></div>
+        <div class="game-icon" onclick="window.location.href='mybids.html'"><img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids"><span>My Bids</span></div>
     </div>
     
     <!-- Main Menu -->
@@ -154,7 +131,7 @@
     <div id="bankScreen" class="screen hidden">
         <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
             <button class="back-btn" onclick="showMainMenu()">←</button>
-            <h3 style="color:#ff9800; flex:1; text-align:center;">🏦 Bank Details</h3>
+            <h3 style="color:#ffd700; flex:1; text-align:center;">🏦 Bank Details</h3>
             <div style="width:30px;"></div>
         </div>
         <input type="text" id="accountHolder" class="input-field" placeholder="Account Holder Name">
@@ -163,14 +140,14 @@
         <input type="text" id="ifscCode" class="input-field" placeholder="IFSC Code">
         <input type="text" id="confirmAccount" class="input-field" placeholder="Confirm Account Number">
         <button class="btn" id="saveBankBtn">💾 Save Bank Details</button>
-        <div id="bankMsg" class="message" style="text-align:center; margin-top:10px; display:none;"></div>
+        <div id="bankMsg" style="text-align:center; margin-top:10px; display:none;"></div>
     </div>
     
     <!-- Bid History Screen -->
     <div id="bidHistoryScreen" class="screen hidden">
         <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
             <button class="back-btn" onclick="showMainMenu()">←</button>
-            <h3 style="color:#ff9800; flex:1; text-align:center;">📋 Bid History</h3>
+            <h3 style="color:#ffd700; flex:1; text-align:center;">📋 Bid History</h3>
             <div style="width:30px;"></div>
         </div>
         <div id="bidsList"></div>
@@ -180,126 +157,40 @@
     <div id="transactionHistoryScreen" class="screen hidden">
         <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
             <button class="back-btn" onclick="showMainMenu()">←</button>
-            <h3 style="color:#ff9800; flex:1; text-align:center;">📊 Transaction History</h3>
+            <h3 style="color:#ffd700; flex:1; text-align:center;">📊 Transaction History</h3>
             <div style="width:30px;"></div>
         </div>
         <div id="transactionsList"></div>
     </div>
     
     <div class="bottom-nav">
-        <div class="nav-item" onclick="location.href='dashboard.html'">
-            <img src="https://i.imgur.com/StGZq3Y.png" alt="Home">
-            <span>Home</span>
-        </div>
-        <div class="nav-item" onclick="location.href='mybids.html'">
-            <img src="https://i.imgur.com/rUWwMYm.png" alt="Passbook">
-            <span>Passbook</span>
-        </div>
-        <div class="nav-item active" onclick="location.href='funds.html'">
-            <img src="https://i.imgur.com/NvJCTli.png" alt="Fund">
-            <span>Fund</span>
-        </div>
-        <div class="nav-item" onclick="showSupportModal()">
-            <img src="https://i.imgur.com/ug9IprL.jpeg" alt="Support">
-            <span>Support</span>
-        </div>
+        <div class="nav-item" onclick="location.href='dashboard.html'"><img src="https://i.imgur.com/StGZq3Y.png" alt="Home"><span>Home</span></div>
+        <div class="nav-item" onclick="location.href='mybids.html'"><img src="https://i.imgur.com/rUWwMYm.png" alt="Passbook"><span>Passbook</span></div>
+        <div class="nav-item" onclick="location.href='mybids.html'"><img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids"><span>My Bids</span></div>
+        <div class="nav-item active" onclick="location.href='funds.html'"><img src="https://i.imgur.com/NvJCTli.png" alt="Fund"><span>Fund</span></div>
+        <div class="nav-item" onclick="showSupportModal()"><img src="https://i.imgur.com/ug9IprL.jpeg" alt="Support"><span>Support</span></div>
     </div>
 </div>
 
-<!-- Profile Modal -->
-<div id="profileModal" class="modal">
-    <div class="modal-content">
-        <h3>👤 My Profile</h3>
-        <div id="profileInfo"></div>
-        <button class="modal-btn" onclick="showGameRatesModal()">🎲 Game Rates</button>
-        <button class="modal-btn" onclick="showChangePinModal()">🔐 Change MPIN</button>
-        <button class="modal-btn" onclick="showBankModal()">🏦 Bank Details</button>
-        <button class="modal-btn close-modal" onclick="closeProfileModal()">Close</button>
-    </div>
-</div>
-
-<!-- Game Rates Modal -->
-<div id="gameRatesModal" class="modal">
-    <div class="modal-content">
-        <h3>🎲 GAME RATES</h3>
-        <div class="rate-row"><span class="rate-name">Single Digit</span><span class="rate-value">10x</span></div>
-        <div class="rate-row"><span class="rate-name">Jodi</span><span class="rate-value">100x</span></div>
-        <div class="rate-row"><span class="rate-name">Single Pana</span><span class="rate-value">160x</span></div>
-        <div class="rate-row"><span class="rate-name">Double Pana</span><span class="rate-value">320x</span></div>
-        <div class="rate-row"><span class="rate-name">Triple Pana</span><span class="rate-value">1000x</span></div>
-        <div class="rate-row"><span class="rate-name">Half Sangam A</span><span class="rate-value">1600x</span></div>
-        <div class="rate-row"><span class="rate-name">Half Sangam B</span><span class="rate-value">1600x</span></div>
-        <div class="rate-row"><span class="rate-name">Full Sangam</span><span class="rate-value">25000x</span></div>
-        <button class="modal-btn close-modal" onclick="closeGameRatesModal()">Close</button>
-    </div>
-</div>
-
-<!-- Change PIN Modal -->
-<div id="changePinModal" class="modal">
-    <div class="modal-content">
-        <h3>🔐 Change MPIN</h3>
-        <input type="password" id="oldPin" class="modal-input" placeholder="Current MPIN" maxlength="4">
-        <input type="password" id="newPin" class="modal-input" placeholder="New MPIN (4 digits)" maxlength="4">
-        <input type="password" id="confirmPin" class="modal-input" placeholder="Confirm New MPIN" maxlength="4">
-        <button class="modal-btn" onclick="updatePin()">Update MPIN</button>
-        <button class="modal-btn close-modal" onclick="closeChangePinModal()">Cancel</button>
-        <div id="pinMsg" style="color:#dc3545; text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<!-- Support Modal -->
-<div id="supportModal" class="modal">
-    <div class="modal-content">
-        <h3>💬 Support Center</h3>
-        <div class="support-option" onclick="sendEmail()">
-            <div class="support-icon">📧</div>
-            <div class="support-text">
-                <div class="support-title">Email Us</div>
-                <div class="support-desc">win777@support.com</div>
-            </div>
-        </div>
-        <div class="support-option" onclick="sendWhatsApp()">
-            <div class="support-icon">📱</div>
-            <div class="support-text">
-                <div class="support-title">WhatsApp</div>
-                <div class="support-desc">+91 9876543210</div>
-            </div>
-        </div>
-        <button class="modal-btn close-modal" onclick="closeSupportModal()">Close</button>
-    </div>
-</div>
+<!-- Modals (same as before) -->
+<div id="profileModal" class="modal"><div class="modal-content"><h3>👑 My Profile</h3><div id="profileInfo"></div><button class="modal-btn" onclick="showGameRatesModal()">🎲 Game Rates</button><button class="modal-btn" onclick="showChangePinModal()">🔐 Change MPIN</button><button class="modal-btn" onclick="showBankModal()">🏦 Bank Details</button><button class="modal-btn logout-btn" onclick="logout()">🚪 Logout</button><button class="modal-btn close-modal" onclick="closeProfileModal()">Close</button></div></div>
+<div id="gameRatesModal" class="modal"><div class="modal-content"><h3>🎲 GAME RATES</h3><div class="rate-row"><span class="rate-name">Single Digit</span><span class="rate-value">10x</span></div><div class="rate-row"><span class="rate-name">Jodi</span><span class="rate-value">100x</span></div><div class="rate-row"><span class="rate-name">Single Pana</span><span class="rate-value">160x</span></div><div class="rate-row"><span class="rate-name">Double Pana</span><span class="rate-value">320x</span></div><div class="rate-row"><span class="rate-name">Triple Pana</span><span class="rate-value">1000x</span></div><div class="rate-row"><span class="rate-name">Half Sangam A</span><span class="rate-value">1600x</span></div><div class="rate-row"><span class="rate-name">Half Sangam B</span><span class="rate-value">1600x</span></div><div class="rate-row"><span class="rate-name">Full Sangam</span><span class="rate-value">25000x</span></div><button class="modal-btn close-modal" onclick="closeGameRatesModal()">Close</button></div></div>
+<div id="changePinModal" class="modal"><div class="modal-content"><h3>🔐 Change MPIN</h3><input type="password" id="oldPin" class="modal-input" placeholder="Current MPIN" maxlength="4"><input type="password" id="newPin" class="modal-input" placeholder="New MPIN (4 digits)" maxlength="4"><input type="password" id="confirmPin" class="modal-input" placeholder="Confirm New MPIN" maxlength="4"><button class="modal-btn" onclick="updatePin()">Update MPIN</button><button class="modal-btn close-modal" onclick="closeChangePinModal()">Cancel</button><div id="pinMsg" style="color:#ff6666; text-align:center; margin-top:10px;"></div></div></div>
+<div id="bankModal" class="modal"><div class="modal-content"><h3>🏦 Bank Details</h3><input type="text" id="bankAccountHolder" class="modal-input" placeholder="Account Holder Name"><input type="text" id="bankName" class="modal-input" placeholder="Bank Name"><input type="text" id="bankAccountNumber" class="modal-input" placeholder="Account Number"><input type="text" id="bankIfsc" class="modal-input" placeholder="IFSC Code"><button class="modal-btn" onclick="saveBankDetails()">Save Bank Details</button><button class="modal-btn close-modal" onclick="closeBankModal()">Cancel</button><div id="bankMsg" style="color:#66ff66; text-align:center; margin-top:10px;"></div></div></div>
+<div id="supportModal" class="modal"><div class="modal-content"><h3>💬 Royal Support</h3><div class="support-option" onclick="sendEmail()"><div class="support-icon">📧</div><div class="support-text"><div class="support-title">Email Us</div><div class="support-desc">win777@support.com</div></div></div><div class="support-option" onclick="sendWhatsApp()"><div class="support-icon">📱</div><div class="support-text"><div class="support-title">WhatsApp</div><div class="support-desc">+91 9876543210</div></div></div><button class="modal-btn close-modal" onclick="closeSupportModal()">Close</button></div></div>
 
 <script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
-        authDomain: "win777-ed482.firebaseapp.com",
-        projectId: "win777-ed482",
-        storageBucket: "win777-ed482.firebasestorage.app",
-        messagingSenderId: "843686112399",
-        appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
-    };
-    
+    const firebaseConfig = { apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38", authDomain: "win777-ed482.firebaseapp.com", projectId: "win777-ed482", storageBucket: "win777-ed482.firebasestorage.app", messagingSenderId: "843686112399", appId: "1:843686112399:web:9c20a96831e6a94cd814fa" };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
     
-    let currentUser = null;
-    let currentUserData = null;
-    
-    const gameRates = {
-        'Single Digit': 10, 'Jodi': 100, 'Single Pana': 160,
-        'Double Pana': 320, 'Triple Pana': 1000,
-        'Half Sangam A': 1600, 'Half Sangam B': 1600, 'Full Sangam': 25000
-    };
+    let currentUser = null, currentUserData = null;
+    const gameRates = { 'Single Digit':10, 'Jodi':100, 'Single Pana':160, 'Double Pana':320, 'Triple Pana':1000, 'Half Sangam A':1600, 'Half Sangam B':1600, 'Full Sangam':25000 };
     
     auth.onAuthStateChanged(async (user) => {
-        if (!user) {
-            window.location.href = 'index.html';
-        } else {
-            currentUser = user;
-            await loadUserData();
-            listenToNotice();
-        }
+        if (!user) window.location.href = 'index.html';
+        else { currentUser = user; await loadUserData(); listenToNotice(); }
     });
     
     async function loadUserData() {
@@ -312,39 +203,19 @@
         }
     }
     
-    function showBalance() {
-        alert(`💰 Current Balance: ₹${currentUserData?.balance || 0}`);
-    }
-    
-    // Navigation
+    function showBalance() { alert(`💰 Current Balance: ₹${currentUserData?.balance || 0}`); }
     function showMainMenu() {
         document.getElementById('mainMenu').classList.remove('hidden');
         document.getElementById('bankScreen').classList.add('hidden');
         document.getElementById('bidHistoryScreen').classList.add('hidden');
         document.getElementById('transactionHistoryScreen').classList.add('hidden');
     }
+    function showAddBank() { document.getElementById('mainMenu').classList.add('hidden'); document.getElementById('bankScreen').classList.remove('hidden'); loadBankDetails(); }
+    function showBidHistory() { document.getElementById('mainMenu').classList.add('hidden'); document.getElementById('bidHistoryScreen').classList.remove('hidden'); loadBidHistory(); }
+    function showTransactionHistory() { document.getElementById('mainMenu').classList.add('hidden'); document.getElementById('transactionHistoryScreen').classList.remove('hidden'); loadTransactionHistory(); }
     
-    function showAddBank() {
-        document.getElementById('mainMenu').classList.add('hidden');
-        document.getElementById('bankScreen').classList.remove('hidden');
-        loadBankDetails();
-    }
-    
-    function showBidHistory() {
-        document.getElementById('mainMenu').classList.add('hidden');
-        document.getElementById('bidHistoryScreen').classList.remove('hidden');
-        loadBidHistory();
-    }
-    
-    function showTransactionHistory() {
-        document.getElementById('mainMenu').classList.add('hidden');
-        document.getElementById('transactionHistoryScreen').classList.remove('hidden');
-        loadTransactionHistory();
-    }
-    
-    // Bank Details
     function loadBankDetails() {
-        if (currentUserData && currentUserData.bankDetails) {
+        if (currentUserData?.bankDetails) {
             const bank = currentUserData.bankDetails;
             document.getElementById('accountHolder').value = bank.accountHolder || '';
             document.getElementById('bankName').value = bank.bankName || '';
@@ -360,217 +231,109 @@
         const accountNumber = document.getElementById('accountNumber').value.trim();
         const ifscCode = document.getElementById('ifscCode').value.trim();
         const confirmAccount = document.getElementById('confirmAccount').value.trim();
-        
         if (!accountHolder || !bankName || !accountNumber || !ifscCode) {
             document.getElementById('bankMsg').innerHTML = 'Please fill all fields';
             document.getElementById('bankMsg').style.display = 'block';
-            document.getElementById('bankMsg').style.color = '#dc3545';
+            document.getElementById('bankMsg').style.color = '#ff6666';
             setTimeout(() => document.getElementById('bankMsg').style.display = 'none', 3000);
             return;
         }
-        
         if (accountNumber !== confirmAccount) {
             document.getElementById('bankMsg').innerHTML = 'Account numbers do not match!';
             document.getElementById('bankMsg').style.display = 'block';
-            document.getElementById('bankMsg').style.color = '#dc3545';
+            document.getElementById('bankMsg').style.color = '#ff6666';
             setTimeout(() => document.getElementById('bankMsg').style.display = 'none', 3000);
             return;
         }
-        
-        const bankDetails = { accountHolder, bankName, accountNumber, ifscCode };
-        await db.collection('users').doc(currentUser.uid).update({ bankDetails: bankDetails });
-        currentUserData.bankDetails = bankDetails;
-        
+        await db.collection('users').doc(currentUser.uid).update({ bankDetails: { accountHolder, bankName, accountNumber, ifscCode } });
+        currentUserData.bankDetails = { accountHolder, bankName, accountNumber, ifscCode };
         document.getElementById('bankMsg').innerHTML = '✅ Bank details saved successfully!';
         document.getElementById('bankMsg').style.display = 'block';
-        document.getElementById('bankMsg').style.color = '#28a745';
-        setTimeout(() => {
-            document.getElementById('bankMsg').style.display = 'none';
-            showMainMenu();
-        }, 2000);
+        document.getElementById('bankMsg').style.color = '#66ff66';
+        setTimeout(() => { document.getElementById('bankMsg').style.display = 'none'; showMainMenu(); }, 2000);
     };
     
-    // Bid History
     async function loadBidHistory() {
         const container = document.getElementById('bidsList');
-        container.innerHTML = '<div class="no-data">Loading...</div>';
-        
-        const bids = await db.collection('bids')
-            .where('userId', '==', currentUser.uid)
-            .orderBy('createdAt', 'desc')
-            .get();
-        
-        if (bids.empty) {
-            container.innerHTML = '<div class="no-data">📭 No bids placed yet</div>';
-            return;
-        }
-        
+        container.innerHTML = '<div class="no-data">🔄 Loading bids...</div>';
+        const bids = await db.collection('bids').where('userId', '==', currentUser.uid).orderBy('createdAt', 'desc').get();
+        if (bids.empty) { container.innerHTML = '<div class="no-data">👑 No bids placed yet</div>'; return; }
         let html = '';
         for (const doc of bids.docs) {
             const b = doc.data();
-            const bidAmount = b.points || 0;
             const multiplier = gameRates[b.gameType] || 10;
-            const winAmount = bidAmount * multiplier;
-            
             let statusClass = '', statusText = '';
-            if (b.status === 'won') {
-                statusClass = 'status-won';
-                statusText = '🏆 WON';
-            } else if (b.status === 'lost') {
-                statusClass = 'status-lost';
-                statusText = '❌ LOST';
-            } else {
-                statusClass = 'status-pending';
-                statusText = '⏳ PENDING';
-            }
-            
-            const bidDate = b.createdAt?.toDate() ? b.createdAt.toDate().toLocaleString() : 'Pending';
-            
-            html += `
-                <div class="bid-card">
-                    <div class="bid-header">
-                        <span class="bid-market">${b.market || 'Unknown'}</span>
-                        <span class="bid-status ${statusClass}">${statusText}</span>
-                    </div>
-                    <div style="margin: 8px 0;"><strong>${b.gameType}</strong>: ${b.value}</div>
-                    <div>💰 Bid: ₹${bidAmount} | Rate: ${multiplier}x</div>
-                    ${b.status === 'won' ? `<div style="color:#28a745;">🏆 Win: ₹${winAmount}</div>` : ''}
-                    <div style="font-size: 11px; color: #888; margin-top: 8px;">📅 ${bidDate}</div>
-                </div>
-            `;
+            if (b.status === 'won') { statusClass = 'status-won'; statusText = '🏆 WON'; }
+            else if (b.status === 'lost') { statusClass = 'status-lost'; statusText = '❌ LOST'; }
+            else { statusClass = 'status-pending'; statusText = '⏳ PENDING'; }
+            const date = b.createdAt?.toDate() ? b.createdAt.toDate().toLocaleString() : 'Pending';
+            html += `<div class="bid-card"><div class="bid-header"><span class="bid-market">👑 ${b.market}</span><span class="bid-status ${statusClass}">${statusText}</span></div><div style="margin:8px 0;"><strong>${b.gameType}</strong>: ${b.value}</div><div>💰 Bid: ₹${b.points} | Rate: ${multiplier}x</div>${b.status === 'won' ? `<div style="color:#66ff66;">🏆 Win: ₹${b.points * multiplier}</div>` : ''}<div style="font-size:11px; color:#aa9c7a; margin-top:8px;">📅 ${date}</div></div>`;
         }
         container.innerHTML = html;
     }
     
-    // Transaction History
     async function loadTransactionHistory() {
         const container = document.getElementById('transactionsList');
-        container.innerHTML = '<div class="no-data">Loading...</div>';
-        
-        const transactions = await db.collection('transactions')
-            .where('userId', '==', currentUser.uid)
-            .orderBy('date', 'desc')
-            .get();
-        
-        if (transactions.empty) {
-            container.innerHTML = '<div class="no-data">📭 No transactions yet</div>';
-            return;
-        }
-        
+        container.innerHTML = '<div class="no-data">🔄 Loading transactions...</div>';
+        const transactions = await db.collection('transactions').where('userId', '==', currentUser.uid).orderBy('date', 'desc').get();
+        if (transactions.empty) { container.innerHTML = '<div class="no-data">👑 No transactions yet</div>'; return; }
         let html = '';
         for (const doc of transactions.docs) {
             const t = doc.data();
             const date = t.date?.toDate() ? t.date.toDate().toLocaleString() : 'Pending';
             const isCredit = t.type === 'credit';
-            let statusColor = '#ff9800', statusText = 'Pending';
-            
-            if (t.status === 'Completed') {
-                statusColor = '#28a745';
-                statusText = 'Completed';
-            } else if (t.status === 'Rejected') {
-                statusColor = '#dc3545';
-                statusText = 'Rejected';
-            }
-            
-            html += `
-                <div class="bid-card">
-                    <div class="bid-header">
-                        <span class="bid-market">${isCredit ? '💰 DEPOSIT' : '💸 WITHDRAWAL'}</span>
-                        <span style="color:${statusColor};">${statusText}</span>
-                    </div>
-                    <div style="font-size: 20px; font-weight: bold; color: ${isCredit ? '#28a745' : '#ff9800'}; margin: 8px 0;">
-                        ${isCredit ? '+' : '-'} ₹${t.amount}
-                    </div>
-                    <div style="font-size: 11px; color: #888;">📅 ${date}</div>
-                    ${t.description ? `<div style="font-size: 11px; color: #666; margin-top: 5px;">${t.description}</div>` : ''}
-                </div>
-            `;
+            let statusColor = '#ffd700', statusText = 'Pending';
+            if (t.status === 'Completed') { statusColor = '#66ff66'; statusText = 'Completed'; }
+            else if (t.status === 'Rejected') { statusColor = '#ff6666'; statusText = 'Rejected'; }
+            html += `<div class="bid-card"><div class="bid-header"><span class="bid-market">${isCredit ? '💰 DEPOSIT' : '💸 WITHDRAWAL'}</span><span style="color:${statusColor};">${statusText}</span></div><div style="font-size:20px; font-weight:bold; color:${isCredit ? '#66ff66' : '#ffd700'};">${isCredit ? '+' : '-'} ₹${t.amount}</div><div style="font-size:11px; color:#aa9c7a;">📅 ${date}</div>${t.description ? `<div style="font-size:11px; color:#aa9c7a;">${t.description}</div>` : ''}</div>`;
         }
         container.innerHTML = html;
     }
     
-    // Profile Modal Functions
+    // Profile Functions
     function showProfileModal() {
         if (currentUserData) {
-            document.getElementById('profileInfo').innerHTML = `
-                <div style="text-align:center; margin-bottom:15px;">
-                    <div style="font-size:20px; margin-bottom:5px;">${currentUserData.name || 'User'}</div>
-                    <div style="color:#888; font-size:12px;">${currentUserData.phone || ''}</div>
-                    <div style="color:#ff9800; font-size:18px; margin-top:10px;">₹${currentUserData.balance || 0}</div>
-                </div>
-            `;
+            document.getElementById('profileInfo').innerHTML = `<div style="text-align:center;"><div style="font-size:20px; color:#ffd700;">${currentUserData.name}</div><div style="color:#aa9c7a;">${currentUserData.phone}</div><div style="color:#ffd700; font-size:18px;">₹${currentUserData.balance}</div></div>`;
             document.getElementById('profileModal').style.display = 'flex';
         }
     }
-    
     function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
     function showGameRatesModal() { closeProfileModal(); document.getElementById('gameRatesModal').style.display = 'flex'; }
     function closeGameRatesModal() { document.getElementById('gameRatesModal').style.display = 'none'; }
-    
-    function showChangePinModal() {
-        closeProfileModal();
-        document.getElementById('changePinModal').style.display = 'flex';
-    }
-    
-    function closeChangePinModal() { 
-        document.getElementById('changePinModal').style.display = 'none';
-        document.getElementById('pinMsg').innerHTML = '';
-        document.getElementById('oldPin').value = '';
-        document.getElementById('newPin').value = '';
-        document.getElementById('confirmPin').value = '';
-    }
-    
+    function logout() { auth.signOut().then(() => { sessionStorage.clear(); window.location.href = 'index.html'; }); }
+    function showChangePinModal() { closeProfileModal(); document.getElementById('changePinModal').style.display = 'flex'; }
+    function closeChangePinModal() { document.getElementById('changePinModal').style.display = 'none'; document.getElementById('pinMsg').innerHTML = ''; }
     async function updatePin() {
-        const oldPin = document.getElementById('oldPin').value;
-        const newPin = document.getElementById('newPin').value;
-        const confirmPin = document.getElementById('confirmPin').value;
-        
-        if (!oldPin || !newPin || !confirmPin) {
-            document.getElementById('pinMsg').innerHTML = 'Please fill all fields';
-            return;
-        }
-        if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
-            document.getElementById('pinMsg').innerHTML = 'MPIN must be 4 digits';
-            return;
-        }
-        if (newPin !== confirmPin) {
-            document.getElementById('pinMsg').innerHTML = 'New MPINs do not match';
-            return;
-        }
-        if (oldPin !== currentUserData.pin) {
-            document.getElementById('pinMsg').innerHTML = 'Current MPIN is incorrect';
-            return;
-        }
-        
+        const oldPin = document.getElementById('oldPin').value, newPin = document.getElementById('newPin').value, confirmPin = document.getElementById('confirmPin').value;
+        if (!oldPin || !newPin || !confirmPin) { document.getElementById('pinMsg').innerHTML = 'Please fill all fields'; return; }
+        if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) { document.getElementById('pinMsg').innerHTML = 'MPIN must be 4 digits'; return; }
+        if (newPin !== confirmPin) { document.getElementById('pinMsg').innerHTML = 'New MPINs do not match'; return; }
+        if (oldPin !== currentUserData.pin) { document.getElementById('pinMsg').innerHTML = 'Current MPIN is incorrect'; return; }
         await db.collection('users').doc(currentUser.uid).update({ pin: newPin });
         currentUserData.pin = newPin;
-        document.getElementById('pinMsg').innerHTML = '✅ MPIN changed successfully!';
-        document.getElementById('pinMsg').style.color = '#28a745';
+        document.getElementById('pinMsg').innerHTML = '✅ MPIN changed!';
+        document.getElementById('pinMsg').style.color = '#66ff66';
         setTimeout(() => closeChangePinModal(), 1500);
     }
-    
-    function showBankModal() {
-        closeProfileModal();
-        showAddBank();
+    function showBankModal() { closeProfileModal(); document.getElementById('bankModal').style.display = 'flex'; }
+    function closeBankModal() { document.getElementById('bankModal').style.display = 'none'; document.getElementById('bankMsg').innerHTML = ''; }
+    async function saveBankDetails() {
+        const accountHolder = document.getElementById('bankAccountHolder').value.trim(), bankName = document.getElementById('bankName').value.trim(), accountNumber = document.getElementById('bankAccountNumber').value.trim(), ifscCode = document.getElementById('bankIfsc').value.trim();
+        if (!accountHolder || !bankName || !accountNumber || !ifscCode) { document.getElementById('bankMsg').innerHTML = 'Please fill all fields'; document.getElementById('bankMsg').style.color = '#ff6666'; return; }
+        await db.collection('users').doc(currentUser.uid).update({ bankDetails: { accountHolder, bankName, accountNumber, ifscCode } });
+        currentUserData.bankDetails = { accountHolder, bankName, accountNumber, ifscCode };
+        document.getElementById('bankMsg').innerHTML = '✅ Bank details saved!';
+        document.getElementById('bankMsg').style.color = '#66ff66';
+        setTimeout(() => closeBankModal(), 1500);
     }
-    
     function showSupportModal() { document.getElementById('supportModal').style.display = 'flex'; }
     function closeSupportModal() { document.getElementById('supportModal').style.display = 'none'; }
     function sendEmail() { window.location.href = 'mailto:win777@support.com'; }
     function sendWhatsApp() { window.open('https://wa.me/919876543210', '_blank'); }
-    
-    function showNoticeModal() { 
-        alert(document.getElementById('noticeText').innerText);
-    }
+    function showNoticeModal() { alert(document.getElementById('noticeText').innerText); }
     function closeNotice() { document.getElementById('noticeBoard').style.display = 'none'; }
     function showGames() { alert('Games coming soon!'); }
-    
-    function listenToNotice() {
-        db.collection('settings').doc('notice').onSnapshot((doc) => {
-            const text = doc.exists ? doc.data().text : 'Welcome to WIN777!';
-            document.getElementById('noticeText').innerHTML = text;
-        });
-    }
+    function listenToNotice() { db.collection('settings').doc('notice').onSnapshot((doc) => { const text = doc.exists ? doc.data().text : 'Welcome to WIN777!'; document.getElementById('noticeText').innerHTML = text; }); }
     
     window.showMainMenu = showMainMenu;
     window.showAddBank = showAddBank;
@@ -585,12 +348,15 @@
     window.closeChangePinModal = closeChangePinModal;
     window.updatePin = updatePin;
     window.showBankModal = showBankModal;
+    window.closeBankModal = closeBankModal;
+    window.saveBankDetails = saveBankDetails;
     window.showSupportModal = showSupportModal;
     window.closeSupportModal = closeSupportModal;
     window.sendEmail = sendEmail;
     window.sendWhatsApp = sendWhatsApp;
     window.closeNotice = closeNotice;
     window.showGames = showGames;
+    window.logout = logout;
 </script>
 </body>
 </html>
