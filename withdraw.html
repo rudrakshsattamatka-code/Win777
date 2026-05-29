@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>WIN777 - Royal Withdrawal</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -34,14 +34,15 @@
         .game-icon img { width: 45px; height: 45px; display: block; margin: 0 auto 4px; border-radius: 12px; }
         
         .withdraw-card { background: linear-gradient(135deg, #1a1510, #0f0c08); margin: 12px; border-radius: 20px; padding: 20px; border: 1px solid #ffd70040; }
-        .withdraw-title { color: #ffd700; font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 15px; text-shadow: 0 0 5px rgba(255,215,0,0.3); }
+        .withdraw-title { color: #ffd700; font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 20px; text-shadow: 0 0 5px rgba(255,215,0,0.3); }
         
         .amount-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
         .amount-btn { background: #0a0806; border: 1px solid #ffd70040; border-radius: 16px; padding: 14px; text-align: center; color: #ffd700; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
         .amount-btn.active { background: linear-gradient(135deg, #ffd700, #daa520); color: #1a1510; border-color: #ffd700; }
         .amount-btn:hover { border-color: #ffd700; transform: scale(1.02); }
         
-        .custom-amount input { width: 100%; padding: 14px; background: #0a0806; border: 1px solid #ffd70040; border-radius: 12px; color: #ffd700; font-size: 16px; }
+        .custom-amount input { width: 100%; padding: 14px; background: #0a0806; border: 1px solid #ffd70040; border-radius: 12px; color: #ffd700; font-size: 16px; text-align: center; }
+        .custom-amount input:focus { outline: none; border-color: #ffd700; }
         
         .bank-info { background: #0a0806; border-radius: 16px; padding: 15px; margin: 15px 0; border: 1px solid #ffd70040; }
         .bank-info h4 { color: #ffd700; margin-bottom: 10px; }
@@ -49,11 +50,11 @@
         .bank-detail span { color: #ffd700; font-weight: bold; }
         .no-bank { color: #ff6666; text-align: center; padding: 20px; }
         
-        .withdraw-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #ffd700, #daa520); border: none; border-radius: 30px; color: #1a1510; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; margin-top: 10px; }
+        .withdraw-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #ffd700, #daa520); border: none; border-radius: 40px; color: #1a1510; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
         .withdraw-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255,215,0,0.5); }
         .withdraw-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        .back-btn { width: 100%; padding: 14px; background: #1a1510; border: 1px solid #ffd70040; border-radius: 30px; color: #ffd700; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .back-btn { width: 100%; padding: 14px; background: #1a1510; border: 1px solid #ffd70040; border-radius: 30px; color: #ffd700; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
         .back-btn:hover { border-color: #ffd700; }
         
         .message { padding: 12px; border-radius: 12px; text-align: center; margin-top: 15px; font-size: 13px; }
@@ -71,7 +72,88 @@
         
         .note-text { font-size: 11px; color: #aa9c7a; text-align: center; margin-top: 15px; }
         
-        .modal, .profile-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; }
+        /* Terms & Conditions Popup */
+        .terms-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+        .terms-content {
+            background: linear-gradient(135deg, #1a1510, #0f0c08);
+            border-radius: 24px;
+            padding: 25px;
+            width: 90%;
+            max-width: 380px;
+            border: 2px solid #ffd700;
+            box-shadow: 0 0 30px rgba(255,215,0,0.3);
+        }
+        .terms-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .terms-header h2 {
+            color: #ffd700;
+            font-size: 22px;
+            letter-spacing: 2px;
+        }
+        .terms-header .crown {
+            font-size: 35px;
+            margin-bottom: 5px;
+        }
+        .terms-body {
+            color: #aa9c7a;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            padding: 10px;
+            background: #0a0806;
+            border-radius: 16px;
+            border: 1px solid #ffd70040;
+        }
+        .terms-body ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .terms-body li {
+            padding: 6px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        .terms-body li:before {
+            content: "👑";
+            position: absolute;
+            left: 0;
+            color: #ffd700;
+            font-size: 12px;
+        }
+        .terms-footer {
+            text-align: center;
+        }
+        .terms-accept-btn {
+            background: linear-gradient(135deg, #ffd700, #daa520);
+            border: none;
+            padding: 12px 40px;
+            border-radius: 40px;
+            color: #1a1510;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        .terms-accept-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(255,215,0,0.5);
+        }
+        
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: linear-gradient(135deg, #1a1510, #0f0c08); border-radius: 24px; padding: 25px; width: 90%; max-width: 350px; border: 1px solid #ffd700; }
         .modal-content h3 { color: #ffd700; text-align: center; margin-bottom: 15px; }
         .modal-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #ffd700, #daa520); border: none; border-radius: 12px; color: #1a1510; font-weight: bold; cursor: pointer; margin-top: 10px; }
@@ -125,7 +207,7 @@
             <div class="amount-btn" onclick="selectAmount(2000)">₹2000</div>
             <div class="amount-btn" onclick="selectAmount(5000)">₹5000</div>
             <div class="amount-btn" onclick="selectAmount(10000)">₹10000</div>
-            <div class="amount-btn" onclick="selectAmount(20000)">₹20000</div>
+            <div class="amount-btn" onclick="selectAmount(25000)">₹25000</div>
         </div>
         
         <div class="custom-amount">
@@ -141,7 +223,7 @@
         <button class="back-btn" onclick="goBack()">← Back</button>
         
         <div id="message" class="message hidden"></div>
-        <div class="note-text">⚡ Minimum ₹500 | Maximum ₹50,000 | Process within 24 hours</div>
+        <div class="note-text">⚡ Minimum ₹500 | Maximum ₹25,00,000 | Process within 10-60 minutes</div>
     </div>
     
     <div class="bottom-nav">
@@ -153,76 +235,72 @@
     </div>
 </div>
 
-<!-- Profile Modal -->
-<div id="profileModal" class="modal">
-    <div class="modal-content">
-        <h3>👑 My Profile</h3>
-        <div id="profileInfo"></div>
-        <button class="modal-btn" onclick="showGameRatesModal()">🎲 Game Rates</button>
-        <button class="modal-btn" onclick="showChangePinModal()">🔐 Change MPIN</button>
-        <button class="modal-btn" onclick="showBankModal()">🏦 Bank Details</button>
-        <button class="modal-btn logout-btn" onclick="logout()">🚪 Logout</button>
-        <button class="modal-btn close-modal" onclick="closeProfileModal()">Close</button>
+<!-- Terms & Conditions Popup -->
+<div id="termsPopup" class="terms-popup">
+    <div class="terms-content">
+        <div class="terms-header">
+            <div class="crown">👑</div>
+            <h2>TERMS & CONDITIONS</h2>
+        </div>
+        <div class="terms-body">
+            <ul>
+                <li>Minimum withdraw: ₹500</li>
+                <li>Maximum withdraw: ₹25 lakh/day</li>
+                <li>Up to ₹1,00,000 – automatic (1 request/day)</li>
+                <li>Above ₹1,00,000 – manual request required</li>
+                <li>Withdraw timing: 10:00 AM – 11:00 PM</li>
+                <li>Processing time: 10-60 minutes (depends on bank server)</li>
+                <li>Available all 7 days</li>
+            </ul>
+        </div>
+        <div class="terms-footer">
+            <button class="terms-accept-btn" onclick="acceptTerms()">✓ ACCEPT</button>
+        </div>
     </div>
 </div>
 
-<div id="gameRatesModal" class="modal">
-    <div class="modal-content"><h3>🎲 GAME RATES</h3>
-        <div class="rate-row"><span class="rate-name">Single Digit</span><span class="rate-value">10x</span></div>
-        <div class="rate-row"><span class="rate-name">Jodi</span><span class="rate-value">100x</span></div>
-        <div class="rate-row"><span class="rate-name">Single Pana</span><span class="rate-value">160x</span></div>
-        <div class="rate-row"><span class="rate-name">Double Pana</span><span class="rate-value">320x</span></div>
-        <div class="rate-row"><span class="rate-name">Triple Pana</span><span class="rate-value">1000x</span></div>
-        <div class="rate-row"><span class="rate-name">Half Sangam A</span><span class="rate-value">1600x</span></div>
-        <div class="rate-row"><span class="rate-name">Half Sangam B</span><span class="rate-value">1600x</span></div>
-        <div class="rate-row"><span class="rate-name">Full Sangam</span><span class="rate-value">25000x</span></div>
-        <button class="modal-btn close-modal" onclick="closeGameRatesModal()">Close</button>
-    </div>
-</div>
-
-<div id="changePinModal" class="modal">
-    <div class="modal-content"><h3>🔐 Change MPIN</h3>
-        <input type="password" id="oldPin" class="modal-input" placeholder="Current MPIN" maxlength="4">
-        <input type="password" id="newPin" class="modal-input" placeholder="New MPIN (4 digits)" maxlength="4">
-        <input type="password" id="confirmPin" class="modal-input" placeholder="Confirm New MPIN" maxlength="4">
-        <button class="modal-btn" onclick="updatePin()">Update MPIN</button>
-        <button class="modal-btn close-modal" onclick="closeChangePinModal()">Cancel</button>
-        <div id="pinMsg" style="color:#ff6666; text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<div id="bankModal" class="modal">
-    <div class="modal-content"><h3>🏦 Bank Details</h3>
-        <input type="text" id="bankAccountHolder" class="modal-input" placeholder="Account Holder Name">
-        <input type="text" id="bankName" class="modal-input" placeholder="Bank Name">
-        <input type="text" id="bankAccountNumber" class="modal-input" placeholder="Account Number">
-        <input type="text" id="bankIfsc" class="modal-input" placeholder="IFSC Code">
-        <button class="modal-btn" onclick="saveBankDetails()">Save Bank Details</button>
-        <button class="modal-btn close-modal" onclick="closeBankModal()">Cancel</button>
-        <div id="bankMsg" style="color:#66ff66; text-align:center; margin-top:10px;"></div>
-    </div>
-</div>
-
-<div id="supportModal" class="modal">
-    <div class="modal-content"><h3>💬 Royal Support</h3>
-        <div class="support-option" onclick="sendEmail()"><div class="support-icon">📧</div><div class="support-text"><div class="support-title">Email Us</div><div class="support-desc">win777@support.com</div></div></div>
-        <div class="support-option" onclick="sendWhatsApp()"><div class="support-icon">📱</div><div class="support-text"><div class="support-title">WhatsApp</div><div class="support-desc">+91 9876543210</div></div></div>
-        <button class="modal-btn close-modal" onclick="closeSupportModal()">Close</button>
-    </div>
-</div>
+<!-- Modals -->
+<div id="profileModal" class="modal"><div class="modal-content"><h3>👑 My Profile</h3><div id="profileInfo"></div><button class="modal-btn" onclick="showGameRatesModal()">🎲 Game Rates</button><button class="modal-btn" onclick="showChangePinModal()">🔐 Change MPIN</button><button class="modal-btn" onclick="showBankModal()">🏦 Bank Details</button><button class="modal-btn close-modal" onclick="closeProfileModal()">Close</button></div></div>
+<div id="gameRatesModal" class="modal"><div class="modal-content"><h3>🎲 GAME RATES</h3><div class="rate-row"><span class="rate-name">Single Digit</span><span class="rate-value">10x</span></div><div class="rate-row"><span class="rate-name">Jodi</span><span class="rate-value">100x</span></div><div class="rate-row"><span class="rate-name">Single Pana</span><span class="rate-value">160x</span></div><div class="rate-row"><span class="rate-name">Double Pana</span><span class="rate-value">320x</span></div><div class="rate-row"><span class="rate-name">Triple Pana</span><span class="rate-value">1000x</span></div><div class="rate-row"><span class="rate-name">Half Sangam A</span><span class="rate-value">1000x</span></div><div class="rate-row"><span class="rate-name">Half Sangam B</span><span class="rate-value">1000x</span></div><div class="rate-row"><span class="rate-name">Full Sangam</span><span class="rate-value">10000x</span></div><button class="modal-btn close-modal" onclick="closeGameRatesModal()">Close</button></div></div>
+<div id="changePinModal" class="modal"><div class="modal-content"><h3>🔐 Change MPIN</h3><input type="password" id="oldPin" class="modal-input" placeholder="Current MPIN" maxlength="4"><input type="password" id="newPin" class="modal-input" placeholder="New MPIN (4 digits)" maxlength="4"><input type="password" id="confirmPin" class="modal-input" placeholder="Confirm MPIN" maxlength="4"><button class="modal-btn" onclick="updatePin()">Update MPIN</button><button class="modal-btn close-modal" onclick="closeChangePinModal()">Cancel</button><div id="pinMsg" style="color:#ff6666; text-align:center; margin-top:10px;"></div></div></div>
+<div id="bankModal" class="modal"><div class="modal-content"><h3>🏦 Bank Details</h3><input type="text" id="bankAccountHolder" class="modal-input" placeholder="Account Holder Name"><input type="text" id="bankName" class="modal-input" placeholder="Bank Name"><input type="text" id="bankAccountNumber" class="modal-input" placeholder="Account Number"><input type="text" id="bankIfsc" class="modal-input" placeholder="IFSC Code"><button class="modal-btn" onclick="saveBankDetails()">Save Bank Details</button><button class="modal-btn close-modal" onclick="closeBankModal()">Cancel</button><div id="bankMsg" style="color:#66ff66; text-align:center; margin-top:10px;"></div></div></div>
+<div id="supportModal" class="modal"><div class="modal-content"><h3>💬 Royal Support</h3><div class="support-option" onclick="sendEmail()"><div class="support-icon">📧</div><div class="support-text"><div class="support-title">Email Us</div><div class="support-desc">win777@support.com</div></div></div><div class="support-option" onclick="sendWhatsApp()"><div class="support-icon">📱</div><div class="support-text"><div class="support-title">WhatsApp</div><div class="support-desc">+91 9876543210</div></div></div><button class="modal-btn close-modal" onclick="closeSupportModal()">Close</button></div></div>
 
 <script>
-    const firebaseConfig = { apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38", authDomain: "win777-ed482.firebaseapp.com", projectId: "win777-ed482", storageBucket: "win777-ed482.firebasestorage.app", messagingSenderId: "843686112399", appId: "1:843686112399:web:9c20a96831e6a94cd814fa" };
+    const firebaseConfig = {
+        apiKey: "AIzaSyBeGpb7V0i5GN1opY9JECHxQIGvHFDPX38",
+        authDomain: "win777-ed482.firebaseapp.com",
+        projectId: "win777-ed482",
+        storageBucket: "win777-ed482.firebasestorage.app",
+        messagingSenderId: "843686112399",
+        appId: "1:843686112399:web:9c20a96831e6a94cd814fa"
+    };
+    
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
     
     let currentUser = null, currentUserData = null, selectedAmount = 500;
+    let termsAccepted = sessionStorage.getItem('withdrawTermsAccepted') === 'true';
     
     auth.onAuthStateChanged(async (user) => {
-        if (!user) window.location.href = 'index.html';
-        else { currentUser = user; await loadUserData(); loadBankDetails(); }
+        if (!user) {
+            window.location.href = 'index.html';
+        } else {
+            currentUser = user;
+            await loadUserData();
+            loadBankDetails();
+            // Show terms popup if not accepted
+            if (!termsAccepted) {
+                document.getElementById('termsPopup').style.display = 'flex';
+            }
+        }
     });
+    
+    function acceptTerms() {
+        sessionStorage.setItem('withdrawTermsAccepted', 'true');
+        document.getElementById('termsPopup').style.display = 'none';
+    }
     
     async function loadUserData() {
         const doc = await db.collection('users').doc(currentUser.uid).get();
@@ -275,7 +353,7 @@
     document.getElementById('withdrawBtn').onclick = async () => {
         const amount = getAmount();
         if (amount < 500) { showMessage('Minimum withdrawal amount is ₹500', 'error'); return; }
-        if (amount > 50000) { showMessage('Maximum withdrawal amount is ₹50,000', 'error'); return; }
+        if (amount > 2500000) { showMessage('Maximum withdrawal amount is ₹25,00,000', 'error'); return; }
         if (amount > (currentUserData?.balance || 0)) { showMessage(`Insufficient balance! You have ₹${currentUserData?.balance || 0}`, 'error'); return; }
         
         const doc = await db.collection('users').doc(currentUser.uid).get();
@@ -286,15 +364,35 @@
             return;
         }
         
-        if (confirm(`Request withdrawal of ₹${amount}?\n\nBank: ${bankDetails.bankName}\nAccount: ${bankDetails.accountNumber}\n\nThis will be processed within 24 hours.`)) {
+        let requestType = "automatic";
+        if (amount > 100000) {
+            requestType = "manual";
+            if (!confirm(`⚠️ MANUAL APPROVAL REQUIRED\n\nAmount: ₹${amount}\n\nAmount above ₹1,00,000 requires manual approval.\nProcessing time may take longer.\n\nContinue?`)) return;
+        }
+        
+        if (confirm(`Withdraw ₹${amount}?\n\nBank: ${bankDetails.bankName}\nAccount: ${bankDetails.accountNumber}\n\nProcess within 10-60 minutes.`)) {
             const btn = document.getElementById('withdrawBtn');
             btn.disabled = true;
             btn.innerText = 'Processing...';
             
-            await db.collection('withdrawRequests').add({ userId: currentUser.uid, amount: amount, bankDetails: bankDetails, status: 'Pending', date: new Date() });
-            await db.collection('transactions').add({ userId: currentUser.uid, type: 'debit', amount: amount, status: 'Pending', date: new Date(), description: 'Withdrawal Request' });
+            await db.collection('withdrawRequests').add({ 
+                userId: currentUser.uid, 
+                amount: amount, 
+                bankDetails: bankDetails, 
+                requestType: requestType,
+                status: 'Pending', 
+                date: new Date() 
+            });
+            await db.collection('transactions').add({ 
+                userId: currentUser.uid, 
+                type: 'debit', 
+                amount: amount, 
+                status: 'Pending', 
+                date: new Date(), 
+                description: 'Withdrawal Request' 
+            });
             
-            showMessage(`✅ Withdrawal request of ₹${amount} sent! Admin will approve within 24 hours.`, 'success');
+            showMessage(`✅ Withdrawal request of ₹${amount} sent! Process within 10-60 minutes.`, 'success');
             btn.disabled = false;
             btn.innerText = '💸 REQUEST WITHDRAWAL';
             setTimeout(() => goBack(), 3000);
@@ -307,7 +405,7 @@
     function showNoticeModal() { alert(document.getElementById('noticeText').innerText); }
     function closeNotice() { document.getElementById('noticeBoard').style.display = 'none'; }
     
-    // Profile Modal Functions
+    // Profile Functions
     function showProfileModal() {
         if (currentUserData) {
             document.getElementById('profileInfo').innerHTML = `<div style="text-align:center;"><div style="font-size:20px; color:#ffd700;">${currentUserData.name}</div><div style="color:#aa9c7a;">${currentUserData.phone}</div><div style="color:#ffd700; font-size:18px;">₹${currentUserData.balance}</div></div>`;
@@ -317,14 +415,13 @@
     function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
     function showGameRatesModal() { closeProfileModal(); document.getElementById('gameRatesModal').style.display = 'flex'; }
     function closeGameRatesModal() { document.getElementById('gameRatesModal').style.display = 'none'; }
-    function logout() { auth.signOut().then(() => { sessionStorage.clear(); window.location.href = 'index.html'; }); }
     function showChangePinModal() { closeProfileModal(); document.getElementById('changePinModal').style.display = 'flex'; }
     function closeChangePinModal() { document.getElementById('changePinModal').style.display = 'none'; document.getElementById('pinMsg').innerHTML = ''; }
     async function updatePin() {
         const oldPin = document.getElementById('oldPin').value, newPin = document.getElementById('newPin').value, confirmPin = document.getElementById('confirmPin').value;
         if (!oldPin || !newPin || !confirmPin) { document.getElementById('pinMsg').innerHTML = 'Please fill all fields'; return; }
         if (newPin.length !== 4 || !/^\d{4}$/.test(newPin)) { document.getElementById('pinMsg').innerHTML = 'MPIN must be 4 digits'; return; }
-        if (newPin !== confirmPin) { document.getElementById('pinMsg').innerHTML = 'New MPINs do not match'; return; }
+        if (newPin !== confirmPin) { document.getElementById('pinMsg').innerHTML = 'MPINs do not match'; return; }
         if (oldPin !== currentUserData.pin) { document.getElementById('pinMsg').innerHTML = 'Current MPIN is incorrect'; return; }
         await db.collection('users').doc(currentUser.uid).update({ pin: newPin });
         currentUserData.pin = newPin;
@@ -341,7 +438,7 @@
         currentUserData.bankDetails = { accountHolder, bankName, accountNumber, ifscCode };
         document.getElementById('bankMsg').innerHTML = '✅ Bank details saved!';
         document.getElementById('bankMsg').style.color = '#66ff66';
-        setTimeout(() => { closeBankModal(); loadBankDetails(); }, 1500);
+        setTimeout(() => closeBankModal(), 1500);
     }
     function showSupportModal() { document.getElementById('supportModal').style.display = 'flex'; }
     function closeSupportModal() { document.getElementById('supportModal').style.display = 'none'; }
@@ -374,7 +471,7 @@
     window.sendWhatsApp = sendWhatsApp;
     window.closeNotice = closeNotice;
     window.showGames = showGames;
-    window.logout = logout;
+    window.acceptTerms = acceptTerms;
 </script>
 </body>
 </html>
