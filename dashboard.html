@@ -57,21 +57,6 @@
             50% { transform: translateY(-10px); }
         }
         
-        /* Royal Animations */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-        }
-        @keyframes glowPulse {
-            0% { box-shadow: 0 0 5px rgba(255,215,0,0.3); }
-            50% { box-shadow: 0 0 20px rgba(255,215,0,0.6); }
-            100% { box-shadow: 0 0 5px rgba(255,215,0,0.3); }
-        }
-        
         /* Royal Header */
         .header { background: linear-gradient(135deg, #1a1510, #0a0806); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffd700; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .logo-img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #ffd700; box-shadow: 0 0 10px rgba(255,215,0,0.3); }
@@ -79,7 +64,7 @@
         .balance:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(255,215,0,0.5); }
         
         /* Royal Profile Row */
-        .profile-row { display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #1a1510, #0f0c08); margin: 10px; padding: 12px 15px; border-radius: 20px; border: 1px solid #ffd700; cursor: pointer; transition: all 0.3s; animation: fadeInUp 0.5s ease-out; }
+        .profile-row { display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #1a1510, #0f0c08); margin: 10px; padding: 12px 15px; border-radius: 20px; border: 1px solid #ffd700; cursor: pointer; transition: all 0.3s; }
         .profile-row:hover { transform: scale(1.01); box-shadow: 0 5px 20px rgba(255,215,0,0.2); }
         .profile-avatar { width: 50px; height: 50px; background: linear-gradient(135deg, #ffd700, #daa520); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #1a1510; box-shadow: 0 0 10px rgba(255,215,0,0.3); }
         .profile-info { flex: 1; }
@@ -88,41 +73,65 @@
         .view-profile { color: #daa520; font-size: 12px; }
         
         /* Royal Notice Board */
-        .notice-board { background: linear-gradient(135deg, #ffd700, #daa520); margin: 10px; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; animation: fadeInUp 0.5s ease-out 0.1s both; box-shadow: 0 0 15px rgba(255,215,0,0.2); }
+        .notice-board { background: linear-gradient(135deg, #ffd700, #daa520); margin: 10px; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 0 15px rgba(255,215,0,0.2); }
         .notice-icon { font-size: 24px; }
         .notice-text { flex: 1; color: #1a1510; font-weight: bold; font-size: 13px; text-shadow: 0 1px 0 rgba(255,255,255,0.2); }
         .close-notice { background: none; border: none; color: #1a1510; font-size: 18px; cursor: pointer; }
         
-        /* Royal Live Clock */
-        .live-clock { background: linear-gradient(135deg, #1a1510, #0f0c08); margin: 10px; padding: 12px 20px; border-radius: 50px; display: flex; justify-content: center; align-items: center; gap: 15px; border: 1px solid #ffd700; animation: fadeInUp 0.5s ease-out 0.2s both, glowPulse 3s infinite; }
-        .clock-icon { font-size: 18px; color: #ffd700; }
-        .clock-time { font-size: 22px; font-weight: bold; color: #ffd700; font-family: monospace; letter-spacing: 2px; text-shadow: 0 0 5px rgba(255,215,0,0.5); }
-        .clock-date { font-size: 12px; color: #aa9c7a; }
+        /* Royal Live Clock - 12 Hour Format */
+        .live-clock { background: linear-gradient(135deg, #1a1510, #0f0c08); margin: 10px; padding: 12px 20px; border-radius: 50px; display: flex; justify-content: center; align-items: center; gap: 15px; border: 1px solid #ffd700; }
+        .clock-icon { font-size: 20px; color: #ffd700; }
+        .clock-time { font-size: 24px; font-weight: bold; color: #ffd700; font-family: monospace; letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,215,0,0.5); }
+        .clock-date { font-size: 13px; color: #ffd700; background: #1a1510; padding: 4px 12px; border-radius: 20px; border: 1px solid #ffd70040; }
+        .clock-ampm { font-size: 14px; color: #daa520; margin-left: 5px; }
         
         /* Royal Games Row */
-        .games-row { display: flex; justify-content: space-around; background: linear-gradient(135deg, #1a1510, #0f0c08); margin: 10px; padding: 12px; border-radius: 20px; border: 1px solid #ffd70020; animation: fadeInUp 0.5s ease-out 0.3s both; }
+        .games-row { display: flex; justify-content: space-around; background: linear-gradient(135deg, #1a1510, #0f0c08); margin: 10px; padding: 12px; border-radius: 20px; border: 1px solid #ffd70020; }
         .game-icon { text-align: center; color: #aa9c7a; font-size: 11px; cursor: pointer; transition: all 0.3s; }
         .game-icon:hover { transform: translateY(-5px); color: #ffd700; }
         .game-icon img { width: 45px; height: 45px; display: block; margin: 0 auto 4px; border-radius: 12px; border: 1px solid #ffd70040; transition: all 0.3s; }
         .game-icon:hover img { border-color: #ffd700; box-shadow: 0 0 15px rgba(255,215,0,0.3); }
         .game-icon span { font-size: 11px; }
         
-        /* Royal Market Card */
-        .market-card { background: linear-gradient(135deg, #1a1510, #0f0c08); margin: 12px; border-radius: 20px; padding: 16px; border: 1px solid #ffd70040; transition: all 0.3s; animation: fadeInUp 0.5s ease-out; }
-        .market-card:hover { transform: translateY(-5px); border-color: #ffd700; box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255,215,0,0.1); }
+        /* Royal Market Card - NO BLINKING */
+        .market-card { background: linear-gradient(135deg, #1a1510, #0f0c08); margin: 12px; border-radius: 20px; padding: 16px; border: 1px solid #ffd70040; transition: all 0.3s; }
+        .market-card:hover { transform: translateY(-3px); border-color: #ffd700; box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255,215,0,0.1); }
         .market-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
-        .market-name { color: #ffd700; font-size: 16px; font-weight: bold; letter-spacing: 1px; text-shadow: 0 0 5px rgba(255,215,0,0.3); }
+        
+        /* Highlighted Market Name */
+        .market-name { 
+            color: #ffd700; 
+            font-size: 18px; 
+            font-weight: bold; 
+            letter-spacing: 1px; 
+            text-shadow: 0 0 10px rgba(255,215,0,0.5);
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
+            display: inline-block;
+        }
+        .market-name::before {
+            content: '👑';
+            font-size: 14px;
+            margin-right: 5px;
+            background: none;
+            -webkit-text-fill-color: #ffd700;
+            color: #ffd700;
+        }
+        
         .market-numbers { color: #aa9c7a; font-size: 12px; font-family: monospace; background: #0a0806; padding: 4px 8px; border-radius: 8px; border: 1px solid #ffd70020; }
         
         /* Royal Result Box */
-        .result-box { background: linear-gradient(135deg, #0f0c08, #0a0806); border-radius: 15px; padding: 15px; margin: 10px 0; text-align: center; border: 1px solid #ffd70040; transition: all 0.3s; }
+        .result-box { background: linear-gradient(135deg, #0f0c08, #0a0806); border-radius: 15px; padding: 15px; margin: 10px 0; text-align: center; border: 1px solid #ffd70040; }
         .result-box:hover { border-color: #ffd700; background: linear-gradient(135deg, #1a1510, #0f0c08); }
         .result-numbers { color: #ffd700; font-size: 22px; font-weight: bold; letter-spacing: 2px; text-shadow: 0 0 10px rgba(255,215,0,0.3); font-family: monospace; }
         
         /* Royal Market Timings */
         .market-timings { display: flex; justify-content: center; gap: 25px; margin: 10px 0 5px 0; padding: 8px; background: #0a0806; border-radius: 30px; border: 1px solid #ffd70020; }
         .timing-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
-        .green-dot { width: 10px; height: 10px; background: #ffd700; border-radius: 50%; box-shadow: 0 0 5px #ffd700; animation: glowPulse 2s infinite; }
+        .green-dot { width: 10px; height: 10px; background: #ffd700; border-radius: 50%; box-shadow: 0 0 5px #ffd700; }
         .orange-dot { width: 10px; height: 10px; background: #daa520; border-radius: 50%; box-shadow: 0 0 5px #daa520; }
         .timing-label { color: #aa9c7a; font-weight: 500; }
         .timing-value { color: #ffd700; font-weight: bold; }
@@ -135,7 +144,7 @@
         
         /* Royal Play Button */
         .play-btn { width: 100%; margin-top: 12px; padding: 10px; background: linear-gradient(135deg, #ffd700, #daa520); border: none; border-radius: 30px; color: #1a1510; font-weight: bold; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; letter-spacing: 1px; }
-        .play-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255,215,0,0.5); letter-spacing: 2px; }
+        .play-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255,215,0,0.5); }
         .play-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #444; transform: none; box-shadow: none; }
         
         /* Royal Bottom Navigation */
@@ -389,6 +398,7 @@
         return new Date(Date.now() + serverTimeOffset);
     }
     
+    // 12-Hour Format with AM/PM
     function formatTimeTo12Hour(timeStr) {
         if (!timeStr || timeStr === '--:--') return '--:--';
         const parts = timeStr.split(':');
@@ -398,6 +408,17 @@
         hours = hours % 12;
         hours = hours ? hours : 12;
         return `${hours}:${minutes} ${ampm}`;
+    }
+    
+    // Format current time to 12-hour for live clock
+    function formatCurrentTimeTo12Hour(date) {
+        let hours = date.getHours();
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const seconds = date.getSeconds().toString().padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        return `${hours}:${minutes}:${seconds} ${ampm}`;
     }
     
     function timeToMinutes(timeStr) {
@@ -419,14 +440,12 @@
     
     function updateLiveClock() {
         const serverTime = getCurrentServerTime();
-        const hours = serverTime.getHours().toString().padStart(2, '0');
-        const minutes = serverTime.getMinutes().toString().padStart(2, '0');
-        const seconds = serverTime.getSeconds().toString().padStart(2, '0');
+        const timeString = formatCurrentTimeTo12Hour(serverTime);
         const day = serverTime.getDate().toString().padStart(2, '0');
         const month = (serverTime.getMonth() + 1).toString().padStart(2, '0');
         const year = serverTime.getFullYear();
         
-        document.getElementById('liveClockTime').innerHTML = `${hours}:${minutes}:${seconds}`;
+        document.getElementById('liveClockTime').innerHTML = timeString;
         document.getElementById('liveClockDate').innerHTML = `${day}/${month}/${year}`;
     }
     
@@ -511,7 +530,7 @@
             container.innerHTML += `
                 <div class="market-card">
                     <div class="market-header">
-                        <span class="market-name">👑 ${market.name}</span>
+                        <span class="market-name">${market.name}</span>
                         <span class="market-numbers">${numbersDisplay}</span>
                     </div>
                     <div class="result-box">
@@ -689,7 +708,6 @@
         listenToNotice();
         setInterval(() => {
             updateLiveClock();
-            listenToMarkets();
         }, 1000);
         setInterval(async () => {
             await syncServerTime();
