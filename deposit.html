@@ -63,17 +63,15 @@
         .qr-title { color: #ffd700; font-size: 16px; font-weight: bold; margin-bottom: 15px; }
         #qrcode { display: flex; justify-content: center; margin: 15px 0; }
         
-        /* UTR Section */
         .utr-section { background: #0a0806; border-radius: 16px; padding: 20px; margin: 15px 0; border: 1px solid #ffd70040; display: none; }
         .utr-title { color: #ffd700; font-size: 16px; font-weight: bold; margin-bottom: 15px; text-align: center; }
-        .mobile-display { background: #0a0806; border: 1px solid #ffd70040; border-radius: 12px; padding: 14px; margin-bottom: 12px; text-align: center; color: #ffd700; font-size: 16px; }
-        .mobile-label { color: #aa9c7a; font-size: 12px; margin-bottom: 5px; }
+        .mobile-display { background: #0a0806; border: 1px solid #ffd70040; border-radius: 12px; padding: 12px; margin-bottom: 12px; text-align: center; color: #ffd700; font-size: 14px; }
         .utr-input { width: 100%; padding: 14px; background: #0a0806; border: 1px solid #ffd70040; border-radius: 12px; color: #ffd700; font-size: 16px; text-align: center; }
-        .utr-input:focus { outline: none; border-color: #ffd700; }
-        .utr-input::placeholder { color: #aa9c7a; }
+        .verify-btn { width: 100%; padding: 14px; background: #28a745; border: none; border-radius: 40px; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
+        .verify-btn:hover { transform: scale(1.02); background: #1e7e34; }
         
-        .generate-btn, .verify-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #ffd700, #daa520); border: none; border-radius: 40px; color: #1a1510; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
-        .generate-btn:hover, .verify-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255,215,0,0.5); }
+        .generate-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #ffd700, #daa520); border: none; border-radius: 40px; color: #1a1510; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
+        .generate-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255,215,0,0.5); }
         
         .timer-box { background: #0a0806; border-radius: 16px; padding: 15px; text-align: center; margin-top: 20px; border: 1px solid #ffd70040; display: none; }
         .timer-text { color: #ffd700; font-size: 32px; font-weight: bold; font-family: monospace; }
@@ -82,7 +80,6 @@
         .message { padding: 12px; border-radius: 12px; text-align: center; margin-top: 15px; font-size: 13px; }
         .message-success { background: #1a3a1a; color: #66ff66; border: 1px solid #66ff66; }
         .message-error { background: #3a1a1a; color: #ff6666; border: 1px solid #ff6666; }
-        .message-pending { background: #3a3a1a; color: #ffd700; border: 1px solid #ffd700; }
         .hidden { display: none; }
         
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: linear-gradient(135deg, #1a1510, #0f0c08); display: flex; justify-content: space-around; padding: 8px 10px; border-top: 2px solid #ffd700; }
@@ -96,10 +93,9 @@
         .note-text { font-size: 11px; color: #aa9c7a; text-align: center; margin-top: 15px; }
         
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-content { background: linear-gradient(135deg, #1a1510, #0f0c08); border-radius: 24px; padding: 25px; width: 90%; max-width: 350px; max-height: 80vh; overflow-y: auto; border: 1px solid #ffd700; }
-        .modal-content h3 { color: #ffd700; margin-bottom: 15px; text-align: center; }
+        .modal-content { background: linear-gradient(135deg, #1a1510, #0f0c08); border-radius: 24px; padding: 25px; width: 90%; max-width: 350px; border: 1px solid #ffd700; }
+        .modal-content h3 { color: #ffd700; text-align: center; margin-bottom: 15px; }
         .modal-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #ffd700, #daa520); border: none; border-radius: 12px; color: #1a1510; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .modal-btn:hover { transform: scale(1.02); }
         .close-modal { background: #333; color: #fff; }
         .modal-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ffd70040; background: #0a0806; border-radius: 12px; color: #ffd700; }
         .rate-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ffd70020; }
@@ -185,13 +181,11 @@
             <p style="font-size: 12px; color: #aa9c7a; margin-top: 10px;">Open any UPI app → Scan QR → Pay</p>
         </div>
         
-        <!-- UTR Section - Mobile number auto-filled -->
         <div class="utr-section" id="utrSection">
             <div class="utr-title">📝 Enter Payment Details</div>
-            <div class="mobile-label">📞 Registered Mobile Number</div>
             <div class="mobile-display" id="userMobileDisplay">Loading...</div>
-            <input type="text" id="utrNumber" class="utr-input" placeholder="Enter UTR / Transaction ID / Reference Number" maxlength="30">
-            <button class="verify-btn" id="submitBtn">✅ SUBMIT FOR VERIFICATION</button>
+            <input type="text" id="utrNumber" class="utr-input" placeholder="Enter UTR / Transaction ID" maxlength="30">
+            <button class="verify-btn" id="verifyBtn">✅ SUBMIT FOR VERIFICATION</button>
         </div>
         
         <div id="message" class="message hidden"></div>
@@ -266,7 +260,6 @@
             document.getElementById('userBalance').innerText = currentUserData.balance || 0;
             document.getElementById('profileName').innerHTML = currentUserData.name || 'User';
             document.getElementById('profilePhone').innerHTML = currentUserData.phone || '';
-            // Auto-fill mobile number display
             document.getElementById('userMobileDisplay').innerHTML = currentUserData.phone || 'Not registered';
         }
     }
@@ -280,7 +273,6 @@
         document.getElementById('customAmount').value = '';
         updateAmount();
         
-        // Hide QR and UTR when amount changes
         document.getElementById('qrSection').style.display = 'none';
         document.getElementById('utrSection').style.display = 'none';
         document.getElementById('generateBtn').style.display = 'block';
@@ -320,12 +312,11 @@
         showMessage('✅ UPI ID copied!', 'success');
     }
     
-    async function createDepositRequest(amount, bonusAmount, utr) {
+    async function createDepositRequest(amount, bonusAmount) {
         const totalAmount = amount + bonusAmount;
         const transactionRef = await db.collection('transactions').add({
             userId: currentUser.uid,
             userMobile: currentUserData.phone,
-            userUTR: utr,
             type: 'credit',
             amount: totalAmount,
             requestedAmount: amount,
@@ -336,6 +327,14 @@
         });
         currentTransactionId = transactionRef.id;
         return transactionRef.id;
+    }
+    
+    async function updateDepositWithUTR(utr) {
+        if (currentTransactionId) {
+            await db.collection('transactions').doc(currentTransactionId).update({
+                userUTR: utr
+            });
+        }
     }
     
     function startTimerAndWait() {
@@ -380,6 +379,8 @@
             return;
         }
         
+        const bonusAmount = getBonusAmount(amount);
+        
         const upiString = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR&tn=WIN777%20Deposit`;
         
         document.getElementById('qrcode').innerHTML = '';
@@ -398,34 +399,33 @@
         document.getElementById('utrSection').style.display = 'block';
         document.getElementById('generateBtn').style.display = 'none';
         
+        createDepositRequest(amount, bonusAmount);
+        
         showMessage(`👑 QR Code generated for ₹${amount}. Scan and pay.`, 'success');
     }
     
-    async function submitForVerification() {
-        const amount = getAmount();
+    async function submitUTR() {
         const utr = document.getElementById('utrNumber').value.trim();
-        
-        if (amount < 200) {
-            showMessage('Minimum deposit amount is ₹200', 'error');
-            return;
-        }
+        const amount = getAmount();
         
         if (!utr) {
             showMessage('Please enter UTR/Transaction ID', 'error');
             return;
         }
         
-        const bonusAmount = getBonusAmount(amount);
+        await updateDepositWithUTR(utr);
         
-        if (confirm(`👑 PAYMENT SUBMISSION\n\n━━━━━━━━━━━━━━━━━━━\n💵 Amount: ₹${amount}\n🎁 Bonus: +₹${bonusAmount}\n💰 Total: ₹${amount + bonusAmount}\n📞 Mobile: ${currentUserData?.phone || 'N/A'}\n📋 UTR: ${utr}\n━━━━━━━━━━━━━━━━━━━\n\nClick OK to submit for verification.`)) {
-            await createDepositRequest(amount, bonusAmount, utr);
-            showMessage(`👑 Payment submitted successfully!`, 'success');
+        if (confirm(`✅ Have you scanned the QR and paid ₹${amount}?\n\nUTR: ${utr}\n\nClick OK to submit for verification.`)) {
+            showMessage(`👑 Payment submitted for verification!`, 'success');
             startTimerAndWait();
             document.getElementById('utrSection').style.display = 'none';
             document.getElementById('qrSection').style.display = 'none';
-            document.getElementById('generateBtn').style.display = 'none';
         }
     }
+    
+    document.getElementById('generateBtn').onclick = generateQR;
+    document.getElementById('verifyBtn').onclick = submitUTR;
+    document.getElementById('customAmount').addEventListener('input', updateAmount);
     
     // Profile Functions
     function showProfileModal() {
@@ -477,10 +477,6 @@
         });
     }
     listenToNotice();
-    
-    document.getElementById('generateBtn').onclick = generateQR;
-    document.getElementById('submitBtn').onclick = submitForVerification;
-    document.getElementById('customAmount').addEventListener('input', updateAmount);
     
     window.selectAmount = selectAmount;
     window.showBalance = showBalance;
