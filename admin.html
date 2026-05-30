@@ -90,14 +90,11 @@
         
         .deposit-utr { color: #ff9800; font-weight: bold; background: #fff3cd; padding: 2px 6px; border-radius: 4px; display: inline-block; }
         
-        /* Search Bar Styles */
         .search-container { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .search-input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
         .search-input:focus { outline: none; border-color: #333; }
         .search-btn { background: #333; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; }
-        .search-btn:hover { background: #555; }
         .clear-btn { background: #6c757d; color: #fff; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; }
-        .clear-btn:hover { background: #5a6268; }
         .user-count { color: #666; font-size: 12px; margin-bottom: 10px; }
         
         @media (max-width: 768px) { 
@@ -140,7 +137,6 @@
                 <h3>➕ Add New Market</h3>
                 <input type="text" id="marketName" placeholder="Market Name">
                 <input type="text" id="marketNumbers" placeholder="Numbers (e.g., 440-8*-***)">
-                
                 <div class="time-group">
                     <label>🟢 Open Bid End Time:</label>
                     <input type="time" id="openBidEnd" step="60">
@@ -153,7 +149,6 @@
                     <label>🔴 Market Closed Time:</label>
                     <input type="time" id="closedTime" step="60">
                 </div>
-                
                 <select id="marketStatus">
                     <option value="open">🟢 OPEN</option>
                     <option value="close">🟡 CLOSE</option>
@@ -184,14 +179,14 @@
         
         <div id="depositsSection" class="hidden">
             <div class="card">
-                <h3>💰 Deposit Requests (Newest First)</h3>
+                <h3>💰 Deposit Requests</h3>
                 <div id="depositsList">Loading...</div>
             </div>
         </div>
         
         <div id="withdrawalsSection" class="hidden">
             <div class="card">
-                <h3>💸 Withdrawal Requests (Newest First)</h3>
+                <h3>💸 Withdrawal Requests</h3>
                 <div id="withdrawalsList">Loading...</div>
             </div>
         </div>
@@ -382,36 +377,57 @@
         return `${hours}:${minutes} ${ampm}`;
     }
     
-    // ============ DEPOSITS WITH UTR AND MOBILE NUMBER (Newest First) ============
+    // ============ DEPOSITS (Working - No orderBy) ============
     function loadDeposits() {
         db.collection('transactions')
             .where('type', '==', 'credit')
             .where('status', '==', 'Pending')
-            .orderBy('date', 'desc')
             .onSnapshot(async (snapshot) => {
                 let html = '';
+                // Convert to array and sort manually by date
+                let deposits = [];
                 for (const doc of snapshot.docs) {
                     const d = doc.data();
                     const user = await db.collection('users').doc(d.userId).get();
+                    deposits.push({
+                        id: doc.id,
+                        userId: d.userId,
+                        amount: d.amount,
+                        bonusAmount: d.bonusAmount,
+                        userUTR: d.userUTR,
+                        userMobile: d.userMobile,
+                        upiId: d.upiId,
+                        date: d.date?.toDate() || new Date(0),
+                        userName: user.data()?.name || 'Unknown',
+                        userPhone: user.data()?.phone || 'N/A'
+                    });
+                }
+                // Sort by date descending (newest first)
+                deposits.sort((a, b) => b.date - a.date);
+                
+                for (const d of deposits) {
                     html += `
                         <div class="request-item" style="display:flex; justify-content:space-between; flex-wrap:wrap;">
                             <div>
-                                <b>👤 ${user.data()?.name || 'Unknown'}</b><br>
-                                <b>📞 Mobile:</b> ${d.userMobile || user.data()?.phone || 'N/A'}<br>
+                                <b>👤 ${d.userName}</b><br>
+                                <b>📞 Mobile:</b> ${d.userMobile || d.userPhone}<br>
                                 <b>💰 Amount:</b> ₹${d.amount}<br>
                                 <b>🎁 Bonus:</b> ₹${d.bonusAmount || 0}<br>
                                 <b>📋 UTR Number:</b> <span class="deposit-utr">${d.userUTR || 'Not provided'}</span><br>
-                                <b>📅 Date:</b> ${d.date?.toDate().toLocaleString() || 'Pending'}<br>
+                                <b>📅 Date:</b> ${d.date.toLocaleString()}<br>
                                 <b>🏦 UPI ID:</b> ${d.upiId || 'N/A'}
                             </div>
                             <div>
-                                <button onclick="approveDeposit('${doc.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button>
-                                <button onclick="rejectDeposit('${doc.id}')" class="btn-danger">Reject</button>
+                                <button onclick="approveDeposit('${d.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button>
+                                <button onclick="rejectDeposit('${d.id}')" class="btn-danger">Reject</button>
                             </div>
                         </div>
                     `;
                 }
                 document.getElementById('depositsList').innerHTML = html || '<p style="color: #888;">No pending deposits</p>';
+            }, (error) => {
+                console.error("Deposits error:", error);
+                document.getElementById('depositsList').innerHTML = '<p style="color: red;">Error loading deposits. Check Firebase rules.</p>';
             });
     }
     
@@ -436,24 +452,39 @@
         }
     }
     
-    // ============ WITHDRAWALS (Newest First) ============
+    // ============ WITHDRAWALS (Working - No orderBy) ============
     function loadWithdrawals() {
         db.collection('withdrawRequests')
             .where('status', '==', 'Pending')
-            .orderBy('date', 'desc')
             .onSnapshot(async (snapshot) => {
                 let html = '';
+                // Convert to array and sort manually by date
+                let withdrawals = [];
                 for (const doc of snapshot.docs) {
                     const d = doc.data();
                     const user = await db.collection('users').doc(d.userId).get();
-                    const bank = d.bankDetails || {};
+                    withdrawals.push({
+                        id: doc.id,
+                        userId: d.userId,
+                        amount: d.amount,
+                        bankDetails: d.bankDetails || {},
+                        date: d.date?.toDate() || new Date(0),
+                        userName: user.data()?.name || 'Unknown',
+                        userPhone: user.data()?.phone || 'N/A'
+                    });
+                }
+                // Sort by date descending (newest first)
+                withdrawals.sort((a, b) => b.date - a.date);
+                
+                for (const d of withdrawals) {
+                    const bank = d.bankDetails;
                     html += `
                         <div class="request-item">
                             <div>
-                                <b>👤 ${user.data()?.name || 'Unknown'}</b><br>
-                                <b>📞 Phone:</b> ${user.data()?.phone || 'N/A'}<br>
+                                <b>👤 ${d.userName}</b><br>
+                                <b>📞 Phone:</b> ${d.userPhone}<br>
                                 <b>💰 Amount:</b> ₹${d.amount}<br>
-                                <b>📅 Date:</b> ${d.date?.toDate().toLocaleString() || 'Pending'}<br>
+                                <b>📅 Date:</b> ${d.date.toLocaleString()}<br>
                                 <div class="bank-details">
                                     <b>🏦 BANK DETAILS:</b><br>
                                     <span>Account Holder:</span> ${bank.accountHolder || 'N/A'}<br>
@@ -463,13 +494,16 @@
                                 </div>
                             </div>
                             <div>
-                                <button onclick="approveWithdraw('${doc.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button>
-                                <button onclick="rejectWithdraw('${doc.id}')" class="btn-danger">Reject</button>
+                                <button onclick="approveWithdraw('${d.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button>
+                                <button onclick="rejectWithdraw('${d.id}')" class="btn-danger">Reject</button>
                             </div>
                         </div>
                     `;
                 }
                 document.getElementById('withdrawalsList').innerHTML = html || '<p style="color: #888;">No pending withdrawals</p>';
+            }, (error) => {
+                console.error("Withdrawals error:", error);
+                document.getElementById('withdrawalsList').innerHTML = '<p style="color: red;">Error loading withdrawals. Check Firebase rules.</p>';
             });
     }
     
@@ -598,17 +632,6 @@
     }
     
     // ============ MARKETS MANAGEMENT ============
-    function formatTimeTo12Hour(timeStr) {
-        if (!timeStr) return '--:--';
-        const parts = timeStr.split(':');
-        let hours = parseInt(parts[0]);
-        const minutes = parts[1];
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12;
-        hours = hours ? hours : 12;
-        return `${hours}:${minutes} ${ampm}`;
-    }
-    
     async function changeSerialNumber(marketId, currentSerial) {
         const newSerial = prompt(`Enter new serial number for this market:\n\nCurrent serial: #${currentSerial}\n\nEnter number (1-100):`, currentSerial);
         if (newSerial && !isNaN(newSerial) && parseInt(newSerial) > 0) {
@@ -635,7 +658,6 @@
                     await db.collection('markets').doc(marketId).update({ serialNo: newSerialNum });
                     await db.collection('markets').doc(existingMarketId).update({ serialNo: currentSerialNum });
                     alert(`✅ Serial numbers swapped!\n\nMarket 1: #${currentSerialNum} → #${newSerialNum}\nMarket 2: #${newSerialNum} → #${currentSerialNum}`);
-                    
                     loadMarkets();
                 }
             } else {
@@ -652,9 +674,7 @@
             if (confirmText === 'DELETE') {
                 const markets = await db.collection('markets').get();
                 const batch = db.batch();
-                markets.forEach(doc => {
-                    batch.delete(doc.ref);
-                });
+                markets.forEach(doc => batch.delete(doc.ref));
                 await batch.commit();
                 alert(`✅ Deleted ${markets.size} markets successfully!`);
                 loadMarkets();
