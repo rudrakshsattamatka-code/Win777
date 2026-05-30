@@ -54,7 +54,7 @@
         .withdraw-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255,215,0,0.5); }
         .withdraw-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        .back-btn { width: 100%; padding: 14px; background: #1a1510; border: 1px solid #ffd70040; border-radius: 30px; color: #ffd700; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
+        .back-btn { width: 100%; padding: 14px; background: #1a1510; border: 1px solid #ffd70040; border-radius: 30px; color: #ffd700; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .back-btn:hover { border-color: #ffd700; }
         
         .message { padding: 12px; border-radius: 12px; text-align: center; margin-top: 15px; font-size: 13px; }
@@ -234,7 +234,7 @@
             <div id="bankInfoContent">Loading bank details...</div>
         </div>
         
-        <button class="withdraw-btn" id="withdrawBtn" onclick="showTermsPopup()">💸 REQUEST WITHDRAWAL</button>
+        <button class="withdraw-btn" id="withdrawBtn">💸 REQUEST WITHDRAWAL</button>
         <button class="back-btn" onclick="goBack()">← Back</button>
         
         <div id="message" class="message hidden"></div>
@@ -269,7 +269,7 @@
             </ul>
         </div>
         <div class="terms-footer">
-            <button class="terms-accept-btn" onclick="acceptTermsAndProceed()">✓ I AGREE & CONTINUE</button>
+            <button class="terms-accept-btn" onclick="acceptTermsAndWithdraw()">✓ I AGREE & CONTINUE</button>
             <button class="terms-close-btn" onclick="closeTermsPopup()">✗ Cancel</button>
         </div>
     </div>
@@ -280,7 +280,7 @@
 <div id="gameRatesModal" class="modal"><div class="modal-content"><h3>🎲 GAME RATES</h3><div class="rate-row"><span class="rate-name">Single Digit</span><span class="rate-value">10x</span></div><div class="rate-row"><span class="rate-name">Jodi</span><span class="rate-value">100x</span></div><div class="rate-row"><span class="rate-name">Single Pana</span><span class="rate-value">160x</span></div><div class="rate-row"><span class="rate-name">Double Pana</span><span class="rate-value">320x</span></div><div class="rate-row"><span class="rate-name">Triple Pana</span><span class="rate-value">1000x</span></div><div class="rate-row"><span class="rate-name">Half Sangam A</span><span class="rate-value">1000x</span></div><div class="rate-row"><span class="rate-name">Half Sangam B</span><span class="rate-value">1000x</span></div><div class="rate-row"><span class="rate-name">Full Sangam</span><span class="rate-value">10000x</span></div><button class="modal-btn close-modal" onclick="closeGameRatesModal()">Close</button></div></div>
 <div id="changePinModal" class="modal"><div class="modal-content"><h3>🔐 Change MPIN</h3><input type="password" id="oldPin" class="modal-input" placeholder="Current MPIN" maxlength="4"><input type="password" id="newPin" class="modal-input" placeholder="New MPIN (4 digits)" maxlength="4"><input type="password" id="confirmPin" class="modal-input" placeholder="Confirm MPIN" maxlength="4"><button class="modal-btn" onclick="updatePin()">Update MPIN</button><button class="modal-btn close-modal" onclick="closeChangePinModal()">Cancel</button><div id="pinMsg" style="color:#ff6666; text-align:center; margin-top:10px;"></div></div></div>
 <div id="bankModal" class="modal"><div class="modal-content"><h3>🏦 Bank Details</h3><input type="text" id="bankAccountHolder" class="modal-input" placeholder="Account Holder Name"><input type="text" id="bankName" class="modal-input" placeholder="Bank Name"><input type="text" id="bankAccountNumber" class="modal-input" placeholder="Account Number"><input type="text" id="bankIfsc" class="modal-input" placeholder="IFSC Code"><button class="modal-btn" onclick="saveBankDetails()">Save Bank Details</button><button class="modal-btn close-modal" onclick="closeBankModal()">Cancel</button><div id="bankMsg" style="color:#66ff66; text-align:center; margin-top:10px;"></div></div></div>
-<div id="supportModal" class="modal"><div class="modal-content"><h3>💬 Royal Support</h3><div class="support-option" onclick="sendEmail()"><div class="support-icon">📧</div><div class="support-text"><div class="support-title">Email Us</div><div class="support-desc">win777@support.com</div></div></div><div class="support-option" onclick="sendWhatsApp()"><div class="support-icon">📱</div><div class="support-text"><div class="support-title">WhatsApp</div><div class="support-desc">+91 9876543210</div></div></div><button class="modal-btn close-modal" onclick="closeSupportModal()">Close</button></div></div>
+<div id="supportModal" class="modal"><div class="modal-content"><h3>💬 Royal Support</h3><div class="support-option" onclick="sendEmail()"><div class="support-icon">📧</div><div class="support-text"><div class="support-title">Email Us</div><div class="support-desc">win777@support.com</div></div></div><div class="support-option" onclick="sendWhatsApp()"><div class="support-icon">📱</div><div class="support-text"><div class="support-title">WhatsApp</div><div class="support-desc">+91 9019941895</div></div></div><button class="modal-btn close-modal" onclick="closeSupportModal()">Close</button></div></div>
 
 <script>
     const firebaseConfig = {
@@ -297,7 +297,8 @@
     const db = firebase.firestore();
     
     let currentUser = null, currentUserData = null, selectedAmount = 500;
-    let pendingWithdrawalAmount = 0;
+    let pendingAmount = 0;
+    let pendingBankDetails = null;
     
     auth.onAuthStateChanged(async (user) => {
         if (!user) {
@@ -308,36 +309,6 @@
             loadBankDetails();
         }
     });
-    
-    // Show Terms Popup
-    function showTermsPopup() {
-        const amount = getAmount();
-        if (amount < 500) {
-            showMessage('Minimum withdrawal amount is ₹500', 'error');
-            return;
-        }
-        if (amount > 2500000) {
-            showMessage('Maximum withdrawal amount is ₹25,00,000', 'error');
-            return;
-        }
-        if (amount > (currentUserData?.balance || 0)) {
-            showMessage(`Insufficient balance! You have ₹${currentUserData?.balance || 0}`, 'error');
-            return;
-        }
-        
-        pendingWithdrawalAmount = amount;
-        document.getElementById('termsPopup').style.display = 'flex';
-    }
-    
-    function closeTermsPopup() {
-        document.getElementById('termsPopup').style.display = 'none';
-        pendingWithdrawalAmount = 0;
-    }
-    
-    function acceptTermsAndProceed() {
-        document.getElementById('termsPopup').style.display = 'none';
-        processWithdrawal(pendingWithdrawalAmount);
-    }
     
     async function loadUserData() {
         const doc = await db.collection('users').doc(currentUser.uid).get();
@@ -360,8 +331,10 @@
                 <div class="bank-detail"><span>Account Number:</span> ${bank.accountNumber || 'N/A'}</div>
                 <div class="bank-detail"><span>IFSC Code:</span> ${bank.ifscCode || 'N/A'}</div>
             `;
+            pendingBankDetails = bank;
         } else {
             container.innerHTML = '<div class="no-bank">⚠️ No bank details found. Please add bank details in Profile → Bank Details</div>';
+            pendingBankDetails = null;
         }
     }
     
@@ -387,24 +360,72 @@
         return amount;
     }
     
-    async function processWithdrawal(amount) {
-        if (!amount || amount < 500) return;
+    // Show Terms Popup when withdraw button is clicked
+    function showTermsPopup() {
+        const amount = getAmount();
         
-        const doc = await db.collection('users').doc(currentUser.uid).get();
-        const bankDetails = doc.data()?.bankDetails;
-        if (!bankDetails || !bankDetails.accountNumber) {
+        // Validate amount first
+        if (amount < 500) {
+            showMessage('Minimum withdrawal amount is ₹500', 'error');
+            return;
+        }
+        if (amount > 2500000) {
+            showMessage('Maximum withdrawal amount is ₹25,00,000', 'error');
+            return;
+        }
+        if (amount > (currentUserData?.balance || 0)) {
+            showMessage(`Insufficient balance! You have ₹${currentUserData?.balance || 0}`, 'error');
+            return;
+        }
+        
+        // Check bank details
+        const doc = db.collection('users').doc(currentUser.uid);
+        doc.get().then((snap) => {
+            const bank = snap.data()?.bankDetails;
+            if (!bank || !bank.accountNumber) {
+                showMessage('Please add bank details first!', 'error');
+                setTimeout(() => showBankModal(), 2000);
+                return;
+            }
+            pendingBankDetails = bank;
+            pendingAmount = amount;
+            document.getElementById('termsPopup').style.display = 'flex';
+        });
+    }
+    
+    function closeTermsPopup() {
+        document.getElementById('termsPopup').style.display = 'none';
+        pendingAmount = 0;
+    }
+    
+    function acceptTermsAndWithdraw() {
+        document.getElementById('termsPopup').style.display = 'none';
+        // Call the withdrawal function after accepting terms
+        processWithdrawal();
+    }
+    
+    async function processWithdrawal() {
+        const amount = pendingAmount;
+        
+        if (!amount || amount < 500) {
+            showMessage('Invalid amount', 'error');
+            return;
+        }
+        
+        if (!pendingBankDetails) {
             showMessage('Please add bank details first!', 'error');
-            setTimeout(() => showBankModal(), 2000);
             return;
         }
         
         let requestType = "automatic";
         if (amount > 100000) {
             requestType = "manual";
-            if (!confirm(`⚠️ MANUAL APPROVAL REQUIRED\n\nAmount: ₹${amount}\n\nAmount above ₹1,00,000 requires manual approval.\nProcessing time may take longer.\n\nContinue?`)) return;
+            if (!confirm(`⚠️ MANUAL APPROVAL REQUIRED\n\nAmount: ₹${amount}\n\nAmount above ₹1,00,000 requires manual approval.\nProcessing time may take longer.\n\nContinue?`)) {
+                return;
+            }
         }
         
-        if (confirm(`Withdraw ₹${amount}?\n\nBank: ${bankDetails.bankName}\nAccount: ${bankDetails.accountNumber}\n\nProcess within 10-60 minutes.`)) {
+        if (confirm(`Withdraw ₹${amount}?\n\nBank: ${pendingBankDetails.bankName}\nAccount: ${pendingBankDetails.accountNumber}\n\nProcess within 10-60 minutes.`)) {
             const btn = document.getElementById('withdrawBtn');
             btn.disabled = true;
             btn.innerText = 'Processing...';
@@ -412,7 +433,7 @@
             await db.collection('withdrawRequests').add({ 
                 userId: currentUser.uid, 
                 amount: amount, 
-                bankDetails: bankDetails, 
+                bankDetails: pendingBankDetails, 
                 requestType: requestType,
                 status: 'Pending', 
                 date: new Date() 
@@ -429,6 +450,7 @@
             showMessage(`✅ Withdrawal request of ₹${amount} sent! Process within 10-60 minutes.`, 'success');
             btn.disabled = false;
             btn.innerText = '💸 REQUEST WITHDRAWAL';
+            pendingAmount = 0;
             setTimeout(() => goBack(), 3000);
         }
     }
@@ -473,11 +495,12 @@
         document.getElementById('bankMsg').innerHTML = '✅ Bank details saved!';
         document.getElementById('bankMsg').style.color = '#66ff66';
         setTimeout(() => closeBankModal(), 1500);
+        loadBankDetails();
     }
     function showSupportModal() { document.getElementById('supportModal').style.display = 'flex'; }
     function closeSupportModal() { document.getElementById('supportModal').style.display = 'none'; }
     function sendEmail() { window.location.href = 'mailto:win777@support.com'; }
-    function sendWhatsApp() { window.open('https://wa.me/919876543210', '_blank'); }
+    function sendWhatsApp() { window.open('https://wa.me/919019941895', '_blank'); }
     
     function listenToNotice() {
         db.collection('settings').doc('notice').onSnapshot((doc) => {
@@ -486,6 +509,9 @@
         });
     }
     listenToNotice();
+    
+    // Attach click handler to withdraw button
+    document.getElementById('withdrawBtn').onclick = showTermsPopup;
     
     window.selectAmount = selectAmount;
     window.showBalance = showBalance;
@@ -507,7 +533,7 @@
     window.showGames = showGames;
     window.showTermsPopup = showTermsPopup;
     window.closeTermsPopup = closeTermsPopup;
-    window.acceptTermsAndProceed = acceptTermsAndProceed;
+    window.acceptTermsAndWithdraw = acceptTermsAndWithdraw;
 </script>
 </body>
 </html>
