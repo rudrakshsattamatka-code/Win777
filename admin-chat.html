@@ -41,27 +41,34 @@
         .input-area input:focus { border-color: #ff9800; }
         .input-area button { background: #ff9800; color: #fff; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; }
         .input-area button:hover { background: #e68900; }
+        
+        .login-required { display: flex; justify-content: center; align-items: center; height: 100vh; background: #f5f5f5; }
+        .login-card { background: #fff; padding: 30px; border-radius: 16px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .login-card h3 { color: #333; margin-bottom: 15px; }
+        .login-card p { color: #666; margin-bottom: 20px; }
     </style>
 </head>
 <body>
-    <div class="users-panel">
-        <h3>💬 Active Chat Users</h3>
-        <div class="users-list" id="usersList">
-            <div class="no-users">Loading...</div>
+    <div id="adminChatContainer" style="display: flex; width: 100%; height: 100vh;">
+        <div class="users-panel">
+            <h3>💬 Active Chat Users</h3>
+            <div class="users-list" id="usersList">
+                <div class="no-users">Loading...</div>
+            </div>
         </div>
-    </div>
-    
-    <div class="chat-panel">
-        <div class="chat-header" id="chatHeader">
-            <div style="text-align: center; color: #aaa;">Select a user to start chatting</div>
-        </div>
-        <div class="chat-messages" id="chatMessages">
-            <div class="no-chat">👈 Select a user from the left panel</div>
-        </div>
-        <div class="typing-indicator" id="typingIndicator" style="display: none;"></div>
-        <div class="input-area" id="inputArea" style="display: none;">
-            <input type="text" id="messageInput" placeholder="Type your reply..." onkeypress="if(event.key==='Enter') sendAdminMessage()">
-            <button onclick="sendAdminMessage()">Send</button>
+        
+        <div class="chat-panel">
+            <div class="chat-header" id="chatHeader">
+                <div style="text-align: center; color: #aaa;">Select a user to start chatting</div>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="no-chat">👈 Select a user from the left panel</div>
+            </div>
+            <div class="typing-indicator" id="typingIndicator" style="display: none;"></div>
+            <div class="input-area" id="inputArea" style="display: none;">
+                <input type="text" id="messageInput" placeholder="Type your reply..." onkeypress="if(event.key==='Enter') sendAdminMessage()">
+                <button onclick="sendAdminMessage()">Send</button>
+            </div>
         </div>
     </div>
 
@@ -76,11 +83,41 @@
         };
         
         firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
         const db = firebase.firestore();
         
         let selectedUserId = null;
         let selectedUserName = "";
         const adminId = "admin_support";
+        
+        // Check if admin is logged in
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                // Try to check if admin session exists in parent window
+                if (window.parent && window.parent.sessionStorage) {
+                    const isAdminLoggedIn = window.parent.sessionStorage.getItem('adminLoggedIn');
+                    if (isAdminLoggedIn === 'true') {
+                        // Admin is logged in via parent, continue
+                        console.log("Admin session detected from parent");
+                        loadUsers();
+                        return;
+                    }
+                }
+                // Not logged in
+                document.body.innerHTML = `
+                    <div class="login-required">
+                        <div class="login-card">
+                            <h3>🔐 Admin Access Required</h3>
+                            <p>Please login to the Admin Panel first.</p>
+                            <button onclick="window.parent.location.href='admin-panel.html'" style="background:#ff9800; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">Go to Admin Panel</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                console.log("Admin authenticated:", user.uid);
+                loadUsers();
+            }
+        });
         
         function loadUsers() {
             db.collection('chats').orderBy('lastMessageTime', 'desc').onSnapshot((snapshot) => {
@@ -109,6 +146,9 @@
                     `;
                 });
                 container.innerHTML = html;
+            }, (error) => {
+                console.error("Error loading users:", error);
+                document.getElementById('usersList').innerHTML = `<div class="no-users">Error: ${error.message}</div>`;
             });
         }
         
@@ -125,9 +165,13 @@
             document.getElementById('inputArea').style.display = 'flex';
             document.getElementById('chatMessages').innerHTML = '<div style="padding:20px; text-align:center; color:#888;">Loading messages...</div>';
             
+            // Mark as read
             db.collection('chats').doc(userId).update({ unread: false });
+            
+            // Load messages
             loadMessages();
             
+            // Listen for typing indicator from user
             db.collection('chats').doc(userId).onSnapshot((doc) => {
                 if (doc.exists && doc.data().userTyping) {
                     document.getElementById('typingIndicator').innerHTML = '✍️ User is typing...';
@@ -165,6 +209,9 @@
                     });
                     container.innerHTML = html;
                     container.scrollTop = container.scrollHeight;
+                }, (error) => {
+                    console.error("Error loading messages:", error);
+                    container.innerHTML = `<div class="no-chat">Error loading messages: ${error.message}</div>`;
                 });
         }
         
@@ -180,19 +227,24 @@
             
             input.value = '';
             
-            await db.collection('chats').doc(selectedUserId).collection('messages').add({
-                senderId: adminId,
-                senderName: 'Support Team',
-                text: text,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                isAdmin: true
-            });
-            
-            await db.collection('chats').doc(selectedUserId).update({
-                lastMessage: text,
-                lastMessageTime: firebase.firestore.FieldValue.serverTimestamp(),
-                adminTyping: false
-            });
+            try {
+                await db.collection('chats').doc(selectedUserId).collection('messages').add({
+                    senderId: adminId,
+                    senderName: 'Support Team',
+                    text: text,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    isAdmin: true
+                });
+                
+                await db.collection('chats').doc(selectedUserId).update({
+                    lastMessage: text,
+                    lastMessageTime: firebase.firestore.FieldValue.serverTimestamp(),
+                    adminTyping: false
+                });
+            } catch (error) {
+                console.error("Error sending message:", error);
+                alert("Error sending message: " + error.message);
+            }
         }
         
         function escapeHtml(str) {
@@ -205,6 +257,7 @@
             });
         }
         
+        // Typing indicator for admin
         let typingTimeout;
         const inputField = document.getElementById('messageInput');
         
@@ -220,7 +273,6 @@
             });
         }
         
-        loadUsers();
         setTimeout(setupTypingListener, 500);
         
         window.selectUser = selectUser;
