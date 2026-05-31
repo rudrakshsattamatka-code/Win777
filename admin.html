@@ -112,6 +112,10 @@
         .market-detail-row.open { display: block; }
         .toggle-icon { font-size: 18px; color: #ff9800; margin-right: 10px; }
         
+        /* Live Chat Section */
+        .chat-iframe { width: 100%; height: 70vh; border: none; border-radius: 12px; background: #fff; }
+        .livechat-card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        
         @media (max-width: 768px) { 
             .sidebar { width: 70px; } 
             .sidebar h2 { font-size: 12px; padding: 15px 5px; } 
@@ -148,6 +152,8 @@
         <div class="sidebar-item" onclick="showSection('withdrawals')">💸 Withdrawals</div>
         <div class="sidebar-item" onclick="showSection('notice')">📢 Notice</div>
         <div class="sidebar-item" onclick="showSection('settings')">⚙️ Settings</div>
+        <!-- NEW: Live Chat Menu Item -->
+        <div class="sidebar-item" onclick="showSection('livechat')">💬 Live Chat</div>
         <div class="sidebar-item" onclick="logout()">🚪 Logout</div>
     </div>
 
@@ -261,6 +267,14 @@
                 <input type="text" id="whatsappNumber" placeholder="WhatsApp Number (e.g., 919019941895)">
                 <button onclick="updateWhatsApp()">Update WhatsApp</button>
                 <div id="whatsappMsg"></div>
+            </div>
+        </div>
+        
+        <!-- NEW: Live Chat Section -->
+        <div id="livechatSection" class="hidden">
+            <div class="livechat-card">
+                <h3>💬 Live Support Chat</h3>
+                <iframe src="admin-chat.html" class="chat-iframe"></iframe>
             </div>
         </div>
     </div>
@@ -934,7 +948,7 @@
     }
     
     function showSection(section) {
-        ['markets', 'users', 'deposits', 'withdrawals', 'notice', 'settings'].forEach(s => document.getElementById(`${s}Section`).classList.add('hidden'));
+        ['markets', 'users', 'deposits', 'withdrawals', 'notice', 'settings', 'livechat'].forEach(s => document.getElementById(`${s}Section`).classList.add('hidden'));
         document.getElementById(`${section}Section`).classList.remove('hidden');
         if(section === 'users') refreshTodayBidsForUsers();
     }
