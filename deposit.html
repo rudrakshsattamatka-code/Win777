@@ -231,22 +231,29 @@
     let selectedAmount = 200;
     let currentTransactionId = null;
     let timerInterval = null;
-    let upiId = "ganeshpatil99@slc"; // Default fallback
+    let upiId = "ganeshpatil99@slc";
     let upiName = "Ganesh Siddharth Patil";
     
-    // Load UPI ID from Firebase settings
-    async function loadUpiId() {
+    // Load UPI ID and Payee Name from Firebase settings
+    async function loadPaymentSettings() {
         try {
-            const doc = await db.collection('settings').doc('upi').get();
-            if (doc.exists && doc.data().upiId) {
-                upiId = doc.data().upiId;
+            // Load UPI ID
+            const upiDoc = await db.collection('settings').doc('upi').get();
+            if (upiDoc.exists && upiDoc.data().upiId) {
+                upiId = upiDoc.data().upiId;
                 console.log("UPI ID loaded:", upiId);
-            } else {
-                console.log("Using default UPI ID");
             }
+            
+            // Load Payee Name
+            const payeeDoc = await db.collection('settings').doc('payee').get();
+            if (payeeDoc.exists && payeeDoc.data().name) {
+                upiName = payeeDoc.data().name;
+                console.log("Payee name loaded:", upiName);
+            }
+            
             document.getElementById('upiIdDisplay').innerHTML = upiId;
         } catch (error) {
-            console.error("Error loading UPI ID:", error);
+            console.error("Error loading payment settings:", error);
             document.getElementById('upiIdDisplay').innerHTML = upiId;
         }
     }
@@ -257,7 +264,7 @@
         } else {
             currentUser = user;
             await loadUserData();
-            await loadUpiId();
+            await loadPaymentSettings();
             updateAmount();
         }
     });
@@ -390,10 +397,10 @@
         
         const bonusAmount = getBonusAmount(amount);
         
-        // Always get the latest UPI ID before generating QR
-        await loadUpiId();
+        // Reload latest payment settings before generating QR
+        await loadPaymentSettings();
         
-        // Create UPI string with current UPI ID
+        // Create UPI string with current UPI ID and Payee Name
         const upiString = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR&tn=WIN777%20Deposit`;
         
         document.getElementById('qrcode').innerHTML = '';
