@@ -246,11 +246,7 @@
         <div class="nav-item" onclick="location.href='mybids.html'"><img src="https://i.imgur.com/rUWwMYm.png" alt="Passbook"><span>Passbook</span></div>
         <div class="nav-item" onclick="location.href='mybids.html'"><img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids"><span>My Bids</span></div>
         <div class="nav-item active" onclick="location.href='funds.html'"><img src="https://i.imgur.com/NvJCTli.png" alt="Fund"><span>Fund</span></div>
-        <!-- CHANGED: Support button now opens Live Chat -->
-        <div class="nav-item" onclick="location.href='chat.html'">
-            <img src="https://i.imgur.com/ug9IprL.jpeg" alt="Support">
-            <span>Support</span>
-        </div>
+        <div class="nav-item" onclick="location.href='chat.html'"><img src="https://i.imgur.com/ug9IprL.jpeg" alt="Support"><span>Support</span></div>
     </div>
 </div>
 
@@ -368,7 +364,6 @@
     function showTermsPopup() {
         const amount = getAmount();
         
-        // Validate amount first
         if (amount < 500) {
             showMessage('Minimum withdrawal amount is ₹500', 'error');
             return;
@@ -382,7 +377,6 @@
             return;
         }
         
-        // Check bank details
         const doc = db.collection('users').doc(currentUser.uid);
         doc.get().then((snap) => {
             const bank = snap.data()?.bankDetails;
@@ -404,10 +398,10 @@
     
     function acceptTermsAndWithdraw() {
         document.getElementById('termsPopup').style.display = 'none';
-        // Call the withdrawal function after accepting terms
         processWithdrawal();
     }
     
+    // UPDATED: processWithdrawal with Firebase Server Timestamp
     async function processWithdrawal() {
         const amount = pendingAmount;
         
@@ -440,14 +434,14 @@
                 bankDetails: pendingBankDetails, 
                 requestType: requestType,
                 status: 'Pending', 
-                date: new Date() 
+                date: firebase.firestore.FieldValue.serverTimestamp()
             });
             await db.collection('transactions').add({ 
                 userId: currentUser.uid, 
                 type: 'debit', 
                 amount: amount, 
                 status: 'Pending', 
-                date: new Date(), 
+                date: firebase.firestore.FieldValue.serverTimestamp(), 
                 description: 'Withdrawal Request' 
             });
             
@@ -514,7 +508,6 @@
     }
     listenToNotice();
     
-    // Attach click handler to withdraw button
     document.getElementById('withdrawBtn').onclick = showTermsPopup;
     
     window.selectAmount = selectAmount;
