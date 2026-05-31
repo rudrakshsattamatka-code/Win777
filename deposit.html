@@ -233,22 +233,20 @@
     let timerInterval = null;
     let upiId = "ganeshpatil99@slc";
     let upiName = "Ganesh Siddharth Patil";
+    let pendingAmount = 0;
+    let pendingBonus = 0;
     
     // Load UPI ID and Payee Name from Firebase settings
     async function loadPaymentSettings() {
         try {
-            // Load UPI ID
             const upiDoc = await db.collection('settings').doc('upi').get();
             if (upiDoc.exists && upiDoc.data().upiId) {
                 upiId = upiDoc.data().upiId;
-                console.log("UPI ID loaded:", upiId);
             }
             
-            // Load Payee Name
             const payeeDoc = await db.collection('settings').doc('payee').get();
             if (payeeDoc.exists && payeeDoc.data().name) {
                 upiName = payeeDoc.data().name;
-                console.log("Payee name loaded:", upiName);
             }
             
             document.getElementById('upiIdDisplay').innerHTML = upiId;
@@ -328,11 +326,13 @@
         showMessage('✅ UPI ID copied!', 'success');
     }
     
-    async function createDepositRequest(amount, bonusAmount) {
+    // ONLY CREATE DEPOSIT REQUEST WHEN UTR IS SUBMITTED
+    async function createDepositRequest(amount, bonusAmount, utr) {
         const totalAmount = amount + bonusAmount;
         const transactionRef = await db.collection('transactions').add({
             userId: currentUser.uid,
             userMobile: currentUserData.phone,
+            userUTR: utr,
             type: 'credit',
             amount: totalAmount,
             requestedAmount: amount,
@@ -343,14 +343,6 @@
         });
         currentTransactionId = transactionRef.id;
         return transactionRef.id;
-    }
-    
-    async function updateDepositWithUTR(utr) {
-        if (currentTransactionId) {
-            await db.collection('transactions').doc(currentTransactionId).update({
-                userUTR: utr
-            });
-        }
     }
     
     function startTimerAndWait() {
@@ -396,6 +388,8 @@
         }
         
         const bonusAmount = getBonusAmount(amount);
+        pendingAmount = amount;
+        pendingBonus = bonusAmount;
         
         // Reload latest payment settings before generating QR
         await loadPaymentSettings();
@@ -422,27 +416,30 @@
         // Update the displayed UPI ID
         document.getElementById('upiIdDisplay').innerHTML = upiId;
         
-        createDepositRequest(amount, bonusAmount);
-        
         showMessage(`👑 QR Code generated for ₹${amount}. Scan and pay to ${upiId}.`, 'success');
+        
+        // DO NOT create deposit request here - wait for UTR submission
     }
     
     async function submitUTR() {
         const utr = document.getElementById('utrNumber').value.trim();
-        const amount = getAmount();
+        const amount = pendingAmount || getAmount();
+        const bonusAmount = pendingBonus || getBonusAmount(amount);
         
         if (!utr) {
             showMessage('Please enter UTR/Transaction ID', 'error');
             return;
         }
         
-        await updateDepositWithUTR(utr);
-        
         if (confirm(`✅ Have you scanned the QR and paid ₹${amount} to ${upiId}?\n\nUTR: ${utr}\n\nClick OK to submit for verification.`)) {
+            // NOW create the deposit request with UTR
+            await createDepositRequest(amount, bonusAmount, utr);
             showMessage(`👑 Payment submitted for verification!`, 'success');
             startTimerAndWait();
             document.getElementById('utrSection').style.display = 'none';
             document.getElementById('qrSection').style.display = 'none';
+            pendingAmount = 0;
+            pendingBonus = 0;
         }
     }
     
