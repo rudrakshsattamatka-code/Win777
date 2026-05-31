@@ -42,7 +42,6 @@
         .btn-warning { background: #ffc107; color: #333; }
         .btn-reset { background: #6c757d; color: #fff; }
         .btn-info { background: #17a2b8; color: #fff; }
-        .btn-holiday { background: #8B4513; color: #fff; }
         .hidden { display: none; }
         
         .results-container { display: flex; gap: 20px; flex-wrap: wrap; margin: 15px 0; }
@@ -215,6 +214,12 @@
                 <div id="upiMsg"></div>
             </div>
             <div class="card">
+                <h3>👤 Payee Name Settings</h3>
+                <input type="text" id="payeeName" placeholder="Payee Name" value="Ganesh Siddharth Patil">
+                <button onclick="updatePayeeName()">Update Payee Name</button>
+                <div id="payeeMsg"></div>
+            </div>
+            <div class="card">
                 <h3>📱 Support Contact</h3>
                 <input type="text" id="whatsappNumber" placeholder="WhatsApp Number (e.g., 919019941895)">
                 <button onclick="updateWhatsApp()">Update WhatsApp</button>
@@ -250,7 +255,7 @@
         loadDeposits();
         loadWithdrawals();
         loadNotice();
-        loadSupportSettings();
+        loadSettings();
     }
     
     const gameRates = {
@@ -270,17 +275,58 @@
             loadDeposits();
             loadWithdrawals();
             loadNotice();
-            loadSupportSettings();
+            loadSettings();
         } else {
             document.getElementById('loginError').innerText = 'Wrong password!';
         }
     }
     
-    async function loadSupportSettings() {
-        const doc = await db.collection('settings').doc('support').get();
-        if (doc.exists && doc.data().whatsapp) {
-            document.getElementById('whatsappNumber').value = doc.data().whatsapp;
+    async function loadSettings() {
+        // Load UPI ID
+        const upiDoc = await db.collection('settings').doc('upi').get();
+        if (upiDoc.exists && upiDoc.data().upiId) {
+            document.getElementById('upiId').value = upiDoc.data().upiId;
         }
+        
+        // Load Payee Name
+        const payeeDoc = await db.collection('settings').doc('payee').get();
+        if (payeeDoc.exists && payeeDoc.data().name) {
+            document.getElementById('payeeName').value = payeeDoc.data().name;
+        }
+        
+        // Load WhatsApp number
+        const supportDoc = await db.collection('settings').doc('support').get();
+        if (supportDoc.exists && supportDoc.data().whatsapp) {
+            document.getElementById('whatsappNumber').value = supportDoc.data().whatsapp;
+        }
+    }
+    
+    async function updateUPI() {
+        const upiId = document.getElementById('upiId').value.trim();
+        if (!upiId) {
+            document.getElementById('upiMsg').innerHTML = '❌ Please enter UPI ID';
+            document.getElementById('upiMsg').style.color = '#dc3545';
+            setTimeout(() => document.getElementById('upiMsg').innerHTML = '', 3000);
+            return;
+        }
+        await db.collection('settings').doc('upi').set({ upiId: upiId });
+        document.getElementById('upiMsg').innerHTML = '✅ UPI ID updated successfully!';
+        document.getElementById('upiMsg').style.color = '#28a745';
+        setTimeout(() => document.getElementById('upiMsg').innerHTML = '', 3000);
+    }
+    
+    async function updatePayeeName() {
+        const payeeName = document.getElementById('payeeName').value.trim();
+        if (!payeeName) {
+            document.getElementById('payeeMsg').innerHTML = '❌ Please enter payee name';
+            document.getElementById('payeeMsg').style.color = '#dc3545';
+            setTimeout(() => document.getElementById('payeeMsg').innerHTML = '', 3000);
+            return;
+        }
+        await db.collection('settings').doc('payee').set({ name: payeeName });
+        document.getElementById('payeeMsg').innerHTML = '✅ Payee name updated successfully!';
+        document.getElementById('payeeMsg').style.color = '#28a745';
+        setTimeout(() => document.getElementById('payeeMsg').innerHTML = '', 3000);
     }
     
     async function updateWhatsApp() {
@@ -377,14 +423,13 @@
         return `${hours}:${minutes} ${ampm}`;
     }
     
-    // ============ DEPOSITS (Working - No orderBy) ============
+    // ============ DEPOSITS ============
     function loadDeposits() {
         db.collection('transactions')
             .where('type', '==', 'credit')
             .where('status', '==', 'Pending')
             .onSnapshot(async (snapshot) => {
                 let html = '';
-                // Convert to array and sort manually by date
                 let deposits = [];
                 for (const doc of snapshot.docs) {
                     const d = doc.data();
@@ -402,7 +447,6 @@
                         userPhone: user.data()?.phone || 'N/A'
                     });
                 }
-                // Sort by date descending (newest first)
                 deposits.sort((a, b) => b.date - a.date);
                 
                 for (const d of deposits) {
@@ -425,9 +469,6 @@
                     `;
                 }
                 document.getElementById('depositsList').innerHTML = html || '<p style="color: #888;">No pending deposits</p>';
-            }, (error) => {
-                console.error("Deposits error:", error);
-                document.getElementById('depositsList').innerHTML = '<p style="color: red;">Error loading deposits. Check Firebase rules.</p>';
             });
     }
     
@@ -452,13 +493,12 @@
         }
     }
     
-    // ============ WITHDRAWALS (Working - No orderBy) ============
+    // ============ WITHDRAWALS ============
     function loadWithdrawals() {
         db.collection('withdrawRequests')
             .where('status', '==', 'Pending')
             .onSnapshot(async (snapshot) => {
                 let html = '';
-                // Convert to array and sort manually by date
                 let withdrawals = [];
                 for (const doc of snapshot.docs) {
                     const d = doc.data();
@@ -473,7 +513,6 @@
                         userPhone: user.data()?.phone || 'N/A'
                     });
                 }
-                // Sort by date descending (newest first)
                 withdrawals.sort((a, b) => b.date - a.date);
                 
                 for (const d of withdrawals) {
@@ -501,9 +540,6 @@
                     `;
                 }
                 document.getElementById('withdrawalsList').innerHTML = html || '<p style="color: #888;">No pending withdrawals</p>';
-            }, (error) => {
-                console.error("Withdrawals error:", error);
-                document.getElementById('withdrawalsList').innerHTML = '<p style="color: red;">Error loading withdrawals. Check Firebase rules.</p>';
             });
     }
     
@@ -636,11 +672,9 @@
         const newSerial = prompt(`Enter new serial number for this market:\n\nCurrent serial: #${currentSerial}\n\nEnter number (1-100):`, currentSerial);
         if (newSerial && !isNaN(newSerial) && parseInt(newSerial) > 0) {
             const newSerialNum = parseInt(newSerial);
-            
             const existingMarkets = await db.collection('markets').get();
             let serialExists = false;
             let existingMarketId = null;
-            
             for (const doc of existingMarkets.docs) {
                 const data = doc.data();
                 if (data.serialNo === newSerialNum && doc.id !== marketId) {
@@ -649,12 +683,10 @@
                     break;
                 }
             }
-            
             if (serialExists) {
                 if (confirm(`Serial #${newSerialNum} is already used by another market.\n\nDo you want to SWAP serial numbers?`)) {
                     const currentMarket = await db.collection('markets').doc(marketId).get();
                     const currentSerialNum = currentMarket.data().serialNo;
-                    
                     await db.collection('markets').doc(marketId).update({ serialNo: newSerialNum });
                     await db.collection('markets').doc(existingMarketId).update({ serialNo: currentSerialNum });
                     alert(`✅ Serial numbers swapped!\n\nMarket 1: #${currentSerialNum} → #${newSerialNum}\nMarket 2: #${newSerialNum} → #${currentSerialNum}`);
@@ -707,19 +739,10 @@
             snapshot.forEach(doc => {
                 const m = doc.data();
                 let statusClass = '', statusText = '';
-                if (m.status === 'open') {
-                    statusClass = 'status-open';
-                    statusText = 'OPEN';
-                } else if (m.status === 'close') {
-                    statusClass = 'status-close';
-                    statusText = 'CLOSE';
-                } else if (m.status === 'holiday') {
-                    statusClass = 'status-holiday';
-                    statusText = 'HOLIDAY';
-                } else {
-                    statusClass = 'status-closed';
-                    statusText = 'CLOSED';
-                }
+                if (m.status === 'open') { statusClass = 'status-open'; statusText = 'OPEN'; }
+                else if (m.status === 'close') { statusClass = 'status-close'; statusText = 'CLOSE'; }
+                else if (m.status === 'holiday') { statusClass = 'status-holiday'; statusText = 'HOLIDAY'; }
+                else { statusClass = 'status-closed'; statusText = 'CLOSED'; }
                 
                 let openPana = m.openPana || '***';
                 let openDigit = m.openDigit || '*';
@@ -727,11 +750,7 @@
                 let closeDigit = m.closeDigit || '*';
                 let jodi = m.jodi || '**';
                 let isCloseDeclared = m.closeDeclared || false;
-                
-                let jodiDisplay = jodi;
-                if (!isCloseDeclared && openPana !== '***') {
-                    jodiDisplay = openDigit + '*';
-                }
+                let jodiDisplay = (!isCloseDeclared && openPana !== '***') ? openDigit + '*' : jodi;
                 
                 const openBidEnd12 = formatTimeTo12Hour(m.openBidEnd);
                 const closeBidEnd12 = formatTimeTo12Hour(m.closeBidEnd);
@@ -744,46 +763,20 @@
                                 <span class="market-serial" onclick="changeSerialNumber('${doc.id}', ${m.serialNo || displaySerial})" title="Click to change serial number">#${m.serialNo || displaySerial}</span> 📊 ${m.name || 'No name'}
                             </div>
                             <div class="market-numbers-text">🎲 Numbers: ${m.numbers || '***'}</div>
-                            <div class="market-time-text">
-                                ⏰ Open End: ${openBidEnd12} | Close End: ${closeBidEnd12} | Closed: ${closedTime12}
-                            </div>
-                            
+                            <div class="market-time-text">⏰ Open End: ${openBidEnd12} | Close End: ${closeBidEnd12} | Closed: ${closedTime12}</div>
                             <div class="results-container">
-                                <div class="result-card">
-                                    <div class="result-pana">${openPana}</div>
-                                    <div class="result-digit">Open Digit: ${openDigit}</div>
-                                </div>
-                                <div class="result-card">
-                                    <div class="result-pana">${closePana}</div>
-                                    <div class="result-digit">Close Digit: ${closeDigit}</div>
-                                </div>
+                                <div class="result-card"><div class="result-pana">${openPana}</div><div class="result-digit">Open Digit: ${openDigit}</div></div>
+                                <div class="result-card"><div class="result-pana">${closePana}</div><div class="result-digit">Close Digit: ${closeDigit}</div></div>
                             </div>
-                            
-                            <div class="jodi-display">
-                                <div class="jodi-label">JODI</div>
-                                <span>${jodiDisplay}</span>
-                            </div>
-                            
+                            <div class="jodi-display"><div class="jodi-label">JODI</div><span>${jodiDisplay}</span></div>
                             ${m.status === 'holiday' ? '<div class="holiday-box">🎪 HOLIDAY - Market closed for today</div>' : ''}
                             ${!isCloseDeclared && openPana !== '***' && m.status !== 'holiday' ? '<div class="warning-box">⚠️ OPEN declared. Pending CLOSE.</div>' : ''}
                             ${isCloseDeclared ? '<div class="success-box">✅ FULL result declared!</div>' : ''}
                             
                             <div class="section-title">📝 Display Timings (24-hour format)</div>
-                            <div class="input-group">
-                                <label>🟢 Open Bid Ends:</label>
-                                <input type="time" id="openBidEnd_${doc.id}" value="${m.openBidEnd || ''}" step="60">
-                                <button onclick="updateMarketTime('${doc.id}', 'openBidEnd', document.getElementById('openBidEnd_${doc.id}').value)">Save</button>
-                            </div>
-                            <div class="input-group">
-                                <label>🟡 Close Bid Ends:</label>
-                                <input type="time" id="closeBidEnd_${doc.id}" value="${m.closeBidEnd || ''}" step="60">
-                                <button onclick="updateMarketTime('${doc.id}', 'closeBidEnd', document.getElementById('closeBidEnd_${doc.id}').value)">Save</button>
-                            </div>
-                            <div class="input-group">
-                                <label>🔴 Market Closes:</label>
-                                <input type="time" id="closedTime_${doc.id}" value="${m.closedTime || ''}" step="60">
-                                <button onclick="updateMarketTime('${doc.id}', 'closedTime', document.getElementById('closedTime_${doc.id}').value)">Save</button>
-                            </div>
+                            <div class="input-group"><label>🟢 Open Bid Ends:</label><input type="time" id="openBidEnd_${doc.id}" value="${m.openBidEnd || ''}" step="60"><button onclick="updateMarketTime('${doc.id}', 'openBidEnd', document.getElementById('openBidEnd_${doc.id}').value)">Save</button></div>
+                            <div class="input-group"><label>🟡 Close Bid Ends:</label><input type="time" id="closeBidEnd_${doc.id}" value="${m.closeBidEnd || ''}" step="60"><button onclick="updateMarketTime('${doc.id}', 'closeBidEnd', document.getElementById('closeBidEnd_${doc.id}').value)">Save</button></div>
+                            <div class="input-group"><label>🔴 Market Closes:</label><input type="time" id="closedTime_${doc.id}" value="${m.closedTime || ''}" step="60"><button onclick="updateMarketTime('${doc.id}', 'closedTime', document.getElementById('closedTime_${doc.id}').value)">Save</button></div>
                             
                             <div class="section-title">🎮 Manual Status Control</div>
                             <div class="status-control">
@@ -794,39 +787,20 @@
                             </div>
                             
                             <div class="section-title">📝 STEP 1: Declare OPEN Result</div>
-                            <div class="input-group">
-                                <label>🔓 Open Pana:</label>
-                                <input type="text" id="openPana_${doc.id}" placeholder="3 digits" value="${openPana !== '***' ? openPana : ''}" style="width:100px;" maxlength="3">
-                                <label>Open Digit:</label>
-                                <input type="text" id="openDigit_${doc.id}" placeholder="1 digit" value="${openDigit !== '*' ? openDigit : ''}" style="width:60px;" maxlength="1">
-                                <button onclick="declareOpenResult('${doc.id}', '${m.name}')">Declare OPEN</button>
-                            </div>
+                            <div class="input-group"><label>🔓 Open Pana:</label><input type="text" id="openPana_${doc.id}" placeholder="3 digits" value="${openPana !== '***' ? openPana : ''}" style="width:100px;" maxlength="3"><label>Open Digit:</label><input type="text" id="openDigit_${doc.id}" placeholder="1 digit" value="${openDigit !== '*' ? openDigit : ''}" style="width:60px;" maxlength="1"><button onclick="declareOpenResult('${doc.id}', '${m.name}')">Declare OPEN</button></div>
                             
                             <div class="section-title">📝 STEP 2: Declare CLOSE Result</div>
-                            <div class="input-group">
-                                <label>🔒 Close Pana:</label>
-                                <input type="text" id="closePana_${doc.id}" placeholder="3 digits" value="${closePana !== '***' ? closePana : ''}" style="width:100px;" maxlength="3">
-                                <label>Close Digit:</label>
-                                <input type="text" id="closeDigit_${doc.id}" placeholder="1 digit" value="${closeDigit !== '*' ? closeDigit : ''}" style="width:60px;" maxlength="1">
-                                <button onclick="declareCloseResult('${doc.id}', '${m.name}')">Declare CLOSE</button>
-                            </div>
+                            <div class="input-group"><label>🔒 Close Pana:</label><input type="text" id="closePana_${doc.id}" placeholder="3 digits" value="${closePana !== '***' ? closePana : ''}" style="width:100px;" maxlength="3"><label>Close Digit:</label><input type="text" id="closeDigit_${doc.id}" placeholder="1 digit" value="${closeDigit !== '*' ? closeDigit : ''}" style="width:60px;" maxlength="1"><button onclick="declareCloseResult('${doc.id}', '${m.name}')">Declare CLOSE</button></div>
                         </div>
-                        
                         <div class="market-actions">
                             <span class="status-badge ${statusClass}">${statusText}</span>
-                            <div>
-                                <button onclick="editMarket('${doc.id}', '${m.name}', '${m.numbers || ''}')">✏️ Edit</button>
-                                <button onclick="resetMarketResult('${doc.id}', '${m.name}')" class="btn-reset">⟳ Reset</button>
-                                <button onclick="deleteMarket('${doc.id}')" class="btn-danger">🗑️ Delete</button>
-                            </div>
+                            <div><button onclick="editMarket('${doc.id}', '${m.name}', '${m.numbers || ''}')">✏️ Edit</button><button onclick="resetMarketResult('${doc.id}', '${m.name}')" class="btn-reset">⟳ Reset</button><button onclick="deleteMarket('${doc.id}')" class="btn-danger">🗑️ Delete</button></div>
                         </div>
                     </div>
                 `;
                 displaySerial++;
             });
-            if (snapshot.empty) {
-                html = '<p style="color: #888; text-align:center; padding:40px;">No markets. Add one above!</p>';
-            }
+            if (snapshot.empty) html = '<p style="color: #888; text-align:center; padding:40px;">No markets. Add one above!</p>';
             document.getElementById('marketsList').innerHTML = html;
         });
     }
@@ -843,29 +817,13 @@
     
     async function declareOpenResult(marketId, marketName) {
         const marketDoc = await db.collection('markets').doc(marketId).get();
-        if (marketDoc.data().status === 'holiday') {
-            alert('❌ Cannot declare result on HOLIDAY market!');
-            return;
-        }
-        
+        if (marketDoc.data().status === 'holiday') { alert('❌ Cannot declare result on HOLIDAY market!'); return; }
         const openPana = document.getElementById(`openPana_${marketId}`).value.trim();
         const openDigit = document.getElementById(`openDigit_${marketId}`).value.trim();
-        
-        if (!openPana || !openPana.match(/^\d{3}$/)) {
-            alert('Enter valid 3-digit Open Pana');
-            return;
-        }
-        if (!openDigit || !openDigit.match(/^\d$/)) {
-            alert('Enter valid Open Digit (0-9)');
-            return;
-        }
-        
+        if (!openPana || !openPana.match(/^\d{3}$/)) { alert('Enter valid 3-digit Open Pana'); return; }
+        if (!openDigit || !openDigit.match(/^\d$/)) { alert('Enter valid Open Digit (0-9)'); return; }
         if (confirm(`Declare OPEN result for ${marketName}?\n\nOpen Pana: ${openPana}\nOpen Digit: ${openDigit}\n\nThis will credit OPEN winners.`)) {
-            await db.collection('markets').doc(marketId).update({ 
-                openPana: openPana,
-                openDigit: openDigit,
-                closeDeclared: false
-            });
+            await db.collection('markets').doc(marketId).update({ openPana: openPana, openDigit: openDigit, closeDeclared: false });
             await creditOpenWinners(marketId, marketName, openPana, openDigit);
             alert(`✅ OPEN result declared! Winners credited.`);
         }
@@ -873,41 +831,18 @@
     
     async function declareCloseResult(marketId, marketName) {
         const marketDoc = await db.collection('markets').doc(marketId).get();
-        if (marketDoc.data().status === 'holiday') {
-            alert('❌ Cannot declare result on HOLIDAY market!');
-            return;
-        }
-        
+        if (marketDoc.data().status === 'holiday') { alert('❌ Cannot declare result on HOLIDAY market!'); return; }
         const closePana = document.getElementById(`closePana_${marketId}`).value.trim();
         const closeDigit = document.getElementById(`closeDigit_${marketId}`).value.trim();
-        
-        if (!closePana || !closePana.match(/^\d{3}$/)) {
-            alert('Enter valid 3-digit Close Pana');
-            return;
-        }
-        if (!closeDigit || !closeDigit.match(/^\d$/)) {
-            alert('Enter valid Close Digit (0-9)');
-            return;
-        }
-        
+        if (!closePana || !closePana.match(/^\d{3}$/)) { alert('Enter valid 3-digit Close Pana'); return; }
+        if (!closeDigit || !closeDigit.match(/^\d$/)) { alert('Enter valid Close Digit (0-9)'); return; }
         const market = marketDoc.data();
         const openPana = market.openPana || '***';
         const openDigit = market.openDigit || '*';
-        
-        if (openPana === '***') {
-            alert('Please declare OPEN result first!');
-            return;
-        }
-        
+        if (openPana === '***') { alert('Please declare OPEN result first!'); return; }
         const jodi = openDigit + closeDigit;
-        
         if (confirm(`Declare CLOSE result for ${marketName}?\n\nClose Pana: ${closePana}\nClose Digit: ${closeDigit}\nJODI: ${jodi}\n\nThis will credit all winners.`)) {
-            await db.collection('markets').doc(marketId).update({ 
-                closePana: closePana,
-                closeDigit: closeDigit,
-                jodi: jodi,
-                closeDeclared: true
-            });
+            await db.collection('markets').doc(marketId).update({ closePana: closePana, closeDigit: closeDigit, jodi: jodi, closeDeclared: true });
             await creditCloseWinners(marketId, marketName, openPana, openDigit, closePana, closeDigit, jodi);
             alert(`✅ CLOSE result declared! All winners credited.`);
         }
@@ -915,9 +850,7 @@
     
     async function resetMarketResult(marketId, marketName) {
         if (confirm(`Reset "${marketName}" to *** - ** - ***?\n\nWARNING: This will NOT refund credits!`)) {
-            await db.collection('markets').doc(marketId).update({
-                openPana: '***', openDigit: '*', closePana: '***', closeDigit: '*', jodi: '**', closeDeclared: false
-            });
+            await db.collection('markets').doc(marketId).update({ openPana: '***', openDigit: '*', closePana: '***', closeDigit: '*', jodi: '**', closeDeclared: false });
             alert(`✅ ${marketName} reset!`);
         }
     }
@@ -929,17 +862,13 @@
             let isWinning = false;
             if (bid.gameType === 'Single Digit' && bid.value === openDigit) isWinning = true;
             if ((bid.gameType === 'Single Pana' || bid.gameType === 'Double Pana' || bid.gameType === 'Triple Pana') && bid.value === openPana) isWinning = true;
-            
             if (isWinning) {
                 const winAmount = bid.points * (gameRates[bid.gameType] || 10);
                 await bidDoc.ref.update({ status: 'won' });
                 const userRef = db.collection('users').doc(bid.userId);
                 const userDoc = await userRef.get();
                 await userRef.update({ balance: (userDoc.data().balance || 0) + winAmount });
-                await db.collection('transactions').add({
-                    userId: bid.userId, type: 'credit', amount: winAmount, status: 'Completed',
-                    description: `🎉 Won on ${marketName} (OPEN) - ${bid.gameType}: ${bid.value}`, date: new Date()
-                });
+                await db.collection('transactions').add({ userId: bid.userId, type: 'credit', amount: winAmount, status: 'Completed', description: `🎉 Won on ${marketName} (OPEN) - ${bid.gameType}: ${bid.value}`, date: new Date() });
             }
         }
     }
@@ -955,21 +884,15 @@
             if (bid.gameType === 'Half Sangam A' && bid.value === `${openPana}-${closeDigit}`) isWinning = true;
             if (bid.gameType === 'Half Sangam B' && bid.value === `${openDigit}-${closePana}`) isWinning = true;
             if (bid.gameType === 'Full Sangam' && bid.value === `${openPana}-${closePana}`) isWinning = true;
-            
             if (isWinning) {
                 const winAmount = bid.points * (gameRates[bid.gameType] || 10);
                 await bidDoc.ref.update({ status: 'won' });
                 const userRef = db.collection('users').doc(bid.userId);
                 const userDoc = await userRef.get();
                 await userRef.update({ balance: (userDoc.data().balance || 0) + winAmount });
-                await db.collection('transactions').add({
-                    userId: bid.userId, type: 'credit', amount: winAmount, status: 'Completed',
-                    description: `🎉 Won on ${marketName} - ${bid.gameType}: ${bid.value}`, date: new Date()
-                });
+                await db.collection('transactions').add({ userId: bid.userId, type: 'credit', amount: winAmount, status: 'Completed', description: `🎉 Won on ${marketName} - ${bid.gameType}: ${bid.value}`, date: new Date() });
             } else {
-                if (bid.status === 'pending') {
-                    await bidDoc.ref.update({ status: 'lost' });
-                }
+                if (bid.status === 'pending') await bidDoc.ref.update({ status: 'lost' });
             }
         }
     }
@@ -981,22 +904,12 @@
         const closeBidEnd = document.getElementById('closeBidEnd').value;
         const closedTime = document.getElementById('closedTime').value;
         const status = document.getElementById('marketStatus').value;
-        
         if (!name) { alert('Enter market name'); return; }
-        
         const markets = await db.collection('markets').get();
         let maxSerial = 0;
-        markets.forEach(doc => {
-            const data = doc.data();
-            if (data.serialNo && data.serialNo > maxSerial) maxSerial = data.serialNo;
-        });
+        markets.forEach(doc => { const data = doc.data(); if (data.serialNo && data.serialNo > maxSerial) maxSerial = data.serialNo; });
         const serialNo = maxSerial + 1;
-        
-        await db.collection('markets').add({ 
-            name, numbers, openBidEnd, closeBidEnd, closedTime, status, serialNo,
-            isHoliday: status === 'holiday',
-            openPana: '***', openDigit: '*', closePana: '***', closeDigit: '*', jodi: '**', closeDeclared: false
-        });
+        await db.collection('markets').add({ name, numbers, openBidEnd, closeBidEnd, closedTime, status, serialNo, isHoliday: status === 'holiday', openPana: '***', openDigit: '*', closePana: '***', closeDigit: '*', jodi: '**', closeDeclared: false });
         document.getElementById('marketName').value = '';
         document.getElementById('marketNumbers').value = '';
         document.getElementById('openBidEnd').value = '';
@@ -1036,12 +949,6 @@
         setTimeout(() => document.getElementById('passMsg').innerHTML = '', 3000);
     }
     
-    async function updateUPI() {
-        await db.collection('settings').doc('upi').set({ upiId: document.getElementById('upiId').value });
-        document.getElementById('upiMsg').innerHTML = '✅ UPI ID updated!';
-        setTimeout(() => document.getElementById('upiMsg').innerHTML = '', 3000);
-    }
-    
     function showSection(section) {
         ['markets', 'users', 'deposits', 'withdrawals', 'notice', 'settings'].forEach(s => document.getElementById(`${s}Section`).classList.add('hidden'));
         document.getElementById(`${section}Section`).classList.remove('hidden');
@@ -1057,6 +964,9 @@
     window.login = login;
     window.searchUsers = searchUsers;
     window.clearSearch = clearSearch;
+    window.updateUPI = updateUPI;
+    window.updatePayeeName = updatePayeeName;
+    window.updateWhatsApp = updateWhatsApp;
     window.changeSerialNumber = changeSerialNumber;
     window.deleteAllMarkets = deleteAllMarkets;
     window.setMarketStatus = setMarketStatus;
@@ -1080,8 +990,6 @@
     window.rejectWithdraw = rejectWithdraw;
     window.updateNotice = updateNotice;
     window.changePassword = changePassword;
-    window.updateUPI = updateUPI;
-    window.updateWhatsApp = updateWhatsApp;
     window.showSection = showSection;
     window.logout = logout;
 </script>
