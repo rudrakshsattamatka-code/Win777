@@ -168,7 +168,7 @@
         
         <div class="upi-info">
             <div class="upi-label">📱 Send payment to this UPI ID</div>
-            <div class="upi-id" id="upiIdDisplay">win777services</div>
+            <div class="upi-id" id="upiIdDisplay">Loading...</div>
             <button class="copy-btn" onclick="copyUpiId()">📋 Copy UPI ID</button>
         </div>
         
@@ -231,14 +231,23 @@
     let selectedAmount = 200;
     let currentTransactionId = null;
     let timerInterval = null;
-    let upiId = "ganeshpatil99@slc";
+    let upiId = "ganeshpatil99@slc"; // Default fallback
     let upiName = "Ganesh Siddharth Patil";
     
+    // Load UPI ID from Firebase settings
     async function loadUpiId() {
-        const doc = await db.collection('settings').doc('upi').get();
-        if (doc.exists && doc.data().upiId) {
-            upiId = doc.data().upiId;
-            document.getElementById('upiIdDisplay').innerText = upiId;
+        try {
+            const doc = await db.collection('settings').doc('upi').get();
+            if (doc.exists && doc.data().upiId) {
+                upiId = doc.data().upiId;
+                console.log("UPI ID loaded:", upiId);
+            } else {
+                console.log("Using default UPI ID");
+            }
+            document.getElementById('upiIdDisplay').innerHTML = upiId;
+        } catch (error) {
+            console.error("Error loading UPI ID:", error);
+            document.getElementById('upiIdDisplay').innerHTML = upiId;
         }
     }
     
@@ -367,7 +376,7 @@
         }
     }
     
-    function generateQR() {
+    async function generateQR() {
         const amount = getAmount();
         
         if (amount < 200) {
@@ -381,6 +390,10 @@
         
         const bonusAmount = getBonusAmount(amount);
         
+        // Always get the latest UPI ID before generating QR
+        await loadUpiId();
+        
+        // Create UPI string with current UPI ID
         const upiString = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR&tn=WIN777%20Deposit`;
         
         document.getElementById('qrcode').innerHTML = '';
@@ -399,9 +412,12 @@
         document.getElementById('utrSection').style.display = 'block';
         document.getElementById('generateBtn').style.display = 'none';
         
+        // Update the displayed UPI ID
+        document.getElementById('upiIdDisplay').innerHTML = upiId;
+        
         createDepositRequest(amount, bonusAmount);
         
-        showMessage(`👑 QR Code generated for ₹${amount}. Scan and pay.`, 'success');
+        showMessage(`👑 QR Code generated for ₹${amount}. Scan and pay to ${upiId}.`, 'success');
     }
     
     async function submitUTR() {
@@ -415,7 +431,7 @@
         
         await updateDepositWithUTR(utr);
         
-        if (confirm(`✅ Have you scanned the QR and paid ₹${amount}?\n\nUTR: ${utr}\n\nClick OK to submit for verification.`)) {
+        if (confirm(`✅ Have you scanned the QR and paid ₹${amount} to ${upiId}?\n\nUTR: ${utr}\n\nClick OK to submit for verification.`)) {
             showMessage(`👑 Payment submitted for verification!`, 'success');
             startTimerAndWait();
             document.getElementById('utrSection').style.display = 'none';
