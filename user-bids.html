@@ -31,13 +31,18 @@
         .refresh-btn { background: #17a2b8; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
         
         .bids-table { background: #fff; border-radius: 16px; overflow-x: auto; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
         th { background: #f8f9fa; padding: 15px; text-align: left; font-weight: bold; color: #333; border-bottom: 1px solid #ddd; }
         td { padding: 12px 15px; border-bottom: 1px solid #eee; color: #555; }
         tr:hover { background: #f8f9fa; }
         .status-won { color: #28a745; font-weight: bold; }
         .status-lost { color: #dc3545; font-weight: bold; }
         .status-pending { color: #ff9800; font-weight: bold; }
+        
+        .bid-type-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+        .bid-type-open { background: #d4edda; color: #155724; }
+        .bid-type-close { background: #fff3cd; color: #856404; }
+        .bid-type-none { background: #e2e3e5; color: #383d41; }
         
         .no-data { text-align: center; padding: 40px; color: #888; }
         .error-box { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
@@ -73,6 +78,12 @@
             <option value="lost">Lost</option>
             <option value="pending">Pending</option>
         </select>
+        <select id="bidTypeFilter" class="filter-select" onchange="filterBids()">
+            <option value="all">All Bid Types</option>
+            <option value="Open">🟢 OPEN</option>
+            <option value="Close">🟡 CLOSE</option>
+            <option value="None">No Type</option>
+        </select>
         <select id="gameTypeFilter" class="filter-select" onchange="filterBids()">
             <option value="all">All Game Types</option>
             <option value="Single Digit">Single Digit</option>
@@ -91,12 +102,12 @@
     <div class="bids-table">
         <table>
             <thead>
-                <tr><th>Date & Time</th><th>Market</th><th>Game Type</th><th>Number</th><th>Points (₹)</th><th>Rate (x)</th><th>Possible Win (₹)</th><th>Status</th></tr>
+                <tr><th>Date & Time</th><th>Market</th><th>Bid Type</th><th>Game Type</th><th>Number</th><th>Points (₹)</th><th>Rate (x)</th><th>Possible Win (₹)</th><th>Status</th></tr>
             </thead>
             <tbody id="bidsList">
-                <tr><td colspan="8" class="no-data">Loading bids...</td</tr>
+                <tr><td colspan="9" class="no-data">Loading bids...</td></tr>
             </tbody>
-        追赶
+        </table>
     </div>
 </div>
 
@@ -134,7 +145,7 @@
         init();
     } else {
         document.getElementById('userName').innerHTML = '❌ No User Selected';
-        document.getElementById('bidsList').innerHTML = '<td><td colspan="8" class="no-data">No user ID provided. Please go back and try again.</td></tr>';
+        document.getElementById('bidsList').innerHTML = '<tr><td colspan="9" class="no-data">No user ID provided. Please go back and try again.</td></tr>';
     }
     
     async function init() {
@@ -166,7 +177,7 @@
     async function loadBids() {
         if (!userId) return;
         
-        document.getElementById('bidsList').innerHTML = '<tr><td colspan="8" class="no-data">Loading bids...</td></tr>';
+        document.getElementById('bidsList').innerHTML = '<tr><td colspan="9" class="no-data">Loading bids...</td></tr>';
         
         try {
             // Query bids for this user
@@ -194,7 +205,8 @@
                 allBids.push({
                     id: doc.id,
                     ...bid,
-                    dateObj: bidDate
+                    dateObj: bidDate,
+                    bidType: bid.bidType || bid.bidTypeValue || null  // Get bidType from database
                 });
             });
             
@@ -202,7 +214,7 @@
             allBids.sort((a, b) => b.dateObj - a.dateObj);
             
             if (allBids.length === 0) {
-                document.getElementById('bidsList').innerHTML = '<tr><td colspan="8" class="no-data">No bids found for this user</td></tr>';
+                document.getElementById('bidsList').innerHTML = '<tr><td colspan="9" class="no-data">No bids found for this user</td></tr>';
             }
             
             updateStats();
@@ -210,12 +222,13 @@
             
         } catch (error) {
             console.error("Error loading bids:", error);
-            document.getElementById('bidsList').innerHTML = `<tr><td colspan="8" class="error-box">❌ Error loading bids: ${error.message}<br><br>Make sure you are logged into the admin panel first.</td></tr>`;
+            document.getElementById('bidsList').innerHTML = `<tr><td colspan="9" class="error-box">❌ Error loading bids: ${error.message}<br><br>Make sure you are logged into the admin panel first.</td></tr>`;
         }
     }
     
     function filterBids() {
         const statusFilter = document.getElementById('statusFilter').value;
+        const bidTypeFilter = document.getElementById('bidTypeFilter').value;
         const gameTypeFilter = document.getElementById('gameTypeFilter').value;
         const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
         
@@ -224,6 +237,15 @@
         // Filter by status
         if (statusFilter !== 'all') {
             filtered = filtered.filter(bid => bid.status === statusFilter);
+        }
+        
+        // Filter by bid type (Open/Close)
+        if (bidTypeFilter !== 'all') {
+            if (bidTypeFilter === 'None') {
+                filtered = filtered.filter(bid => !bid.bidType);
+            } else {
+                filtered = filtered.filter(bid => bid.bidType === bidTypeFilter);
+            }
         }
         
         // Filter by game type
@@ -243,11 +265,24 @@
         displayBidsTable(filtered);
     }
     
+    function getBidTypeBadge(bidType) {
+        if (!bidType) {
+            return '<span class="bid-type-badge bid-type-none">—</span>';
+        }
+        if (bidType === 'Open' || bidType === 'open') {
+            return '<span class="bid-type-badge bid-type-open">🟢 OPEN</span>';
+        }
+        if (bidType === 'Close' || bidType === 'close') {
+            return '<span class="bid-type-badge bid-type-close">🟡 CLOSE</span>';
+        }
+        return `<span class="bid-type-badge bid-type-none">${escapeHtml(bidType)}</span>`;
+    }
+    
     function displayBidsTable(bids) {
         const tbody = document.getElementById('bidsList');
         
         if (bids.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="no-data">No bids match your filters</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="no-data">No bids match your filters</td></tr>';
             return;
         }
         
@@ -258,13 +293,15 @@
             const possibleWin = (bid.points || 0) * gameRate;
             const statusClass = bid.status === 'won' ? 'status-won' : (bid.status === 'lost' ? 'status-lost' : 'status-pending');
             const statusText = bid.status ? bid.status.toUpperCase() : 'PENDING';
+            const bidTypeBadge = getBidTypeBadge(bid.bidType);
             
             html += `
                 <tr>
                     <td>${dateStr}</td>
                     <td>${escapeHtml(bid.market || 'Unknown')}</td>
+                    <td>${bidTypeBadge}</td>
                     <td>${escapeHtml(bid.gameType || '-')}</td>
-                    <td>${escapeHtml(bid.value || '-')}</td>
+                    <td><strong>${escapeHtml(bid.value || '-')}</strong></td>
                     <td>₹${(bid.points || 0).toLocaleString()}</td>
                     <td>${gameRate}x</td>
                     <td>₹${possibleWin.toLocaleString()}</td>
@@ -357,7 +394,8 @@
                     allBids.push({
                         id: doc.id,
                         ...bid,
-                        dateObj: bidDate
+                        dateObj: bidDate,
+                        bidType: bid.bidType || null
                     });
                 });
                 allBids.sort((a, b) => b.dateObj - a.dateObj);
