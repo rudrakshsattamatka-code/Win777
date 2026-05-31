@@ -165,7 +165,6 @@
             <img src="https://i.imgur.com/NvJCTli.png" alt="Fund">
             <span>Fund</span>
         </div>
-        <!-- CHANGED: Support button now opens Live Chat -->
         <div class="nav-item" onclick="location.href='chat.html'">
             <img src="https://i.imgur.com/ug9IprL.jpeg" alt="Support">
             <span>Support</span>
@@ -276,24 +275,18 @@
     
     let marketsData = [];
     let currentUserData = null;
-    let serverTimeOffset = 0;
     
-    async function syncServerTime() {
+    // Get Firebase Server Time
+    async function getServerTime() {
         try {
             const docRef = db.collection('settings').doc('servertime');
             await docRef.set({ timestamp: firebase.firestore.FieldValue.serverTimestamp() });
             const doc = await docRef.get();
-            const serverTime = doc.data().timestamp.toDate();
-            const clientTime = new Date();
-            serverTimeOffset = serverTime.getTime() - clientTime.getTime();
-            return serverTime;
+            return doc.data().timestamp.toDate();
         } catch (error) {
+            console.error("Error getting server time:", error);
             return new Date();
         }
-    }
-    
-    function getCurrentServerTime() {
-        return new Date(Date.now() + serverTimeOffset);
     }
     
     function formatTimeTo12Hour(timeStr) {
@@ -323,12 +316,12 @@
         return parseInt(parts[0]) * 60 + parseInt(parts[1]);
     }
     
-    function calculateMarketStatus(openBidEnd, closeBidEnd, marketStatus) {
+    async function calculateMarketStatus(openBidEnd, closeBidEnd, marketStatus) {
         if (marketStatus === 'holiday') {
             return 'holiday';
         }
         
-        const now = getCurrentServerTime();
+        const now = await getServerTime();
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
         const openEnd = timeToMinutes(openBidEnd);
         const closeEnd = timeToMinutes(closeBidEnd);
@@ -338,23 +331,27 @@
         else return 'closed';
     }
     
-    function updateLiveClock() {
-        const serverTime = getCurrentServerTime();
-        const timeString = formatCurrentTimeTo12Hour(serverTime);
-        const day = serverTime.getDate().toString().padStart(2, '0');
-        const month = (serverTime.getMonth() + 1).toString().padStart(2, '0');
-        const year = serverTime.getFullYear();
-        
-        document.getElementById('liveClockTime').innerHTML = timeString;
-        document.getElementById('liveClockDate').innerHTML = `${day}/${month}/${year}`;
+    async function updateLiveClock() {
+        try {
+            const serverTime = await getServerTime();
+            const timeString = formatCurrentTimeTo12Hour(serverTime);
+            const day = serverTime.getDate().toString().padStart(2, '0');
+            const month = (serverTime.getMonth() + 1).toString().padStart(2, '0');
+            const year = serverTime.getFullYear();
+            
+            document.getElementById('liveClockTime').innerHTML = timeString;
+            document.getElementById('liveClockDate').innerHTML = `${day}/${month}/${year}`;
+        } catch (error) {
+            console.error("Clock update error:", error);
+        }
     }
     
     function listenToMarkets() {
-        db.collection('markets').onSnapshot((snapshot) => {
+        db.collection('markets').onSnapshot(async (snapshot) => {
             marketsData = [];
-            snapshot.forEach(doc => {
+            for (const doc of snapshot.docs) {
                 const data = doc.data();
-                const calculatedStatus = calculateMarketStatus(data.openBidEnd, data.closeBidEnd, data.status);
+                const calculatedStatus = await calculateMarketStatus(data.openBidEnd, data.closeBidEnd, data.status);
                 marketsData.push({ 
                     id: doc.id, 
                     name: data.name,
@@ -369,7 +366,7 @@
                     jodi: data.jodi || '**',
                     serialNo: data.serialNo || 999
                 });
-            });
+            }
             marketsData.sort((a, b) => (a.serialNo || 999) - (b.serialNo || 999));
             renderMarkets();
         });
@@ -607,16 +604,12 @@
     function showGames() { alert('Games coming soon!'); }
     
     async function init() {
-        await syncServerTime();
         listenToMarkets();
         listenToNotice();
-        setInterval(() => {
-            updateLiveClock();
-            listenToMarkets();
-        }, 1000);
+        // Update clock every second using Firebase server time
         setInterval(async () => {
-            await syncServerTime();
-        }, 3600000);
+            await updateLiveClock();
+        }, 1000);
     }
     
     setInterval(() => {
