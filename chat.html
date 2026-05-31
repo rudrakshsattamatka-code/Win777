@@ -9,9 +9,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Georgia', 'Times New Roman', serif; }
-        body { background: #0a0806; height: 100vh; display: flex; flex-direction: column; }
+        body { background: #0a0806; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        .chat-header { background: linear-gradient(135deg, #1a1510, #0a0806); padding: 15px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 2px solid #ffd700; }
+        .chat-header { background: linear-gradient(135deg, #1a1510, #0a0806); padding: 15px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 2px solid #ffd700; flex-shrink: 0; }
         .back-btn { background: none; border: none; color: #ffd700; font-size: 24px; cursor: pointer; }
         .chat-title { flex: 1; color: #ffd700; font-size: 18px; font-weight: bold; text-align: center; }
         .status { font-size: 11px; color: #66ff66; margin-top: 3px; }
@@ -22,25 +22,19 @@
         .support-message { background: #1a1510; color: #ffd700; align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid #ffd70040; }
         .message-time { font-size: 10px; margin-top: 6px; opacity: 0.7; }
         
-        .chat-input-area { background: #1a1510; padding: 12px 15px; display: flex; gap: 10px; border-top: 1px solid #ffd70040; }
+        .chat-input-area { background: #1a1510; padding: 12px 15px; display: flex; gap: 10px; border-top: 1px solid #ffd70040; flex-shrink: 0; }
         .chat-input { flex: 1; background: #0a0806; border: 1px solid #ffd70040; border-radius: 25px; padding: 12px 18px; color: #ffd700; font-size: 14px; outline: none; }
         .chat-input:focus { border-color: #ffd700; }
         .send-btn { background: linear-gradient(135deg, #ffd700, #daa520); border: none; border-radius: 25px; padding: 0 22px; color: #1a1510; font-weight: bold; cursor: pointer; font-size: 16px; }
         .send-btn:hover { transform: scale(1.02); }
         
-        .typing-indicator { color: #aa9c7a; font-size: 12px; padding: 8px 15px; font-style: italic; }
-        .no-messages { text-align: center; color: #aa9c7a; padding: 50px 20px; }
+        .typing-indicator { color: #aa9c7a; font-size: 12px; padding: 8px 15px; font-style: italic; background: #0a0806; flex-shrink: 0; }
         .welcome-msg { background: #1a1510; border-radius: 16px; padding: 20px; text-align: center; margin: 20px; border: 1px solid #ffd70040; }
         .welcome-msg h3 { color: #ffd700; margin-bottom: 10px; }
         .welcome-msg p { color: #aa9c7a; font-size: 13px; }
         
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: linear-gradient(135deg, #1a1510, #0f0c08); display: flex; justify-content: space-around; padding: 8px 10px; border-top: 2px solid #ffd700; }
-        .nav-item { text-align: center; color: #aa9c7a; cursor: pointer; font-size: 10px; transition: all 0.3s; flex: 1; }
-        .nav-item:hover { color: #ffd700; transform: translateY(-3px); }
-        .nav-item img { width: 28px; height: 28px; display: block; margin: 0 auto 3px; border-radius: 8px; filter: brightness(0.8); }
-        .nav-item:hover img { filter: brightness(1); }
-        .nav-item span { font-size: 10px; display: block; }
-        .nav-item.active { color: #ffd700; }
+        /* Removed bottom-nav since chat has its own input area */
+        .no-bottom-nav { padding-bottom: 0; }
     </style>
 </head>
 <body>
@@ -65,14 +59,6 @@
     <div class="chat-input-area">
         <input type="text" class="chat-input" id="messageInput" placeholder="Type your message..." onkeypress="if(event.key==='Enter') sendMessage()">
         <button class="send-btn" onclick="sendMessage()">📤 Send</button>
-    </div>
-    
-    <div class="bottom-nav">
-        <div class="nav-item" onclick="location.href='dashboard.html'"><img src="https://i.imgur.com/StGZq3Y.png" alt="Home"><span>Home</span></div>
-        <div class="nav-item" onclick="location.href='mybids.html'"><img src="https://i.imgur.com/rUWwMYm.png" alt="Passbook"><span>Passbook</span></div>
-        <div class="nav-item" onclick="location.href='mybids.html'"><img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids"><span>My Bids</span></div>
-        <div class="nav-item" onclick="location.href='funds.html'"><img src="https://i.imgur.com/NvJCTli.png" alt="Fund"><span>Fund</span></div>
-        <div class="nav-item active" onclick="location.href='chat.html'"><img src="https://i.imgur.com/ug9IprL.jpeg" alt="Support"><span>Support</span></div>
     </div>
 
     <script>
@@ -104,10 +90,15 @@
         });
         
         async function loadUserData() {
-            const doc = await db.collection('users').doc(currentUser.uid).get();
-            if (doc.exists) {
-                currentUserData = doc.data();
-                chatRoomId = `chat_${currentUser.uid}`;
+            try {
+                const doc = await db.collection('users').doc(currentUser.uid).get();
+                if (doc.exists) {
+                    currentUserData = doc.data();
+                    chatRoomId = `chat_${currentUser.uid}`;
+                    console.log("Chat room ID:", chatRoomId);
+                }
+            } catch (error) {
+                console.error("Error loading user data:", error);
             }
         }
         
@@ -138,6 +129,8 @@
                     });
                     if (html) container.innerHTML = html;
                     container.scrollTop = container.scrollHeight;
+                }, (error) => {
+                    console.error("Error loading messages:", error);
                 });
             
             // Listen for typing indicator from admin
@@ -147,6 +140,8 @@
                 } else {
                     document.getElementById('typingIndicator').style.display = 'none';
                 }
+            }, (error) => {
+                console.error("Typing indicator error:", error);
             });
             
             // Create/update chat document
@@ -155,7 +150,9 @@
                 userName: currentUserData?.name || 'User',
                 userPhone: currentUserData?.phone || '',
                 lastActive: firebase.firestore.FieldValue.serverTimestamp()
-            }, { merge: true });
+            }, { merge: true }).catch(error => {
+                console.error("Error creating chat document:", error);
+            });
         }
         
         async function sendMessage() {
@@ -165,19 +162,26 @@
             
             input.value = '';
             
-            await db.collection('chats').doc(chatRoomId).collection('messages').add({
-                senderId: currentUser.uid,
-                senderName: currentUserData?.name || 'User',
-                text: text,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                isUser: true
-            });
-            
-            await db.collection('chats').doc(chatRoomId).set({
-                lastMessage: text,
-                lastMessageTime: firebase.firestore.FieldValue.serverTimestamp(),
-                unread: true
-            }, { merge: true });
+            try {
+                await db.collection('chats').doc(chatRoomId).collection('messages').add({
+                    senderId: currentUser.uid,
+                    senderName: currentUserData?.name || 'User',
+                    text: text,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    isUser: true
+                });
+                
+                await db.collection('chats').doc(chatRoomId).set({
+                    lastMessage: text,
+                    lastMessageTime: firebase.firestore.FieldValue.serverTimestamp(),
+                    unread: true
+                }, { merge: true });
+                
+                console.log("Message sent successfully");
+            } catch (error) {
+                console.error("Error sending message:", error);
+                alert("Error sending message: " + error.message);
+            }
         }
         
         function escapeHtml(str) {
@@ -197,13 +201,16 @@
         // Typing indicator
         let typingTimeout;
         const inputField = document.getElementById('messageInput');
-        inputField.addEventListener('input', () => {
-            db.collection('chats').doc(chatRoomId).update({ userTyping: true });
-            clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => {
-                db.collection('chats').doc(chatRoomId).update({ userTyping: false });
-            }, 1000);
-        });
+        if (inputField) {
+            inputField.addEventListener('input', () => {
+                if (!chatRoomId) return;
+                db.collection('chats').doc(chatRoomId).update({ userTyping: true }).catch(() => {});
+                clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(() => {
+                    db.collection('chats').doc(chatRoomId).update({ userTyping: false }).catch(() => {});
+                }, 1000);
+            });
+        }
         
         window.sendMessage = sendMessage;
         window.goBack = goBack;
