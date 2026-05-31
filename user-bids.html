@@ -40,7 +40,6 @@
         .status-pending { color: #ff9800; font-weight: bold; }
         
         .no-data { text-align: center; padding: 40px; color: #888; }
-        .error-box { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
         
         @media (max-width: 768px) {
             .stats { grid-template-columns: repeat(2, 1fr); }
@@ -59,7 +58,7 @@
         <p id="userBalance">💰 Balance: ₹0</p>
     </div>
     
-    <div class="stats" id="stats">
+    <div class="stats">
         <div class="stat-card"><div class="label">Total Bids</div><div class="value" id="totalBids">0</div></div>
         <div class="stat-card"><div class="label">Total Spent</div><div class="value" id="totalSpent">₹0</div></div>
         <div class="stat-card"><div class="label">Total Won</div><div class="value positive" id="totalWon">₹0</div></div>
@@ -89,12 +88,12 @@
     </div>
     
     <div class="bids-table">
-        <table id="bidsTable">
+        <table>
             <thead>
                 <tr><th>Date & Time</th><th>Market</th><th>Game Type</th><th>Number</th><th>Points (₹)</th><th>Rate (x)</th><th>Possible Win (₹)</th><th>Status</th></tr>
             </thead>
             <tbody id="bidsList">
-                <tr><td colspan="8" class="no-data">Loading bids...</td</tr>
+                <tr><td colspan="8" class="no-data">Loading bids...</td></tr>
             </tbody>
          </table>
     </div>
@@ -130,15 +129,13 @@
     
     if (userId) {
         document.getElementById('userName').innerHTML = `📋 Bid History: ${escapeHtml(userName)}`;
-        init();
+        loadUserData();
+        loadBids();
+        listenToUserUpdates();
+        listenToBidUpdates();
     } else {
         document.getElementById('userName').innerHTML = '❌ No User Selected';
-        document.getElementById('bidsList').innerHTML = '<tr><td colspan="8" class="no-data">No user ID provided. Please go back and try again.</td></tr>';
-    }
-    
-    async function init() {
-        await loadUserData();
-        await loadBids();
+        document.getElementById('bidsList').innerHTML = '<tr><td colspan="8" class="no-data">No user ID provided</td></tr>';
     }
     
     // Load user info
@@ -151,8 +148,6 @@
                 const userData = userDoc.data();
                 document.getElementById('userPhone').innerHTML = `📞 Phone: ${userData.phone || 'Not provided'}`;
                 document.getElementById('userBalance').innerHTML = `💰 Balance: ₹${(userData.balance || 0).toLocaleString()}`;
-            } else {
-                document.getElementById('userPhone').innerHTML = '📞 Phone: User not found';
             }
         } catch (error) {
             console.error("Error loading user:", error);
@@ -160,23 +155,21 @@
         }
     }
     
-    // Load bids - using date field (not timestamp) and no orderBy initially to avoid index requirement
+    // Load bids - NO orderBy to avoid index requirement
     async function loadBids() {
         if (!userId) return;
         
         document.getElementById('bidsList').innerHTML = '<tr><td colspan="8" class="no-data">Loading bids...</td></tr>';
         
         try {
-            // Simple query without orderBy first to avoid needing index
-            const bidsSnapshot = await db.collection('bids')
-                .where('userId', '==', userId)
-                .get();
+            const bidsSnapshot = await db.collection('bids').where('userId', '==', userId).get();
             
             allBids = [];
             bidsSnapshot.forEach(doc => {
                 const bid = doc.data();
-                // Handle date field (could be Firestore Timestamp or regular date)
-                let bidDate = null;
+                let bidDate = new Date(0);
+                
+                // Handle different date formats
                 if (bid.date) {
                     if (bid.date.toDate) {
                         bidDate = bid.date.toDate();
@@ -185,8 +178,6 @@
                     } else {
                         bidDate = new Date(bid.date);
                     }
-                } else {
-                    bidDate = new Date(0);
                 }
                 
                 allBids.push({
@@ -199,16 +190,12 @@
             // Sort manually by date (newest first)
             allBids.sort((a, b) => b.dateObj - a.dateObj);
             
-            if (allBids.length === 0) {
-                document.getElementById('bidsList').innerHTML = '<tr><td colspan="8" class="no-data">No bids found for this user</td></tr>';
-            }
-            
             updateStats();
             filterBids();
             
         } catch (error) {
             console.error("Error loading bids:", error);
-            document.getElementById('bidsList').innerHTML = `<tr><td colspan="8" class="no-data">Error loading bids: ${error.message}. Please check console.</td></tr>`;
+            document.getElementById('bidsList').innerHTML = `<tr><td colspan="8" class="no-data">Error: ${error.message}</td></tr>`;
         }
     }
     
@@ -219,17 +206,14 @@
         
         let filtered = [...allBids];
         
-        // Filter by status
         if (statusFilter !== 'all') {
             filtered = filtered.filter(bid => bid.status === statusFilter);
         }
         
-        // Filter by game type
         if (gameTypeFilter !== 'all') {
             filtered = filtered.filter(bid => bid.gameType === gameTypeFilter);
         }
         
-        // Filter by market name or number
         if (searchTerm) {
             filtered = filtered.filter(bid => {
                 const marketName = (bid.marketName || '').toLowerCase();
@@ -245,7 +229,7 @@
         const tbody = document.getElementById('bidsList');
         
         if (bids.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" class="no-data">No bids match your filters</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="no-data">No bids found</td></tr>';
             return;
         }
         
@@ -329,64 +313,24 @@
         await loadBids();
     }
     
-    // Listen for real-time updates on user balance
+    // Real-time listeners
     function listenToUserUpdates() {
         if (!userId) return;
-        
         db.collection('users').doc(userId).onSnapshot((doc) => {
             if (doc.exists) {
                 const data = doc.data();
                 document.getElementById('userBalance').innerHTML = `💰 Balance: ₹${(data.balance || 0).toLocaleString()}`;
             }
-        }, (error) => {
-            console.error("User listener error:", error);
         });
     }
     
-    // Listen for real-time bid updates
     function listenToBidUpdates() {
         if (!userId) return;
-        
-        db.collection('bids')
-            .where('userId', '==', userId)
-            .onSnapshot((snapshot) => {
-                allBids = [];
-                snapshot.forEach(doc => {
-                    const bid = doc.data();
-                    let bidDate = null;
-                    if (bid.date) {
-                        if (bid.date.toDate) {
-                            bidDate = bid.date.toDate();
-                        } else if (bid.date.seconds) {
-                            bidDate = new Date(bid.date.seconds * 1000);
-                        } else {
-                            bidDate = new Date(bid.date);
-                        }
-                    } else {
-                        bidDate = new Date(0);
-                    }
-                    
-                    allBids.push({
-                        id: doc.id,
-                        ...bid,
-                        dateObj: bidDate
-                    });
-                });
-                allBids.sort((a, b) => b.dateObj - a.dateObj);
-                updateStats();
-                filterBids();
-            }, (error) => {
-                console.error("Bid listener error:", error);
-            });
+        db.collection('bids').where('userId', '==', userId).onSnapshot(() => {
+            loadBids();
+        });
     }
     
-    // Start real-time listeners
-    if (userId) {
-        listenToUserUpdates();
-        listenToBidUpdates();
-    }
-    
-    // Make functions global for inline handlers
     window.filterBids = filterBids;
     window.refreshData = refreshData;
 </script>
