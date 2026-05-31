@@ -114,7 +114,7 @@
     <div class="nav-item" onclick="location.href='mybids.html'"><img src="https://i.imgur.com/rUWwMYm.png" alt="Passbook"><span>Passbook</span></div>
     <div class="nav-item" onclick="location.href='mybids.html'"><img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids"><span>My Bids</span></div>
     <div class="nav-item" onclick="location.href='funds.html'"><img src="https://i.imgur.com/NvJCTli.png" alt="Fund"><span>Fund</span></div>
-    <div class="nav-item" onclick="alert('Support: WhatsApp +919019941895')"><img src="https://i.imgur.com/ug9IprL.jpeg" alt="Support"><span>Support</span></div>
+    <div class="nav-item" onclick="location.href='chat.html'"><img src="https://i.imgur.com/ug9IprL.jpeg" alt="Support"><span>Support</span></div>
 </div>
 
 <script>
@@ -132,7 +132,7 @@
     const db = firebase.firestore();
     
     let currentUser = null, userData = null, currentMarket = '', currentMarketId = '', currentStatus = 'open', currentGameType = 'Single Digit', bids = [];
-    let currentPoints = 10; // Store current points value
+    let currentPoints = 10;
     
     const gameRates = {
         'Single Digit': 10, 'Jodi': 100, 'Single Pana': 160,
@@ -216,7 +216,6 @@
         }
     }
     
-    // Function to update points from input
     function updatePoints() {
         const pointsInput = document.getElementById('pointsInput');
         if (pointsInput) {
@@ -228,7 +227,6 @@
         }
     }
     
-    // Function to get current points
     function getCurrentPoints() {
         const pointsInput = document.getElementById('pointsInput');
         if (pointsInput) {
@@ -411,7 +409,6 @@
                 break;
         }
         
-        // Set the points input value after rendering
         const pointsInput = document.getElementById('pointsInput');
         if (pointsInput) {
             pointsInput.value = currentPoints;
@@ -604,6 +601,7 @@
         setTimeout(() => d.classList.add('hidden'), 3000);
     }
     
+    // UPDATED: submitBids with Firebase Server Timestamp
     async function submitBids() {
         if(bids.length === 0) { showMessage('No bids to place', true); return; }
         if(!currentUser) return;
@@ -622,7 +620,7 @@
                     value: b.value, 
                     points: b.points, 
                     status: 'pending', 
-                    createdAt: new Date() 
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 }); 
             }
             await db.collection('transactions').add({ 
@@ -631,7 +629,7 @@
                 amount: total, 
                 status: 'Completed',
                 description: `Bid placed on ${currentMarket} (${bids.length} bids)`, 
-                date: new Date() 
+                date: firebase.firestore.FieldValue.serverTimestamp()
             });
             showMessage(`✅ ₹${total} bids placed!`, false);
             bids = []; 
@@ -640,7 +638,6 @@
             const updatedUser = await db.collection('users').doc(currentUser.uid).get();
             userData = updatedUser.data();
             document.getElementById('userBalance').innerText = userData?.balance || 0;
-            // Don't redirect - stay on betting page
         } catch(e) { showMessage('Error: ' + e.message, true); }
     }
     
