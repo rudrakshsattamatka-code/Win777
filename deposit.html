@@ -201,11 +201,7 @@
         <div class="nav-item" onclick="location.href='mybids.html'"><img src="https://i.imgur.com/rUWwMYm.png" alt="Passbook"><span>Passbook</span></div>
         <div class="nav-item" onclick="location.href='mybids.html'"><img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids"><span>My Bids</span></div>
         <div class="nav-item" onclick="location.href='funds.html'"><img src="https://i.imgur.com/NvJCTli.png" alt="Fund"><span>Fund</span></div>
-        <!-- CHANGED: Support button now opens Live Chat -->
-        <div class="nav-item" onclick="location.href='chat.html'">
-            <img src="https://i.imgur.com/ug9IprL.jpeg" alt="Support">
-            <span>Support</span>
-        </div>
+        <div class="nav-item" onclick="location.href='chat.html'"><img src="https://i.imgur.com/ug9IprL.jpeg" alt="Support"><span>Support</span></div>
     </div>
 </div>
 
@@ -330,7 +326,7 @@
         showMessage('✅ UPI ID copied!', 'success');
     }
     
-    // ONLY CREATE DEPOSIT REQUEST WHEN UTR IS SUBMITTED
+    // UPDATED: createDepositRequest with Firebase Server Timestamp
     async function createDepositRequest(amount, bonusAmount, utr) {
         const totalAmount = amount + bonusAmount;
         const transactionRef = await db.collection('transactions').add({
@@ -342,7 +338,7 @@
             requestedAmount: amount,
             bonusAmount: bonusAmount,
             status: 'Pending',
-            date: new Date(),
+            date: firebase.firestore.FieldValue.serverTimestamp(),
             upiId: upiId
         });
         currentTransactionId = transactionRef.id;
@@ -395,10 +391,8 @@
         pendingAmount = amount;
         pendingBonus = bonusAmount;
         
-        // Reload latest payment settings before generating QR
         await loadPaymentSettings();
         
-        // Create UPI string with current UPI ID and Payee Name
         const upiString = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount}&cu=INR&tn=WIN777%20Deposit`;
         
         document.getElementById('qrcode').innerHTML = '';
@@ -417,12 +411,9 @@
         document.getElementById('utrSection').style.display = 'block';
         document.getElementById('generateBtn').style.display = 'none';
         
-        // Update the displayed UPI ID
         document.getElementById('upiIdDisplay').innerHTML = upiId;
         
         showMessage(`👑 QR Code generated for ₹${amount}. Scan and pay to ${upiId}.`, 'success');
-        
-        // DO NOT create deposit request here - wait for UTR submission
     }
     
     async function submitUTR() {
@@ -436,7 +427,6 @@
         }
         
         if (confirm(`✅ Have you scanned the QR and paid ₹${amount} to ${upiId}?\n\nUTR: ${utr}\n\nClick OK to submit for verification.`)) {
-            // NOW create the deposit request with UTR
             await createDepositRequest(amount, bonusAmount, utr);
             showMessage(`👑 Payment submitted for verification!`, 'success');
             startTimerAndWait();
