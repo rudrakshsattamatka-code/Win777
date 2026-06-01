@@ -42,6 +42,7 @@
         .btn-warning { background: #ffc107; color: #333; }
         .btn-reset { background: #6c757d; color: #fff; }
         .btn-info { background: #17a2b8; color: #fff; }
+        .btn-clear { background: #8B0000; color: #fff; }
         .hidden { display: none; }
         
         .results-container { display: flex; gap: 20px; flex-wrap: wrap; margin: 15px 0; }
@@ -103,7 +104,7 @@
         .sort-select { width: auto; margin: 0; padding: 8px 12px; cursor: pointer; }
         .sort-btn-active { background: #ff9800; color: #fff; }
         
-        /* Market List Collapsible - Market name shows, details hidden by default */
+        /* Market List Collapsible */
         .market-header-row { display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 12px; background: #f8f9fa; border-radius: 10px; margin-bottom: 8px; transition: all 0.2s; }
         .market-header-row:hover { background: #e9ecef; }
         .market-name-click { font-weight: bold; font-size: 16px; color: #333; flex: 1; }
@@ -113,8 +114,9 @@
         .toggle-icon { font-size: 18px; color: #ff9800; margin-right: 10px; }
         
         /* Live Chat Section */
-        .chat-iframe { width: 100%; height: 70vh; border: none; border-radius: 12px; background: #fff; }
+        .chat-iframe { width: 100%; height: 60vh; border: none; border-radius: 12px; background: #fff; }
         .livechat-card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .chat-buttons { display: flex; gap: 10px; margin-top: 10px; }
         
         @media (max-width: 768px) { 
             .sidebar { width: 70px; } 
@@ -128,7 +130,6 @@
             .sort-select { width: 100%; }
         }
         
-        /* Today bid highlight */
         .today-bid-amount { background: #e3f2fd; padding: 2px 8px; border-radius: 12px; font-size: 12px; color: #1565c0; }
     </style>
 </head>
@@ -182,6 +183,7 @@
                 </select>
                 <button onclick="addMarket()">Add Market</button>
                 <button onclick="deleteAllMarkets()" style="background:#dc3545;">🗑️ Delete All</button>
+                <button onclick="resetAllMarketsResults()" style="background:#ff9800; color:#333;">🔄 Reset All Results</button>
             </div>
             <div class="card">
                 <h3>📋 Manage Markets (Click on Market Name to Expand/Collapse Details)</h3>
@@ -236,7 +238,11 @@
         <div id="livechatSection" class="hidden">
             <div class="livechat-card">
                 <h3>💬 Live Support Chat</h3>
-                <iframe src="admin-chat.html" class="chat-iframe"></iframe>
+                <iframe src="admin-chat.html" class="chat-iframe" id="chatIframe"></iframe>
+                <div class="chat-buttons">
+                    <button onclick="clearAllChats()" class="btn-clear" style="background:#8B0000;">🗑️ Delete All Chat History</button>
+                    <button onclick="refreshChat()" class="btn-info" style="background:#17a2b8;">🔄 Refresh Chat</button>
+                </div>
             </div>
         </div>
     </div>
@@ -260,7 +266,7 @@
     let allUsers = [];
     let currentSearchTerm = "";
     let currentSortType = "newest";
-    let todayBidMap = new Map(); // userId -> total points (bids amount) today
+    let todayBidMap = new Map();
     
     if (sessionStorage.getItem('adminLoggedIn') === 'true') {
         document.getElementById('loginScreen').style.display = 'none';
@@ -296,7 +302,58 @@
         }
     }
     
-    // Load users with today's bidding amount
+    // Clear all chats
+    async function clearAllChats() {
+        if (confirm("⚠️ WARNING: This will delete ALL chat history permanently!\n\nAll user conversations will be lost.\n\nType 'DELETE' to confirm:")) {
+            const confirmText = prompt('Type "DELETE" to confirm:');
+            if (confirmText === 'DELETE') {
+                const chatsSnapshot = await db.collection('chats').get();
+                const batch = db.batch();
+                for (const chatDoc of chatsSnapshot.docs) {
+                    const messagesSnapshot = await db.collection('chats').doc(chatDoc.id).collection('messages').get();
+                    for (const msgDoc of messagesSnapshot.docs) {
+                        batch.delete(msgDoc.ref);
+                    }
+                    batch.delete(chatDoc.ref);
+                }
+                await batch.commit();
+                alert(`✅ Deleted all chat history!`);
+                refreshChat();
+            }
+        }
+    }
+    
+    function refreshChat() {
+        const iframe = document.getElementById('chatIframe');
+        if (iframe) {
+            iframe.src = iframe.src;
+        }
+    }
+    
+    // Reset all markets results
+    async function resetAllMarketsResults() {
+        if (confirm("⚠️ WARNING: This will reset ALL markets results (Open Pana, Open Digit, Close Pana, Close Digit, Jodi) to *** - * - *** - * - **\n\nType 'RESET' to confirm:")) {
+            const confirmText = prompt('Type "RESET" to confirm:');
+            if (confirmText === 'RESET') {
+                const markets = await db.collection('markets').get();
+                const batch = db.batch();
+                markets.forEach(doc => {
+                    batch.update(doc.ref, {
+                        openPana: '***',
+                        openDigit: '*',
+                        closePana: '***',
+                        closeDigit: '*',
+                        jodi: '**',
+                        closeDeclared: false
+                    });
+                });
+                await batch.commit();
+                alert(`✅ Reset ${markets.size} markets successfully!`);
+                loadMarkets();
+            }
+        }
+    }
+    
     async function loadUsersWithTodayBids() {
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
@@ -382,11 +439,9 @@
             filteredUsers.sort((a, b) => (b.balance || 0) - (a.balance || 0));
         } else if (currentSortType === 'balanceLow') {
             filteredUsers.sort((a, b) => (a.balance || 0) - (b.balance || 0));
-        } else if (currentSortType === 'todayBidHigh') {
-            filteredUsers.sort((a, b) => (b.todayBidTotal || 0) - (a.todayBidTotal || 0));
         }
         
-        document.getElementById('userCount').innerHTML = `👥 Total Users: ${filteredUsers.length} ${currentSearchTerm ? `(Filtered from ${allUsers.length})` : ''} | Sorted by: ${currentSortType === 'newest' ? 'Newest First' : currentSortType === 'balanceHigh' ? 'Balance ↓' : currentSortType === 'balanceLow' ? 'Balance ↑' : 'Today Bidding ↓'}`;
+        document.getElementById('userCount').innerHTML = `👥 Total Users: ${filteredUsers.length}`;
         
         if (filteredUsers.length === 0) {
             document.getElementById('usersList').innerHTML = '<p style="color: #888; text-align:center; padding:40px;">No users found.</p>';
@@ -424,21 +479,9 @@
         document.getElementById('usersList').innerHTML = html;
     }
     
-    function escapeHtml(str) {
-        if(!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if(m === '&') return '&amp;';
-            if(m === '<') return '&lt;';
-            if(m === '>') return '&gt;';
-            return m;
-        });
-    }
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
+    function openUserBidsPage(uid, name) { window.open(`user-bids.html?uid=${uid}&name=${encodeURIComponent(name)}`, '_blank'); }
     
-    function openUserBidsPage(uid, name) {
-        window.open(`user-bids.html?uid=${uid}&name=${encodeURIComponent(name)}`, '_blank');
-    }
-    
-    // ============ MARKETS - Collapsible View ============
     let openMarketId = null;
     
     function toggleMarketDetails(marketId) {
@@ -655,7 +698,7 @@
         }
     }
     
-    // FIXED: OPEN winners credited, losers marked as lost
+    // FIXED: OPEN winners credited, losers marked as lost (Jodi and Sangam stay PENDING)
     async function creditOpenWinners(marketId, marketName, openPana, openDigit) {
         const bids = await db.collection('bids')
             .where('marketId', '==', marketId)
@@ -667,12 +710,15 @@
             const bid = bidDoc.data();
             let isWinning = false;
             
+            // Only OPEN phase game types (Single Digit and Pana)
             if (bid.gameType === 'Single Digit' && bid.value === openDigit) {
                 isWinning = true;
             }
-            if ((bid.gameType === 'Single Pana' || bid.gameType === 'Double Pana' || bid.gameType === 'Triple Pana') && bid.value === openPana) {
+            else if ((bid.gameType === 'Single Pana' || bid.gameType === 'Double Pana' || bid.gameType === 'Triple Pana') && bid.value === openPana) {
                 isWinning = true;
             }
+            // Jodi, Half Sangam A, Half Sangam B, Full Sangam are NOT processed here
+            // They remain PENDING until CLOSE result
             
             if (isWinning) {
                 const winAmount = bid.points * (gameRates[bid.gameType] || 10);
@@ -689,7 +735,7 @@
                     date: new Date() 
                 });
             } else {
-                // LOSER: Mark as lost
+                // Loser OPEN bets
                 await bidDoc.ref.update({ status: 'lost' });
             }
         }
@@ -710,7 +756,7 @@
             if (bid.gameType === 'Single Digit' && bid.bidType === 'Close' && bid.value === closeDigit) {
                 isWinning = true;
             }
-            // Jodi
+            // JODI - Now determined! (Open Digit + Close Digit)
             else if (bid.gameType === 'Jodi' && bid.value === jodi) {
                 isWinning = true;
             }
@@ -718,15 +764,15 @@
             else if ((bid.gameType === 'Single Pana' || bid.gameType === 'Double Pana' || bid.gameType === 'Triple Pana') && bid.bidType === 'Close' && bid.value === closePana) {
                 isWinning = true;
             }
-            // Half Sangam A
+            // Half Sangam A (Open Pana + Close Digit)
             else if (bid.gameType === 'Half Sangam A' && bid.value === `${openPana}-${closeDigit}`) {
                 isWinning = true;
             }
-            // Half Sangam B
+            // Half Sangam B (Open Digit + Close Pana)
             else if (bid.gameType === 'Half Sangam B' && bid.value === `${openDigit}-${closePana}`) {
                 isWinning = true;
             }
-            // Full Sangam
+            // Full Sangam (Open Pana + Close Pana)
             else if (bid.gameType === 'Full Sangam' && bid.value === `${openPana}-${closePana}`) {
                 isWinning = true;
             }
@@ -746,7 +792,7 @@
                     date: new Date() 
                 });
             } else {
-                // LOSER: Mark as lost
+                // Loser - mark as lost
                 if (bid.status === 'pending') {
                     await bidDoc.ref.update({ status: 'lost' });
                 }
@@ -785,7 +831,7 @@
         if (confirm('Delete this market permanently?')) await db.collection('markets').doc(id).delete();
     }
     
-    // ============ DEPOSITS ============
+    // Deposits
     function loadDeposits() {
         db.collection('transactions').where('type', '==', 'credit').where('status', '==', 'Pending').onSnapshot(async (snapshot) => {
             let deposits = [];
@@ -826,7 +872,7 @@
         if (confirm('Reject this deposit?')) await db.collection('transactions').doc(id).update({ status: 'Rejected' });
     }
     
-    // ============ WITHDRAWALS ============
+    // Withdrawals
     function loadWithdrawals() {
         db.collection('withdrawRequests').where('status', '==', 'Pending').onSnapshot(async (snapshot) => {
             let withdrawals = [];
@@ -864,7 +910,7 @@
         if (confirm('Reject this withdrawal?')) await db.collection('withdrawRequests').doc(id).update({ status: 'Rejected' });
     }
     
-    // ============ USER MANAGEMENT FUNCTIONS ============
+    // User Management
     async function updateBalance(uid, action) {
         const amount = prompt(`Enter amount to ${action === 'add' ? 'ADD' : 'REMOVE'}:`);
         if (!amount || isNaN(amount) || parseInt(amount) <= 0) { alert('Please enter a valid amount'); return; }
@@ -979,6 +1025,7 @@
     window.updateWhatsApp = updateWhatsApp;
     window.changeSerialNumber = changeSerialNumber;
     window.deleteAllMarkets = deleteAllMarkets;
+    window.resetAllMarketsResults = resetAllMarketsResults;
     window.setMarketStatus = setMarketStatus;
     window.setMarketHoliday = setMarketHoliday;
     window.declareOpenResult = declareOpenResult;
@@ -1004,6 +1051,8 @@
     window.toggleMarketDetails = toggleMarketDetails;
     window.applyUserSort = applyUserSort;
     window.refreshTodayBidsForUsers = refreshTodayBidsForUsers;
+    window.clearAllChats = clearAllChats;
+    window.refreshChat = refreshChat;
 </script>
 </body>
 </html>
