@@ -152,7 +152,6 @@
         <div class="sidebar-item" onclick="showSection('withdrawals')">💸 Withdrawals</div>
         <div class="sidebar-item" onclick="showSection('notice')">📢 Notice</div>
         <div class="sidebar-item" onclick="showSection('settings')">⚙️ Settings</div>
-        <!-- NEW: Live Chat Menu Item -->
         <div class="sidebar-item" onclick="showSection('livechat')">💬 Live Chat</div>
         <div class="sidebar-item" onclick="logout()">🚪 Logout</div>
     </div>
@@ -203,16 +202,13 @@
                     <button onclick="searchUsers()" class="search-btn">Search</button>
                     <button onclick="clearSearch()" class="clear-btn">Clear</button>
                 </div>
-                <!-- Sort Options: Newest First, By Balance, By Today Bidding -->
                 <div class="sort-bar">
                     <label>📊 Sort By:</label>
                     <select id="sortUsersSelect" class="sort-select" onchange="applyUserSort()">
-                        <option value="newest">🕒 Newest First (Default)</option>
+                        <option value="newest">🕒 Newest First</option>
                         <option value="balanceHigh">💰 Balance: High to Low</option>
                         <option value="balanceLow">💰 Balance: Low to High</option>
-                        <option value="todayBidHigh">📈 Today Bidding: Highest First</option>
                     </select>
-                    <button id="refreshTodayBids" onclick="refreshTodayBidsForUsers()" style="background:#17a2b8;">🔄 Refresh Today's Bids</button>
                 </div>
                 <div id="userCount" class="user-count"></div>
                 <div id="usersList">Loading...</div>
@@ -220,57 +216,23 @@
         </div>
         
         <div id="depositsSection" class="hidden">
-            <div class="card">
-                <h3>💰 Deposit Requests</h3>
-                <div id="depositsList">Loading...</div>
-            </div>
+            <div class="card"><h3>💰 Deposit Requests</h3><div id="depositsList">Loading...</div></div>
         </div>
         
         <div id="withdrawalsSection" class="hidden">
-            <div class="card">
-                <h3>💸 Withdrawal Requests</h3>
-                <div id="withdrawalsList">Loading...</div>
-            </div>
+            <div class="card"><h3>💸 Withdrawal Requests</h3><div id="withdrawalsList">Loading...</div></div>
         </div>
         
         <div id="noticeSection" class="hidden">
-            <div class="card">
-                <h3>📢 Notice Board</h3>
-                <textarea id="noticeText" rows="3" placeholder="Enter notice text..." style="width:100%; padding:10px; border-radius:8px; background:#fff; color:#333; border:1px solid #ddd;"></textarea>
-                <button onclick="updateNotice()">Update Notice</button>
-                <div id="noticeMsg" style="margin-top:10px;"></div>
-            </div>
+            <div class="card"><h3>📢 Notice Board</h3><textarea id="noticeText" rows="3" style="width:100%; padding:10px;"></textarea><button onclick="updateNotice()">Update Notice</button><div id="noticeMsg"></div></div>
         </div>
         
         <div id="settingsSection" class="hidden">
-            <div class="card">
-                <h3>🔐 Change Password</h3>
-                <input type="password" id="oldPass" placeholder="Old Password">
-                <input type="password" id="newPass" placeholder="New Password">
-                <button onclick="changePassword()">Update</button>
-                <div id="passMsg"></div>
-            </div>
-            <div class="card">
-                <h3>🏧 UPI ID Settings</h3>
-                <input type="text" id="upiId" placeholder="UPI ID" value="ganeshpatil99@slc">
-                <button onclick="updateUPI()">Update UPI ID</button>
-                <div id="upiMsg"></div>
-            </div>
-            <div class="card">
-                <h3>👤 Payee Name Settings</h3>
-                <input type="text" id="payeeName" placeholder="Payee Name" value="Ganesh Siddharth Patil">
-                <button onclick="updatePayeeName()">Update Payee Name</button>
-                <div id="payeeMsg"></div>
-            </div>
-            <div class="card">
-                <h3>📱 Support Contact</h3>
-                <input type="text" id="whatsappNumber" placeholder="WhatsApp Number (e.g., 919019941895)">
-                <button onclick="updateWhatsApp()">Update WhatsApp</button>
-                <div id="whatsappMsg"></div>
-            </div>
+            <div class="card"><h3>🔐 Change Password</h3><input type="password" id="oldPass" placeholder="Old Password"><input type="password" id="newPass" placeholder="New Password"><button onclick="changePassword()">Update</button><div id="passMsg"></div></div>
+            <div class="card"><h3>🏧 UPI ID Settings</h3><input type="text" id="upiId" placeholder="UPI ID" value="ganeshpatil99@slc"><button onclick="updateUPI()">Update UPI ID</button><div id="upiMsg"></div></div>
+            <div class="card"><h3>👤 Payee Name</h3><input type="text" id="payeeName" placeholder="Payee Name" value="Ganesh Siddharth Patil"><button onclick="updatePayeeName()">Update</button><div id="payeeMsg"></div></div>
         </div>
         
-        <!-- NEW: Live Chat Section -->
         <div id="livechatSection" class="hidden">
             <div class="livechat-card">
                 <h3>💬 Live Support Chat</h3>
@@ -336,12 +298,10 @@
     
     // Load users with today's bidding amount
     async function loadUsersWithTodayBids() {
-        // Get today's start timestamp
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
         
-        // Fetch all bids from today to calculate total points per user
-        const bidsSnapshot = await db.collection('bids').where('timestamp', '>=', todayStart).get();
+        const bidsSnapshot = await db.collection('bids').where('createdAt', '>=', todayStart).get();
         todayBidMap.clear();
         bidsSnapshot.forEach(doc => {
             const bid = doc.data();
@@ -350,7 +310,6 @@
             todayBidMap.set(userId, (todayBidMap.get(userId) || 0) + points);
         });
         
-        // Load users with created order (newest first base)
         db.collection('users').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
             allUsers = [];
             snapshot.forEach(doc => {
@@ -368,7 +327,7 @@
     async function refreshTodayBidsForUsers() {
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
-        const bidsSnapshot = await db.collection('bids').where('timestamp', '>=', todayStart).get();
+        const bidsSnapshot = await db.collection('bids').where('createdAt', '>=', todayStart).get();
         todayBidMap.clear();
         bidsSnapshot.forEach(doc => {
             const bid = doc.data();
@@ -409,7 +368,6 @@
     function displayFilteredUsers() {
         let filteredUsers = [...allUsers];
         
-        // Apply search filter
         if (currentSearchTerm) {
             filteredUsers = filteredUsers.filter(user => {
                 const name = (user.name || '').toLowerCase();
@@ -418,14 +376,8 @@
             });
         }
         
-        // Apply sorting
         if (currentSortType === 'newest') {
-            // Already sorted by createdAt desc from Firestore, but ensure consistency
-            filteredUsers.sort((a, b) => {
-                const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(0);
-                const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(0);
-                return dateB - dateA;
-            });
+            filteredUsers.sort((a, b) => (b.createdAt?.toDate?.() || new Date(0)) - (a.createdAt?.toDate?.() || new Date(0)));
         } else if (currentSortType === 'balanceHigh') {
             filteredUsers.sort((a, b) => (b.balance || 0) - (a.balance || 0));
         } else if (currentSortType === 'balanceLow') {
@@ -482,12 +434,11 @@
         });
     }
     
-    // Open separate page for user bids
     function openUserBidsPage(uid, name) {
         window.open(`user-bids.html?uid=${uid}&name=${encodeURIComponent(name)}`, '_blank');
     }
     
-    // ============ MARKETS - Collapsible View (Click on Market Name to show/hide edit details) ============
+    // ============ MARKETS - Collapsible View ============
     let openMarketId = null;
     
     function toggleMarketDetails(marketId) {
@@ -497,7 +448,6 @@
                 detailDiv.classList.remove('open');
                 openMarketId = null;
             } else {
-                // Close previously open
                 if (openMarketId) {
                     const prevDiv = document.getElementById(`market_detail_${openMarketId}`);
                     if (prevDiv) prevDiv.classList.remove('open');
@@ -705,9 +655,8 @@
         }
     }
     
-    // ============ FIXED: OPEN winners only credit OPEN phase bets ============
+    // FIXED: OPEN winners credited, losers marked as lost
     async function creditOpenWinners(marketId, marketName, openPana, openDigit) {
-        // Only get bids with bidType = 'Open' (placed during OPEN bidding)
         const bids = await db.collection('bids')
             .where('marketId', '==', marketId)
             .where('status', '==', 'pending')
@@ -717,8 +666,14 @@
         for (const bidDoc of bids.docs) {
             const bid = bidDoc.data();
             let isWinning = false;
-            if (bid.gameType === 'Single Digit' && bid.value === openDigit) isWinning = true;
-            if ((bid.gameType === 'Single Pana' || bid.gameType === 'Double Pana' || bid.gameType === 'Triple Pana') && bid.value === openPana) isWinning = true;
+            
+            if (bid.gameType === 'Single Digit' && bid.value === openDigit) {
+                isWinning = true;
+            }
+            if ((bid.gameType === 'Single Pana' || bid.gameType === 'Double Pana' || bid.gameType === 'Triple Pana') && bid.value === openPana) {
+                isWinning = true;
+            }
+            
             if (isWinning) {
                 const winAmount = bid.points * (gameRates[bid.gameType] || 10);
                 await bidDoc.ref.update({ status: 'won' });
@@ -733,11 +688,14 @@
                     description: `🎉 Won on ${marketName} (OPEN) - ${bid.gameType}: ${bid.value}`, 
                     date: new Date() 
                 });
+            } else {
+                // LOSER: Mark as lost
+                await bidDoc.ref.update({ status: 'lost' });
             }
         }
     }
     
-    // ============ FIXED: CLOSE winners only credit CLOSE phase bets ============
+    // FIXED: CLOSE winners credited, losers marked as lost
     async function creditCloseWinners(marketId, marketName, openPana, openDigit, closePana, closeDigit, jodi) {
         const bids = await db.collection('bids')
             .where('marketId', '==', marketId)
@@ -748,27 +706,27 @@
             const bid = bidDoc.data();
             let isWinning = false;
             
-            // Single Digit - only if placed during CLOSE bidding
+            // Single Digit - only CLOSE phase
             if (bid.gameType === 'Single Digit' && bid.bidType === 'Close' && bid.value === closeDigit) {
                 isWinning = true;
             }
-            // Jodi (only during CLOSE phase)
+            // Jodi
             else if (bid.gameType === 'Jodi' && bid.value === jodi) {
                 isWinning = true;
             }
-            // Pana bets - only if placed during CLOSE bidding
+            // Pana - only CLOSE phase
             else if ((bid.gameType === 'Single Pana' || bid.gameType === 'Double Pana' || bid.gameType === 'Triple Pana') && bid.bidType === 'Close' && bid.value === closePana) {
                 isWinning = true;
             }
-            // Half Sangam A (Open Pana + Close Digit) - no bidType needed
+            // Half Sangam A
             else if (bid.gameType === 'Half Sangam A' && bid.value === `${openPana}-${closeDigit}`) {
                 isWinning = true;
             }
-            // Half Sangam B (Open Digit + Close Pana) - no bidType needed
+            // Half Sangam B
             else if (bid.gameType === 'Half Sangam B' && bid.value === `${openDigit}-${closePana}`) {
                 isWinning = true;
             }
-            // Full Sangam (Open Pana + Close Pana) - no bidType needed
+            // Full Sangam
             else if (bid.gameType === 'Full Sangam' && bid.value === `${openPana}-${closePana}`) {
                 isWinning = true;
             }
@@ -788,7 +746,10 @@
                     date: new Date() 
                 });
             } else {
-                if (bid.status === 'pending') await bidDoc.ref.update({ status: 'lost' });
+                // LOSER: Mark as lost
+                if (bid.status === 'pending') {
+                    await bidDoc.ref.update({ status: 'lost' });
+                }
             }
         }
     }
@@ -824,7 +785,7 @@
         if (confirm('Delete this market permanently?')) await db.collection('markets').doc(id).delete();
     }
     
-    // ============ DEPOSITS (unchanged) ============
+    // ============ DEPOSITS ============
     function loadDeposits() {
         db.collection('transactions').where('type', '==', 'credit').where('status', '==', 'Pending').onSnapshot(async (snapshot) => {
             let deposits = [];
@@ -865,7 +826,7 @@
         if (confirm('Reject this deposit?')) await db.collection('transactions').doc(id).update({ status: 'Rejected' });
     }
     
-    // ============ WITHDRAWALS (unchanged) ============
+    // ============ WITHDRAWALS ============
     function loadWithdrawals() {
         db.collection('withdrawRequests').where('status', '==', 'Pending').onSnapshot(async (snapshot) => {
             let withdrawals = [];
@@ -903,7 +864,7 @@
         if (confirm('Reject this withdrawal?')) await db.collection('withdrawRequests').doc(id).update({ status: 'Rejected' });
     }
     
-    // ============ USER MANAGEMENT FUNCTIONS (unchanged) ============
+    // ============ USER MANAGEMENT FUNCTIONS ============
     async function updateBalance(uid, action) {
         const amount = prompt(`Enter amount to ${action === 'add' ? 'ADD' : 'REMOVE'}:`);
         if (!amount || isNaN(amount) || parseInt(amount) <= 0) { alert('Please enter a valid amount'); return; }
