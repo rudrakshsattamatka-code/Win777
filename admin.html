@@ -705,8 +705,15 @@
         }
     }
     
+    // ============ FIXED: OPEN winners only credit OPEN phase bets ============
     async function creditOpenWinners(marketId, marketName, openPana, openDigit) {
-        const bids = await db.collection('bids').where('marketId', '==', marketId).where('status', '==', 'pending').get();
+        // Only get bids with bidType = 'Open' (placed during OPEN bidding)
+        const bids = await db.collection('bids')
+            .where('marketId', '==', marketId)
+            .where('status', '==', 'pending')
+            .where('bidType', '==', 'Open')
+            .get();
+        
         for (const bidDoc of bids.docs) {
             const bid = bidDoc.data();
             let isWinning = false;
@@ -718,29 +725,68 @@
                 const userRef = db.collection('users').doc(bid.userId);
                 const userDoc = await userRef.get();
                 await userRef.update({ balance: (userDoc.data().balance || 0) + winAmount });
-                await db.collection('transactions').add({ userId: bid.userId, type: 'credit', amount: winAmount, status: 'Completed', description: `🎉 Won on ${marketName} (OPEN) - ${bid.gameType}: ${bid.value}`, date: new Date() });
+                await db.collection('transactions').add({ 
+                    userId: bid.userId, 
+                    type: 'credit', 
+                    amount: winAmount, 
+                    status: 'Completed', 
+                    description: `🎉 Won on ${marketName} (OPEN) - ${bid.gameType}: ${bid.value}`, 
+                    date: new Date() 
+                });
             }
         }
     }
     
+    // ============ FIXED: CLOSE winners only credit CLOSE phase bets ============
     async function creditCloseWinners(marketId, marketName, openPana, openDigit, closePana, closeDigit, jodi) {
-        const bids = await db.collection('bids').where('marketId', '==', marketId).where('status', '==', 'pending').get();
+        const bids = await db.collection('bids')
+            .where('marketId', '==', marketId)
+            .where('status', '==', 'pending')
+            .get();
+        
         for (const bidDoc of bids.docs) {
             const bid = bidDoc.data();
             let isWinning = false;
-            if (bid.gameType === 'Single Digit' && bid.value === closeDigit) isWinning = true;
-            if (bid.gameType === 'Jodi' && bid.value === jodi) isWinning = true;
-            if ((bid.gameType === 'Single Pana' || bid.gameType === 'Double Pana' || bid.gameType === 'Triple Pana') && bid.value === closePana) isWinning = true;
-            if (bid.gameType === 'Half Sangam A' && bid.value === `${openPana}-${closeDigit}`) isWinning = true;
-            if (bid.gameType === 'Half Sangam B' && bid.value === `${openDigit}-${closePana}`) isWinning = true;
-            if (bid.gameType === 'Full Sangam' && bid.value === `${openPana}-${closePana}`) isWinning = true;
+            
+            // Single Digit - only if placed during CLOSE bidding
+            if (bid.gameType === 'Single Digit' && bid.bidType === 'Close' && bid.value === closeDigit) {
+                isWinning = true;
+            }
+            // Jodi (only during CLOSE phase)
+            else if (bid.gameType === 'Jodi' && bid.value === jodi) {
+                isWinning = true;
+            }
+            // Pana bets - only if placed during CLOSE bidding
+            else if ((bid.gameType === 'Single Pana' || bid.gameType === 'Double Pana' || bid.gameType === 'Triple Pana') && bid.bidType === 'Close' && bid.value === closePana) {
+                isWinning = true;
+            }
+            // Half Sangam A (Open Pana + Close Digit) - no bidType needed
+            else if (bid.gameType === 'Half Sangam A' && bid.value === `${openPana}-${closeDigit}`) {
+                isWinning = true;
+            }
+            // Half Sangam B (Open Digit + Close Pana) - no bidType needed
+            else if (bid.gameType === 'Half Sangam B' && bid.value === `${openDigit}-${closePana}`) {
+                isWinning = true;
+            }
+            // Full Sangam (Open Pana + Close Pana) - no bidType needed
+            else if (bid.gameType === 'Full Sangam' && bid.value === `${openPana}-${closePana}`) {
+                isWinning = true;
+            }
+            
             if (isWinning) {
                 const winAmount = bid.points * (gameRates[bid.gameType] || 10);
                 await bidDoc.ref.update({ status: 'won' });
                 const userRef = db.collection('users').doc(bid.userId);
                 const userDoc = await userRef.get();
                 await userRef.update({ balance: (userDoc.data().balance || 0) + winAmount });
-                await db.collection('transactions').add({ userId: bid.userId, type: 'credit', amount: winAmount, status: 'Completed', description: `🎉 Won on ${marketName} - ${bid.gameType}: ${bid.value}`, date: new Date() });
+                await db.collection('transactions').add({ 
+                    userId: bid.userId, 
+                    type: 'credit', 
+                    amount: winAmount, 
+                    status: 'Completed', 
+                    description: `🎉 Won on ${marketName} - ${bid.gameType}: ${bid.value}`, 
+                    date: new Date() 
+                });
             } else {
                 if (bid.status === 'pending') await bidDoc.ref.update({ status: 'lost' });
             }
