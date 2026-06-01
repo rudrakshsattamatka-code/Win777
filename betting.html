@@ -435,6 +435,11 @@
             font-size: 18px;
             font-weight: 700;
             cursor: pointer;
+            transition: all 0.2s;
+        }
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .message {
@@ -512,6 +517,22 @@
             font-size: 13px;
             color: #856404;
         }
+        
+        /* Loading overlay for submit button */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #fff;
+            border-top: 2px solid #1a1a2e;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -551,7 +572,7 @@
                 <div class="summary-value" id="totalPoints">₹0</div>
             </div>
         </div>
-        <button class="submit-btn" onclick="submitBids()">💰 PLACE BETS</button>
+        <button class="submit-btn" id="submitBtn" onclick="submitBids()">💰 PLACE BETS</button>
         <div id="message" class="message hidden"></div>
     </div>
 </div>
@@ -594,6 +615,7 @@
     let selectedJodis = [];
     let marketOpenEndTime = null;
     let marketCloseEndTime = null;
+    let isSubmitting = false;
     
     const gameRates = {
         'Single Digit': 10, 'Jodi': 100, 'Single Pana': 160,
@@ -762,7 +784,6 @@
         updateSummary();
     }
     
-    // FIXED: No auto-changing of points, user can enter any value
     function updatePoints() {
         const pointsInput = document.getElementById('pointsInput');
         if (pointsInput) {
@@ -774,7 +795,6 @@
         }
     }
     
-    // FIXED: Only validate minimum at add time, not while typing
     function getCurrentPoints() {
         const pointsInput = document.getElementById('pointsInput');
         if (pointsInput) {
@@ -987,10 +1007,12 @@
         d.innerText = msg;
         d.className = `message ${isError ? 'error' : 'success'}`;
         d.classList.remove('hidden');
-        setTimeout(() => d.classList.add('hidden'), 4000);
+        setTimeout(() => d.classList.add('hidden'), 3000);
     }
     
+    // OPTIMIZED: Batch write using Promise.all for faster submission
     async function submitBids() {
+        if(isSubmitting) return;
         if(bids.length === 0) { showMessage('No bids to place', true); return; }
         if(!currentUser) return;
         
@@ -1002,34 +1024,80 @@
         
         const total = bids.reduce((s,b)=>s+b.points,0);
         
-        // FIXED: Check minimum ₹5 at submission time
         if (total < 5) {
             showMessage('⚠️ Minimum total bid amount is ₹5. Please add more bids.', true);
             return;
         }
         
         if(userData.balance < total) { showMessage(`Insufficient balance! Need ₹${total}`, true); return; }
+        
+        // Disable submit button and show loading state
+        isSubmitting = true;
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<span class="loading-spinner"></span> Processing...';
+        submitBtn.disabled = true;
+        
         const newBalance = userData.balance - total;
+        const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+        
         try {
-            await db.collection('users').doc(currentUser.uid).update({ balance: newBalance });
-            for(let b of bids) { 
-                await db.collection('bids').add({ 
-                    userId: currentUser.uid, market: b.market, marketId: b.marketId, gameType: b.type,
-                    bidType: b.option || (currentStatus === 'open' ? 'Open' : 'Close'), value: b.value,
-                    points: b.points, status: 'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                }); 
+            // Use Firestore batch for atomic operations
+            const batch = db.batch();
+            
+            // 1. Update user balance
+            const userRef = db.collection('users').doc(currentUser.uid);
+            batch.update(userRef, { balance: newBalance });
+            
+            // 2. Add all bids in batch
+            for(let b of bids) {
+                const bidRef = db.collection('bids').doc();
+                batch.set(bidRef, {
+                    userId: currentUser.uid,
+                    market: b.market,
+                    marketId: b.marketId,
+                    gameType: b.type,
+                    bidType: b.option || (currentStatus === 'open' ? 'Open' : 'Close'),
+                    value: b.value,
+                    points: b.points,
+                    status: 'pending',
+                    createdAt: timestamp
+                });
             }
-            await db.collection('transactions').add({ 
-                userId: currentUser.uid, type: 'debit', amount: total, status: 'Completed',
-                description: `Bid placed on ${currentMarket} (${bids.length} bids)`, date: firebase.firestore.FieldValue.serverTimestamp()
+            
+            // 3. Add transaction record
+            const transactionRef = db.collection('transactions').doc();
+            batch.set(transactionRef, {
+                userId: currentUser.uid,
+                type: 'debit',
+                amount: total,
+                status: 'Completed',
+                description: `Bid placed on ${currentMarket} (${bids.length} bids)`,
+                date: timestamp
             });
+            
+            // Execute all writes in one batch (instant!)
+            await batch.commit();
+            
+            // Update local data
+            userData.balance = newBalance;
+            document.getElementById('userBalance').innerText = newBalance;
+            
             showMessage(`✅ ₹${total} bids placed successfully!`, false);
-            bids = []; updateSummary();
+            
+            // Clear bids and reset UI
+            bids = [];
+            updateSummary();
             renderGamePanel();
-            const updatedUser = await db.collection('users').doc(currentUser.uid).get();
-            userData = updatedUser.data();
-            document.getElementById('userBalance').innerText = userData?.balance || 0;
-        } catch(e) { showMessage('Error: ' + e.message, true); }
+            
+        } catch(e) { 
+            showMessage('Error: ' + e.message, true);
+        } finally {
+            // Re-enable submit button
+            isSubmitting = false;
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
     }
     
     function setOpenClose(value) { 
