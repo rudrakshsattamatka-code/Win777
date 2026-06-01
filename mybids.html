@@ -56,9 +56,24 @@
             color: #1565c0;
             font-size: 11px;
             padding: 8px 12px;
-            margin: 0 12px;
+            margin: 0 12px 12px 12px;
             border-radius: 8px;
             text-align: center;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 3px solid #e9ecef;
+            border-top: 3px solid #ffd700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -84,14 +99,22 @@
         <div class="delete-info">
             📋 Bids older than 24 hours are automatically deleted
         </div>
-        <div id="bidsList"></div>
+        <div id="bidsList">
+            <div style="display: flex; justify-content: center; padding: 40px;">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
     </div>
     
     <div id="transactionsTab" class="hidden">
         <div style="text-align: center;">
             <button class="clear-btn" onclick="clearAllTransactions()">🗑️ Clear All Transactions</button>
         </div>
-        <div id="transactionsList"></div>
+        <div id="transactionsList">
+            <div style="display: flex; justify-content: center; padding: 40px;">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
     </div>
     
     <div id="ratesTab" class="hidden">
@@ -166,16 +189,31 @@
         twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
         
         try {
-            const oldBids = await db.collection('bids')
+            // Get all bids for this user
+            const allBids = await db.collection('bids')
                 .where('userId', '==', user.uid)
-                .where('createdAt', '<=', twentyFourHoursAgo)
                 .get();
             
-            if (!oldBids.empty) {
-                const batch = db.batch();
-                oldBids.forEach(doc => batch.delete(doc.ref));
+            const batch = db.batch();
+            let deleteCount = 0;
+            
+            allBids.forEach(doc => {
+                const bid = doc.data();
+                let bidDate = null;
+                if (bid.createdAt) {
+                    if (bid.createdAt.toDate) bidDate = bid.createdAt.toDate();
+                    else if (bid.createdAt.seconds) bidDate = new Date(bid.createdAt.seconds * 1000);
+                }
+                
+                if (bidDate && bidDate < twentyFourHoursAgo) {
+                    batch.delete(doc.ref);
+                    deleteCount++;
+                }
+            });
+            
+            if (deleteCount > 0) {
                 await batch.commit();
-                console.log(`Deleted ${oldBids.size} old bids`);
+                console.log(`Deleted ${deleteCount} old bids`);
             }
         } catch (error) {
             console.error("Error deleting old bids:", error);
@@ -191,16 +229,30 @@
         twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
         
         try {
-            const oldTransactions = await db.collection('transactions')
+            const allTransactions = await db.collection('transactions')
                 .where('userId', '==', user.uid)
-                .where('date', '<=', twentyFourHoursAgo)
                 .get();
             
-            if (!oldTransactions.empty) {
-                const batch = db.batch();
-                oldTransactions.forEach(doc => batch.delete(doc.ref));
+            const batch = db.batch();
+            let deleteCount = 0;
+            
+            allTransactions.forEach(doc => {
+                const trans = doc.data();
+                let transDate = null;
+                if (trans.date) {
+                    if (trans.date.toDate) transDate = trans.date.toDate();
+                    else if (trans.date.seconds) transDate = new Date(trans.date.seconds * 1000);
+                }
+                
+                if (transDate && transDate < twentyFourHoursAgo) {
+                    batch.delete(doc.ref);
+                    deleteCount++;
+                }
+            });
+            
+            if (deleteCount > 0) {
                 await batch.commit();
-                console.log(`Deleted ${oldTransactions.size} old transactions`);
+                console.log(`Deleted ${deleteCount} old transactions`);
             }
         } catch (error) {
             console.error("Error deleting old transactions:", error);
@@ -253,15 +305,15 @@
         currentUserId = user.uid;
         const container = document.getElementById('bidsList');
         
-        container.innerHTML = '<div class="no-data">🔄 Loading bids...</div>';
+        container.innerHTML = '<div style="display: flex; justify-content: center; padding: 40px;"><div class="loading-spinner"></div></div>';
         
         try {
             // Run cleanup first
             await deleteOldBids();
             
+            // Get all bids for this user (NO orderBy to avoid index requirement)
             const bidsSnapshot = await db.collection('bids')
                 .where('userId', '==', currentUserId)
-                .orderBy('createdAt', 'desc')
                 .get();
             
             if (bidsSnapshot.empty) {
@@ -270,7 +322,18 @@
             }
             
             let bids = [];
-            bidsSnapshot.forEach(doc => { bids.push({ id: doc.id, ...doc.data() }); });
+            bidsSnapshot.forEach(doc => {
+                const bid = doc.data();
+                let bidDate = null;
+                if (bid.createdAt) {
+                    if (bid.createdAt.toDate) bidDate = bid.createdAt.toDate();
+                    else if (bid.createdAt.seconds) bidDate = new Date(bid.createdAt.seconds * 1000);
+                }
+                bids.push({ id: doc.id, ...bid, dateObj: bidDate || new Date(0) });
+            });
+            
+            // Sort manually by date (newest first)
+            bids.sort((a, b) => b.dateObj - a.dateObj);
             
             let html = '';
             
@@ -291,7 +354,9 @@
                 }
                 
                 let bidDate = 'Pending';
-                if (b.createdAt && b.createdAt.toDate) bidDate = b.createdAt.toDate().toLocaleString();
+                if (b.dateObj && b.dateObj.getTime() > 0) {
+                    bidDate = b.dateObj.toLocaleString();
+                }
                 
                 html += `
                     <div class="bid-card">
@@ -312,6 +377,7 @@
             
             container.innerHTML = html;
         } catch (error) {
+            console.error("Error loading bids:", error);
             container.innerHTML = `<div class="error-box">❌ Error loading bids: ${error.message}</div>`;
         }
     }
@@ -321,7 +387,7 @@
         if (!user) return;
         
         const container = document.getElementById('transactionsList');
-        container.innerHTML = '<div class="no-data">🔄 Loading transactions...</div>';
+        container.innerHTML = '<div style="display: flex; justify-content: center; padding: 40px;"><div class="loading-spinner"></div></div>';
         
         try {
             // Run cleanup on transactions
@@ -329,7 +395,6 @@
             
             const transactionsSnapshot = await db.collection('transactions')
                 .where('userId', '==', user.uid)
-                .orderBy('date', 'desc')
                 .get();
             
             if (transactionsSnapshot.empty) {
@@ -338,11 +403,22 @@
             }
             
             let transactions = [];
-            transactionsSnapshot.forEach(doc => { transactions.push({ id: doc.id, ...doc.data() }); });
+            transactionsSnapshot.forEach(doc => {
+                const trans = doc.data();
+                let transDate = null;
+                if (trans.date) {
+                    if (trans.date.toDate) transDate = trans.date.toDate();
+                    else if (trans.date.seconds) transDate = new Date(trans.date.seconds * 1000);
+                }
+                transactions.push({ id: doc.id, ...trans, dateObj: transDate || new Date(0) });
+            });
+            
+            // Sort manually by date (newest first)
+            transactions.sort((a, b) => b.dateObj - a.dateObj);
             
             let html = '';
             for (const t of transactions) {
-                const date = t.date?.toDate().toLocaleString() || 'Pending';
+                const date = t.dateObj && t.dateObj.getTime() > 0 ? t.dateObj.toLocaleString() : 'Pending';
                 const isCredit = t.type === 'credit';
                 let statusColor = '#ffc107', statusText = '⏳ Pending';
                 if (t.status === 'Completed') { statusColor = '#28a745'; statusText = '✅ Completed'; }
@@ -364,6 +440,7 @@
             }
             container.innerHTML = html;
         } catch (error) {
+            console.error("Error loading transactions:", error);
             container.innerHTML = `<div class="error-box">❌ Error loading transactions: ${error.message}</div>`;
         }
     }
