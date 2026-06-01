@@ -698,8 +698,10 @@
         }
     }
     
-    // FIXED: OPEN winners credited, losers marked as lost (Jodi and Sangam stay PENDING)
+    // FIXED: OPEN winners credited, losers marked as lost
+    // IMPORTANT: Jodi, Half Sangam, Full Sangam are NOT processed here - they stay PENDING
     async function creditOpenWinners(marketId, marketName, openPana, openDigit) {
+        // Only get OPEN phase pending bets
         const bids = await db.collection('bids')
             .where('marketId', '==', marketId)
             .where('status', '==', 'pending')
@@ -710,15 +712,15 @@
             const bid = bidDoc.data();
             let isWinning = false;
             
-            // Only OPEN phase game types (Single Digit and Pana)
+            // Only process OPEN phase game types (Single Digit and Pana)
             if (bid.gameType === 'Single Digit' && bid.value === openDigit) {
                 isWinning = true;
             }
             else if ((bid.gameType === 'Single Pana' || bid.gameType === 'Double Pana' || bid.gameType === 'Triple Pana') && bid.value === openPana) {
                 isWinning = true;
             }
-            // Jodi, Half Sangam A, Half Sangam B, Full Sangam are NOT processed here
-            // They remain PENDING until CLOSE result
+            // IMPORTANT: Jodi, Half Sangam A, Half Sangam B, Full Sangam are NOT processed here
+            // They remain PENDING until CLOSE result is declared
             
             if (isWinning) {
                 const winAmount = bid.points * (gameRates[bid.gameType] || 10);
@@ -742,7 +744,9 @@
     }
     
     // FIXED: CLOSE winners credited, losers marked as lost
+    // This processes ALL remaining pending bets including Jodi, Half Sangam, Full Sangam
     async function creditCloseWinners(marketId, marketName, openPana, openDigit, closePana, closeDigit, jodi) {
+        // Get all remaining pending bets for this market
         const bids = await db.collection('bids')
             .where('marketId', '==', marketId)
             .where('status', '==', 'pending')
