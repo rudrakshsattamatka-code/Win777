@@ -33,6 +33,11 @@
         .clock-time { font-size: 24px; font-weight: bold; color: #ffd700; font-family: monospace; letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,215,0,0.5); }
         .clock-date { font-size: 13px; color: #ffd700; background: #1a1510; padding: 4px 12px; border-radius: 20px; border: 1px solid #ffd70040; }
         
+        /* Loading Spinner */
+        .loader { display: flex; justify-content: center; align-items: center; padding: 40px; }
+        .spinner { width: 40px; height: 40px; border: 3px solid #ffd70040; border-top: 3px solid #ffd700; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
         .games-row { display: flex; justify-content: space-around; background: linear-gradient(135deg, #1a1510, #0f0c08); margin: 10px; padding: 12px; border-radius: 20px; border: 1px solid #ffd70020; }
         .game-icon { text-align: center; color: #aa9c7a; font-size: 11px; cursor: pointer; transition: all 0.3s; }
         .game-icon:hover { transform: translateY(-5px); color: #ffd700; }
@@ -146,7 +151,11 @@
         </div>
     </div>
     
-    <div id="marketsList"></div>
+    <div id="marketsList">
+        <div class="loader">
+            <div class="spinner"></div>
+        </div>
+    </div>
     
     <div class="bottom-nav">
         <div class="nav-item active" onclick="location.reload()">
@@ -275,17 +284,28 @@
     
     let marketsData = [];
     let currentUserData = null;
+    let cachedMarketsHtml = null;
+    let lastMarketDataHash = null;
+    let cachedServerTime = null;
+    let lastServerTimeFetch = 0;
     
-    // Get Firebase Server Time
+    // Get Firebase Server Time (Cached for 30 seconds - Immune to device time changes)
     async function getServerTime() {
+        const now = Date.now();
+        if (cachedServerTime && (now - lastServerTimeFetch) < 30000) {
+            return cachedServerTime;
+        }
+        
         try {
             const docRef = db.collection('settings').doc('servertime');
             await docRef.set({ timestamp: firebase.firestore.FieldValue.serverTimestamp() });
             const doc = await docRef.get();
-            return doc.data().timestamp.toDate();
+            cachedServerTime = doc.data().timestamp.toDate();
+            lastServerTimeFetch = now;
+            return cachedServerTime;
         } catch (error) {
             console.error("Error getting server time:", error);
-            return new Date();
+            return cachedServerTime || new Date();
         }
     }
     
@@ -402,10 +422,27 @@
         const container = document.getElementById('marketsList');
         if (marketsData.length === 0) {
             container.innerHTML = '<div style="text-align:center; color:#aa9c7a; padding:40px;">No markets available. Admin will add soon.</div>';
+            cachedMarketsHtml = null;
+            lastMarketDataHash = null;
             return;
         }
         
-        container.innerHTML = '';
+        // Only re-render if data changed
+        const dataHash = JSON.stringify(marketsData.map(m => ({ 
+            id: m.id, 
+            status: m.status, 
+            openPana: m.openPana, 
+            closePana: m.closePana,
+            jodi: m.jodi,
+            openDigit: m.openDigit
+        })));
+        
+        if (cachedMarketsHtml && lastMarketDataHash === dataHash) {
+            return; // No changes, skip re-render
+        }
+        
+        lastMarketDataHash = dataHash;
+        let html = '';
         
         marketsData.forEach(market => {
             const isPlayable = (market.status === 'open' || market.status === 'close') && market.originalStatus !== 'holiday';
@@ -427,7 +464,7 @@
             const openBidEnd12 = formatTimeTo12Hour(market.openBidEnd);
             const closeBidEnd12 = formatTimeTo12Hour(market.closeBidEnd);
             
-            container.innerHTML += `
+            html += `
                 <div class="market-card">
                     <div class="market-header">
                         <span class="market-name">${market.name}</span>
@@ -457,6 +494,9 @@
                 </div>
             `;
         });
+        
+        cachedMarketsHtml = html;
+        container.innerHTML = html;
     }
     
     async function loadUserData() {
@@ -606,12 +646,13 @@
     async function init() {
         listenToMarkets();
         listenToNotice();
-        // Update clock every second using Firebase server time
+        // Update clock every 5 seconds (reduced from 1 second for better performance)
         setInterval(async () => {
             await updateLiveClock();
-        }, 1000);
+        }, 5000);
     }
     
+    // Update balance every 30 seconds instead of 5 seconds
     setInterval(() => {
         if (auth.currentUser) {
             db.collection('users').doc(auth.currentUser.uid).get().then(doc => {
@@ -621,7 +662,7 @@
                 }
             });
         }
-    }, 5000);
+    }, 30000);
     
     auth.onAuthStateChanged(user => { 
         if (!user) window.location.href = 'index.html'; 
