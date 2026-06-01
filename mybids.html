@@ -29,7 +29,6 @@
         .bid-row { display: flex; justify-content: space-between; margin-bottom: 10px; padding: 5px 0; border-bottom: 1px solid #e9ecef; }
         .bid-label { color: #6c757d; font-size: 13px; }
         .bid-value { color: #1a1a2e; font-weight: 600; font-size: 14px; }
-        .win-amount { color: #28a745; font-size: 18px; font-weight: bold; }
         .bid-footer { background: #f8f9fa; padding: 10px 15px; font-size: 11px; color: #6c757d; text-align: right; border-top: 1px solid #e9ecef; }
         .no-data { text-align: center; color: #6c757d; padding: 60px 20px; }
         
@@ -179,8 +178,10 @@
     
     let currentUserId = null;
     let cleanupInterval = null;
+    let bidsListener = null;
+    let transactionsListener = null;
     
-    // Auto-delete bids older than 24 hours
+    // Auto-delete bids older than 24 hours (using collection group query to avoid index issues)
     async function deleteOldBids() {
         const user = auth.currentUser;
         if (!user) return;
@@ -189,16 +190,16 @@
         twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
         
         try {
-            // Get all bids for this user
-            const allBids = await db.collection('bids')
-                .where('userId', '==', user.uid)
-                .get();
+            // Get all bids for this user without any where clause (fetch all and filter locally)
+            const allBids = await db.collection('bids').get();
             
             const batch = db.batch();
             let deleteCount = 0;
             
             allBids.forEach(doc => {
                 const bid = doc.data();
+                if (bid.userId !== user.uid) return;
+                
                 let bidDate = null;
                 if (bid.createdAt) {
                     if (bid.createdAt.toDate) bidDate = bid.createdAt.toDate();
@@ -220,7 +221,7 @@
         }
     }
     
-    // Auto-delete old transactions (older than 24 hours)
+    // Auto-delete old transactions
     async function deleteOldTransactions() {
         const user = auth.currentUser;
         if (!user) return;
@@ -229,15 +230,15 @@
         twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
         
         try {
-            const allTransactions = await db.collection('transactions')
-                .where('userId', '==', user.uid)
-                .get();
+            const allTransactions = await db.collection('transactions').get();
             
             const batch = db.batch();
             let deleteCount = 0;
             
             allTransactions.forEach(doc => {
                 const trans = doc.data();
+                if (trans.userId !== user.uid) return;
+                
                 let transDate = null;
                 if (trans.date) {
                     if (trans.date.toDate) transDate = trans.date.toDate();
@@ -276,11 +277,17 @@
         const user = auth.currentUser;
         if (!user) return;
         if (confirm("⚠️ WARNING: This will delete ALL your bid history permanently!\n\nThis action cannot be undone!\n\nAre you sure?")) {
-            const bids = await db.collection('bids').where('userId', '==', user.uid).get();
+            const allBids = await db.collection('bids').get();
             const batch = db.batch();
-            bids.forEach(doc => batch.delete(doc.ref));
+            let deleteCount = 0;
+            allBids.forEach(doc => {
+                if (doc.data().userId === user.uid) {
+                    batch.delete(doc.ref);
+                    deleteCount++;
+                }
+            });
             await batch.commit();
-            alert(`✅ Deleted ${bids.size} bids!`);
+            alert(`✅ Deleted ${deleteCount} bids!`);
             loadBids();
         }
     }
@@ -289,11 +296,17 @@
         const user = auth.currentUser;
         if (!user) return;
         if (confirm("⚠️ WARNING: This will delete ALL your transaction history permanently!\n\nThis action cannot be undone!\n\nAre you sure?")) {
-            const transactions = await db.collection('transactions').where('userId', '==', user.uid).get();
+            const allTransactions = await db.collection('transactions').get();
             const batch = db.batch();
-            transactions.forEach(doc => batch.delete(doc.ref));
+            let deleteCount = 0;
+            allTransactions.forEach(doc => {
+                if (doc.data().userId === user.uid) {
+                    batch.delete(doc.ref);
+                    deleteCount++;
+                }
+            });
             await batch.commit();
-            alert(`✅ Deleted ${transactions.size} transactions!`);
+            alert(`✅ Deleted ${deleteCount} transactions!`);
             loadTransactions();
         }
     }
@@ -311,26 +324,27 @@
             // Run cleanup first
             await deleteOldBids();
             
-            // Get all bids for this user (NO orderBy to avoid index requirement)
-            const bidsSnapshot = await db.collection('bids')
-                .where('userId', '==', currentUserId)
-                .get();
+            // Get ALL bids (no where clause to avoid index requirement)
+            const allBidsSnapshot = await db.collection('bids').get();
             
-            if (bidsSnapshot.empty) {
+            // Filter for current user
+            let bids = [];
+            allBidsSnapshot.forEach(doc => {
+                const bid = doc.data();
+                if (bid.userId === currentUserId) {
+                    let bidDate = null;
+                    if (bid.createdAt) {
+                        if (bid.createdAt.toDate) bidDate = bid.createdAt.toDate();
+                        else if (bid.createdAt.seconds) bidDate = new Date(bid.createdAt.seconds * 1000);
+                    }
+                    bids.push({ id: doc.id, ...bid, dateObj: bidDate || new Date(0) });
+                }
+            });
+            
+            if (bids.length === 0) {
                 container.innerHTML = '<div class="no-data">👑 No bids placed yet<br><small>Go to dashboard and place your first royal bid!</small></div>';
                 return;
             }
-            
-            let bids = [];
-            bidsSnapshot.forEach(doc => {
-                const bid = doc.data();
-                let bidDate = null;
-                if (bid.createdAt) {
-                    if (bid.createdAt.toDate) bidDate = bid.createdAt.toDate();
-                    else if (bid.createdAt.seconds) bidDate = new Date(bid.createdAt.seconds * 1000);
-                }
-                bids.push({ id: doc.id, ...bid, dateObj: bidDate || new Date(0) });
-            });
             
             // Sort manually by date (newest first)
             bids.sort((a, b) => b.dateObj - a.dateObj);
@@ -361,14 +375,14 @@
                 html += `
                     <div class="bid-card">
                         <div class="bid-header">
-                            <span class="market-name">👑 ${b.market || 'Unknown Market'}</span>
+                            <span class="market-name">👑 ${escapeHtml(b.market) || 'Unknown Market'}</span>
                             <span class="status-badge ${statusClass}">${statusText}</span>
                         </div>
                         <div class="bid-body">
-                            <div class="bid-row"><span class="bid-label">🎲 Game Type</span><span class="bid-value">${b.gameType || '-'}</span></div>
-                            <div class="bid-row"><span class="bid-label">🔢 Your Number</span><span class="bid-value" style="color:#ff4757; font-size:16px; font-weight:bold;">${b.value || '-'}</span></div>
+                            <div class="bid-row"><span class="bid-label">🎲 Game Type</span><span class="bid-value">${escapeHtml(b.gameType) || '-'}</span></div>
+                            <div class="bid-row"><span class="bid-label">🔢 Your Number</span><span class="bid-value" style="color:#ff4757; font-size:16px; font-weight:bold;">${escapeHtml(b.value) || '-'}</span></div>
                             <div class="bid-row"><span class="bid-label">💰 Bid Amount</span><span class="bid-value">₹${bidAmount}</span></div>
-                            ${b.bidType ? `<div class="bid-row"><span class="bid-label">🎲 Bid Type</span><span class="bid-value">${b.bidType}</span></div>` : ''}
+                            ${b.bidType ? `<div class="bid-row"><span class="bid-label">🎲 Bid Type</span><span class="bid-value">${escapeHtml(b.bidType)}</span></div>` : ''}
                         </div>
                         <div class="bid-footer">📅 ${bidDate}</div>
                     </div>
@@ -393,25 +407,27 @@
             // Run cleanup on transactions
             await deleteOldTransactions();
             
-            const transactionsSnapshot = await db.collection('transactions')
-                .where('userId', '==', user.uid)
-                .get();
+            // Get ALL transactions (no where clause to avoid index requirement)
+            const allTransactionsSnapshot = await db.collection('transactions').get();
             
-            if (transactionsSnapshot.empty) {
+            // Filter for current user
+            let transactions = [];
+            allTransactionsSnapshot.forEach(doc => {
+                const trans = doc.data();
+                if (trans.userId === user.uid) {
+                    let transDate = null;
+                    if (trans.date) {
+                        if (trans.date.toDate) transDate = trans.date.toDate();
+                        else if (trans.date.seconds) transDate = new Date(trans.date.seconds * 1000);
+                    }
+                    transactions.push({ id: doc.id, ...trans, dateObj: transDate || new Date(0) });
+                }
+            });
+            
+            if (transactions.length === 0) {
                 container.innerHTML = '<div class="no-data">👑 No transactions yet</div>';
                 return;
             }
-            
-            let transactions = [];
-            transactionsSnapshot.forEach(doc => {
-                const trans = doc.data();
-                let transDate = null;
-                if (trans.date) {
-                    if (trans.date.toDate) transDate = trans.date.toDate();
-                    else if (trans.date.seconds) transDate = new Date(trans.date.seconds * 1000);
-                }
-                transactions.push({ id: doc.id, ...trans, dateObj: transDate || new Date(0) });
-            });
             
             // Sort manually by date (newest first)
             transactions.sort((a, b) => b.dateObj - a.dateObj);
@@ -433,7 +449,7 @@
                         <div class="bid-body">
                             <div class="bid-row"><span class="bid-label">Amount</span><span class="bid-value" style="color:${isCredit ? '#28a745' : '#1a1a2e'}; font-size:18px; font-weight:bold;">${isCredit ? '+' : '-'} ₹${t.amount}</span></div>
                             <div class="bid-row"><span class="bid-label">Date</span><span class="bid-value">${date}</span></div>
-                            ${t.description ? `<div class="bid-row"><span class="bid-label">Description</span><span class="bid-value">${t.description}</span></div>` : ''}
+                            ${t.description ? `<div class="bid-row"><span class="bid-label">Description</span><span class="bid-value">${escapeHtml(t.description)}</span></div>` : ''}
                         </div>
                     </div>
                 `;
@@ -445,6 +461,16 @@
         }
     }
     
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
     // Run cleanup every hour
     function startAutoCleanup() {
         if (cleanupInterval) clearInterval(cleanupInterval);
@@ -453,7 +479,7 @@
                 deleteOldBids();
                 deleteOldTransactions();
             }
-        }, 3600000); // Every hour
+        }, 3600000);
     }
     
     auth.onAuthStateChanged(user => {
