@@ -137,6 +137,15 @@
             color: #6c757d;
             margin-top: 8px;
         }
+        .game-card-badge {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1565c0;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            margin-top: 8px;
+        }
 
         .bidding-panel {
             display: none;
@@ -174,6 +183,14 @@
             font-size: 13px;
             font-weight: 600;
             color: #ff4757;
+        }
+        .selected-game-bidtype {
+            background: #e3f2fd;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #1565c0;
         }
 
         .game-panel-content {
@@ -518,7 +535,6 @@
             color: #856404;
         }
         
-        /* Loading overlay for submit button */
         .loading-spinner {
             display: inline-block;
             width: 20px;
@@ -559,6 +575,7 @@
             <button class="back-to-games" onclick="showGameSelection()">←</button>
             <div class="selected-game-title" id="selectedGameTitle">Single Digit</div>
             <div class="selected-game-rate" id="selectedGameRate">10x</div>
+            <div class="selected-game-bidtype" id="selectedGameBidType">OPEN BID</div>
         </div>
         <div id="timeWarning" class="time-warning hidden"></div>
         <div id="gamePanel"></div>
@@ -623,10 +640,22 @@
         'Half Sangam A': 1000, 'Half Sangam B': 1000, 'Full Sangam': 10000
     };
     
+    // Game badges - shows which bidding phase the game belongs to
+    const gameBadges = {
+        'Single Digit': { open: '🟢 OPEN BID', close: '🟡 CLOSE BID' },
+        'Jodi': { open: '🟡 CLOSE BID ONLY', close: '🟡 CLOSE BID' },
+        'Single Pana': { open: '🟢 OPEN BID', close: '🟡 CLOSE BID' },
+        'Double Pana': { open: '🟢 OPEN BID', close: '🟡 CLOSE BID' },
+        'Triple Pana': { open: '🟢 OPEN BID', close: '🟡 CLOSE BID' },
+        'Half Sangam A': { open: '🟡 CLOSE BID ONLY', close: '🟡 CLOSE BID' },
+        'Half Sangam B': { open: '🟡 CLOSE BID ONLY', close: '🟡 CLOSE BID' },
+        'Full Sangam': { open: '🟡 CLOSE BID ONLY', close: '🟡 CLOSE BID' }
+    };
+    
     const gameIcons = {
-        'Single Digit': '🔢', 'Jodi': '🔗', 'Single Pana': '🎲',
-        'Double Pana': '🎲🎲', 'Triple Pana': '🎲🎲🎲',
-        'Half Sangam A': '🔄', 'Half Sangam B': '🔄', 'Full Sangam': '⭐'
+        'Single Digit': '', 'Jodi': '', 'Single Pana': '',
+        'Double Pana': '', 'Triple Pana': '',
+        'Half Sangam A': '', 'Half Sangam B': '', 'Full Sangam': ''
     };
     
     const gameDescriptions = {
@@ -740,14 +769,18 @@
     function renderGameTypeSelection() {
         availableGameTypes = getAvailableGameTypes();
         const container = document.getElementById('gameTypesGrid');
-        container.innerHTML = availableGameTypes.map(type => `
-            <div class="game-type-card" onclick="selectGameTypeFromCard('${type.name}')">
-                <div class="game-icon">${gameIcons[type.name] || '🎮'}</div>
-                <div class="game-card-name">${type.name}</div>
-                <div class="game-card-rate">${type.rate}x Win</div>
-                <div class="game-card-desc">${gameDescriptions[type.name] || ''}</div>
-            </div>
-        `).join('');
+        container.innerHTML = availableGameTypes.map(type => {
+            const badgeText = currentStatus === 'open' ? (gameBadges[type.name]?.open || 'OPEN BID') : (gameBadges[type.name]?.close || 'CLOSE BID');
+            return `
+                <div class="game-type-card" onclick="selectGameTypeFromCard('${type.name}')">
+                    <div class="game-icon">${gameIcons[type.name] || '🎮'}</div>
+                    <div class="game-card-name">${type.name}</div>
+                    <div class="game-card-rate">${type.rate}x Win</div>
+                    <div class="game-card-desc">${gameDescriptions[type.name] || ''}</div>
+                    <div class="game-card-badge">${badgeText}</div>
+                </div>
+            `;
+        }).join('');
     }
     
     async function selectGameTypeFromCard(type) {
@@ -760,8 +793,20 @@
         currentGameType = type;
         selectedDigits = [];
         selectedJodis = [];
+        
+        // Update header with game info
         document.getElementById('selectedGameTitle').innerHTML = currentGameType;
         document.getElementById('selectedGameRate').innerHTML = `${gameRates[currentGameType]}x`;
+        
+        // Show correct bid type badge
+        let bidTypeText = '';
+        if (currentStatus === 'open') {
+            bidTypeText = gameBadges[currentGameType]?.open || '🟢 OPEN BID';
+        } else {
+            bidTypeText = gameBadges[currentGameType]?.close || '🟡 CLOSE BID';
+        }
+        document.getElementById('selectedGameBidType').innerHTML = bidTypeText;
+        
         document.getElementById('gameSelectionScreen').style.display = 'none';
         document.getElementById('biddingPanel').style.display = 'block';
         renderGamePanel();
@@ -788,9 +833,7 @@
         const pointsInput = document.getElementById('pointsInput');
         if (pointsInput) {
             let pts = parseInt(pointsInput.value);
-            if (isNaN(pts)) {
-                pts = null;
-            }
+            if (isNaN(pts)) pts = null;
             currentPoints = pts;
         }
     }
@@ -875,14 +918,29 @@
     }
     
     function addToBids(gameType, value, points) {
-        let bidOption = null;
+        let bidTypeValue = null;
+        
+        // Determine bid type based on game type and current status
         if (gameType === 'Single Digit' || gameType === 'Single Pana' || gameType === 'Double Pana' || gameType === 'Triple Pana') {
-            bidOption = (currentStatus === 'close') ? 'Close' : selectedOpenClose;
+            bidTypeValue = (currentStatus === 'close') ? 'Close' : 'Open';
+        } else {
+            // Jodi, Half Sangam A/B, Full Sangam are always CLOSE phase
+            bidTypeValue = 'Close';
         }
         
-        const existingIndex = bids.findIndex(b => b.type === gameType && b.value === value && b.option === bidOption);
-        if(existingIndex !== -1) bids[existingIndex].points += points;
-        else bids.push({ type: gameType, option: bidOption, value: value, points: points, market: currentMarket, marketId: currentMarketId });
+        const existingIndex = bids.findIndex(b => b.type === gameType && b.value === value && b.bidType === bidTypeValue);
+        if(existingIndex !== -1) {
+            bids[existingIndex].points += points;
+        } else {
+            bids.push({ 
+                type: gameType, 
+                bidType: bidTypeValue, 
+                value: value, 
+                points: points, 
+                market: currentMarket, 
+                marketId: currentMarketId 
+            });
+        }
         
         updateSummary();
         renderGamePanel();
@@ -981,7 +1039,7 @@
         return `<div class="bids-section">${bids.map((b,i)=>`
             <div class="bid-item">
                 <div class="bid-info">
-                    <div class="bid-type">${b.type}${b.option ? ` (${b.option})` : ''}</div>
+                    <div class="bid-type">${b.type} ${b.bidType === 'Open' ? '(OPEN)' : '(CLOSE)'}</div>
                     <div class="bid-value">${b.value}</div>
                     <div class="bid-points">₹${b.points} × ${gameRates[b.type] || 10}x = ₹${b.points * (gameRates[b.type] || 10)}</div>
                 </div>
@@ -1010,7 +1068,6 @@
         setTimeout(() => d.classList.add('hidden'), 3000);
     }
     
-    // OPTIMIZED: Batch write using Promise.all for faster submission
     async function submitBids() {
         if(isSubmitting) return;
         if(bids.length === 0) { showMessage('No bids to place', true); return; }
@@ -1031,7 +1088,6 @@
         
         if(userData.balance < total) { showMessage(`Insufficient balance! Need ₹${total}`, true); return; }
         
-        // Disable submit button and show loading state
         isSubmitting = true;
         const submitBtn = document.getElementById('submitBtn');
         const originalText = submitBtn.innerHTML;
@@ -1042,14 +1098,10 @@
         const timestamp = firebase.firestore.FieldValue.serverTimestamp();
         
         try {
-            // Use Firestore batch for atomic operations
             const batch = db.batch();
-            
-            // 1. Update user balance
             const userRef = db.collection('users').doc(currentUser.uid);
             batch.update(userRef, { balance: newBalance });
             
-            // 2. Add all bids in batch
             for(let b of bids) {
                 const bidRef = db.collection('bids').doc();
                 batch.set(bidRef, {
@@ -1057,7 +1109,7 @@
                     market: b.market,
                     marketId: b.marketId,
                     gameType: b.type,
-                    bidType: b.option || (currentStatus === 'open' ? 'Open' : 'Close'),
+                    bidType: b.bidType,
                     value: b.value,
                     points: b.points,
                     status: 'pending',
@@ -1065,7 +1117,6 @@
                 });
             }
             
-            // 3. Add transaction record
             const transactionRef = db.collection('transactions').doc();
             batch.set(transactionRef, {
                 userId: currentUser.uid,
@@ -1076,16 +1127,13 @@
                 date: timestamp
             });
             
-            // Execute all writes in one batch (instant!)
             await batch.commit();
             
-            // Update local data
             userData.balance = newBalance;
             document.getElementById('userBalance').innerText = newBalance;
             
             showMessage(`✅ ₹${total} bids placed successfully!`, false);
             
-            // Clear bids and reset UI
             bids = [];
             updateSummary();
             renderGamePanel();
@@ -1093,7 +1141,6 @@
         } catch(e) { 
             showMessage('Error: ' + e.message, true);
         } finally {
-            // Re-enable submit button
             isSubmitting = false;
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
@@ -1110,6 +1157,9 @@
         const rate = gameRates[currentGameType];
         const gameType = allGameTypes.find(g => g.name === currentGameType);
         const showOpenClose = gameType ? gameType.hasOpenClose : false;
+        
+        // For Jodi and Sangam games, don't show Open/Close toggle (they are always CLOSE phase)
+        const isCloseOnlyGame = (currentGameType === 'Jodi' || currentGameType === 'Half Sangam A' || currentGameType === 'Half Sangam B' || currentGameType === 'Full Sangam');
         
         let validationMsg = '';
         switch(currentGameType) {
@@ -1130,7 +1180,7 @@
             }
             panel.innerHTML = `
                 <div class="game-panel-content">
-                    ${showOpenClose && currentStatus === 'open' ? `
+                    ${showOpenClose && currentStatus === 'open' && !isCloseOnlyGame ? `
                     <div class="toggle-section">
                         <label class="toggle-option"><input type="radio" name="openClose" value="Open" ${selectedOpenClose === 'Open' ? 'checked' : ''} onchange="setOpenClose('Open')"> 🟢 Open</label>
                         <label class="toggle-option"><input type="radio" name="openClose" value="Close" ${selectedOpenClose === 'Close' ? 'checked' : ''} onchange="setOpenClose('Close')"> 🟡 Close</label>
@@ -1155,6 +1205,7 @@
             }
             panel.innerHTML = `
                 <div class="game-panel-content">
+                    <div class="toggle-section"><span style="color:#28a745;">🟡 CLOSE BIDDING ONLY</span></div>
                     <div class="points-section">
                         <label class="points-label">💰 Bid Amount (₹)</label>
                         <input type="number" id="pointsInput" class="points-input" placeholder="Enter amount (Min ₹5)" step="1" onchange="updatePoints()" oninput="updatePoints()" inputmode="numeric">
@@ -1170,7 +1221,7 @@
         else if(currentGameType === 'Single Pana' || currentGameType === 'Double Pana' || currentGameType === 'Triple Pana') {
             panel.innerHTML = `
                 <div class="game-panel-content">
-                    ${showOpenClose && currentStatus === 'open' ? `
+                    ${showOpenClose && currentStatus === 'open' && !isCloseOnlyGame ? `
                     <div class="toggle-section">
                         <label class="toggle-option"><input type="radio" name="openClose" value="Open" ${selectedOpenClose === 'Open' ? 'checked' : ''} onchange="setOpenClose('Open')"> 🟢 Open</label>
                         <label class="toggle-option"><input type="radio" name="openClose" value="Close" ${selectedOpenClose === 'Close' ? 'checked' : ''} onchange="setOpenClose('Close')"> 🟡 Close</label>
@@ -1195,6 +1246,7 @@
         else if(currentGameType === 'Half Sangam A') {
             panel.innerHTML = `
                 <div class="game-panel-content">
+                    <div class="toggle-section"><span style="color:#28a745;">🟡 CLOSE BIDDING ONLY</span></div>
                     <div class="points-section">
                         <label class="points-label">💰 Bid Amount (₹)</label>
                         <input type="number" id="pointsInput" class="points-input" placeholder="Enter amount (Min ₹5)" step="1" onchange="updatePoints()" oninput="updatePoints()" inputmode="numeric">
@@ -1213,6 +1265,7 @@
         else if(currentGameType === 'Half Sangam B') {
             panel.innerHTML = `
                 <div class="game-panel-content">
+                    <div class="toggle-section"><span style="color:#28a745;">🟡 CLOSE BIDDING ONLY</span></div>
                     <div class="points-section">
                         <label class="points-label">💰 Bid Amount (₹)</label>
                         <input type="number" id="pointsInput" class="points-input" placeholder="Enter amount (Min ₹5)" step="1" onchange="updatePoints()" oninput="updatePoints()" inputmode="numeric">
@@ -1231,6 +1284,7 @@
         else if(currentGameType === 'Full Sangam') {
             panel.innerHTML = `
                 <div class="game-panel-content">
+                    <div class="toggle-section"><span style="color:#28a745;">🟡 CLOSE BIDDING ONLY</span></div>
                     <div class="points-section">
                         <label class="points-label">💰 Bid Amount (₹)</label>
                         <input type="number" id="pointsInput" class="points-input" placeholder="Enter amount (Min ₹5)" step="1" onchange="updatePoints()" oninput="updatePoints()" inputmode="numeric">
