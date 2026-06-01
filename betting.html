@@ -474,6 +474,10 @@
             background: #e0f7e8;
             color: #28a745;
         }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+        }
         .hidden { display: none; }
 
         .rate-info {
@@ -521,6 +525,17 @@
             font-size: 10px;
             display: block;
         }
+        
+        /* Time Warning */
+        .time-warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 16px;
+            margin: 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            color: #856404;
+        }
     </style>
 </head>
 <body>
@@ -550,6 +565,7 @@
             <div class="selected-game-title" id="selectedGameTitle">Single Digit</div>
             <div class="selected-game-rate" id="selectedGameRate">10x</div>
         </div>
+        <div id="timeWarning" class="time-warning hidden"></div>
         <div id="gamePanel"></div>
         <div class="summary-bar">
             <div class="summary-item">
@@ -602,6 +618,8 @@
     let currentPoints = null;
     let selectedDigits = [];
     let selectedJodis = [];
+    let marketOpenEndTime = null;
+    let marketCloseEndTime = null;
     
     const gameRates = {
         'Single Digit': 10, 'Jodi': 100, 'Single Pana': 160,
@@ -660,6 +678,66 @@
     let availableGameTypes = [];
     let selectedOpenClose = 'Open';
     
+    // Get current server time
+    let cachedServerTime = null;
+    let lastServerTimeFetch = 0;
+    
+    async function getServerTime() {
+        const now = Date.now();
+        if (cachedServerTime && (now - lastServerTimeFetch) < 5000) {
+            const elapsed = (now - lastServerTimeFetch) / 1000;
+            return new Date(cachedServerTime.getTime() + (elapsed * 1000));
+        }
+        try {
+            const docRef = db.collection('settings').doc('servertime');
+            await docRef.set({ timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+            const doc = await docRef.get();
+            cachedServerTime = doc.data().timestamp.toDate();
+            lastServerTimeFetch = now;
+            return cachedServerTime;
+        } catch (error) {
+            return cachedServerTime || new Date();
+        }
+    }
+    
+    // Check if betting is allowed based on current time
+    async function isBettingAllowed() {
+        const serverTime = await getServerTime();
+        const currentMinutes = serverTime.getHours() * 60 + serverTime.getMinutes();
+        
+        if (currentStatus === 'open') {
+            if (marketOpenEndTime && currentMinutes >= marketOpenEndTime) {
+                return { allowed: false, message: '⚠️ Open bidding time is over! Please select CLOSE bidding if available.' };
+            }
+            return { allowed: true, message: null };
+        } 
+        else if (currentStatus === 'close') {
+            if (marketCloseEndTime && currentMinutes >= marketCloseEndTime) {
+                return { allowed: false, message: '⚠️ Close bidding time is over! Market is now closed.' };
+            }
+            return { allowed: true, message: null };
+        }
+        return { allowed: true, message: null };
+    }
+    
+    function timeToMinutes(timeStr) {
+        if (!timeStr) return null;
+        const parts = timeStr.split(':');
+        return parseInt(parts[0]) * 60 + parseInt(parts[1]);
+    }
+    
+    async function updateTimeWarning() {
+        const warningDiv = document.getElementById('timeWarning');
+        const bettingAllowed = await isBettingAllowed();
+        
+        if (!bettingAllowed.allowed) {
+            warningDiv.innerHTML = bettingAllowed.message;
+            warningDiv.classList.remove('hidden');
+        } else {
+            warningDiv.classList.add('hidden');
+        }
+    }
+    
     function getAvailableGameTypes() {
         if (currentStatus === 'open') return allGameTypes.filter(g => g.availableInOpen === true);
         else return allGameTypes.filter(g => g.availableInClose === true);
@@ -678,7 +756,14 @@
         `).join('');
     }
     
-    function selectGameTypeFromCard(type) {
+    async function selectGameTypeFromCard(type) {
+        // Check if betting is allowed before entering game
+        const bettingAllowed = await isBettingAllowed();
+        if (!bettingAllowed.allowed) {
+            showMessage(bettingAllowed.message, true);
+            return;
+        }
+        
         currentGameType = type;
         selectedDigits = [];
         selectedJodis = [];
@@ -687,9 +772,23 @@
         document.getElementById('gameSelectionScreen').style.display = 'none';
         document.getElementById('biddingPanel').style.display = 'block';
         renderGamePanel();
+        updateTimeWarning();
+        
+        // Start time check interval
+        if (window.timeCheckInterval) clearInterval(window.timeCheckInterval);
+        window.timeCheckInterval = setInterval(async () => {
+            const allowed = await isBettingAllowed();
+            if (!allowed.allowed) {
+                updateTimeWarning();
+                // Disable add buttons if time is over
+                const addBtns = document.querySelectorAll('.add-btn');
+                addBtns.forEach(btn => btn.disabled = true);
+            }
+        }, 5000);
     }
     
     function showGameSelection() {
+        if (window.timeCheckInterval) clearInterval(window.timeCheckInterval);
         document.getElementById('biddingPanel').style.display = 'none';
         document.getElementById('gameSelectionScreen').style.display = 'block';
         bids = [];
@@ -700,12 +799,15 @@
         const pointsInput = document.getElementById('pointsInput');
         if (pointsInput) {
             let pts = parseInt(pointsInput.value);
-            if (isNaN(pts) || pts === '') {
+            if (isNaN(pts)) {
                 pts = null;
             }
+            // Only validate minimum, don't auto-change the value
             if (pts !== null && pts < 5) {
-                pts = 5;
-                pointsInput.value = 5;
+                alert('Minimum points is ₹5');
+                pointsInput.value = '';
+                currentPoints = null;
+                return;
             }
             currentPoints = pts;
         }
@@ -715,14 +817,13 @@
         const pointsInput = document.getElementById('pointsInput');
         if (pointsInput) {
             let pts = parseInt(pointsInput.value);
-            if (isNaN(pts) || pts === '') {
+            if (isNaN(pts) || pts === '' || pts === null) {
                 alert('Please enter points amount (Minimum ₹5)');
                 return null;
             }
             if (pts < 5) {
                 alert('Minimum points is ₹5');
-                pointsInput.value = 5;
-                return 5;
+                return null;
             }
             currentPoints = pts;
             return currentPoints;
@@ -765,7 +866,13 @@
         }
     }
     
-    function addSelectedNumbers() {
+    async function addSelectedNumbers() {
+        const bettingAllowed = await isBettingAllowed();
+        if (!bettingAllowed.allowed) {
+            showMessage(bettingAllowed.message, true);
+            return;
+        }
+        
         const points = getCurrentPoints();
         if(points === null) return;
         
@@ -799,7 +906,13 @@
         renderGamePanel();
     }
     
-    function addManualNumber() {
+    async function addManualNumber() {
+        const bettingAllowed = await isBettingAllowed();
+        if (!bettingAllowed.allowed) {
+            showMessage(bettingAllowed.message, true);
+            return;
+        }
+        
         const points = getCurrentPoints();
         if(points === null) return;
         const value = document.getElementById('manualValue')?.value.trim();
@@ -818,7 +931,13 @@
         renderGamePanel();
     }
     
-    function addHalfSangamA() {
+    async function addHalfSangamA() {
+        const bettingAllowed = await isBettingAllowed();
+        if (!bettingAllowed.allowed) {
+            showMessage(bettingAllowed.message, true);
+            return;
+        }
+        
         const points = getCurrentPoints();
         if(points === null) return;
         const open = document.getElementById('halfSangamAOpen')?.value.trim();
@@ -833,7 +952,13 @@
         renderGamePanel();
     }
     
-    function addHalfSangamB() {
+    async function addHalfSangamB() {
+        const bettingAllowed = await isBettingAllowed();
+        if (!bettingAllowed.allowed) {
+            showMessage(bettingAllowed.message, true);
+            return;
+        }
+        
         const points = getCurrentPoints();
         if(points === null) return;
         const open = document.getElementById('halfSangamBOpen')?.value.trim();
@@ -848,7 +973,13 @@
         renderGamePanel();
     }
     
-    function addFullSangam() {
+    async function addFullSangam() {
+        const bettingAllowed = await isBettingAllowed();
+        if (!bettingAllowed.allowed) {
+            showMessage(bettingAllowed.message, true);
+            return;
+        }
+        
         const points = getCurrentPoints();
         if(points === null) return;
         const open = document.getElementById('fullSangamOpen')?.value.trim();
@@ -894,12 +1025,20 @@
         d.innerText = msg;
         d.className = `message ${isError ? 'error' : 'success'}`;
         d.classList.remove('hidden');
-        setTimeout(() => d.classList.add('hidden'), 3000);
+        setTimeout(() => d.classList.add('hidden'), 4000);
     }
     
     async function submitBids() {
         if(bids.length === 0) { showMessage('No bids to place', true); return; }
         if(!currentUser) return;
+        
+        // Final time check before submitting
+        const bettingAllowed = await isBettingAllowed();
+        if (!bettingAllowed.allowed) {
+            showMessage(bettingAllowed.message, true);
+            return;
+        }
+        
         const total = bids.reduce((s,b)=>s+b.points,0);
         if(userData.balance < total) { showMessage(`Insufficient balance! Need ₹${total}`, true); return; }
         const newBalance = userData.balance - total;
@@ -1076,6 +1215,15 @@
         if (pointsInput && currentPoints) pointsInput.value = currentPoints;
     }
     
+    async function loadMarketData() {
+        const marketDoc = await db.collection('markets').doc(currentMarketId).get();
+        if (marketDoc.exists) {
+            const data = marketDoc.data();
+            marketOpenEndTime = timeToMinutes(data.openBidEnd);
+            marketCloseEndTime = timeToMinutes(data.closeBidEnd);
+        }
+    }
+    
     async function loadUserData() {
         const user = auth.currentUser;
         if(!user) { window.location.href = 'index.html'; return; }
@@ -1094,6 +1242,7 @@
     document.getElementById('marketName').innerHTML = currentMarket;
     document.getElementById('bidTypeBadge').innerHTML = currentStatus === 'open' ? 'OPEN BIDDING' : 'CLOSE BIDDING';
     
+    loadMarketData();
     renderGameTypeSelection();
     
     window.selectGameTypeFromCard = selectGameTypeFromCard;
