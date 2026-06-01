@@ -20,7 +20,6 @@
             padding-bottom: 70px;
         }
 
-        /* Header */
         .app-header {
             background: #ffffff;
             padding: 16px 20px;
@@ -63,7 +62,6 @@
             font-weight: 600;
         }
 
-        /* Balance Card */
         .balance-card {
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             margin: 16px;
@@ -85,7 +83,6 @@
             font-weight: 700;
         }
 
-        /* Game Type Selection Screen */
         .game-selection-screen {
             padding: 16px;
         }
@@ -141,7 +138,6 @@
             margin-top: 8px;
         }
 
-        /* Bidding Panel (Hidden initially) */
         .bidding-panel {
             display: none;
         }
@@ -180,7 +176,6 @@
             color: #ff4757;
         }
 
-        /* Game Panel Content */
         .game-panel-content {
             background: #fff;
             margin: 16px;
@@ -188,19 +183,7 @@
             padding: 20px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
-        .game-panel-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: #1a1a2e;
-            text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #ffd700;
-            display: inline-block;
-            width: 100%;
-        }
 
-        /* Points Section */
         .points-section {
             background: #f8f9fc;
             border-radius: 16px;
@@ -237,7 +220,6 @@
             margin-top: 8px;
         }
 
-        /* Toggle Section */
         .toggle-section {
             display: flex;
             justify-content: center;
@@ -265,7 +247,6 @@
             accent-color: #ffd700;
         }
 
-        /* Number Grids */
         .number-grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
@@ -317,7 +298,6 @@
             border-color: #ffd700;
         }
 
-        /* Manual Entry */
         .manual-entry {
             display: flex;
             flex-direction: column;
@@ -366,7 +346,6 @@
             background: #ffcd38;
         }
 
-        /* Bids List */
         .bids-section {
             background: #f8f9fc;
             border-radius: 16px;
@@ -420,7 +399,6 @@
             color: #fff;
         }
 
-        /* Summary */
         .summary-bar {
             background: #fff;
             margin: 16px;
@@ -489,7 +467,6 @@
             border-top: 1px solid #e0e4e8;
         }
 
-        /* Bottom Nav */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -526,7 +503,6 @@
             display: block;
         }
         
-        /* Time Warning */
         .time-warning {
             background: #fff3cd;
             border-left: 4px solid #ffc107;
@@ -551,14 +527,12 @@
         <span class="balance-amount">₹<span id="userBalance">0</span></span>
     </div>
 
-    <!-- Game Type Selection Screen -->
     <div id="gameSelectionScreen" class="game-selection-screen">
         <div class="selection-title">🎲 Choose Game Type</div>
         <div class="selection-subtitle">Select a game to start betting</div>
         <div class="game-types-grid" id="gameTypesGrid"></div>
     </div>
 
-    <!-- Bidding Panel (Hidden initially) -->
     <div id="biddingPanel" class="bidding-panel">
         <div class="bidding-header">
             <button class="back-to-games" onclick="showGameSelection()">←</button>
@@ -678,7 +652,6 @@
     let availableGameTypes = [];
     let selectedOpenClose = 'Open';
     
-    // Get current server time
     let cachedServerTime = null;
     let lastServerTimeFetch = 0;
     
@@ -700,7 +673,6 @@
         }
     }
     
-    // Check if betting is allowed based on current time
     async function isBettingAllowed() {
         const serverTime = await getServerTime();
         const currentMinutes = serverTime.getHours() * 60 + serverTime.getMinutes();
@@ -757,7 +729,6 @@
     }
     
     async function selectGameTypeFromCard(type) {
-        // Check if betting is allowed before entering game
         const bettingAllowed = await isBettingAllowed();
         if (!bettingAllowed.allowed) {
             showMessage(bettingAllowed.message, true);
@@ -774,15 +745,11 @@
         renderGamePanel();
         updateTimeWarning();
         
-        // Start time check interval
         if (window.timeCheckInterval) clearInterval(window.timeCheckInterval);
         window.timeCheckInterval = setInterval(async () => {
             const allowed = await isBettingAllowed();
             if (!allowed.allowed) {
                 updateTimeWarning();
-                // Disable add buttons if time is over
-                const addBtns = document.querySelectorAll('.add-btn');
-                addBtns.forEach(btn => btn.disabled = true);
             }
         }, 5000);
     }
@@ -795,6 +762,7 @@
         updateSummary();
     }
     
+    // FIXED: No auto-changing of points, user can enter any value
     function updatePoints() {
         const pointsInput = document.getElementById('pointsInput');
         if (pointsInput) {
@@ -802,27 +770,21 @@
             if (isNaN(pts)) {
                 pts = null;
             }
-            // Only validate minimum, don't auto-change the value
-            if (pts !== null && pts < 5) {
-                alert('Minimum points is ₹5');
-                pointsInput.value = '';
-                currentPoints = null;
-                return;
-            }
             currentPoints = pts;
         }
     }
     
+    // FIXED: Only validate minimum at add time, not while typing
     function getCurrentPoints() {
         const pointsInput = document.getElementById('pointsInput');
         if (pointsInput) {
             let pts = parseInt(pointsInput.value);
             if (isNaN(pts) || pts === '' || pts === null) {
-                alert('Please enter points amount (Minimum ₹5)');
+                alert('Please enter points amount');
                 return null;
             }
             if (pts < 5) {
-                alert('Minimum points is ₹5');
+                alert('⚠️ Minimum bid amount is ₹5. Please enter ₹5 or more.');
                 return null;
             }
             currentPoints = pts;
@@ -1032,7 +994,6 @@
         if(bids.length === 0) { showMessage('No bids to place', true); return; }
         if(!currentUser) return;
         
-        // Final time check before submitting
         const bettingAllowed = await isBettingAllowed();
         if (!bettingAllowed.allowed) {
             showMessage(bettingAllowed.message, true);
@@ -1040,6 +1001,13 @@
         }
         
         const total = bids.reduce((s,b)=>s+b.points,0);
+        
+        // FIXED: Check minimum ₹5 at submission time
+        if (total < 5) {
+            showMessage('⚠️ Minimum total bid amount is ₹5. Please add more bids.', true);
+            return;
+        }
+        
         if(userData.balance < total) { showMessage(`Insufficient balance! Need ₹${total}`, true); return; }
         const newBalance = userData.balance - total;
         try {
@@ -1101,8 +1069,8 @@
                     </div>` : showOpenClose && currentStatus === 'close' ? '<div class="toggle-section"><span style="color:#ff4757;">🔒 Close Only Bidding</span></div>' : ''}
                     <div class="points-section">
                         <label class="points-label">💰 Bid Amount (₹)</label>
-                        <input type="number" id="pointsInput" class="points-input" placeholder="Enter amount" min="5" step="1" onchange="updatePoints()" oninput="updatePoints()" inputmode="numeric">
-                        <div class="points-hint">Minimum ₹5 | No maximum limit</div>
+                        <input type="number" id="pointsInput" class="points-input" placeholder="Enter amount (Min ₹5)" step="1" onchange="updatePoints()" oninput="updatePoints()" inputmode="numeric">
+                        <div class="points-hint">Enter any amount (Minimum ₹5 per bid)</div>
                     </div>
                     <div class="number-grid">${digitsHtml}</div>
                     <button class="add-btn" onclick="addSelectedNumbers()">➕ Add Selected (${selectedDigits.length} digits)</button>
@@ -1121,8 +1089,8 @@
                 <div class="game-panel-content">
                     <div class="points-section">
                         <label class="points-label">💰 Bid Amount (₹)</label>
-                        <input type="number" id="pointsInput" class="points-input" placeholder="Enter amount" min="5" step="1" onchange="updatePoints()" oninput="updatePoints()" inputmode="numeric">
-                        <div class="points-hint">Minimum ₹5 | No maximum limit</div>
+                        <input type="number" id="pointsInput" class="points-input" placeholder="Enter amount (Min ₹5)" step="1" onchange="updatePoints()" oninput="updatePoints()" inputmode="numeric">
+                        <div class="points-hint">Enter any amount (Minimum ₹5 per bid)</div>
                     </div>
                     <div class="jodi-grid">${jodiHtml}</div>
                     <button class="add-btn" onclick="addSelectedNumbers()">➕ Add Selected (${selectedJodis.length} Jodis)</button>
@@ -1141,8 +1109,8 @@
                     </div>` : showOpenClose && currentStatus === 'close' ? '<div class="toggle-section"><span style="color:#ff4757;">🔒 Close Only Bidding</span></div>' : ''}
                     <div class="points-section">
                         <label class="points-label">💰 Bid Amount (₹)</label>
-                        <input type="number" id="pointsInput" class="points-input" placeholder="Enter amount" min="5" step="1" onchange="updatePoints()" oninput="updatePoints()" inputmode="numeric">
-                        <div class="points-hint">Minimum ₹5 | No maximum limit</div>
+                        <input type="number" id="pointsInput" class="points-input" placeholder="Enter amount (Min ₹5)" step="1" onchange="updatePoints()" oninput="updatePoints()" inputmode="numeric">
+                        <div class="points-hint">Enter any amount (Minimum ₹5 per bid)</div>
                     </div>
                     <div class="manual-entry">
                         <div class="manual-row">
@@ -1161,8 +1129,8 @@
                 <div class="game-panel-content">
                     <div class="points-section">
                         <label class="points-label">💰 Bid Amount (₹)</label>
-                        <input type="number" id="pointsInput" class="points-input" placeholder="Enter amount" min="5" step="1" onchange="updatePoints()" oninput="updatePoints()" inputmode="numeric">
-                        <div class="points-hint">Minimum ₹5 | No maximum limit</div>
+                        <input type="number" id="pointsInput" class="points-input" placeholder="Enter amount (Min ₹5)" step="1" onchange="updatePoints()" oninput="updatePoints()" inputmode="numeric">
+                        <div class="points-hint">Enter any amount (Minimum ₹5 per bid)</div>
                     </div>
                     <div class="manual-entry">
                         <div class="manual-row"><span class="manual-label">Open Pana:</span><input type="text" id="halfSangamAOpen" placeholder="3-digit Open Pana" maxlength="3" inputmode="numeric"></div>
@@ -1179,8 +1147,8 @@
                 <div class="game-panel-content">
                     <div class="points-section">
                         <label class="points-label">💰 Bid Amount (₹)</label>
-                        <input type="number" id="pointsInput" class="points-input" placeholder="Enter amount" min="5" step="1" onchange="updatePoints()" oninput="updatePoints()" inputmode="numeric">
-                        <div class="points-hint">Minimum ₹5 | No maximum limit</div>
+                        <input type="number" id="pointsInput" class="points-input" placeholder="Enter amount (Min ₹5)" step="1" onchange="updatePoints()" oninput="updatePoints()" inputmode="numeric">
+                        <div class="points-hint">Enter any amount (Minimum ₹5 per bid)</div>
                     </div>
                     <div class="manual-entry">
                         <div class="manual-row"><span class="manual-label">Open Digit:</span><input type="text" id="halfSangamBOpen" placeholder="Open Digit (0-9)" maxlength="1" inputmode="numeric"></div>
@@ -1197,8 +1165,8 @@
                 <div class="game-panel-content">
                     <div class="points-section">
                         <label class="points-label">💰 Bid Amount (₹)</label>
-                        <input type="number" id="pointsInput" class="points-input" placeholder="Enter amount" min="5" step="1" onchange="updatePoints()" oninput="updatePoints()" inputmode="numeric">
-                        <div class="points-hint">Minimum ₹5 | No maximum limit</div>
+                        <input type="number" id="pointsInput" class="points-input" placeholder="Enter amount (Min ₹5)" step="1" onchange="updatePoints()" oninput="updatePoints()" inputmode="numeric">
+                        <div class="points-hint">Enter any amount (Minimum ₹5 per bid)</div>
                     </div>
                     <div class="manual-entry">
                         <div class="manual-row"><span class="manual-label">Open Pana:</span><input type="text" id="fullSangamOpen" placeholder="3-digit Open Pana" maxlength="3" inputmode="numeric"></div>
