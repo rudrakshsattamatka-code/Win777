@@ -914,7 +914,6 @@
         renderGamePanel();
     }
     
-    // FIXED: addToBids with proper merging
     function addToBids(gameType, value, points) {
         let bidTypeValue = null;
         
@@ -924,10 +923,7 @@
             bidTypeValue = 'Close';
         }
         
-        // Create a unique key for the bid
-        const bidKey = `${gameType}_${value}_${bidTypeValue}`;
-        
-        // Check if same bid already exists
+        // Find existing bid with same type, value, and bidType
         const existingIndex = bids.findIndex(b => 
             b.type === gameType && 
             b.value === value && 
@@ -937,7 +933,7 @@
         if (existingIndex !== -1) {
             // MERGE: Add points to existing bid
             bids[existingIndex].points += points;
-            console.log(`Merged bid: ${value} - New total: ${bids[existingIndex].points}`);
+            console.log(`Merged ${gameType} ${value}: +${points} = ${bids[existingIndex].points}`);
         } else {
             // Add new bid
             bids.push({ 
@@ -948,7 +944,7 @@
                 market: currentMarket, 
                 marketId: currentMarketId 
             });
-            console.log(`Added new bid: ${value} - ${points}`);
+            console.log(`Added new ${gameType} ${value}: ${points}`);
         }
         
         updateSummary();
@@ -1061,7 +1057,6 @@
         const total = bids.reduce((s,b)=>s+b.points,0);
         document.getElementById('totalBids').innerText = bids.length;
         document.getElementById('totalPoints').innerHTML = `₹${total}`;
-        console.log("Total bids amount:", total);
     }
     
     function removeBid(i) { 
@@ -1078,8 +1073,12 @@
         setTimeout(() => d.classList.add('hidden'), 3000);
     }
     
+    // FIXED: Submit bids with proper balance check
     async function submitBids() {
-        if(isSubmitting) return;
+        if(isSubmitting) {
+            showMessage('Please wait, processing...', true);
+            return;
+        }
         if(bids.length === 0) { showMessage('No bids to place', true); return; }
         if(!currentUser) return;
         
@@ -1089,17 +1088,20 @@
             return;
         }
         
-        // Calculate total correctly by summing all bid points
+        // Calculate total correctly
         const total = bids.reduce((sum, bid) => sum + bid.points, 0);
-        console.log("Total to deduct:", total);
         
         if (total < 5) {
             showMessage('⚠️ Minimum total bid amount is ₹5. Please add more bids.', true);
             return;
         }
         
-        if(userData.balance < total) { 
-            showMessage(`Insufficient balance! Need ₹${total}`, true); 
+        // IMPORTANT: Refresh user balance from Firebase before checking
+        const freshUserDoc = await db.collection('users').doc(currentUser.uid).get();
+        const currentBalance = freshUserDoc.data()?.balance || 0;
+        
+        if(currentBalance < total) { 
+            showMessage(`Insufficient balance! Need ₹${total}. Your balance: ₹${currentBalance}`, true); 
             return; 
         }
         
@@ -1109,7 +1111,7 @@
         submitBtn.innerHTML = '<span class="loading-spinner"></span> Processing...';
         submitBtn.disabled = true;
         
-        const newBalance = userData.balance - total;
+        const newBalance = currentBalance - total;
         const timestamp = firebase.firestore.FieldValue.serverTimestamp();
         
         try {
@@ -1144,16 +1146,19 @@
             
             await batch.commit();
             
+            // Update local data
             userData.balance = newBalance;
             document.getElementById('userBalance').innerText = newBalance;
             
             showMessage(`✅ ₹${total} bids placed successfully!`, false);
             
+            // Clear bids array
             bids = [];
             updateSummary();
             renderGamePanel();
             
         } catch(e) { 
+            console.error("Submit error:", e);
             showMessage('Error: ' + e.message, true);
         } finally {
             isSubmitting = false;
