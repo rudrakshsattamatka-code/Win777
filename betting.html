@@ -640,7 +640,6 @@
         'Half Sangam A': 1000, 'Half Sangam B': 1000, 'Full Sangam': 10000
     };
     
-    // Game badges - shows which bidding phase the game belongs to
     const gameBadges = {
         'Single Digit': { open: '🟢 OPEN BID', close: '🟡 CLOSE BID' },
         'Jodi': { open: '🟡 CLOSE BID ONLY', close: '🟡 CLOSE BID' },
@@ -653,9 +652,9 @@
     };
     
     const gameIcons = {
-        'Single Digit': '', 'Jodi': '', 'Single Pana': '',
-        'Double Pana': '', 'Triple Pana': '',
-        'Half Sangam A': '', 'Half Sangam B': '', 'Full Sangam': ''
+        'Single Digit': '🔢', 'Jodi': '🔗', 'Single Pana': '🎲',
+        'Double Pana': '🎲🎲', 'Triple Pana': '🎲🎲🎲',
+        'Half Sangam A': '🔄', 'Half Sangam B': '🔄', 'Full Sangam': '⭐'
     };
     
     const gameDescriptions = {
@@ -794,11 +793,9 @@
         selectedDigits = [];
         selectedJodis = [];
         
-        // Update header with game info
         document.getElementById('selectedGameTitle').innerHTML = currentGameType;
         document.getElementById('selectedGameRate').innerHTML = `${gameRates[currentGameType]}x`;
         
-        // Show correct bid type badge
         let bidTypeText = '';
         if (currentStatus === 'open') {
             bidTypeText = gameBadges[currentGameType]?.open || '🟢 OPEN BID';
@@ -917,21 +914,32 @@
         renderGamePanel();
     }
     
+    // FIXED: addToBids with proper merging
     function addToBids(gameType, value, points) {
         let bidTypeValue = null;
         
-        // Determine bid type based on game type and current status
         if (gameType === 'Single Digit' || gameType === 'Single Pana' || gameType === 'Double Pana' || gameType === 'Triple Pana') {
             bidTypeValue = (currentStatus === 'close') ? 'Close' : 'Open';
         } else {
-            // Jodi, Half Sangam A/B, Full Sangam are always CLOSE phase
             bidTypeValue = 'Close';
         }
         
-        const existingIndex = bids.findIndex(b => b.type === gameType && b.value === value && b.bidType === bidTypeValue);
-        if(existingIndex !== -1) {
+        // Create a unique key for the bid
+        const bidKey = `${gameType}_${value}_${bidTypeValue}`;
+        
+        // Check if same bid already exists
+        const existingIndex = bids.findIndex(b => 
+            b.type === gameType && 
+            b.value === value && 
+            b.bidType === bidTypeValue
+        );
+        
+        if (existingIndex !== -1) {
+            // MERGE: Add points to existing bid
             bids[existingIndex].points += points;
+            console.log(`Merged bid: ${value} - New total: ${bids[existingIndex].points}`);
         } else {
+            // Add new bid
             bids.push({ 
                 type: gameType, 
                 bidType: bidTypeValue, 
@@ -940,6 +948,7 @@
                 market: currentMarket, 
                 marketId: currentMarketId 
             });
+            console.log(`Added new bid: ${value} - ${points}`);
         }
         
         updateSummary();
@@ -1052,6 +1061,7 @@
         const total = bids.reduce((s,b)=>s+b.points,0);
         document.getElementById('totalBids').innerText = bids.length;
         document.getElementById('totalPoints').innerHTML = `₹${total}`;
+        console.log("Total bids amount:", total);
     }
     
     function removeBid(i) { 
@@ -1079,14 +1089,19 @@
             return;
         }
         
-        const total = bids.reduce((s,b)=>s+b.points,0);
+        // Calculate total correctly by summing all bid points
+        const total = bids.reduce((sum, bid) => sum + bid.points, 0);
+        console.log("Total to deduct:", total);
         
         if (total < 5) {
             showMessage('⚠️ Minimum total bid amount is ₹5. Please add more bids.', true);
             return;
         }
         
-        if(userData.balance < total) { showMessage(`Insufficient balance! Need ₹${total}`, true); return; }
+        if(userData.balance < total) { 
+            showMessage(`Insufficient balance! Need ₹${total}`, true); 
+            return; 
+        }
         
         isSubmitting = true;
         const submitBtn = document.getElementById('submitBtn');
@@ -1157,8 +1172,6 @@
         const rate = gameRates[currentGameType];
         const gameType = allGameTypes.find(g => g.name === currentGameType);
         const showOpenClose = gameType ? gameType.hasOpenClose : false;
-        
-        // For Jodi and Sangam games, don't show Open/Close toggle (they are always CLOSE phase)
         const isCloseOnlyGame = (currentGameType === 'Jodi' || currentGameType === 'Half Sangam A' || currentGameType === 'Half Sangam B' || currentGameType === 'Full Sangam');
         
         let validationMsg = '';
