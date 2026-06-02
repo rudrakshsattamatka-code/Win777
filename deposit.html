@@ -9,103 +9,93 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Georgia', 'Times New Roman', serif; }
-        body { background: #0a0806; padding-bottom: 70px; }
-        .app-container { max-width: 500px; margin: 0 auto; background: #0a0806; min-height: 100vh; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f5f7fa; padding-bottom: 70px; }
+        .app-container { max-width: 500px; margin: 0 auto; background: #f5f7fa; min-height: 100vh; }
         
-        .header { background: linear-gradient(135deg, #1a1510, #0a0806); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffd700; }
-        .logo-img { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #ffd700; }
-        .balance { background: linear-gradient(135deg, #ffd700, #daa520); padding: 5px 15px; border-radius: 30px; color: #1a1510; font-weight: bold; font-size: 14px; cursor: pointer; }
+        .header { background: #fff; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; }
+        .logo-img { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #ffd700; }
+        .balance { background: linear-gradient(135deg, #ffd700, #ffcd38); padding: 4px 12px; border-radius: 30px; color: #1a1a2e; font-weight: bold; font-size: 13px; cursor: pointer; }
         
-        .profile-row { display: flex; align-items: center; gap: 12px; background: linear-gradient(135deg, #1a1510, #0f0c08); margin: 10px; padding: 12px 15px; border-radius: 20px; border: 1px solid #ffd700; cursor: pointer; }
-        .profile-avatar { width: 50px; height: 50px; background: linear-gradient(135deg, #ffd700, #daa520); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #1a1510; }
+        .profile-row { display: flex; align-items: center; gap: 10px; background: #fff; margin: 8px; padding: 10px 12px; border-radius: 16px; border: 1px solid #e9ecef; cursor: pointer; }
+        .profile-avatar { width: 40px; height: 40px; background: linear-gradient(135deg, #ffd700, #ffcd38); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #1a1a2e; }
         .profile-info { flex: 1; }
-        .profile-name { color: #ffd700; font-size: 16px; font-weight: bold; }
-        .profile-phone { color: #aa9c7a; font-size: 12px; }
-        .view-profile { color: #daa520; font-size: 12px; }
+        .profile-name { color: #1a1a2e; font-size: 14px; font-weight: bold; }
+        .profile-phone { color: #6c757d; font-size: 11px; }
+        .view-profile { color: #ffd700; font-size: 11px; }
         
-        .notice-board { background: linear-gradient(135deg, #ffd700, #daa520); margin: 10px; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .notice-icon { font-size: 24px; }
-        .notice-text { flex: 1; color: #1a1510; font-weight: bold; font-size: 13px; }
-        .close-notice { background: none; border: none; color: #1a1510; font-size: 18px; cursor: pointer; }
+        .notice-board { background: linear-gradient(135deg, #ffd700, #ffcd38); margin: 8px; padding: 8px 12px; border-radius: 12px; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .notice-icon { font-size: 18px; }
+        .notice-text { flex: 1; color: #1a1a2e; font-weight: bold; font-size: 11px; }
+        .close-notice { background: none; border: none; color: #1a1a2e; font-size: 16px; cursor: pointer; }
         
-        .games-row { display: flex; justify-content: space-around; background: linear-gradient(135deg, #1a1510, #0f0c08); margin: 10px; padding: 12px; border-radius: 20px; border: 1px solid #ffd70020; }
-        .game-icon { text-align: center; color: #aa9c7a; font-size: 11px; cursor: pointer; transition: all 0.3s; }
-        .game-icon:hover { transform: translateY(-5px); color: #ffd700; }
-        .game-icon img { width: 45px; height: 45px; display: block; margin: 0 auto 4px; border-radius: 12px; }
+        .games-row { display: flex; justify-content: space-around; background: #fff; margin: 8px; padding: 8px; border-radius: 16px; border: 1px solid #e9ecef; }
+        .game-icon { text-align: center; color: #6c757d; font-size: 10px; cursor: pointer; transition: all 0.3s; }
+        .game-icon:hover { transform: translateY(-3px); color: #ffd700; }
+        .game-icon img { width: 35px; height: 35px; display: block; margin: 0 auto 3px; border-radius: 10px; }
         
-        .deposit-card { background: linear-gradient(135deg, #1a1510, #0f0c08); margin: 12px; border-radius: 20px; padding: 20px; border: 1px solid #ffd70040; }
-        .deposit-title { color: #ffd700; font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 20px; text-shadow: 0 0 5px rgba(255,215,0,0.3); }
+        .deposit-card { background: #fff; margin: 8px; border-radius: 20px; padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e9ecef; }
+        .deposit-title { color: #1a1a2e; font-size: 18px; font-weight: bold; text-align: center; margin-bottom: 16px; }
         
-        .amount-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
-        .amount-btn { background: #0a0806; border: 1px solid #ffd70040; border-radius: 16px; padding: 14px; text-align: center; color: #ffd700; font-size: 18px; font-weight: bold; cursor: pointer; transition: all 0.3s; }
-        .amount-btn.active { background: linear-gradient(135deg, #ffd700, #daa520); color: #1a1510; border-color: #ffd700; }
+        .amount-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+        .amount-btn { background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 12px; padding: 10px; text-align: center; color: #1a1a2e; font-size: 14px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .amount-btn.active { background: linear-gradient(135deg, #ffd700, #ffcd38); border-color: #ffd700; }
         .amount-btn:hover { border-color: #ffd700; transform: scale(1.02); }
         
-        .custom-amount input { width: 100%; padding: 14px; background: #0a0806; border: 1px solid #ffd70040; border-radius: 12px; color: #ffd700; font-size: 16px; text-align: center; }
-        .custom-amount input:focus { outline: none; border-color: #ffd700; }
+        .custom-amount { margin-bottom: 12px; }
+        .custom-amount input { width: 100%; padding: 10px; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 12px; color: #1a1a2e; font-size: 14px; text-align: center; outline: none; }
+        .custom-amount input:focus { border-color: #ffd700; }
         
-        .bonus-box { background: #0a0806; border-radius: 16px; padding: 15px; margin: 15px 0; border: 1px solid #ffd70040; display: flex; align-items: center; justify-content: space-between; }
-        .bonus-box label { color: #ffd700; font-weight: bold; }
-        .bonus-text { color: #66ff66; font-size: 12px; margin-top: 5px; }
+        .bonus-box { background: #f8f9fa; border-radius: 12px; padding: 10px 12px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #e9ecef; }
+        .bonus-box label { color: #1a1a2e; font-weight: 600; font-size: 13px; }
+        .bonus-text { color: #28a745; font-size: 10px; margin-top: 2px; }
         
-        .summary { background: #0a0806; border-radius: 16px; padding: 15px; margin: 15px 0; text-align: center; border: 1px solid #ffd70040; }
-        .summary-label { color: #aa9c7a; font-size: 12px; }
-        .summary-amount { color: #ffd700; font-size: 28px; font-weight: bold; }
+        .upi-info { background: #f8f9fa; border-radius: 12px; padding: 12px; margin-bottom: 12px; text-align: center; border: 1px solid #e9ecef; }
+        .upi-label { color: #6c757d; font-size: 11px; margin-bottom: 5px; }
+        .upi-id { color: #1a1a2e; font-size: 16px; font-weight: bold; word-break: break-all; }
+        .copy-btn { background: #ffd700; color: #1a1a2e; border: none; padding: 6px 16px; border-radius: 20px; cursor: pointer; margin-top: 8px; font-weight: bold; font-size: 12px; }
         
-        .upi-info { background: #0a0806; border-radius: 16px; padding: 20px; margin: 15px 0; text-align: center; border: 1px solid #ffd70040; }
-        .upi-label { color: #aa9c7a; font-size: 12px; margin-bottom: 8px; }
-        .upi-id { color: #ffd700; font-size: 20px; font-weight: bold; letter-spacing: 1px; word-break: break-all; }
-        .copy-btn { background: #daa520; color: #1a1510; border: none; padding: 8px 20px; border-radius: 30px; cursor: pointer; margin-top: 10px; font-weight: bold; transition: all 0.3s; }
-        .copy-btn:hover { background: #ffd700; transform: scale(1.02); }
+        .qr-section { background: #f8f9fa; border-radius: 16px; padding: 16px; margin-bottom: 12px; text-align: center; border: 2px dashed #ffd700; display: none; }
+        .qr-title { color: #1a1a2e; font-size: 14px; font-weight: bold; margin-bottom: 10px; }
+        #qrcode { display: flex; justify-content: center; margin: 10px 0; }
         
-        .qr-section { background: #0a0806; border-radius: 20px; padding: 20px; margin: 15px 0; text-align: center; border: 2px dashed #ffd700; display: none; }
-        .qr-title { color: #ffd700; font-size: 16px; font-weight: bold; margin-bottom: 15px; }
-        #qrcode { display: flex; justify-content: center; margin: 15px 0; }
+        .utr-section { background: #f8f9fa; border-radius: 12px; padding: 12px; margin-bottom: 12px; border: 1px solid #e9ecef; display: none; }
+        .utr-title { color: #1a1a2e; font-size: 14px; font-weight: bold; margin-bottom: 10px; text-align: center; }
+        .mobile-display { background: #fff; border: 1px solid #e9ecef; border-radius: 10px; padding: 8px; margin-bottom: 10px; text-align: center; color: #1a1a2e; font-size: 12px; }
+        .utr-input { width: 100%; padding: 10px; background: #fff; border: 1px solid #e9ecef; border-radius: 10px; color: #1a1a2e; font-size: 14px; text-align: center; outline: none; }
+        .utr-input:focus { border-color: #ffd700; }
+        .verify-btn { width: 100%; padding: 10px; background: #28a745; border: none; border-radius: 30px; color: #fff; font-size: 14px; font-weight: bold; cursor: pointer; margin-top: 8px; }
         
-        .utr-section { background: #0a0806; border-radius: 16px; padding: 20px; margin: 15px 0; border: 1px solid #ffd70040; display: none; }
-        .utr-title { color: #ffd700; font-size: 16px; font-weight: bold; margin-bottom: 15px; text-align: center; }
-        .mobile-display { background: #0a0806; border: 1px solid #ffd70040; border-radius: 12px; padding: 12px; margin-bottom: 12px; text-align: center; color: #ffd700; font-size: 14px; }
-        .utr-input { width: 100%; padding: 14px; background: #0a0806; border: 1px solid #ffd70040; border-radius: 12px; color: #ffd700; font-size: 16px; text-align: center; }
-        .verify-btn { width: 100%; padding: 14px; background: #28a745; border: none; border-radius: 40px; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
-        .verify-btn:hover { transform: scale(1.02); background: #1e7e34; }
+        .generate-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #ffd700, #ffcd38); border: none; border-radius: 30px; color: #1a1a2e; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 5px; }
         
-        .generate-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, #ffd700, #daa520); border: none; border-radius: 40px; color: #1a1510; font-size: 18px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
-        .generate-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(255,215,0,0.5); }
+        .timer-box { background: #f8f9fa; border-radius: 12px; padding: 10px; text-align: center; margin-top: 10px; border: 1px solid #e9ecef; display: none; }
+        .timer-text { color: #ff4757; font-size: 24px; font-weight: bold; font-family: monospace; }
+        .timer-label { color: #6c757d; font-size: 10px; margin-top: 3px; }
         
-        .timer-box { background: #0a0806; border-radius: 16px; padding: 15px; text-align: center; margin-top: 20px; border: 1px solid #ffd70040; display: none; }
-        .timer-text { color: #ffd700; font-size: 32px; font-weight: bold; font-family: monospace; }
-        .timer-label { color: #daa520; font-size: 12px; margin-top: 5px; }
-        
-        .message { padding: 12px; border-radius: 12px; text-align: center; margin-top: 15px; font-size: 13px; }
-        .message-success { background: #1a3a1a; color: #66ff66; border: 1px solid #66ff66; }
-        .message-error { background: #3a1a1a; color: #ff6666; border: 1px solid #ff6666; }
+        .message { padding: 10px; border-radius: 10px; text-align: center; margin-top: 10px; font-size: 12px; }
+        .message-success { background: #d4edda; color: #28a745; border: 1px solid #c3e6cb; }
+        .message-error { background: #fee2e2; color: #dc3545; border: 1px solid #ffcdcd; }
         .hidden { display: none; }
         
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: linear-gradient(135deg, #1a1510, #0f0c08); display: flex; justify-content: space-around; padding: 8px 10px; border-top: 2px solid #ffd700; }
-        .nav-item { text-align: center; color: #aa9c7a; cursor: pointer; font-size: 10px; transition: all 0.3s; flex: 1; }
-        .nav-item:hover { color: #ffd700; transform: translateY(-3px); }
-        .nav-item img { width: 28px; height: 28px; display: block; margin: 0 auto 3px; border-radius: 8px; filter: brightness(0.8); }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #fff; display: flex; justify-content: space-around; padding: 6px 8px; border-top: 1px solid #e9ecef; }
+        .nav-item { text-align: center; color: #6c757d; cursor: pointer; font-size: 9px; transition: all 0.3s; flex: 1; }
+        .nav-item:hover { color: #ffd700; transform: translateY(-2px); }
+        .nav-item img { width: 22px; height: 22px; display: block; margin: 0 auto 2px; border-radius: 8px; filter: brightness(0.8); }
         .nav-item:hover img { filter: brightness(1); }
-        .nav-item span { font-size: 10px; display: block; }
+        .nav-item span { font-size: 9px; display: block; }
         .nav-item.active { color: #ffd700; }
         
-        .note-text { font-size: 11px; color: #aa9c7a; text-align: center; margin-top: 15px; }
+        .note-text { font-size: 10px; color: #6c757d; text-align: center; margin-top: 10px; }
         
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-content { background: linear-gradient(135deg, #1a1510, #0f0c08); border-radius: 24px; padding: 25px; width: 90%; max-width: 350px; border: 1px solid #ffd700; }
-        .modal-content h3 { color: #ffd700; text-align: center; margin-bottom: 15px; }
-        .modal-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #ffd700, #daa520); border: none; border-radius: 12px; color: #1a1510; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .close-modal { background: #333; color: #fff; }
-        .modal-input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ffd70040; background: #0a0806; border-radius: 12px; color: #ffd700; }
-        .rate-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #ffd70020; }
-        .rate-name { color: #aa9c7a; }
-        .rate-value { color: #ffd700; font-weight: bold; }
-        .support-option { display: flex; align-items: center; gap: 15px; padding: 15px; background: #0a0806; border-radius: 12px; margin-bottom: 10px; cursor: pointer; border: 1px solid #ffd70020; }
-        .support-option:hover { background: #1a1510; border-color: #ffd700; }
-        .support-icon { font-size: 30px; }
-        .support-text { flex: 1; }
-        .support-title { font-weight: bold; color: #ffd700; }
+        .modal-content { background: #fff; border-radius: 20px; padding: 20px; width: 90%; max-width: 350px; border: none; }
+        .modal-content h3 { color: #1a1a2e; text-align: center; margin-bottom: 12px; }
+        .modal-btn { width: 100%; padding: 10px; background: linear-gradient(135deg, #ffd700, #ffcd38); border: none; border-radius: 12px; color: #1a1a2e; font-weight: bold; cursor: pointer; margin-top: 8px; }
+        .close-modal { background: #e9ecef; color: #1a1a2e; }
+        .modal-input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #e9ecef; background: #f8f9fa; border-radius: 10px; color: #1a1a2e; }
+        .rate-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #e9ecef; }
+        .support-option { display: flex; align-items: center; gap: 12px; padding: 10px; background: #f8f9fa; border-radius: 12px; margin-bottom: 8px; cursor: pointer; border: 1px solid #e9ecef; }
+        .support-option:hover { background: #fff; border-color: #ffd700; }
     </style>
 </head>
 <body>
@@ -121,12 +111,12 @@
             <div class="profile-name" id="profileName">Loading...</div>
             <div class="profile-phone" id="profilePhone">Loading...</div>
         </div>
-        <div class="view-profile">View Profile →</div>
+        <div class="view-profile">View →</div>
     </div>
     
     <div id="noticeBoard" class="notice-board" onclick="showNoticeModal()">
         <div class="notice-icon">📜</div>
-        <div class="notice-text" id="noticeText">Welcome to WIN777! Play big · Win big · Unlimited</div>
+        <div class="notice-text" id="noticeText">Welcome to WIN777! Play big · Win big</div>
         <button class="close-notice" onclick="event.stopPropagation(); closeNotice()">✕</button>
     </div>
     
@@ -150,20 +140,15 @@
         </div>
         
         <div class="custom-amount">
-            <input type="number" id="customAmount" placeholder="Enter amount (Min ₹200)" oninput="updateAmount()">
+            <input type="number" id="customAmount" placeholder="Enter custom amount (Min ₹200)" oninput="updateAmount()">
         </div>
         
         <div class="bonus-box">
             <div>
                 <label>🎁 Apply 10% Bonus</label>
-                <div class="bonus-text">Get 10% extra on deposit above ₹500</div>
+                <div class="bonus-text">Get 10% extra on ₹500+</div>
             </div>
             <input type="checkbox" id="applyBonus" onchange="updateAmount()">
-        </div>
-        
-        <div class="summary">
-            <div class="summary-label">You will receive</div>
-            <div class="summary-amount">₹<span id="totalAmount">200</span></div>
         </div>
         
         <div class="upi-info">
@@ -175,32 +160,31 @@
         <button class="generate-btn" id="generateBtn">👑 GENERATE QR CODE</button>
         
         <div class="qr-section" id="qrSection">
-            <div class="qr-title">📸 Scan QR Code to Pay</div>
+            <div class="qr-title">📸 Scan QR to Pay</div>
             <div id="qrcode"></div>
-            <div class="summary-amount" style="font-size: 18px; margin-top: 10px;">₹<span id="qrAmount">0</span></div>
-            <p style="font-size: 12px; color: #aa9c7a; margin-top: 10px;">Open any UPI app → Scan QR → Pay</p>
+            <p style="font-size: 11px; color: #6c757d; margin-top: 8px;">Amount: ₹<span id="qrAmount">0</span></p>
         </div>
         
         <div class="utr-section" id="utrSection">
             <div class="utr-title">📝 Enter Payment Details</div>
             <div class="mobile-display" id="userMobileDisplay">Loading...</div>
             <input type="text" id="utrNumber" class="utr-input" placeholder="Enter UTR / Transaction ID" maxlength="30">
-            <button class="verify-btn" id="verifyBtn">✅ SUBMIT FOR VERIFICATION</button>
+            <button class="verify-btn" id="verifyBtn">✅ SUBMIT</button>
         </div>
         
         <div id="message" class="message hidden"></div>
         <div id="timerBox" class="timer-box">
             <div class="timer-text" id="countdownTimer">05:00</div>
-            <div class="timer-label">⏳ Payment submitted for verification...</div>
+            <div class="timer-label">⏳ Awaiting verification...</div>
         </div>
-        <div class="note-text">⚡ Minimum ₹200 | Maximum ₹50,000 | 10% Bonus on ₹500+</div>
+        <div class="note-text">⚡ Min ₹200 | Max ₹50,000 | 10% Bonus on ₹500+</div>
     </div>
     
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="location.href='dashboard.html'"><img src="https://i.imgur.com/StGZq3Y.png" alt="Home"><span>Home</span></div>
+        <div class="nav-item" onclick="location.href='dashboard.html'"><img src="https://i.imgur.com/StGZq3Y.png" alt="Home"><span>Home</span></div>
         <div class="nav-item" onclick="location.href='mybids.html'"><img src="https://i.imgur.com/rUWwMYm.png" alt="Passbook"><span>Passbook</span></div>
         <div class="nav-item" onclick="location.href='mybids.html'"><img src="https://i.imgur.com/QhfWXLI.jpeg" alt="My Bids"><span>My Bids</span></div>
-        <div class="nav-item" onclick="location.href='funds.html'"><img src="https://i.imgur.com/NvJCTli.png" alt="Fund"><span>Fund</span></div>
+        <div class="nav-item active" onclick="location.href='funds.html'"><img src="https://i.imgur.com/NvJCTli.png" alt="Fund"><span>Fund</span></div>
         <div class="nav-item" onclick="location.href='chat.html'"><img src="https://i.imgur.com/ug9IprL.jpeg" alt="Support"><span>Support</span></div>
     </div>
 </div>
@@ -208,8 +192,8 @@
 <!-- Modals -->
 <div id="profileModal" class="modal"><div class="modal-content"><h3>👑 My Profile</h3><div id="profileInfo"></div><button class="modal-btn" onclick="showGameRatesModal()">🎲 Game Rates</button><button class="modal-btn" onclick="showChangePinModal()">🔐 Change MPIN</button><button class="modal-btn" onclick="showBankModal()">🏦 Bank Details</button><button class="modal-btn close-modal" onclick="closeProfileModal()">Close</button></div></div>
 <div id="gameRatesModal" class="modal"><div class="modal-content"><h3>🎲 GAME RATES</h3><div class="rate-row"><span class="rate-name">Single Digit</span><span class="rate-value">10x</span></div><div class="rate-row"><span class="rate-name">Jodi</span><span class="rate-value">100x</span></div><div class="rate-row"><span class="rate-name">Single Pana</span><span class="rate-value">160x</span></div><div class="rate-row"><span class="rate-name">Double Pana</span><span class="rate-value">320x</span></div><div class="rate-row"><span class="rate-name">Triple Pana</span><span class="rate-value">1000x</span></div><div class="rate-row"><span class="rate-name">Half Sangam A</span><span class="rate-value">1000x</span></div><div class="rate-row"><span class="rate-name">Half Sangam B</span><span class="rate-value">1000x</span></div><div class="rate-row"><span class="rate-name">Full Sangam</span><span class="rate-value">10000x</span></div><button class="modal-btn close-modal" onclick="closeGameRatesModal()">Close</button></div></div>
-<div id="changePinModal" class="modal"><div class="modal-content"><h3>🔐 Change MPIN</h3><input type="password" id="oldPin" class="modal-input" placeholder="Current MPIN" maxlength="4"><input type="password" id="newPin" class="modal-input" placeholder="New MPIN (4 digits)" maxlength="4"><input type="password" id="confirmPin" class="modal-input" placeholder="Confirm MPIN" maxlength="4"><button class="modal-btn" onclick="updatePin()">Update MPIN</button><button class="modal-btn close-modal" onclick="closeChangePinModal()">Cancel</button><div id="pinMsg" style="color:#ff6666; text-align:center; margin-top:10px;"></div></div></div>
-<div id="bankModal" class="modal"><div class="modal-content"><h3>🏦 Bank Details</h3><input type="text" id="bankAccountHolder" class="modal-input" placeholder="Account Holder Name"><input type="text" id="bankName" class="modal-input" placeholder="Bank Name"><input type="text" id="bankAccountNumber" class="modal-input" placeholder="Account Number"><input type="text" id="bankIfsc" class="modal-input" placeholder="IFSC Code"><button class="modal-btn" onclick="saveBankDetails()">Save Bank Details</button><button class="modal-btn close-modal" onclick="closeBankModal()">Cancel</button><div id="bankMsg" style="color:#66ff66; text-align:center; margin-top:10px;"></div></div></div>
+<div id="changePinModal" class="modal"><div class="modal-content"><h3>🔐 Change MPIN</h3><input type="password" id="oldPin" class="modal-input" placeholder="Current MPIN" maxlength="4"><input type="password" id="newPin" class="modal-input" placeholder="New MPIN (4 digits)" maxlength="4"><input type="password" id="confirmPin" class="modal-input" placeholder="Confirm MPIN" maxlength="4"><button class="modal-btn" onclick="updatePin()">Update MPIN</button><button class="modal-btn close-modal" onclick="closeChangePinModal()">Cancel</button><div id="pinMsg" style="color:#dc3545; text-align:center; margin-top:8px;"></div></div></div>
+<div id="bankModal" class="modal"><div class="modal-content"><h3>🏦 Bank Details</h3><input type="text" id="bankAccountHolder" class="modal-input" placeholder="Account Holder Name"><input type="text" id="bankName" class="modal-input" placeholder="Bank Name"><input type="text" id="bankAccountNumber" class="modal-input" placeholder="Account Number"><input type="text" id="bankIfsc" class="modal-input" placeholder="IFSC Code"><button class="modal-btn" onclick="saveBankDetails()">Save Bank Details</button><button class="modal-btn close-modal" onclick="closeBankModal()">Cancel</button><div id="bankMsg" style="color:#28a745; text-align:center; margin-top:8px;"></div></div></div>
 <div id="supportModal" class="modal"><div class="modal-content"><h3>💬 Royal Support</h3><div class="support-option" onclick="sendEmail()"><div class="support-icon">📧</div><div class="support-text"><div class="support-title">Email Us</div><div class="support-desc">win777@support.com</div></div></div><div class="support-option" onclick="sendWhatsApp()"><div class="support-icon">📱</div><div class="support-text"><div class="support-title">WhatsApp</div><div class="support-desc">+91 9019941895</div></div></div><button class="modal-btn close-modal" onclick="closeSupportModal()">Close</button></div></div>
 
 <script>
@@ -231,27 +215,23 @@
     let selectedAmount = 200;
     let currentTransactionId = null;
     let timerInterval = null;
-    let upiId = "ganeshpatil99@slc";
-    let upiName = "Ganesh Siddharth Patil";
+    let upiId = "win777services@axl";
+    let upiName = "WIN777 Services";
     let pendingAmount = 0;
     let pendingBonus = 0;
     
-    // Load UPI ID and Payee Name from Firebase settings
     async function loadPaymentSettings() {
         try {
             const upiDoc = await db.collection('settings').doc('upi').get();
             if (upiDoc.exists && upiDoc.data().upiId) {
                 upiId = upiDoc.data().upiId;
             }
-            
             const payeeDoc = await db.collection('settings').doc('payee').get();
             if (payeeDoc.exists && payeeDoc.data().name) {
                 upiName = payeeDoc.data().name;
             }
-            
             document.getElementById('upiIdDisplay').innerHTML = upiId;
         } catch (error) {
-            console.error("Error loading payment settings:", error);
             document.getElementById('upiIdDisplay').innerHTML = upiId;
         }
     }
@@ -278,7 +258,7 @@
         }
     }
     
-    function showBalance() { alert(`💰 Current Balance: ₹${currentUserData?.balance || 0}`); }
+    function showBalance() { alert(`💰 Balance: ₹${currentUserData?.balance || 0}`); }
     
     function selectAmount(amount) {
         selectedAmount = amount;
@@ -286,7 +266,6 @@
         event.target.classList.add('active');
         document.getElementById('customAmount').value = '';
         updateAmount();
-        
         document.getElementById('qrSection').style.display = 'none';
         document.getElementById('utrSection').style.display = 'none';
         document.getElementById('generateBtn').style.display = 'block';
@@ -296,9 +275,6 @@
         let amount = selectedAmount;
         const custom = parseInt(document.getElementById('customAmount').value);
         if (custom && custom >= 200) amount = custom;
-        const applyBonus = document.getElementById('applyBonus').checked;
-        let bonus = (applyBonus && amount >= 500) ? Math.floor(amount * 0.10) : 0;
-        document.getElementById('totalAmount').innerText = amount + bonus;
     }
     
     function getAmount() {
@@ -326,7 +302,6 @@
         showMessage('✅ UPI ID copied!', 'success');
     }
     
-    // UPDATED: createDepositRequest with Firebase Server Timestamp
     async function createDepositRequest(amount, bonusAmount, utr) {
         const totalAmount = amount + bonusAmount;
         const transactionRef = await db.collection('transactions').add({
@@ -359,7 +334,7 @@
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
                 timerBox.style.display = 'none';
-                showMessage('Verification time expired! Please contact support.', 'error');
+                showMessage('Verification time expired! Contact support.', 'error');
             }
         }, 1000);
         
@@ -368,7 +343,7 @@
                 if (doc.exists && doc.data().status === 'Completed') {
                     clearInterval(timerInterval);
                     timerBox.style.display = 'none';
-                    showMessage(`✅ ₹${doc.data().amount} added successfully!`, 'success');
+                    showMessage(`✅ ₹${doc.data().amount} added!`, 'success');
                     setTimeout(() => window.location.href = 'dashboard.html', 2000);
                 }
             });
@@ -379,11 +354,11 @@
         const amount = getAmount();
         
         if (amount < 200) {
-            showMessage('Minimum deposit amount is ₹200', 'error');
+            showMessage('Minimum deposit is ₹200', 'error');
             return;
         }
         if (amount > 50000) {
-            showMessage('Maximum deposit amount is ₹50,000', 'error');
+            showMessage('Maximum deposit is ₹50,000', 'error');
             return;
         }
         
@@ -399,10 +374,10 @@
         
         new QRCode(document.getElementById("qrcode"), {
             text: upiString,
-            width: 200,
-            height: 200,
-            colorDark: "#ffd700",
-            colorLight: "#0a0806",
+            width: 180,
+            height: 180,
+            colorDark: "#1a1a2e",
+            colorLight: "#fff",
             correctLevel: QRCode.CorrectLevel.H
         });
         
@@ -413,7 +388,7 @@
         
         document.getElementById('upiIdDisplay').innerHTML = upiId;
         
-        showMessage(`👑 QR Code generated for ₹${amount}. Scan and pay to ${upiId}.`, 'success');
+        showMessage(`👑 QR for ₹${amount} generated. Pay to ${upiId}`, 'success');
     }
     
     async function submitUTR() {
@@ -426,7 +401,7 @@
             return;
         }
         
-        if (confirm(`✅ Have you scanned the QR and paid ₹${amount} to ${upiId}?\n\nUTR: ${utr}\n\nClick OK to submit for verification.`)) {
+        if (confirm(`✅ Paid ₹${amount} to ${upiId}?\nUTR: ${utr}`)) {
             await createDepositRequest(amount, bonusAmount, utr);
             showMessage(`👑 Payment submitted for verification!`, 'success');
             startTimerAndWait();
@@ -444,7 +419,7 @@
     // Profile Functions
     function showProfileModal() {
         if (currentUserData) {
-            document.getElementById('profileInfo').innerHTML = `<div style="text-align:center;"><div style="font-size:20px; color:#ffd700;">${currentUserData.name}</div><div style="color:#aa9c7a;">${currentUserData.phone}</div><div style="color:#ffd700; font-size:18px;">₹${currentUserData.balance}</div></div>`;
+            document.getElementById('profileInfo').innerHTML = `<div style="text-align:center;"><div style="font-size:18px; color:#1a1a2e;">${currentUserData.name}</div><div style="color:#6c757d; font-size:12px;">${currentUserData.phone}</div><div style="color:#1a1a2e; font-size:18px; margin-top:8px;">₹${currentUserData.balance}</div></div>`;
             document.getElementById('profileModal').style.display = 'flex';
         }
     }
@@ -462,18 +437,18 @@
         await db.collection('users').doc(currentUser.uid).update({ pin: newPin });
         currentUserData.pin = newPin;
         document.getElementById('pinMsg').innerHTML = '✅ MPIN changed!';
-        document.getElementById('pinMsg').style.color = '#66ff66';
+        document.getElementById('pinMsg').style.color = '#28a745';
         setTimeout(() => closeChangePinModal(), 1500);
     }
     function showBankModal() { closeProfileModal(); document.getElementById('bankModal').style.display = 'flex'; }
     function closeBankModal() { document.getElementById('bankModal').style.display = 'none'; document.getElementById('bankMsg').innerHTML = ''; }
     async function saveBankDetails() {
         const accountHolder = document.getElementById('bankAccountHolder').value.trim(), bankName = document.getElementById('bankName').value.trim(), accountNumber = document.getElementById('bankAccountNumber').value.trim(), ifscCode = document.getElementById('bankIfsc').value.trim();
-        if (!accountHolder || !bankName || !accountNumber || !ifscCode) { document.getElementById('bankMsg').innerHTML = 'Please fill all fields'; document.getElementById('bankMsg').style.color = '#ff6666'; return; }
+        if (!accountHolder || !bankName || !accountNumber || !ifscCode) { document.getElementById('bankMsg').innerHTML = 'Please fill all fields'; document.getElementById('bankMsg').style.color = '#dc3545'; return; }
         await db.collection('users').doc(currentUser.uid).update({ bankDetails: { accountHolder, bankName, accountNumber, ifscCode } });
         currentUserData.bankDetails = { accountHolder, bankName, accountNumber, ifscCode };
         document.getElementById('bankMsg').innerHTML = '✅ Bank details saved!';
-        document.getElementById('bankMsg').style.color = '#66ff66';
+        document.getElementById('bankMsg').style.color = '#28a745';
         setTimeout(() => closeBankModal(), 1500);
     }
     function showSupportModal() { document.getElementById('supportModal').style.display = 'flex'; }
