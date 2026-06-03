@@ -20,8 +20,49 @@
         .admin-panel { display: none; }
         .sidebar { width: 260px; background: #fff; min-height: 100vh; position: fixed; border-right: 1px solid #ddd; box-shadow: 2px 0 10px rgba(0,0,0,0.05); }
         .sidebar h2 { color: #333; padding: 25px; text-align: center; border-bottom: 1px solid #eee; }
-        .sidebar-item { padding: 15px 25px; color: #555; cursor: pointer; border-bottom: 1px solid #eee; transition: all 0.3s; }
+        .sidebar-item { padding: 15px 25px; color: #555; cursor: pointer; border-bottom: 1px solid #eee; transition: all 0.3s; position: relative; }
         .sidebar-item:hover { background: #f0f0f0; color: #000; }
+        
+        /* Notification Badge */
+        .notification-badge {
+            position: absolute;
+            right: 15px;
+            top: 12px;
+            background: #ff4757;
+            color: white;
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+        }
+        
+        /* Tabs for Completed/Pending */
+        .request-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .request-tab {
+            padding: 8px 20px;
+            cursor: pointer;
+            border-radius: 20px;
+            background: #f8f9fa;
+            color: #333;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .request-tab.active {
+            background: #333;
+            color: #fff;
+        }
+        .request-tab:hover {
+            background: #e0e0e0;
+        }
+        
         .main-content { margin-left: 260px; padding: 25px; }
         .card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
         .card h3 { margin-bottom: 15px; color: #333; border-left: 3px solid #333; padding-left: 12px; }
@@ -117,22 +158,30 @@
         .toggle-icon { font-size: 18px; color: #ff9800; margin-right: 10px; }
         
         /* Live Chat Section */
-        .chat-iframe { width: 100%; height: 70vh; border: none; border-radius: 12px; background: #fff; }
-        .livechat-card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .chat-iframe { width: 100%; height: 65vh; border: none; border-radius: 12px; background: #fff; }
+        .livechat-card { background: #fff; border-radius: 16px; padding: 20px; margin-bottom: 20px; border: 1px solid #eee; box-shadow: 0 2px 8px rgba(0,0,0,0.05); position: relative; }
+        .chat-buttons { display: flex; gap: 10px; margin-top: 10px; }
+        
+        /* Status labels */
+        .status-completed { color: #28a745; font-weight: bold; }
+        .status-rejected { color: #dc3545; font-weight: bold; }
+        .status-pending { color: #ff9800; font-weight: bold; }
         
         @media (max-width: 768px) { 
             .sidebar { width: 70px; } 
             .sidebar h2 { font-size: 12px; padding: 15px 5px; } 
             .sidebar-item { padding: 12px; text-align: center; font-size: 11px; } 
+            .sidebar-item .notification-badge { right: 5px; top: 5px; padding: 1px 5px; font-size: 9px; }
             .main-content { margin-left: 70px; } 
             .results-container { justify-content: center; }
             .market-actions { align-items: stretch; }
             .search-container { flex-direction: column; }
             .sort-bar { flex-direction: column; align-items: stretch; }
             .sort-select { width: 100%; }
+            .request-tabs { justify-content: center; }
+            .request-tab { padding: 6px 12px; font-size: 12px; }
         }
         
-        /* Today bid highlight */
         .today-bid-amount { background: #e3f2fd; padding: 2px 8px; border-radius: 12px; font-size: 12px; color: #1565c0; }
     </style>
 </head>
@@ -151,12 +200,21 @@
     <div class="sidebar">
         <h2>WIN777</h2>
         <div class="sidebar-item" onclick="showSection('markets')">🎮 Markets</div>
-        <div class="sidebar-item" onclick="showSection('users')">👥 Users</div>
-        <div class="sidebar-item" onclick="showSection('deposits')">💰 Deposits</div>
-        <div class="sidebar-item" onclick="showSection('withdrawals')">💸 Withdrawals</div>
+        <div class="sidebar-item" onclick="showSection('users')" id="usersMenuItem">👥 Users</div>
+        <div class="sidebar-item" onclick="showSection('deposits')" id="depositsMenuItem">
+            💰 Deposits
+            <span id="depositBadge" class="notification-badge" style="display:none;">0</span>
+        </div>
+        <div class="sidebar-item" onclick="showSection('withdrawals')" id="withdrawalsMenuItem">
+            💸 Withdrawals
+            <span id="withdrawalBadge" class="notification-badge" style="display:none;">0</span>
+        </div>
         <div class="sidebar-item" onclick="showSection('notice')">📢 Notice</div>
         <div class="sidebar-item" onclick="showSection('settings')">⚙️ Settings</div>
-        <div class="sidebar-item" onclick="showSection('livechat')">💬 Live Chat</div>
+        <div class="sidebar-item" onclick="showSection('livechat')" id="livechatMenuItem">
+            💬 Live Chat
+            <span id="chatBadge" class="notification-badge" style="display:none;">0</span>
+        </div>
         <div class="sidebar-item" onclick="logout()">🚪 Logout</div>
     </div>
 
@@ -207,7 +265,6 @@
                     <button onclick="searchUsers()" class="search-btn">Search</button>
                     <button onclick="clearSearch()" class="clear-btn">Clear</button>
                 </div>
-                <!-- Sort Options -->
                 <div class="sort-bar">
                     <label>📊 Sort By:</label>
                     <select id="sortUsersSelect" class="sort-select" onchange="applyUserSort()">
@@ -224,11 +281,27 @@
         </div>
         
         <div id="depositsSection" class="hidden">
-            <div class="card"><h3>💰 Deposit Requests</h3><div id="depositsList">Loading...</div></div>
+            <div class="card">
+                <h3>💰 Deposit Requests</h3>
+                <div class="request-tabs">
+                    <div class="request-tab active" onclick="showDepositTab('pending')">⏳ Pending</div>
+                    <div class="request-tab" onclick="showDepositTab('completed')">✅ Completed</div>
+                    <div class="request-tab" onclick="showDepositTab('rejected')">❌ Rejected</div>
+                </div>
+                <div id="depositsList">Loading...</div>
+            </div>
         </div>
         
         <div id="withdrawalsSection" class="hidden">
-            <div class="card"><h3>💸 Withdrawal Requests</h3><div id="withdrawalsList">Loading...</div></div>
+            <div class="card">
+                <h3>💸 Withdrawal Requests</h3>
+                <div class="request-tabs">
+                    <div class="request-tab active" onclick="showWithdrawalTab('pending')">⏳ Pending</div>
+                    <div class="request-tab" onclick="showWithdrawalTab('completed')">✅ Completed</div>
+                    <div class="request-tab" onclick="showWithdrawalTab('rejected')">❌ Rejected</div>
+                </div>
+                <div id="withdrawalsList">Loading...</div>
+            </div>
         </div>
         
         <div id="noticeSection" class="hidden">
@@ -245,7 +318,7 @@
             <div class="livechat-card">
                 <h3>💬 Live Support Chat</h3>
                 <iframe src="admin-chat.html" class="chat-iframe" id="chatIframe"></iframe>
-                <div class="chat-buttons" style="margin-top:10px; display:flex; gap:10px;">
+                <div class="chat-buttons">
                     <button onclick="clearAllChats()" class="btn-danger" style="background:#8B0000;">🗑️ Delete All Chat History</button>
                     <button onclick="refreshChat()" class="btn-info" style="background:#17a2b8;">🔄 Refresh Chat</button>
                 </div>
@@ -272,8 +345,16 @@
     let allUsers = [];
     let currentSearchTerm = "";
     let currentSortType = "todayBidders";
-    let todayBidMap = new Map(); // userId -> total points (bids amount) today
-    let userLastBidTime = new Map(); // userId -> last bid time
+    let todayBidMap = new Map();
+    let userLastBidTime = new Map();
+    let depositCount = 0;
+    let withdrawalCount = 0;
+    let chatUnreadCount = 0;
+    let depositListener = null;
+    let withdrawalListener = null;
+    let chatListener = null;
+    let currentDepositTab = "pending";
+    let currentWithdrawalTab = "pending";
     
     if (sessionStorage.getItem('adminLoggedIn') === 'true') {
         document.getElementById('loginScreen').style.display = 'none';
@@ -284,6 +365,8 @@
         loadWithdrawals();
         loadNotice();
         loadSettings();
+        startNotificationListeners();
+        startAutoCleanup();
     }
     
     const gameRates = {
@@ -304,9 +387,159 @@
             loadWithdrawals();
             loadNotice();
             loadSettings();
+            startNotificationListeners();
+            startAutoCleanup();
         } else {
             document.getElementById('loginError').innerText = 'Wrong password!';
         }
+    }
+    
+    // Start real-time notification listeners (only for pending)
+    function startNotificationListeners() {
+        // Deposit notifications (Pending deposits only)
+        if (depositListener) depositListener();
+        depositListener = db.collection('transactions')
+            .where('type', '==', 'credit')
+            .where('status', '==', 'Pending')
+            .onSnapshot((snapshot) => {
+                depositCount = snapshot.size;
+                updateDepositBadge();
+                if (currentDepositTab === 'pending') loadDeposits();
+            });
+        
+        // Withdrawal notifications (Pending withdrawals only)
+        if (withdrawalListener) withdrawalListener();
+        withdrawalListener = db.collection('withdrawRequests')
+            .where('status', '==', 'Pending')
+            .onSnapshot((snapshot) => {
+                withdrawalCount = snapshot.size;
+                updateWithdrawalBadge();
+                if (currentWithdrawalTab === 'pending') loadWithdrawals();
+            });
+        
+        // Chat notifications (Unread messages from users)
+        if (chatListener) chatListener();
+        chatListener = db.collection('chats')
+            .where('unread', '==', true)
+            .onSnapshot((snapshot) => {
+                chatUnreadCount = snapshot.size;
+                updateChatBadge();
+            });
+    }
+    
+    function updateDepositBadge() {
+        const badge = document.getElementById('depositBadge');
+        if (depositCount > 0) {
+            badge.style.display = 'inline-block';
+            badge.innerText = depositCount > 99 ? '99+' : depositCount;
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+    
+    function updateWithdrawalBadge() {
+        const badge = document.getElementById('withdrawalBadge');
+        if (withdrawalCount > 0) {
+            badge.style.display = 'inline-block';
+            badge.innerText = withdrawalCount > 99 ? '99+' : withdrawalCount;
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+    
+    function updateChatBadge() {
+        const badge = document.getElementById('chatBadge');
+        if (chatUnreadCount > 0) {
+            badge.style.display = 'inline-block';
+            badge.innerText = chatUnreadCount > 99 ? '99+' : chatUnreadCount;
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+    
+    function showDepositTab(tab) {
+        currentDepositTab = tab;
+        document.querySelectorAll('#depositsSection .request-tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        loadDeposits();
+    }
+    
+    function showWithdrawalTab(tab) {
+        currentWithdrawalTab = tab;
+        document.querySelectorAll('#withdrawalsSection .request-tab').forEach(t => t.classList.remove('active'));
+        event.target.classList.add('active');
+        loadWithdrawals();
+    }
+    
+    // Auto-delete old completed/rejected records (older than 30 days)
+    async function deleteOldRecords() {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        try {
+            // Delete old completed/rejected deposits
+            const oldDeposits = await db.collection('transactions')
+                .where('type', '==', 'credit')
+                .where('status', 'in', ['Completed', 'Rejected'])
+                .get();
+            
+            const depositBatch = db.batch();
+            let depositDeleteCount = 0;
+            
+            oldDeposits.forEach(doc => {
+                const data = doc.data();
+                let requestDate = null;
+                if (data.date) {
+                    if (data.date.toDate) requestDate = data.date.toDate();
+                    else if (data.date.seconds) requestDate = new Date(data.date.seconds * 1000);
+                }
+                if (requestDate && requestDate < thirtyDaysAgo) {
+                    depositBatch.delete(doc.ref);
+                    depositDeleteCount++;
+                }
+            });
+            
+            if (depositDeleteCount > 0) {
+                await depositBatch.commit();
+                console.log(`Deleted ${depositDeleteCount} old deposit records`);
+            }
+            
+            // Delete old completed/rejected withdrawals
+            const oldWithdrawals = await db.collection('withdrawRequests')
+                .where('status', 'in', ['Completed', 'Rejected'])
+                .get();
+            
+            const withdrawalBatch = db.batch();
+            let withdrawalDeleteCount = 0;
+            
+            oldWithdrawals.forEach(doc => {
+                const data = doc.data();
+                let requestDate = null;
+                if (data.date) {
+                    if (data.date.toDate) requestDate = data.date.toDate();
+                    else if (data.date.seconds) requestDate = new Date(data.date.seconds * 1000);
+                }
+                if (requestDate && requestDate < thirtyDaysAgo) {
+                    withdrawalBatch.delete(doc.ref);
+                    withdrawalDeleteCount++;
+                }
+            });
+            
+            if (withdrawalDeleteCount > 0) {
+                await withdrawalBatch.commit();
+                console.log(`Deleted ${withdrawalDeleteCount} old withdrawal records`);
+            }
+        } catch (error) {
+            console.error("Error deleting old records:", error);
+        }
+    }
+    
+    function startAutoCleanup() {
+        // Run cleanup every day
+        setInterval(() => {
+            deleteOldRecords();
+        }, 86400000); // 24 hours
+        deleteOldRecords();
     }
     
     // Clear all chats
@@ -361,12 +594,10 @@
         }
     }
     
-    // Load users with today's bidding amount
     async function loadUsersWithTodayBids() {
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
         
-        // Fetch all bids from today to calculate total points per user
         const bidsSnapshot = await db.collection('bids').where('createdAt', '>=', todayStart).get();
         todayBidMap.clear();
         userLastBidTime.clear();
@@ -377,7 +608,6 @@
             const points = bid.points || 0;
             todayBidMap.set(userId, (todayBidMap.get(userId) || 0) + points);
             
-            // Track last bid time
             let bidDate = null;
             if (bid.createdAt) {
                 if (bid.createdAt.toDate) bidDate = bid.createdAt.toDate();
@@ -391,7 +621,6 @@
             }
         });
         
-        // Load users with created order (newest first base)
         db.collection('users').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
             allUsers = [];
             snapshot.forEach(doc => {
@@ -467,7 +696,6 @@
     function displayFilteredUsers() {
         let filteredUsers = [...allUsers];
         
-        // Apply search filter
         if (currentSearchTerm) {
             filteredUsers = filteredUsers.filter(user => {
                 const name = (user.name || '').toLowerCase();
@@ -476,14 +704,11 @@
             });
         }
         
-        // Apply sorting
         if (currentSortType === 'todayBidders') {
-            // Sort by today's bid amount (highest first), then by last bid time
             filteredUsers.sort((a, b) => {
                 if (a.todayBidTotal !== b.todayBidTotal) {
                     return (b.todayBidTotal || 0) - (a.todayBidTotal || 0);
                 }
-                // If same bid amount, sort by last bid time (most recent first)
                 const timeA = a.lastBidTime ? a.lastBidTime.getTime() : 0;
                 const timeB = b.lastBidTime ? b.lastBidTime.getTime() : 0;
                 return timeB - timeA;
@@ -539,21 +764,9 @@
         document.getElementById('usersList').innerHTML = html;
     }
     
-    function escapeHtml(str) {
-        if(!str) return '';
-        return str.replace(/[&<>]/g, function(m) {
-            if(m === '&') return '&amp;';
-            if(m === '<') return '&lt;';
-            if(m === '>') return '&gt;';
-            return m;
-        });
-    }
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;')); }
+    function openUserBidsPage(uid, name) { window.open(`user-bids.html?uid=${uid}&name=${encodeURIComponent(name)}`, '_blank'); }
     
-    function openUserBidsPage(uid, name) {
-        window.open(`user-bids.html?uid=${uid}&name=${encodeURIComponent(name)}`, '_blank');
-    }
-    
-    // ============ MARKETS - Collapsible View ============
     let openMarketId = null;
     
     function toggleMarketDetails(marketId) {
@@ -864,30 +1077,38 @@
         if (confirm('Delete this market permanently?')) await db.collection('markets').doc(id).delete();
     }
     
-    // Deposits
-    function loadDeposits() {
-        db.collection('transactions').where('type', '==', 'credit').where('status', '==', 'Pending').onSnapshot(async (snapshot) => {
-            let deposits = [];
-            for (const doc of snapshot.docs) {
-                const d = doc.data();
-                const user = await db.collection('users').doc(d.userId).get();
-                deposits.push({
-                    id: doc.id, userId: d.userId, amount: d.amount, bonusAmount: d.bonusAmount,
-                    userUTR: d.userUTR, userMobile: d.userMobile, upiId: d.upiId,
-                    date: d.date?.toDate() || new Date(0),
-                    userName: user.data()?.name || 'Unknown', userPhone: user.data()?.phone || 'N/A'
-                });
-            }
-            deposits.sort((a, b) => b.date - a.date);
-            let html = '';
-            for (const d of deposits) {
-                html += `<div class="request-item" style="display:flex; justify-content:space-between; flex-wrap:wrap;">
-                    <div><b>👤 ${d.userName}</b><br><b>📞 Mobile:</b> ${d.userMobile || d.userPhone}<br><b>💰 Amount:</b> ₹${d.amount}<br><b>🎁 Bonus:</b> ₹${d.bonusAmount || 0}<br><b>📋 UTR:</b> <span class="deposit-utr">${d.userUTR || 'Not provided'}</span><br><b>📅 Date:</b> ${d.date.toLocaleString()}<br><b>🏦 UPI ID:</b> ${d.upiId || 'N/A'}</div>
-                    <div><button onclick="approveDeposit('${d.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button><button onclick="rejectDeposit('${d.id}')" class="btn-danger">Reject</button></div>
-                </div>`;
-            }
-            document.getElementById('depositsList').innerHTML = html || '<p style="color: #888;">No pending deposits</p>';
-        });
+    // Deposits with tabs (Pending, Completed, Rejected)
+    async function loadDeposits() {
+        const status = currentDepositTab === 'pending' ? 'Pending' : (currentDepositTab === 'completed' ? 'Completed' : 'Rejected');
+        
+        const snapshot = await db.collection('transactions')
+            .where('type', '==', 'credit')
+            .where('status', '==', status)
+            .get();
+        
+        let deposits = [];
+        for (const doc of snapshot.docs) {
+            const d = doc.data();
+            const user = await db.collection('users').doc(d.userId).get();
+            deposits.push({
+                id: doc.id, userId: d.userId, amount: d.amount, bonusAmount: d.bonusAmount,
+                userUTR: d.userUTR, userMobile: d.userMobile, upiId: d.upiId,
+                date: d.date?.toDate() || new Date(0),
+                userName: user.data()?.name || 'Unknown', userPhone: user.data()?.phone || 'N/A'
+            });
+        }
+        deposits.sort((a, b) => b.date - a.date);
+        
+        let html = '';
+        for (const d of deposits) {
+            const timeAgo = getTimeAgo(d.date);
+            const isPending = currentDepositTab === 'pending';
+            html += `<div class="request-item" style="display:flex; justify-content:space-between; flex-wrap:wrap;">
+                <div><b>👤 ${d.userName}</b><br><b>📞 Mobile:</b> ${d.userMobile || d.userPhone}<br><b>💰 Amount:</b> ₹${d.amount}<br><b>🎁 Bonus:</b> ₹${d.bonusAmount || 0}<br><b>📋 UTR:</b> <span class="deposit-utr">${d.userUTR || 'Not provided'}</span><br><b>📅 ${timeAgo}</b><br><b>🏦 UPI ID:</b> ${d.upiId || 'N/A'}</div>
+                ${isPending ? `<div><button onclick="approveDeposit('${d.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button><button onclick="rejectDeposit('${d.id}')" class="btn-danger">Reject</button></div>` : `<div><span class="status-${currentDepositTab === 'completed' ? 'completed' : 'rejected'}">${currentDepositTab === 'completed' ? '✅ Completed' : '❌ Rejected'}</span></div>`}
+            </div>`;
+        }
+        document.getElementById('depositsList').innerHTML = html || '<p style="color: #888;">No deposits found</p>';
     }
     
     async function approveDeposit(id, amount, userId) {
@@ -898,34 +1119,62 @@
             await db.collection('users').doc(userId).update({ balance: (user.data().balance || 0) + amount });
             await db.collection('transactions').doc(id).update({ status: 'Completed' });
             alert(`✅ Deposit approved!`);
+            loadDeposits();
+            if (currentDepositTab === 'pending') loadDeposits();
         }
     }
     
     async function rejectDeposit(id) {
-        if (confirm('Reject this deposit?')) await db.collection('transactions').doc(id).update({ status: 'Rejected' });
+        if (confirm('Reject this deposit?')) {
+            await db.collection('transactions').doc(id).update({ status: 'Rejected' });
+            alert(`❌ Deposit rejected!`);
+            loadDeposits();
+        }
     }
     
-    // Withdrawals
-    function loadWithdrawals() {
-        db.collection('withdrawRequests').where('status', '==', 'Pending').onSnapshot(async (snapshot) => {
-            let withdrawals = [];
-            for (const doc of snapshot.docs) {
-                const d = doc.data();
-                const user = await db.collection('users').doc(d.userId).get();
-                withdrawals.push({
-                    id: doc.id, userId: d.userId, amount: d.amount, bankDetails: d.bankDetails || {},
-                    date: d.date?.toDate() || new Date(0), userName: user.data()?.name || 'Unknown', userPhone: user.data()?.phone || 'N/A'
-                });
-            }
-            withdrawals.sort((a, b) => b.date - a.date);
-            let html = '';
-            for (const d of withdrawals) {
-                const bank = d.bankDetails;
-                html += `<div class="request-item"><div><b>👤 ${d.userName}</b><br><b>📞 Phone:</b> ${d.userPhone}<br><b>💰 Amount:</b> ₹${d.amount}<br><b>📅 Date:</b> ${d.date.toLocaleString()}<br><div class="bank-details"><b>🏦 BANK DETAILS:</b><br><span>Account Holder:</span> ${bank.accountHolder || 'N/A'}<br><span>Bank Name:</span> ${bank.bankName || 'N/A'}<br><span>Account Number:</span> ${bank.accountNumber || 'N/A'}<br><span>IFSC Code:</span> ${bank.ifscCode || 'N/A'}</div></div>
-                <div><button onclick="approveWithdraw('${d.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button><button onclick="rejectWithdraw('${d.id}')" class="btn-danger">Reject</button></div></div>`;
-            }
-            document.getElementById('withdrawalsList').innerHTML = html || '<p style="color: #888;">No pending withdrawals</p>';
-        });
+    // Withdrawals with tabs (Pending, Completed, Rejected)
+    async function loadWithdrawals() {
+        const status = currentWithdrawalTab === 'pending' ? 'Pending' : (currentWithdrawalTab === 'completed' ? 'Completed' : 'Rejected');
+        
+        const snapshot = await db.collection('withdrawRequests')
+            .where('status', '==', status)
+            .get();
+        
+        let withdrawals = [];
+        for (const doc of snapshot.docs) {
+            const d = doc.data();
+            const user = await db.collection('users').doc(d.userId).get();
+            withdrawals.push({
+                id: doc.id, userId: d.userId, amount: d.amount, bankDetails: d.bankDetails || {},
+                date: d.date?.toDate() || new Date(0), userName: user.data()?.name || 'Unknown', userPhone: user.data()?.phone || 'N/A'
+            });
+        }
+        withdrawals.sort((a, b) => b.date - a.date);
+        
+        let html = '';
+        for (const d of withdrawals) {
+            const bank = d.bankDetails;
+            const timeAgo = getTimeAgo(d.date);
+            const isPending = currentWithdrawalTab === 'pending';
+            html += `<div class="request-item"><div><b>👤 ${d.userName}</b><br><b>📞 Phone:</b> ${d.userPhone}<br><b>💰 Amount:</b> ₹${d.amount}<br><b>📅 ${timeAgo}</b><br><div class="bank-details"><b>🏦 BANK DETAILS:</b><br><span>Account Holder:</span> ${bank.accountHolder || 'N/A'}<br><span>Bank Name:</span> ${bank.bankName || 'N/A'}<br><span>Account Number:</span> ${bank.accountNumber || 'N/A'}<br><span>IFSC Code:</span> ${bank.ifscCode || 'N/A'}</div></div>
+                ${isPending ? `<div><button onclick="approveWithdraw('${d.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button><button onclick="rejectWithdraw('${d.id}')" class="btn-danger">Reject</button></div>` : `<div><span class="status-${currentWithdrawalTab === 'completed' ? 'completed' : 'rejected'}">${currentWithdrawalTab === 'completed' ? '✅ Completed' : '❌ Rejected'}</span></div>`}
+            </div>`;
+        }
+        document.getElementById('withdrawalsList').innerHTML = html || '<p style="color: #888;">No withdrawals found</p>';
+    }
+    
+    function getTimeAgo(date) {
+        if (!date) return 'Unknown';
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins} min ago`;
+        if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
     }
     
     async function approveWithdraw(id, amount, userId) {
@@ -936,11 +1185,16 @@
             await db.collection('withdrawRequests').doc(id).update({ status: 'Completed' });
             await db.collection('transactions').add({ userId: userId, type: 'debit', amount: amount, status: 'Completed', description: 'Withdrawal Approved', date: new Date() });
             alert(`✅ Withdrawal approved!`);
+            loadWithdrawals();
         }
     }
     
     async function rejectWithdraw(id) {
-        if (confirm('Reject this withdrawal?')) await db.collection('withdrawRequests').doc(id).update({ status: 'Rejected' });
+        if (confirm('Reject this withdrawal?')) {
+            await db.collection('withdrawRequests').doc(id).update({ status: 'Rejected' });
+            alert(`❌ Withdrawal rejected!`);
+            loadWithdrawals();
+        }
     }
     
     // User Management
@@ -1037,6 +1291,22 @@
         ['markets', 'users', 'deposits', 'withdrawals', 'notice', 'settings', 'livechat'].forEach(s => document.getElementById(`${s}Section`).classList.add('hidden'));
         document.getElementById(`${section}Section`).classList.remove('hidden');
         if(section === 'users') refreshTodayBidsForUsers();
+        if(section === 'deposits') loadDeposits();
+        if(section === 'withdrawals') loadWithdrawals();
+        
+        if (section === 'livechat') {
+            markAllChatsAsRead();
+        }
+    }
+    
+    async function markAllChatsAsRead() {
+        const unreadChats = await db.collection('chats').where('unread', '==', true).get();
+        const batch = db.batch();
+        unreadChats.forEach(doc => {
+            batch.update(doc.ref, { unread: false });
+        });
+        await batch.commit();
+        updateChatBadge();
     }
     
     function logout() {
@@ -1086,6 +1356,8 @@
     window.refreshTodayBidsForUsers = refreshTodayBidsForUsers;
     window.clearAllChats = clearAllChats;
     window.refreshChat = refreshChat;
+    window.showDepositTab = showDepositTab;
+    window.showWithdrawalTab = showWithdrawalTab;
 </script>
 </body>
 </html>
