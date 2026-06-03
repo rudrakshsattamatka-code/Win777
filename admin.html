@@ -83,6 +83,8 @@
         .btn-warning { background: #ffc107; color: #333; }
         .btn-reset { background: #6c757d; color: #fff; }
         .btn-info { background: #17a2b8; color: #fff; }
+        .btn-delete { background: #8B0000; color: #fff; }
+        .btn-delete:hover { background: #a00000; }
         .hidden { display: none; }
         
         .results-container { display: flex; gap: 20px; flex-wrap: wrap; margin: 15px 0; }
@@ -166,6 +168,8 @@
         .status-completed { color: #28a745; font-weight: bold; }
         .status-rejected { color: #dc3545; font-weight: bold; }
         .status-pending { color: #ff9800; font-weight: bold; }
+        
+        .request-actions { display: flex; gap: 8px; flex-wrap: wrap; }
         
         @media (max-width: 768px) { 
             .sidebar { width: 70px; } 
@@ -396,7 +400,6 @@
     
     // Start real-time notification listeners (only for pending)
     function startNotificationListeners() {
-        // Deposit notifications (Pending deposits only)
         if (depositListener) depositListener();
         depositListener = db.collection('transactions')
             .where('type', '==', 'credit')
@@ -407,7 +410,6 @@
                 if (currentDepositTab === 'pending') loadDeposits();
             });
         
-        // Withdrawal notifications (Pending withdrawals only)
         if (withdrawalListener) withdrawalListener();
         withdrawalListener = db.collection('withdrawRequests')
             .where('status', '==', 'Pending')
@@ -417,7 +419,6 @@
                 if (currentWithdrawalTab === 'pending') loadWithdrawals();
             });
         
-        // Chat notifications (Unread messages from users)
         if (chatListener) chatListener();
         chatListener = db.collection('chats')
             .where('unread', '==', true)
@@ -471,13 +472,12 @@
         loadWithdrawals();
     }
     
-    // Auto-delete old completed/rejected records (older than 30 days)
+    // Auto-delete old records (older than 30 days)
     async function deleteOldRecords() {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         
         try {
-            // Delete old completed/rejected deposits
             const oldDeposits = await db.collection('transactions')
                 .where('type', '==', 'credit')
                 .where('status', 'in', ['Completed', 'Rejected'])
@@ -504,7 +504,6 @@
                 console.log(`Deleted ${depositDeleteCount} old deposit records`);
             }
             
-            // Delete old completed/rejected withdrawals
             const oldWithdrawals = await db.collection('withdrawRequests')
                 .where('status', 'in', ['Completed', 'Rejected'])
                 .get();
@@ -535,16 +534,14 @@
     }
     
     function startAutoCleanup() {
-        // Run cleanup every day
         setInterval(() => {
             deleteOldRecords();
-        }, 86400000); // 24 hours
+        }, 86400000);
         deleteOldRecords();
     }
     
-    // Clear all chats
     async function clearAllChats() {
-        if (confirm("⚠️ WARNING: This will delete ALL chat history permanently!\n\nAll user conversations will be lost.\n\nType 'DELETE' to confirm:")) {
+        if (confirm("⚠️ WARNING: This will delete ALL chat history permanently!\n\nType 'DELETE' to confirm:")) {
             const confirmText = prompt('Type "DELETE" to confirm:');
             if (confirmText === 'DELETE') {
                 const chatsSnapshot = await db.collection('chats').get();
@@ -570,25 +567,19 @@
         }
     }
     
-    // Reset all markets results
     async function resetAllMarketsResults() {
-        if (confirm("⚠️ WARNING: This will reset ALL markets results (Open Pana, Open Digit, Close Pana, Close Digit, Jodi) to *** - * - *** - * - **\n\nType 'RESET' to confirm:")) {
+        if (confirm("⚠️ WARNING: This will reset ALL markets results!\n\nType 'RESET' to confirm:")) {
             const confirmText = prompt('Type "RESET" to confirm:');
             if (confirmText === 'RESET') {
                 const markets = await db.collection('markets').get();
                 const batch = db.batch();
                 markets.forEach(doc => {
                     batch.update(doc.ref, {
-                        openPana: '***',
-                        openDigit: '*',
-                        closePana: '***',
-                        closeDigit: '*',
-                        jodi: '**',
-                        closeDeclared: false
+                        openPana: '***', openDigit: '*', closePana: '***', closeDigit: '*', jodi: '**', closeDeclared: false
                     });
                 });
                 await batch.commit();
-                alert(`✅ Reset ${markets.size} markets successfully!`);
+                alert(`✅ Reset ${markets.size} markets!`);
                 loadMarkets();
             }
         }
@@ -885,46 +876,43 @@
     }
     
     async function changeSerialNumber(marketId, currentSerial) {
-        const newSerial = prompt(`Enter new serial number for this market:\n\nCurrent serial: #${currentSerial}\n\nEnter number (1-100):`, currentSerial);
+        const newSerial = prompt(`Enter new serial number:\n\nCurrent: #${currentSerial}`, currentSerial);
         if (newSerial && !isNaN(newSerial) && parseInt(newSerial) > 0) {
             const newSerialNum = parseInt(newSerial);
             const existingMarkets = await db.collection('markets').get();
-            let serialExists = false;
             let existingMarketId = null;
             for (const doc of existingMarkets.docs) {
-                const data = doc.data();
-                if (data.serialNo === newSerialNum && doc.id !== marketId) {
-                    serialExists = true;
+                if (doc.data().serialNo === newSerialNum && doc.id !== marketId) {
                     existingMarketId = doc.id;
                     break;
                 }
             }
-            if (serialExists) {
-                if (confirm(`Serial #${newSerialNum} is already used by another market.\n\nDo you want to SWAP serial numbers?`)) {
+            if (existingMarketId) {
+                if (confirm(`Serial #${newSerialNum} already used. Swap?`)) {
                     const currentMarket = await db.collection('markets').doc(marketId).get();
                     const currentSerialNum = currentMarket.data().serialNo;
                     await db.collection('markets').doc(marketId).update({ serialNo: newSerialNum });
                     await db.collection('markets').doc(existingMarketId).update({ serialNo: currentSerialNum });
-                    alert(`✅ Serial numbers swapped!`);
+                    alert(`✅ Swapped!`);
                     loadMarkets();
                 }
             } else {
                 await db.collection('markets').doc(marketId).update({ serialNo: newSerialNum });
-                alert(`✅ Serial number changed to #${newSerialNum}`);
+                alert(`✅ Changed to #${newSerialNum}`);
                 loadMarkets();
             }
         }
     }
     
     async function deleteAllMarkets() {
-        if (confirm("⚠️ DELETE ALL MARKETS\n\nType 'DELETE' to confirm:")) {
+        if (confirm("⚠️ DELETE ALL MARKETS?\n\nType 'DELETE' to confirm:")) {
             const confirmText = prompt('Type "DELETE" to confirm:');
             if (confirmText === 'DELETE') {
                 const markets = await db.collection('markets').get();
                 const batch = db.batch();
                 markets.forEach(doc => batch.delete(doc.ref));
                 await batch.commit();
-                alert(`✅ Deleted ${markets.size} markets successfully!`);
+                alert(`✅ Deleted ${markets.size} markets!`);
                 loadMarkets();
             }
         }
@@ -932,15 +920,15 @@
     
     async function setMarketHoliday(marketId, marketName, currentStatus) {
         if (currentStatus === 'holiday') {
-            if (confirm(`Remove HOLIDAY status for "${marketName}"?`)) {
+            if (confirm(`Remove HOLIDAY for "${marketName}"?`)) {
                 await db.collection('markets').doc(marketId).update({ status: 'closed', isHoliday: false });
-                alert(`✅ Holiday removed for ${marketName}`);
+                alert(`✅ Holiday removed`);
                 loadMarkets();
             }
         } else {
             if (confirm(`Set "${marketName}" as HOLIDAY?`)) {
                 await db.collection('markets').doc(marketId).update({ status: 'holiday', isHoliday: true });
-                alert(`✅ ${marketName} is now marked as HOLIDAY`);
+                alert(`✅ ${marketName} is HOLIDAY`);
                 loadMarkets();
             }
         }
@@ -1048,17 +1036,17 @@
     
     async function addMarket() {
         const name = document.getElementById('marketName').value;
-        const numbers = document.getElementById('marketNumbers').value || '***-**-***';
-        const openBidEnd = document.getElementById('openBidEnd').value;
-        const closeBidEnd = document.getElementById('closeBidEnd').value;
-        const closedTime = document.getElementById('closedTime').value;
-        const status = document.getElementById('marketStatus').value;
         if (!name) { alert('Enter market name'); return; }
         const markets = await db.collection('markets').get();
         let maxSerial = 0;
-        markets.forEach(doc => { const data = doc.data(); if (data.serialNo && data.serialNo > maxSerial) maxSerial = data.serialNo; });
-        const serialNo = maxSerial + 1;
-        await db.collection('markets').add({ name, numbers, openBidEnd, closeBidEnd, closedTime, status, serialNo, isHoliday: status === 'holiday', openPana: '***', openDigit: '*', closePana: '***', closeDigit: '*', jodi: '**', closeDeclared: false });
+        markets.forEach(doc => { if (doc.data().serialNo && doc.data().serialNo > maxSerial) maxSerial = doc.data().serialNo; });
+        await db.collection('markets').add({ 
+            name, numbers: document.getElementById('marketNumbers').value || '***-**-***',
+            openBidEnd: document.getElementById('openBidEnd').value, closeBidEnd: document.getElementById('closeBidEnd').value,
+            closedTime: document.getElementById('closedTime').value, status: document.getElementById('marketStatus').value,
+            serialNo: maxSerial + 1, isHoliday: document.getElementById('marketStatus').value === 'holiday',
+            openPana: '***', openDigit: '*', closePana: '***', closeDigit: '*', jodi: '**', closeDeclared: false
+        });
         document.getElementById('marketName').value = '';
         document.getElementById('marketNumbers').value = '';
         document.getElementById('openBidEnd').value = '';
@@ -1077,7 +1065,7 @@
         if (confirm('Delete this market permanently?')) await db.collection('markets').doc(id).delete();
     }
     
-    // Deposits with tabs (Pending, Completed, Rejected)
+    // ============ DEPOSITS WITH DELETE BUTTON ============
     async function loadDeposits() {
         const status = currentDepositTab === 'pending' ? 'Pending' : (currentDepositTab === 'completed' ? 'Completed' : 'Rejected');
         
@@ -1105,7 +1093,14 @@
             const isPending = currentDepositTab === 'pending';
             html += `<div class="request-item" style="display:flex; justify-content:space-between; flex-wrap:wrap;">
                 <div><b>👤 ${d.userName}</b><br><b>📞 Mobile:</b> ${d.userMobile || d.userPhone}<br><b>💰 Amount:</b> ₹${d.amount}<br><b>🎁 Bonus:</b> ₹${d.bonusAmount || 0}<br><b>📋 UTR:</b> <span class="deposit-utr">${d.userUTR || 'Not provided'}</span><br><b>📅 ${timeAgo}</b><br><b>🏦 UPI ID:</b> ${d.upiId || 'N/A'}</div>
-                ${isPending ? `<div><button onclick="approveDeposit('${d.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button><button onclick="rejectDeposit('${d.id}')" class="btn-danger">Reject</button></div>` : `<div><span class="status-${currentDepositTab === 'completed' ? 'completed' : 'rejected'}">${currentDepositTab === 'completed' ? '✅ Completed' : '❌ Rejected'}</span></div>`}
+                <div class="request-actions">
+                    ${isPending ? `
+                        <button onclick="approveDeposit('${d.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button>
+                        <button onclick="rejectDeposit('${d.id}')" class="btn-danger">Reject</button>
+                    ` : `
+                        <button onclick="deleteDepositRecord('${d.id}')" class="btn-delete">🗑️ Delete</button>
+                    `}
+                </div>
             </div>`;
         }
         document.getElementById('depositsList').innerHTML = html || '<p style="color: #888;">No deposits found</p>';
@@ -1120,7 +1115,6 @@
             await db.collection('transactions').doc(id).update({ status: 'Completed' });
             alert(`✅ Deposit approved!`);
             loadDeposits();
-            if (currentDepositTab === 'pending') loadDeposits();
         }
     }
     
@@ -1132,7 +1126,15 @@
         }
     }
     
-    // Withdrawals with tabs (Pending, Completed, Rejected)
+    async function deleteDepositRecord(id) {
+        if (confirm('⚠️ Permanently delete this deposit record?\n\nThis action cannot be undone!')) {
+            await db.collection('transactions').doc(id).delete();
+            alert(`✅ Deposit record deleted!`);
+            loadDeposits();
+        }
+    }
+    
+    // ============ WITHDRAWALS WITH DELETE BUTTON ============
     async function loadWithdrawals() {
         const status = currentWithdrawalTab === 'pending' ? 'Pending' : (currentWithdrawalTab === 'completed' ? 'Completed' : 'Rejected');
         
@@ -1157,7 +1159,14 @@
             const timeAgo = getTimeAgo(d.date);
             const isPending = currentWithdrawalTab === 'pending';
             html += `<div class="request-item"><div><b>👤 ${d.userName}</b><br><b>📞 Phone:</b> ${d.userPhone}<br><b>💰 Amount:</b> ₹${d.amount}<br><b>📅 ${timeAgo}</b><br><div class="bank-details"><b>🏦 BANK DETAILS:</b><br><span>Account Holder:</span> ${bank.accountHolder || 'N/A'}<br><span>Bank Name:</span> ${bank.bankName || 'N/A'}<br><span>Account Number:</span> ${bank.accountNumber || 'N/A'}<br><span>IFSC Code:</span> ${bank.ifscCode || 'N/A'}</div></div>
-                ${isPending ? `<div><button onclick="approveWithdraw('${d.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button><button onclick="rejectWithdraw('${d.id}')" class="btn-danger">Reject</button></div>` : `<div><span class="status-${currentWithdrawalTab === 'completed' ? 'completed' : 'rejected'}">${currentWithdrawalTab === 'completed' ? '✅ Completed' : '❌ Rejected'}</span></div>`}
+                <div class="request-actions">
+                    ${isPending ? `
+                        <button onclick="approveWithdraw('${d.id}', ${d.amount}, '${d.userId}')" class="btn-success">Approve</button>
+                        <button onclick="rejectWithdraw('${d.id}')" class="btn-danger">Reject</button>
+                    ` : `
+                        <button onclick="deleteWithdrawalRecord('${d.id}')" class="btn-delete">🗑️ Delete</button>
+                    `}
+                </div>
             </div>`;
         }
         document.getElementById('withdrawalsList').innerHTML = html || '<p style="color: #888;">No withdrawals found</p>';
@@ -1193,6 +1202,14 @@
         if (confirm('Reject this withdrawal?')) {
             await db.collection('withdrawRequests').doc(id).update({ status: 'Rejected' });
             alert(`❌ Withdrawal rejected!`);
+            loadWithdrawals();
+        }
+    }
+    
+    async function deleteWithdrawalRecord(id) {
+        if (confirm('⚠️ Permanently delete this withdrawal record?\n\nThis action cannot be undone!')) {
+            await db.collection('withdrawRequests').doc(id).delete();
+            alert(`✅ Withdrawal record deleted!`);
             loadWithdrawals();
         }
     }
@@ -1345,8 +1362,10 @@
     window.deleteUser = deleteUser;
     window.approveDeposit = approveDeposit;
     window.rejectDeposit = rejectDeposit;
+    window.deleteDepositRecord = deleteDepositRecord;
     window.approveWithdraw = approveWithdraw;
     window.rejectWithdraw = rejectWithdraw;
+    window.deleteWithdrawalRecord = deleteWithdrawalRecord;
     window.updateNotice = updateNotice;
     window.changePassword = changePassword;
     window.showSection = showSection;
