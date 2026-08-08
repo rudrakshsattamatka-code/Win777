@@ -9,14 +9,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #FFFDD0; padding-bottom: 70px; } /* Cream background */
-        .app-container { max-width: 500px; margin: 0 auto; background: #FFFDD0; min-height: 100vh; } /* Cream background */
+        body { background: #ffffff; padding-bottom: 70px; } /* Changed to white */
+        .app-container { max-width: 500px; margin: 0 auto; background: #ffffff; min-height: 100vh; } /* Changed to white */
         
-        .header { background: #FFFDD0; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; } /* Cream background */
+        .header { background: #ffffff; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; } /* Changed to white */
         .logo-img { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #ffd700; }
         .balance { background: linear-gradient(135deg, #ffd700, #ffcd38); padding: 5px 15px; border-radius: 30px; color: #1a1a2e; font-weight: bold; font-size: 14px; cursor: pointer; }
         
-        .profile-row { display: flex; align-items: center; gap: 12px; background: #FFFDD0; margin: 10px; padding: 12px 15px; border-radius: 20px; border: 1px solid #e9ecef; cursor: pointer; } /* Cream background */
+        .profile-row { display: flex; align-items: center; gap: 12px; background: #ffffff; margin: 10px; padding: 12px 15px; border-radius: 20px; border: 1px solid #e9ecef; cursor: pointer; } /* Changed to white */
         .profile-avatar { width: 50px; height: 50px; background: linear-gradient(135deg, #ffd700, #ffcd38); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #1a1a2e; }
         .profile-info { flex: 1; }
         .profile-name { color: #1a1a2e; font-size: 16px; font-weight: bold; }
@@ -30,7 +30,7 @@
         
         /* Stylish Live Clock */
         .live-clock {
-            background: #FFFDD0; /* Cream background */
+            background: #ffffff; /* Changed to white */
             margin: 10px 10px 15px 10px;
             padding: 8px 16px;
             border-radius: 30px;
@@ -59,7 +59,7 @@
             border-radius: 25px;
         }
         
-        .games-row { display: flex; justify-content: space-around; background: #FFFDD0; margin: 10px; padding: 12px; border-radius: 20px; border: 1px solid #e9ecef; } /* Cream background */
+        .games-row { display: flex; justify-content: space-around; background: #FFFDD0; margin: 10px; padding: 12px; border-radius: 20px; border: 1px solid #e9ecef; } /* Cream background for games */
         .game-icon { text-align: center; color: #6c757d; font-size: 11px; cursor: pointer; transition: all 0.3s; }
         .game-icon:hover { transform: translateY(-5px); color: #ffd700; }
         .game-icon img { width: 45px; height: 45px; display: block; margin: 0 auto 4px; border-radius: 12px; }
@@ -73,7 +73,7 @@
             border-radius: 12px;
         }
         
-        .market-card { background: #FFFDD0; margin: 12px; border-radius: 20px; padding: 16px; border: 1px solid #e9ecef; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.04); } /* Cream background */
+        .market-card { background: #FFFDD0; margin: 12px; border-radius: 20px; padding: 16px; border: 1px solid #e9ecef; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.04); } /* Cream background for cards */
         .market-card:hover { transform: translateY(-2px); border-color: #ffd700; box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
         .market-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
         .market-name { color: #000000; font-size: 18px; font-weight: bold; } /* Dark Black */
@@ -101,7 +101,7 @@
         .play-btn:hover { transform: scale(1.02); box-shadow: 0 4px 15px rgba(255,215,0,0.4); }
         .play-btn:disabled { opacity: 0.5; cursor: not-allowed; background: #ced4da; transform: none; box-shadow: none; }
         
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #FFFDD0; display: flex; justify-content: space-around; padding: 8px 10px; border-top: 1px solid #e9ecef; } /* Cream background */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; max-width: 500px; margin: 0 auto; background: #ffffff; display: flex; justify-content: space-around; padding: 8px 10px; border-top: none; } /* Removed border top */
         .nav-item { text-align: center; color: #6c757d; cursor: pointer; font-size: 10px; transition: all 0.3s; flex: 1; }
         .nav-item:hover { color: #ffd700; transform: translateY(-3px); }
         .nav-item img { width: 28px; height: 28px; display: block; margin: 0 auto 3px; border-radius: 8px; filter: brightness(0.8); }
@@ -112,7 +112,7 @@
         .hidden { display: none; }
         
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-content { background: #FFFDD0; border-radius: 24px; padding: 25px; width: 90%; max-width: 350px; max-height: 80vh; overflow-y: auto; border: none; } /* Cream background */
+        .modal-content { background: #ffffff; border-radius: 24px; padding: 25px; width: 90%; max-width: 350px; max-height: 80vh; overflow-y: auto; border: none; } /* Changed to white */
         .modal-content h3 { color: #1a1a2e; margin-bottom: 15px; text-align: center; }
         .modal-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #ffd700, #ffcd38); border: none; border-radius: 12px; color: #1a1a2e; font-weight: bold; cursor: pointer; margin-top: 10px; }
         .close-modal { background: #e9ecef; color: #1a1a2e; }
@@ -167,12 +167,10 @@
             <img src="https://i.imgur.com/xaMlRtU.jpeg" alt="Games">
             <span>Games</span>
         </div>
-        <!-- Added action-yellow class below -->
         <div class="game-icon action-yellow" onclick="window.location.href='deposit.html'">
             <img src="https://i.imgur.com/NvJCTli.png" alt="Deposit">
             <span>Deposit</span>
         </div>
-        <!-- Added action-yellow class below -->
         <div class="game-icon action-yellow" onclick="window.location.href='withdraw.html'">
             <img src="https://i.imgur.com/3ZxjAIp.png" alt="Withdraw">
             <span>Withdraw</span>
@@ -322,7 +320,6 @@
     let clockInterval = null;
     let statusUpdateInterval = null;
     
-    // Get Firebase Server Time (Cached for 2 seconds for real-time accuracy)
     async function getServerTime() {
         const now = Date.now();
         if (serverTimeCache && (now - lastServerTimeFetch) < 2000) {
@@ -370,7 +367,6 @@
         return parseInt(parts[0]) * 60 + parseInt(parts[1]);
     }
     
-    // Calculate market status based on current server time
     async function calculateMarketStatus(openBidEnd, closeBidEnd, adminStatus) {
         if (adminStatus === 'holiday') return 'holiday';
         
@@ -384,7 +380,6 @@
         else return 'closed';
     }
     
-    // Update live clock display
     async function updateLiveClock() {
         try {
             const serverTime = await getServerTime();
@@ -400,7 +395,6 @@
         }
     }
     
-    // Real-time market status updater (runs every second)
     async function updateAllMarketStatuses() {
         if (!marketsData.length) return;
         
@@ -421,7 +415,6 @@
         }
     }
     
-    // Listen to markets from Firestore (only for data changes, not time-based)
     function listenToMarkets() {
         if (marketsListener) marketsListener();
         
@@ -691,20 +684,17 @@
         listenToMarkets();
         listenToNotice();
         
-        // Update clock every second
         if (clockInterval) clearInterval(clockInterval);
         clockInterval = setInterval(async () => {
             await updateLiveClock();
         }, 1000);
         
-        // Update market statuses every second (real-time without refresh)
         if (statusUpdateInterval) clearInterval(statusUpdateInterval);
         statusUpdateInterval = setInterval(async () => {
             await updateAllMarketStatuses();
         }, 1000);
     }
     
-    // Update balance every 30 seconds
     setInterval(() => {
         if (auth.currentUser) {
             db.collection('users').doc(auth.currentUser.uid).get().then(doc => {
